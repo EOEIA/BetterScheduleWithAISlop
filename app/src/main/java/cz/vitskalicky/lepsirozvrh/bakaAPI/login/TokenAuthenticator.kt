@@ -14,7 +14,7 @@ class TokenAuthenticator(val app: MainApplication) : Authenticator, Interceptor 
     private val sprefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(app)
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        val origRequest: Request = response.request()
+        val origRequest: Request = response.request
         val retried: Int = origRequest.tag(Retried::class.java)?.count ?: 0
         if (retried > 1) {
             return null
