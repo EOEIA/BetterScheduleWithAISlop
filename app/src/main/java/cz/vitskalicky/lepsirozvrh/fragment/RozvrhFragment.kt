@@ -19,14 +19,12 @@ import androidx.lifecycle.distinctUntilChanged
 import com.jaredrummler.cyanea.Cyanea
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
-import cz.vitskalicky.lepsirozvrh.model.RozvrhStatus
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import cz.vitskalicky.lepsirozvrh.view.RozvrhLayout
-import cz.vitskalicky.lepsirozvrh.model.RozvrhStatus.Status.*
-import org.joda.time.DateTime
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 import org.joda.time.LocalDateTime
-import org.joda.time.format.ISODateTimeFormat
 
 class RozvrhFragment : Fragment() {
 
@@ -250,7 +248,7 @@ class RozvrhFragment : Fragment() {
                         else -> ""
                     }
                 }
-        val status: RozvrhStatus = viewModel.getStatusLD().value ?: RozvrhStatus.unknown()
+        val status: StatusInfo = viewModel.getStatusLD().value ?: StatusInfo.unknown()
         if (viewModel.isOfflineLD.value != false){
             if ((viewModel.showError || viewModel.getDisplayLD().value == null) && status.errMessage != null){
                 infoLine.text = getString(status.errMessage)

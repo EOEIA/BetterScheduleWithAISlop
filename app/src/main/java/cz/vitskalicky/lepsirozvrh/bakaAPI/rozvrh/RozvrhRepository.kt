@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.fasterxml.jackson.databind.JsonMappingException
-import cz.vitskalicky.lepsirozvrh.DebugUtils
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.LoginRequiredException
@@ -12,7 +11,7 @@ import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice.Companion.getS
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Rozvrh3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.RozvrhConverter
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
-import cz.vitskalicky.lepsirozvrh.model.RozvrhStatus
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
 import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import io.sentry.Sentry
@@ -84,7 +83,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         return db.rozvrhDao().loadRozvrhRelated(monday)
     }
 
-    fun getRozvrhStatusLiveData(rozvrhId: LocalDate): LiveData<RozvrhStatus>{
+    fun getRozvrhStatusLiveData(rozvrhId: LocalDate): LiveData<StatusInfo>{
         return statusStr.getLiveData(rozvrhId)
     }
 
@@ -117,10 +116,10 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     }
 
     private suspend fun refreshNeeded(rozvrhId: LocalDate, foreground: Boolean = false): Boolean{
-        if (statusStr[rozvrhId].status == RozvrhStatus.Status.ERROR){
+        if (statusStr[rozvrhId].status == StatusInfo.Status.ERROR){
             return true
         }
-        if (statusStr[rozvrhId].status == RozvrhStatus.Status.LOADING){
+        if (statusStr[rozvrhId].status == StatusInfo.Status.LOADING){
             return false
         }
         val expireTime = if (foreground){
@@ -144,7 +143,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     @Throws(Exception::class)
     private suspend fun fetchAndCache(rozvrhId: LocalDate): RozvrhRelated {
         withContext(Dispatchers.Main) {
-            statusStr[rozvrhId] = RozvrhStatus.loading()
+            statusStr[rozvrhId] = StatusInfo.loading()
         }
         val rozvrh3: Rozvrh3 = try {
             //check for demo mode
@@ -173,7 +172,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         }
         withContext(Dispatchers.Main) {
             statusStr.isOffline.value = false
-            statusStr[rozvrhId] = RozvrhStatus.success()
+            statusStr[rozvrhId] = StatusInfo.success()
         }
         return rozvrh
     }
@@ -199,26 +198,26 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                 //parsing error
                 //report
                 sendReport(e)
-                RozvrhStatus.unexpectedResponse()
+                StatusInfo.unexpectedResponse()
             }
             is IOException -> {
                 //network error
-                RozvrhStatus.unreachable()
+                StatusInfo.unreachable()
             }
             is RozvrhConverter.RozvrhConversionException -> {
                 //conversion failed
                 sendReport(e)
-                RozvrhStatus.unexpectedResponse()
+                StatusInfo.unexpectedResponse()
             }
             is LoginRequiredException -> {
                 application.login.logout()
-                RozvrhStatus.loginFailed()
+                StatusInfo.loginFailed()
             }
             is HttpException -> {
-                RozvrhStatus.unexpectedResponse()
+                StatusInfo.unexpectedResponse()
             }
             else -> {
-                statusStr[rozvrhId] = RozvrhStatus.unexpectedResponse()
+                statusStr[rozvrhId] = StatusInfo.unexpectedResponse()
                 sendReport(e)
                 throw e
             }
