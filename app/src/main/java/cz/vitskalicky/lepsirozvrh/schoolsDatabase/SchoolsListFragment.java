@@ -26,15 +26,15 @@ import com.android.volley.RequestQueue;
 import com.jaredrummler.cyanea.app.CyaneaFragment;
 
 import cz.vitskalicky.lepsirozvrh.R;
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class SchoolsListFragment extends CyaneaFragment {
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
     SchoolsAdapter adapter = null;
-    SchoolsViewModel viewModel = null;
+    SchoolsListViewModel viewModel = null;
 
     ProgressBar progressBar;
     TextView twInfo;
@@ -42,19 +42,14 @@ public class SchoolsListFragment extends CyaneaFragment {
     TextView twError;
     ImageView ivError;
 
-    OnItemClickListener listener = url -> {};
-
-    RequestQueue requestQueue = null;
-    SchoolsDatabse database = null;
-    SchoolDAO dao = null;
-
+    private Function1<SchoolInfo, Unit> onItemClick = schoolInfo -> {return Unit.INSTANCE;};
 
     public SchoolsListFragment() {
         // Required empty public constructor
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener){
-        this.listener = listener;
+    public void setOnItemClickListener(Function1<SchoolInfo, Unit> onItemClick){
+        this.onItemClick = onItemClick;
     }
 
 
@@ -70,12 +65,7 @@ public class SchoolsListFragment extends CyaneaFragment {
         twError = view.findViewById(R.id.textViewError);
         ivError = view.findViewById(R.id.imageViewError);
 
-        recyclerView.setVisibility(View.GONE);
-        twError.setVisibility(View.GONE);
-        ivError.setVisibility(View.GONE);
-
-        viewModel = ViewModelProviders.of(this).get(SchoolsViewModel.class);
-        database = viewModel.init(getContext());
+        viewModel = ViewModelProviders.of(this).get(SchoolsListViewModel.class);
 
         etSearch.addTextChangedListener(new TextWatcher() {//<editor-fold desc="unused methods">
             @Override
@@ -96,28 +86,48 @@ public class SchoolsListFragment extends CyaneaFragment {
             }
         });
 
-        requestQueue = SchoolsDatabaseAPI.getAllSchools(getContext(), successful -> {
-            if (successful) {
-                layoutManager = new LinearLayoutManager(getContext());
-                recyclerView.setLayoutManager(layoutManager);
+        layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new SchoolsAdapter(getContext(), onItemClick);
+        recyclerView.setAdapter(adapter);
 
-                adapter = new SchoolsAdapter(getContext(), listener);
+        viewModel.getQueriedSchools().observe(getViewLifecycleOwner(), schoolInfos -> {
+            adapter.submitList(schoolInfos);
+        });
 
-                viewModel.getQueriedSchools().observe(this, adapter::submitList);
 
-                recyclerView.setAdapter(adapter);
-                recyclerView.setVisibility(View.VISIBLE);
+        viewModel.getStatusLD().observe(getViewLifecycleOwner(), statusInfo -> {
+            if (statusInfo.getStatus() == StatusInfo.Status.SUCCESS){
                 progressBar.setVisibility(View.GONE);
                 twInfo.setVisibility(View.GONE);
+                twError.setVisibility(View.GONE);
+                ivError.setVisibility(View.GONE);
+            } else if (statusInfo.getStatus() == StatusInfo.Status.LOADING || statusInfo.getStatus() == StatusInfo.Status.UNKNOWN){
+                progressBar.setVisibility(View.VISIBLE);
+                twInfo.setVisibility(View.GONE);
+                twError.setVisibility(View.GONE);
+                ivError.setVisibility(View.GONE);
+            } else {
+                progressBar.setVisibility(View.GONE);
+                twInfo.setVisibility(View.GONE);
+                twError.setVisibility(View.VISIBLE);
+                ivError.setVisibility(View.VISIBLE);
+            }
+        });
 
-                viewModel.setQuery(etSearch.getText().toString());
+        /*requestQueue = SchoolsDatabaseAPI.getAllSchools(getContext(), successful -> {
+            if (successful) {
+
+
+
+                //viewModel.setQuery(etSearch.getText().toString());
             }else {
                 progressBar.setVisibility(View.GONE);
                 twInfo.setVisibility(View.GONE);
                 twError.setVisibility(View.VISIBLE);
                 ivError.setVisibility(View.VISIBLE);
             }
-        },database, progressBar);
+        },database, progressBar);*/
 
         //automatically show keyboard
         etSearch.requestFocus();
@@ -129,12 +139,9 @@ public class SchoolsListFragment extends CyaneaFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (requestQueue != null){
-            requestQueue.cancelAll(request -> true/*all requests*/);
-        }
     }
 
-    public static interface OnItemClickListener{
+    /*public static interface OnItemClickListener{
         public void onClick(String url);
-    }
+    }*/
 }

@@ -7,6 +7,7 @@ import com.jaredrummler.cyanea.app.CyaneaAppCompatActivity;
 
 import cz.vitskalicky.lepsirozvrh.R;
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsListFragment;
+import kotlin.Unit;
 
 public class SchoolsListActivity extends BaseActivity {
     public static final String EXTRA_URL = SchoolsListActivity.class.getCanonicalName() + ".url";
@@ -20,11 +21,12 @@ public class SchoolsListActivity extends BaseActivity {
         setContentView(R.layout.activity_schools);
 
         fragment = (SchoolsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentSchools);
-        fragment.setOnItemClickListener(url -> {
+        fragment.setOnItemClickListener(schoolInfo -> {
             Intent intent = new Intent();
-            intent.putExtra(EXTRA_URL, url);
+            intent.putExtra(EXTRA_URL, schoolInfo.getUrl());
             setResult(RESULT_OK, intent);
             finish();
+            return Unit.INSTANCE;
         });
     }
 

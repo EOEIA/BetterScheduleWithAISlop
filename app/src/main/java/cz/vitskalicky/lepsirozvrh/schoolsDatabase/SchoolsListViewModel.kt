@@ -13,6 +13,7 @@ import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import io.sentry.Sentry
 import kotlinx.coroutines.launch
 import okio.IOException
+import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
@@ -43,14 +44,17 @@ class SchoolsListViewModel(
     fun getStatusLD(): LiveData<StatusInfo> { return statusLD }
 
     fun setQuery(queryString: String){
-        val newQuery = queryString.simplified().replace(" ","* ") + "*"
-        query.value = newQuery
+        query.value = if (queryString.isBlank()){
+            ""
+        }else{
+            queryString.simplified().replace(" ","* ") + "*"
+        }
     }
 
     init {
         viewModelScope.launch {
-            val lastUpdate: LocalDateTime? = SharedPrefs.getStringPreference(app(), R.string.PREFS_LAST_SCHOOLS_LIST_UPDATE).takeUnless { it.isNullOrBlank() }?.let{ ISODateTimeFormat.dateTime().parseLocalDateTime(it)}
-            if (lastUpdate == null || lastUpdate.isBefore(LocalDateTime.now().withMillisOfDay(0)) || dao.countAllSchools() == 0){
+            val lastUpdate: DateTime? = SharedPrefs.getStringPreference(app(), R.string.PREFS_LAST_SCHOOLS_LIST_UPDATE).takeUnless { it.isNullOrBlank() }?.let{ ISODateTimeFormat.dateTime().parseDateTime(it)}
+            if (lastUpdate == null || lastUpdate.isBefore(DateTime.now().withMillisOfDay(0)) || dao.countAllSchools() == 0){
                 //refresh if never refreshed or not refreshed today yet or there are no schools in database for some reason
                 statusLD.value = StatusInfo.loading()
 
@@ -77,6 +81,7 @@ class SchoolsListViewModel(
                 if (allSchools != null){
                     if (allSchools.size > 0) {
                         db.replaceSchools(allSchools)
+                        SharedPrefs.setStringPreference(app(), R.string.PREFS_LAST_SCHOOLS_LIST_UPDATE, ISODateTimeFormat.dateTime().print(DateTime.now()))
                         statusLD.value = StatusInfo.success()
                     }else{
                         val f = RuntimeException("Schools list is empty")
