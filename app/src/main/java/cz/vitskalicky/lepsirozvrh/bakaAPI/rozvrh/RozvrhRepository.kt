@@ -147,26 +147,27 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         }
         val rozvrh3: Rozvrh3 = try {
             //check for demo mode
-            if (application.debugUtils.isDemoMode){
+            if (application.debugUtils.isDemoMode) {
                 //simulate slow net
                 delay(Random.nextLong(3000))
                 //return demo rozvrh
                 application.debugUtils.getDemoRozvrh3(rozvrhId)
-            }else{
+            } else {
                 //download true from server
-                application.webservice?.getSchedule(rozvrhId) ?: throw IOException("Webservice not ready")
+                application.webservice?.getSchedule(rozvrhId)
+                        ?: throw IOException("Webservice not ready")
             }
-        }catch (e: HttpException){
+        } catch (e: HttpException) {
             if (e.code() == 401) //unauthorized
                 throw LoginRequiredException()
             else
                 throw e
         }
 
-        val rozvrh = withContext(Dispatchers.IO){ RozvrhConverter.convert(rozvrh3, rozvrhId, application) }
+        val rozvrh = withContext(Dispatchers.IO) { RozvrhConverter.convert(rozvrh3, rozvrhId, application) }
         db.insertRozvrhRelated(rozvrh)
-        if (rozvrh.rozvrh.id == Utils.getCurrentMonday()){
-            withContext(Dispatchers.Main){
+        if (rozvrh.rozvrh.id == Utils.getCurrentMonday()) {
+            withContext(Dispatchers.Main) {
                 currentWeekLD.value = rozvrh;
             }
         }
@@ -175,17 +176,6 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
             statusStr[rozvrhId] = StatusInfo.success()
         }
         return rozvrh
-    }
-
-    private val reported = HashSet<String>()
-    /**
-     * prevents overhauling the crash report service by many identical exceptions
-     */
-    private fun sendReport(e: Exception){
-        if (!reported.contains(e.message ?: "")){
-            reported.add(e.message ?: "")
-            Sentry.capture(e)
-        }
     }
 
     /**
@@ -197,7 +187,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
             is JsonMappingException ->{
                 //parsing error
                 //report
-                sendReport(e)
+                application.sendReport(e)
                 StatusInfo.unexpectedResponse()
             }
             is IOException -> {
@@ -206,7 +196,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
             }
             is RozvrhConverter.RozvrhConversionException -> {
                 //conversion failed
-                sendReport(e)
+                application.sendReport(e)
                 StatusInfo.unexpectedResponse()
             }
             is LoginRequiredException -> {
@@ -218,7 +208,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
             }
             else -> {
                 statusStr[rozvrhId] = StatusInfo.unexpectedResponse()
-                sendReport(e)
+                application.sendReport(e)
                 throw e
             }
         }

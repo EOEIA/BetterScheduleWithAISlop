@@ -26,6 +26,8 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
 import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import cz.vitskalicky.lepsirozvrh.notification.NotificationState
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
+import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsDatabase
+import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsWebservice
 import cz.vitskalicky.lepsirozvrh.theme.DefaultThemes
 import cz.vitskalicky.lepsirozvrh.theme.SystemTheme
 import cz.vitskalicky.lepsirozvrh.theme.Theme
@@ -146,6 +148,30 @@ class MainApplication : MultiDexApplication() {
     val debugUtils: DebugUtils by lazy {
         DebugUtils(this)
     }
+
+    //region SCHOOLS DATABASE
+    val schoolsDb: SchoolsDatabase by lazy {
+        Room.databaseBuilder(
+                applicationContext,
+                SchoolsDatabase::class.java, "schools-database"
+        ).build()
+    }
+
+    val schoolsRetrofit: Retrofit by lazy {
+            val loggingInterceptor = HttpLoggingInterceptor()
+            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+            val client = OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
+            Retrofit.Builder()
+                    .baseUrl("https://vitskalicky.gitlab.io/bakalari-schools-list/")
+                    .addConverterFactory(JacksonConverterFactory.create(objectMapper))
+                    .client(client)
+                    .build()
+     }
+
+    val schoolsWebservice: SchoolsWebservice by lazy {
+        schoolsRetrofit.create(SchoolsWebservice::class.java)
+    }
+    //endregion
 
     override fun onCreate() {
         super.onCreate()
@@ -315,6 +341,18 @@ class MainApplication : MultiDexApplication() {
 
     fun diableSentry() {
         Sentry.close()
+    }
+
+    private val reported = HashSet<String>()
+    /**
+     * prevents overhauling the crash report service by many identical exceptions
+     */
+    fun sendReport(e: Exception){
+        val msg = e.message?.takeUnless { it.isBlank() } ?: e.stackTraceToString()
+        if (!reported.contains(msg)){
+            reported.add(msg)
+            Sentry.capture(e)
+        }
     }
 
     /**
