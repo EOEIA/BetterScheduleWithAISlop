@@ -19,9 +19,28 @@ data class SchoolInfo(
 /**
  * Removes all accents, converts punctuation to spaces, deletes all non-alphanumerical characters and removes duplicate spaces
  */
-fun CharSequence.simplified():String =
-        Normalizer.normalize(this, Normalizer.Form.NFD) //converts letters with accents to letter without an accent and combining character, which gets removed 3 lines later.
-                .toLowerCase()
-                .replace(Regex("\\p{Punct}"), " ")
-                .replace(Regex("[^\\p{Alnum}\\s]"), "")
-                .split(" ").filter{ it.isNotBlank()}.joinToString(" ")
+fun String.simplified():String {
+    val normalized = Normalizer.normalize(this.toLowerCase(), Normalizer.Form.NFD).toCharArray() //converts letters with accents to letter without an accent and combining character, which gets removed 3 lines later.
+    val sb = StringBuilder()
+    var last: Char = ' ';
+    var i = 0;
+    while (i < normalized.size){
+        var item:Char = normalized[i]
+        var category = item.category
+        if (item.isLetterOrDigit()){
+            sb.append(item)
+            last = item
+        } else {
+            if (category == CharCategory.OTHER_PUNCTUATION){
+                item = ' '
+                category = item.category
+            }
+            if (category == CharCategory.SPACE_SEPARATOR && last != ' '){
+                sb.append(' ')
+                last = ' '
+            }
+        }
+        i++
+    }
+    return sb.toString()
+}

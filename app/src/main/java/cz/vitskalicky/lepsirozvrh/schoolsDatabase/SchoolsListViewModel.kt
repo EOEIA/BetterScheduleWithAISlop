@@ -8,14 +8,10 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
-import cz.vitskalicky.lepsirozvrh.model.Resource
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
-import io.sentry.Sentry
 import kotlinx.coroutines.launch
 import okio.IOException
 import org.joda.time.DateTime
-import org.joda.time.LocalDateTime
-import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
 import retrofit2.HttpException
 
