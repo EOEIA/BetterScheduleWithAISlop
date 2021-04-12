@@ -35,18 +35,18 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
         var notify = showUseUrl()
         field = value
         notify = notify != showUseUrl()
-        //todo R.string
         //todo notify unencrypted is not possible on release
         val url = if (field.startsWith("https://") || field.startsWith("http://")) field else "https://$field"
-        twUseUrl.text = "Use \"$url\""
-        twUseUrl.setOnClickListener { onClicked(SchoolInfo("",/*TODO*/"dfdsf", url)) }
+        twUseUrl?.text = url
+        useUrlView?.setOnClickListener { onClicked(SchoolInfo("",url, url)) }
         if (notify) {
             notifyDataSetChanged()
         }
     }
 
-    private val twUseUrl = TextView(context)
-    private val useUrlViewHolder = UseUrlViewHolder(twUseUrl)
+    private var useUrlView: View? = null
+    private var twUseUrl: TextView? = null
+    private var useUrlViewHolder: UseUrlViewHolder? = null
 
     private var statusView: View? = null
     private var loadingView: View? = null
@@ -75,7 +75,14 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
             return ItemViewHolder(itemView, onClicked)
         }
         if (viewType == TYPE_USE_URL){
-            return useUrlViewHolder//UseUrlViewHolder(FrameLayout(context).apply { addView(TextView(context).apply { id = R.id.textView }) }, onClicked);
+            if (useUrlViewHolder == null){
+                useUrlView = LayoutInflater.from(context).inflate(R.layout.item_use_url,viewGroup, false)
+                twUseUrl = useUrlView!!.findViewById(R.id.textViewURL)
+                useUrlViewHolder = UseUrlViewHolder(useUrlView!!)
+            }else{
+
+            }
+            return useUrlViewHolder!!//UseUrlViewHolder(FrameLayout(context).apply { addView(TextView(context).apply { id = R.id.textView }) }, onClicked);
         }
         if(viewType == TYPE_STATUS){
             if (statusViewholder == null){
