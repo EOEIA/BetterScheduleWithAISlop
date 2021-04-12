@@ -47,45 +47,54 @@ class SchoolsListViewModel(
         }
     }
 
+    suspend fun refresh(){
+        statusLD.value = StatusInfo.loading()
+
+        val allSchools: List<SchoolInfo>? = try {
+            webservice.fetchSchools()
+        }catch (e: JsonMappingException){
+            val f = RuntimeException("Failed to parse schools list", e)
+            app().sendReport(f)
+            statusLD.value = StatusInfo.unexpectedResponse()
+            null
+        }catch (e : IOException){
+            statusLD.value = StatusInfo.unreachable()
+            null
+        }catch (e: HttpException){
+            statusLD.value = StatusInfo.unexpectedResponse()
+            null
+        }catch (e: Exception){
+            val f = RuntimeException("Failed to load schools list", e)
+            app().sendReport(f)
+            statusLD.value = StatusInfo.unexpectedResponse()
+            null
+        }
+
+        if (allSchools != null){
+            if (allSchools.size > 0) {
+                db.replaceSchools(allSchools)
+                SharedPrefs.setStringPreference(app(), R.string.PREFS_LAST_SCHOOLS_LIST_UPDATE, ISODateTimeFormat.dateTime().print(DateTime.now()))
+                statusLD.value = StatusInfo.success()
+            }else{
+                val f = RuntimeException("Schools list is empty")
+                app().sendReport(f)
+                statusLD.value = StatusInfo.unexpectedResponse()
+            }
+        }
+    }
+
+    fun refreshUnsuspend(){
+        viewModelScope.launch {
+            refresh()
+        }
+    }
+
     init {
         viewModelScope.launch {
             val lastUpdate: DateTime? = SharedPrefs.getStringPreference(app(), R.string.PREFS_LAST_SCHOOLS_LIST_UPDATE).takeUnless { it.isNullOrBlank() }?.let{ ISODateTimeFormat.dateTime().parseDateTime(it)}
             if (lastUpdate == null || lastUpdate.isBefore(DateTime.now().withMillisOfDay(0)) || dao.countAllSchools() == 0){
                 //refresh if never refreshed or not refreshed today yet or there are no schools in database for some reason
-                statusLD.value = StatusInfo.loading()
-
-                val allSchools: List<SchoolInfo>? = try {
-                    webservice.fetchSchools()
-                }catch (e: JsonMappingException){
-                    val f = RuntimeException("Failed to parse schools list", e)
-                    app().sendReport(f)
-                    statusLD.value = StatusInfo.unexpectedResponse()
-                    null
-                }catch (e : IOException){
-                    statusLD.value = StatusInfo.unreachable()
-                    null
-                }catch (e: HttpException){
-                    statusLD.value = StatusInfo.unexpectedResponse()
-                    null
-                }catch (e: Exception){
-                    val f = RuntimeException("Failed to load schools list", e)
-                    app().sendReport(f)
-                    statusLD.value = StatusInfo.unexpectedResponse()
-                    null
-                }
-
-                if (allSchools != null){
-                    if (allSchools.size > 0) {
-                        db.replaceSchools(allSchools)
-                        SharedPrefs.setStringPreference(app(), R.string.PREFS_LAST_SCHOOLS_LIST_UPDATE, ISODateTimeFormat.dateTime().print(DateTime.now()))
-                        statusLD.value = StatusInfo.success()
-                    }else{
-                        val f = RuntimeException("Schools list is empty")
-                        app().sendReport(f)
-                        statusLD.value = StatusInfo.unexpectedResponse()
-                    }
-                }
-
+                refresh()
             }else{
                 statusLD.value = StatusInfo.success()
             }

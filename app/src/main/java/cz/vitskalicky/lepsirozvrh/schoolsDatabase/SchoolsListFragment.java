@@ -75,13 +75,20 @@ public class SchoolsListFragment extends CyaneaFragment {
             public void afterTextChanged(Editable s) {
                 if (viewModel != null){
                     viewModel.setQuery(s.toString());
+                    adapter.setQueryText(s.toString());
                 }
             }
         });
 
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new SchoolsAdapter(requireContext(), schoolInfo -> onItemClick.invoke(schoolInfo));
+        adapter = new SchoolsAdapter(requireContext(), schoolInfo -> onItemClick.invoke(schoolInfo), () -> {viewModel.refreshUnsuspend(); return Unit.INSTANCE;});
+        adapter.setOnListChanged(() -> {
+            try {
+                recyclerView.getLayoutManager().scrollToPosition(0);
+            }catch (NullPointerException ignored){};
+            return Unit.INSTANCE;
+        });
         recyclerView.setAdapter(adapter);
 
         viewModel.getQueriedSchools().observe(getViewLifecycleOwner(), schoolInfos -> {
