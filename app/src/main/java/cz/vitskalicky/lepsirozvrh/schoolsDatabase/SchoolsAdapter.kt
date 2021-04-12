@@ -33,7 +33,9 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
             } else {
                 twName.text = item.name
                 twURL.text = item.url
-                view.setOnClickListener { v: View? -> onClicked(item) }
+                view.setOnClickListener {
+                    v: View? -> onClicked(item)
+                }
             }
         }
 

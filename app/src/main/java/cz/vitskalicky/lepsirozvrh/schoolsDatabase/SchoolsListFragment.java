@@ -81,7 +81,7 @@ public class SchoolsListFragment extends CyaneaFragment {
 
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new SchoolsAdapter(getContext(), onItemClick);
+        adapter = new SchoolsAdapter(requireContext(), schoolInfo -> onItemClick.invoke(schoolInfo));
         recyclerView.setAdapter(adapter);
 
         viewModel.getQueriedSchools().observe(getViewLifecycleOwner(), schoolInfos -> {
