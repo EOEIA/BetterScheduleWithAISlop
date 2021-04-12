@@ -3,22 +3,33 @@ package cz.vitskalicky.lepsirozvrh.schoolsDatabase
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.view.View.INVISIBLE
 import android.view.ViewGroup
-import android.widget.FrameLayout
+import android.widget.Button
 import android.widget.TextView
-import androidx.core.view.children
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
-import java.util.*
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 
 class SchoolsAdapter(private val context: Context, private val onClicked: (SchoolInfo) -> Unit, private val retry: () -> Unit) : PagedListAdapter<SchoolInfo, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
     var onListChanged: () -> Unit = {}
 
-    public var status: StatusInfo = StatusInfo.unknown();
+    public var status: StatusInfo = StatusInfo.unknown()
+    set(value) {
+        var notify = showLoadingOrError()
+        field = value
+        notify = notify != showLoadingOrError()
+        updateStatusView()
+        if (notify) {
+            notifyDataSetChanged()
+        }
+    }
     public var queryText: String = ""
     set(value) {
         var notify = showUseUrl()
@@ -37,6 +48,27 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
     private val twUseUrl = TextView(context)
     private val useUrlViewHolder = UseUrlViewHolder(twUseUrl)
 
+    private var statusView: View? = null
+    private var loadingView: View? = null
+    private var errorView: View? = null
+    private var twErrorMessage: TextView? = null
+    private var buttonRetry: Button? = null
+    private var statusViewholder: StatusViewHolder? = null
+
+    private fun updateStatusView(){
+        if (status.status == ERROR){
+            loadingView?.visibility = GONE
+            errorView?.visibility = VISIBLE
+            twErrorMessage?.text = context.getText(status.errMessage ?: R.string.unknown_error)
+        }else if (status.status == LOADING){
+            loadingView?.visibility = VISIBLE
+            errorView?.visibility = GONE
+        }else {
+            loadingView?.visibility = GONE
+            errorView?.visibility = GONE
+        }
+    }
+
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == TYPE_ITEM){
             val itemView = LayoutInflater.from(context).inflate(R.layout.item_school_info, viewGroup, false)
@@ -44,6 +76,21 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
         }
         if (viewType == TYPE_USE_URL){
             return useUrlViewHolder//UseUrlViewHolder(FrameLayout(context).apply { addView(TextView(context).apply { id = R.id.textView }) }, onClicked);
+        }
+        if(viewType == TYPE_STATUS){
+            if (statusViewholder == null){
+                statusView = LayoutInflater.from(context).inflate(R.layout.item_status,viewGroup, false)
+                loadingView = statusView!!.findViewById(R.id.loadingLayout)
+                errorView = statusView!!.findViewById(R.id.errorLayout)
+                twErrorMessage = statusView!!.findViewById(R.id.textViewSchoolsError)
+                buttonRetry = statusView!!.findViewById(R.id.buttonRetry)
+
+                buttonRetry!!.setOnClickListener { retry() }
+                updateStatusView()
+
+                statusViewholder = StatusViewHolder(statusView!!)
+            }
+            return statusViewholder!!;
         }
 
         throw IllegalStateException("WTF? Unknown view type in recycler view. This is really not supposed to happen.");
@@ -61,17 +108,15 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
                 val item = getItem(position)
                 holder.bind(item)
             }
-            TYPE_USE_URL -> {
-                /*require(holder is UseUrlViewHolder)
-                holder.bind(queryText)
-                useUrlviewholders.add(holder)*/
+            TYPE_USE_URL, TYPE_STATUS -> {
+                //dont do anything
             }
         }
 
     }
 
     private fun showLoadingOrError(): Boolean {
-        return false//status.status == StatusInfo.Status.LOADING || status.status == StatusInfo.Status.ERROR
+        return status.status == LOADING || status.status == ERROR
     }
 
     private fun showUseUrl(): Boolean {
@@ -80,7 +125,9 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
 
     override fun getItemCount(): Int {
         // +1 for "use this as url"
-        return super.getItemCount() + if (showLoadingOrError()) 1 else 0 + if (showUseUrl()) 1 else 0
+        val toret = super.getItemCount() + (if (showLoadingOrError()) {1} else {0}) + (if (showUseUrl()) {1} else {0})
+        println("item count: $toret")
+        return toret
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -138,12 +185,8 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
         }
     }
 
-    inner class UseUrlViewHolder(val view: View/*, val onClicked: (SchoolInfo) -> Unit*/) : RecyclerView.ViewHolder(view) {
-        /*val tw: TextView  = view.findViewById(R.id.textView)
-
-        fun bind(url: String) {
-            tw.text = "Use \"$url\"" //todo R.string
-            view.setOnClickListener { v: View? -> onClicked()}
-        }*/
+    inner class UseUrlViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    }
+    inner class StatusViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
     }
 }

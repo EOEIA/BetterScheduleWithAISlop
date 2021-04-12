@@ -21,12 +21,14 @@
     <string name="schedule_disabled">Rozvrh není povolen na tomto serveru</string>
     <string name="unexpected_response">Neočekávaná odpověď serveru. Prosím, zkontrolujte zadanou adresu serveru.</string>
     <string name="unreachable">Server nedostupný (zkontrolujte internetové připojení a adresu serveru)</string>
+    <string name="unknown_error">Nastala chyba</string>
     <string name="enter_username">Zadejte Vaše přihlašovací jméno</string>
     <string name="enter_password">Zadejte heslo</string>
     <string name="enter_url">Zadejte adresu Vašeho serveru Bakaláři nebo ťukněte na \"vybrat školu\"</string>
     <string name="search">Vyhledávejte…</string>
     <string name="connection_failed">Nepodařilo se připojit k internetu</string>
     <string name="loading_schools_info">Načítání informací o školách…</string>
+    <string name="schools_retry">Zkusit znovu</string>
 
     <string name="info_last_week">Minulý týden</string>
     <string name="info_this_week">Tento týden</string>

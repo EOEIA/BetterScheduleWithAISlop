@@ -12,14 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.jaredrummler.cyanea.app.CyaneaFragment;
 
 import cz.vitskalicky.lepsirozvrh.R;
-import cz.vitskalicky.lepsirozvrh.model.StatusInfo;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
@@ -29,11 +25,7 @@ public class SchoolsListFragment extends CyaneaFragment {
     SchoolsAdapter adapter = null;
     SchoolsListViewModel viewModel = null;
 
-    ProgressBar progressBar;
-    TextView twInfo;
     EditText etSearch;
-    TextView twError;
-    ImageView ivError;
 
     private Function1<SchoolInfo, Unit> onItemClick = schoolInfo -> {return Unit.INSTANCE;};
 
@@ -52,11 +44,7 @@ public class SchoolsListFragment extends CyaneaFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_schools_list, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
-        progressBar = view.findViewById(R.id.progressBar);
-        twInfo = view.findViewById(R.id.textViewInfo);
         etSearch = view.findViewById(R.id.editTextSearch);
-        twError = view.findViewById(R.id.textViewError);
-        ivError = view.findViewById(R.id.imageViewError);
 
         viewModel = ViewModelProviders.of(this).get(SchoolsListViewModel.class);
 
@@ -97,37 +85,8 @@ public class SchoolsListFragment extends CyaneaFragment {
 
 
         viewModel.getStatusLD().observe(getViewLifecycleOwner(), statusInfo -> {
-            if (statusInfo.getStatus() == StatusInfo.Status.SUCCESS){
-                progressBar.setVisibility(View.GONE);
-                twInfo.setVisibility(View.GONE);
-                twError.setVisibility(View.GONE);
-                ivError.setVisibility(View.GONE);
-            } else if (statusInfo.getStatus() == StatusInfo.Status.LOADING || statusInfo.getStatus() == StatusInfo.Status.UNKNOWN){
-                progressBar.setVisibility(View.VISIBLE);
-                twInfo.setVisibility(View.GONE);
-                twError.setVisibility(View.GONE);
-                ivError.setVisibility(View.GONE);
-            } else {
-                progressBar.setVisibility(View.GONE);
-                twInfo.setVisibility(View.GONE);
-                twError.setVisibility(View.VISIBLE);
-                ivError.setVisibility(View.VISIBLE);
-            }
+            adapter.setStatus(statusInfo);
         });
-
-        /*requestQueue = SchoolsDatabaseAPI.getAllSchools(getContext(), successful -> {
-            if (successful) {
-
-
-
-                //viewModel.setQuery(etSearch.getText().toString());
-            }else {
-                progressBar.setVisibility(View.GONE);
-                twInfo.setVisibility(View.GONE);
-                twError.setVisibility(View.VISIBLE);
-                ivError.setVisibility(View.VISIBLE);
-            }
-        },database, progressBar);*/
 
         //automatically show keyboard
         etSearch.requestFocus();
