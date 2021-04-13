@@ -63,6 +63,8 @@ public class SchoolsListFragment extends CyaneaFragment {
             public void afterTextChanged(Editable s) {
                 if (viewModel != null){
                     viewModel.setQuery(s.toString());
+                }
+                if (adapter != null){
                     adapter.setQueryText(s.toString());
                 }
             }
@@ -71,9 +73,12 @@ public class SchoolsListFragment extends CyaneaFragment {
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
         adapter = new SchoolsAdapter(requireContext(), schoolInfo -> onItemClick.invoke(schoolInfo), () -> {viewModel.refreshUnsuspend(); return Unit.INSTANCE;});
-        adapter.setOnListChanged(() -> {
+        adapter.setOnListChanged((previousList, currentList) -> {
             try {
-                recyclerView.getLayoutManager().scrollToPosition(0);
+                // this makes sure it is scrolled to top only if search query changes and not, for example, on screen rotation.
+                if ((currentList != null && previousList != null && currentList.size() > 0) && (currentList.size() != previousList.size())) {
+                    recyclerView.getLayoutManager().scrollToPosition(0);
+                }
             }catch (NullPointerException ignored){};
             return Unit.INSTANCE;
         });

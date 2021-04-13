@@ -24,8 +24,18 @@ class SchoolsListViewModel(
     private val webservice = app().schoolsWebservice
 
     val allSchools: LiveData<PagedList<SchoolInfo>> = LivePagedListBuilder(dao.queryAllSchools(),50).build()
-    private val query = MutableLiveData("")
-    val queriedSchools: LiveData<PagedList<SchoolInfo>> = query.switchMap {
+    private val queryLD = MutableLiveData("")
+    var query: String = ""
+    set(value) {
+        field = value
+        queryLD.value = if (field.isBlank()){
+            ""
+        }else{
+            field.simplified().replace(" ","* ") + "*"
+        }
+    }
+
+    val queriedSchools: LiveData<PagedList<SchoolInfo>> = queryLD.switchMap {
         LivePagedListBuilder(
                 if (it.isBlank()){
                     dao.queryAllSchools()
@@ -38,14 +48,6 @@ class SchoolsListViewModel(
     private val statusLD: MutableLiveData<StatusInfo> = MutableLiveData(StatusInfo.unknown())
 
     fun getStatusLD(): LiveData<StatusInfo> { return statusLD }
-
-    fun setQuery(queryString: String){
-        query.value = if (queryString.isBlank()){
-            ""
-        }else{
-            queryString.simplified().replace(" ","* ") + "*"
-        }
-    }
 
     suspend fun refresh(){
         statusLD.value = StatusInfo.loading()

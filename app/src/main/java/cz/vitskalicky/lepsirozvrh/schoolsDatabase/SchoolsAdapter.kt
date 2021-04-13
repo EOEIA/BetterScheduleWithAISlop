@@ -18,7 +18,7 @@ import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 
 class SchoolsAdapter(private val context: Context, private val onClicked: (SchoolInfo) -> Unit, private val retry: () -> Unit) : PagedListAdapter<SchoolInfo, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
-    var onListChanged: () -> Unit = {}
+    var onListChanged: (previousList: PagedList<SchoolInfo>?, currentList: PagedList<SchoolInfo>?) -> Unit = { _, _ -> }
 
     public var status: StatusInfo = StatusInfo.unknown()
     set(value) {
@@ -79,6 +79,7 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
                 useUrlView = LayoutInflater.from(context).inflate(R.layout.item_use_url,viewGroup, false)
                 twUseUrl = useUrlView!!.findViewById(R.id.textViewURL)
                 useUrlViewHolder = UseUrlViewHolder(useUrlView!!)
+                queryText = queryText
             }else{
 
             }
@@ -105,7 +106,7 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
 
     override fun onCurrentListChanged(previousList: PagedList<SchoolInfo>?, currentList: PagedList<SchoolInfo>?) {
         super.onCurrentListChanged(previousList, currentList)
-        onListChanged()
+        onListChanged(previousList, currentList)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -133,7 +134,6 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
     override fun getItemCount(): Int {
         // +1 for "use this as url"
         val toret = super.getItemCount() + (if (showLoadingOrError()) {1} else {0}) + (if (showUseUrl()) {1} else {0})
-        println("item count: $toret")
         return toret
     }
 
@@ -141,8 +141,8 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
         val itemCount = super.getItemCount()
         return when{
             position < itemCount -> TYPE_ITEM
-            position == itemCount -> if (showLoadingOrError()) TYPE_STATUS else TYPE_USE_URL
-            position == itemCount + 1 -> TYPE_USE_URL
+            position == itemCount -> if (showUseUrl()) TYPE_USE_URL else TYPE_STATUS
+            position == itemCount + 1 -> TYPE_STATUS
             else -> throw IllegalStateException("WTF? Too many items in list??? This is really not supposed to happen.");
         }
     }
