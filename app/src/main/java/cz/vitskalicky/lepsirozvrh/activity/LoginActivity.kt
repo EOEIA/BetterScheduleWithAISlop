@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputLayout
@@ -16,7 +17,6 @@ import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login.LoginResult
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import kotlinx.coroutines.launch
-import kotlin.coroutines.Continuation
 
 class LoginActivity : BaseActivity() {
     lateinit var tilUsername: TextInputLayout
@@ -60,6 +60,11 @@ class LoginActivity : BaseActivity() {
                 logIn()
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateChooseSchoolButtonText()
     }
 
     fun logIn() {
@@ -130,6 +135,14 @@ class LoginActivity : BaseActivity() {
         adb.show()
     }
 
+    fun updateChooseSchoolButtonText() {
+        if(tilURL.editText?.text.isNullOrBlank()){
+            bChooseSchool.setText(R.string.choose_school)
+        }else{
+            bChooseSchool.setText(R.string.change_school)
+        }
+    }
+
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_PICK_SCHOOL && resultCode == SchoolsListActivity.RESULT_OK && data != null) {
@@ -140,6 +153,7 @@ class LoginActivity : BaseActivity() {
                 Log.e(TAG, "No extra containing url (extra key: " + SchoolsListActivity.EXTRA_URL + ")")
             }
         }
+        updateChooseSchoolButtonText()
     }
 
     companion object {

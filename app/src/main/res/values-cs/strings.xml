@@ -13,8 +13,9 @@
     <string name="bakalari_logo">Logo Bakalářů</string>
     <string name="username">Přihlašovací jméno</string>
     <string name="password">Heslo</string>
-    <string name="bakalari_server_adress">Adresa Vašeho serveru Bakaláři</string>
-    <string name="choose_school">Seznam škol…</string>
+    <string name="school">Škola</string>
+    <string name="choose_school">Zvolit</string>
+    <string name="change_school">Změnint</string>
     <string name="login_button">Přihlásit se</string>
     <string name="login_message">Přihlaste se do systému Bakaláři</string>
     <string name="invalid_login">Neplatné uživatelské jméno nebo heslo</string>
