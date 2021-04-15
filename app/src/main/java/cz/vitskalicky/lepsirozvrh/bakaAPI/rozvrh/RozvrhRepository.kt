@@ -188,26 +188,26 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                 //parsing error
                 //report
                 application.sendReport(e)
-                StatusInfo.unexpectedResponse()
+                StatusInfo.Rozvrh.unexpectedResponse()
             }
             is IOException -> {
                 //network error
-                StatusInfo.unreachable()
+                StatusInfo.Rozvrh.unreachable()
             }
             is RozvrhConverter.RozvrhConversionException -> {
                 //conversion failed
                 application.sendReport(e)
-                StatusInfo.unexpectedResponse()
+                StatusInfo.Rozvrh.unexpectedResponse()
             }
             is LoginRequiredException -> {
                 application.login.logout()
-                StatusInfo.loginFailed()
+                StatusInfo.Rozvrh.loginFailed()
             }
             is HttpException -> {
-                StatusInfo.unexpectedResponse()
+                StatusInfo.Rozvrh.unexpectedResponse()
             }
             else -> {
-                statusStr[rozvrhId] = StatusInfo.unexpectedResponse()
+                statusStr[rozvrhId] = StatusInfo.Rozvrh.unexpectedResponse()
                 application.sendReport(e)
                 throw e
             }

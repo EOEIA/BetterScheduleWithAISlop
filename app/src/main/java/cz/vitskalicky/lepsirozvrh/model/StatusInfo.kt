@@ -18,6 +18,10 @@ data class StatusInfo(
         fun success(): StatusInfo = StatusInfo(SUCCESS)
         fun loading(): StatusInfo = StatusInfo(LOADING)
         fun unknown(): StatusInfo = StatusInfo(UNKNOWN)
+        fun error(specification: Int = 0, message: Int? = null): StatusInfo = StatusInfo(ERROR, message, specification)
+    }
+
+    object Rozvrh{
 
         fun unreachable(): StatusInfo = StatusInfo(ERROR, R.string.info_unreachable, Specification.ERROR_UNREACHABLE)
         fun loginFailed(): StatusInfo = StatusInfo(ERROR, R.string.info_login_failed, Specification.ERROR_LOGIN_FAILED)

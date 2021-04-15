@@ -9,6 +9,7 @@ import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Specification
 import kotlinx.coroutines.launch
 import okio.IOException
 import org.joda.time.DateTime
@@ -57,18 +58,18 @@ class SchoolsListViewModel(
         }catch (e: JsonMappingException){
             val f = RuntimeException("Failed to parse schools list", e)
             app().sendReport(f)
-            statusLD.value = StatusInfo.unexpectedResponse()
+            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.connection_failed)
             null
         }catch (e : IOException){
-            statusLD.value = StatusInfo.unreachable()
+            statusLD.value = StatusInfo.error(Specification.ERROR_UNREACHABLE, R.string.connection_failed)
             null
         }catch (e: HttpException){
-            statusLD.value = StatusInfo.unexpectedResponse()
+            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.connection_failed)
             null
         }catch (e: Exception){
             val f = RuntimeException("Failed to load schools list", e)
             app().sendReport(f)
-            statusLD.value = StatusInfo.unexpectedResponse()
+            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.connection_failed)
             null
         }
 
@@ -80,7 +81,7 @@ class SchoolsListViewModel(
             }else{
                 val f = RuntimeException("Schools list is empty")
                 app().sendReport(f)
-                statusLD.value = StatusInfo.unexpectedResponse()
+                statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.connection_failed)
             }
         }
     }

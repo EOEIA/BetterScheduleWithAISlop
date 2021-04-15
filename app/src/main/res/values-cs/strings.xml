@@ -25,7 +25,7 @@
     <string name="enter_username">Zadejte Vaše přihlašovací jméno</string>
     <string name="enter_password">Zadejte heslo</string>
     <string name="enter_url">Zadejte adresu Vašeho serveru Bakaláři nebo ťukněte na \"vybrat školu\"</string>
-    <string name="search">Vyhledávejte…</string>
+    <string name="search">Vyhledávejte nebo zadejte URL adresu…</string>
     <string name="connection_failed">Nepodařilo se připojit k internetu</string>
     <string name="loading_schools_info">Načítání informací o školách…</string>
     <string name="schools_retry">Zkusit znovu</string>
