@@ -37,35 +37,36 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
         notify = notify != showUseUrl()
         //todo notify unencrypted is not possible on release
         val url = if (field.startsWith("https://") || field.startsWith("http://")) field else "https://$field"
-        twUseUrl?.text = url
-        useUrlView?.setOnClickListener { onClicked(SchoolInfo("",url, url)) }
+        useUrlViewHolders.forEach {
+            it.twUseUrl.text = url
+            it.view.setOnClickListener { onClicked(SchoolInfo("",url, url)) }
+        }
         if (notify) {
             notifyDataSetChanged()
         }
     }
 
-    private var useUrlView: View? = null
-    private var twUseUrl: TextView? = null
-    private var useUrlViewHolder: UseUrlViewHolder? = null
+    private var useUrlViewHolders: HashSet<UseUrlViewHolder> = HashSet()
 
-    private var statusView: View? = null
-    private var loadingView: View? = null
-    private var errorView: View? = null
-    private var twErrorMessage: TextView? = null
-    private var buttonRetry: Button? = null
-    private var statusViewholder: StatusViewHolder? = null
+    private var statusViewholders: HashSet<StatusViewHolder> = HashSet()
 
     private fun updateStatusView(){
         if (status.status == ERROR){
-            loadingView?.visibility = GONE
-            errorView?.visibility = VISIBLE
-            twErrorMessage?.text = context.getText(status.errMessage ?: R.string.unknown_error)
+            statusViewholders.forEach {
+                it.loadingView.visibility = GONE
+                it.errorView.visibility = VISIBLE
+                it.twErrorMessage.text = context.getText(status.errMessage ?: R.string.unknown_error)
+            }
         }else if (status.status == LOADING){
-            loadingView?.visibility = VISIBLE
-            errorView?.visibility = GONE
+            statusViewholders.forEach {
+                it.loadingView.visibility = VISIBLE
+                it.errorView.visibility = GONE
+            }
         }else {
-            loadingView?.visibility = GONE
-            errorView?.visibility = GONE
+            statusViewholders.forEach {
+                it.loadingView.visibility = GONE
+                it.errorView.visibility = GONE
+            }
         }
     }
 
@@ -75,30 +76,16 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
             return ItemViewHolder(itemView, onClicked)
         }
         if (viewType == TYPE_USE_URL){
-            if (useUrlViewHolder == null){
-                useUrlView = LayoutInflater.from(context).inflate(R.layout.item_use_url,viewGroup, false)
-                twUseUrl = useUrlView!!.findViewById(R.id.textViewURL)
-                useUrlViewHolder = UseUrlViewHolder(useUrlView!!)
-                queryText = queryText
-            }else{
-
-            }
-            return useUrlViewHolder!!//UseUrlViewHolder(FrameLayout(context).apply { addView(TextView(context).apply { id = R.id.textView }) }, onClicked);
+            val useUrlViewHolder = UseUrlViewHolder(LayoutInflater.from(context).inflate(R.layout.item_use_url,viewGroup, false))
+            queryText = queryText
+            useUrlViewHolders.add(useUrlViewHolder)
+            return useUrlViewHolder
         }
         if(viewType == TYPE_STATUS){
-            if (statusViewholder == null){
-                statusView = LayoutInflater.from(context).inflate(R.layout.item_status,viewGroup, false)
-                loadingView = statusView!!.findViewById(R.id.loadingLayout)
-                errorView = statusView!!.findViewById(R.id.errorLayout)
-                twErrorMessage = statusView!!.findViewById(R.id.textViewSchoolsError)
-                buttonRetry = statusView!!.findViewById(R.id.buttonRetry)
-
-                buttonRetry!!.setOnClickListener { retry() }
-                updateStatusView()
-
-                statusViewholder = StatusViewHolder(statusView!!)
-            }
-            return statusViewholder!!;
+            val statusViewholder = StatusViewHolder(LayoutInflater.from(context).inflate(R.layout.item_status,viewGroup, false))
+            statusViewholders.add(statusViewholder)
+            updateStatusView()
+            return statusViewholder;
         }
 
         throw IllegalStateException("WTF? Unknown view type in recycler view. This is really not supposed to happen.");
@@ -193,7 +180,16 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
     }
 
     inner class UseUrlViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val twUseUrl: TextView = view.findViewById(R.id.textViewURL)
     }
     inner class StatusViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val loadingView: View = view.findViewById(R.id.loadingLayout)
+        val errorView: View = view.findViewById(R.id.errorLayout)
+        val twErrorMessage: TextView = view.findViewById(R.id.textViewSchoolsError)
+        val buttonRetry: Button = view.findViewById(R.id.buttonRetry)
+
+        init {
+            buttonRetry.setOnClickListener { retry() }
+        }
     }
 }
