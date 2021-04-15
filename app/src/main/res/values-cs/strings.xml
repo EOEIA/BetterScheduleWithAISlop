@@ -14,8 +14,9 @@
     <string name="username">Přihlašovací jméno</string>
     <string name="password">Heslo</string>
     <string name="school">Škola</string>
-    <string name="choose_school">Zvolit</string>
+    <string name="choose_school">Vybrat</string>
     <string name="change_school">Změnint</string>
+    <string name="no_school_selected">Nevybráno</string>
     <string name="login_button">Přihlásit se</string>
     <string name="login_message">Přihlaste se do systému Bakaláři</string>
     <string name="invalid_login">Neplatné uživatelské jméno nebo heslo</string>
@@ -27,7 +28,7 @@
     <string name="unknown_error">Nastala chyba</string>
     <string name="enter_username">Zadejte Vaše přihlašovací jméno</string>
     <string name="enter_password">Zadejte heslo</string>
-    <string name="enter_school">Zvolte Vaši školu</string>
+    <string name="enter_school">Vyberte Vaši školu</string>
     <string name="search">Vyhledávejte nebo zadejte URL adresu…</string>
     <string name="connection_failed">Nepodařilo se připojit k internetu</string>
     <string name="loading_schools_info">Načítání informací o školách…</string>

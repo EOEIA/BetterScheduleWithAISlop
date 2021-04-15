@@ -57,7 +57,7 @@ class LoginActivity : BaseActivity() {
         if (viewModel.schoolInfo == null){
             viewModel.schoolInfo = SchoolInfo(
                     SharedPrefs.getString(this, SharedPrefs.SCHOOL_ID),
-                    SharedPrefs.getString(this, SharedPrefs.SCHOOL_NAME).ifBlank { SharedPrefs.getString(this, SharedPrefs.URL) },
+                    SharedPrefs.getString(this, SharedPrefs.SCHOOL_NAME).ifBlank { SharedPrefs.getString(this, SharedPrefs.URL) }.ifBlank { getString(R.string.no_school_selected) },
                     SharedPrefs.getString(this, SharedPrefs.URL)
             )
         }
@@ -182,7 +182,7 @@ class LoginActivity : BaseActivity() {
     }
 
     fun updateChooseSchoolButtonText() {
-        if(tilURL.editText?.text.isNullOrBlank()){
+        if(viewModel.schoolInfo?.url.isNullOrBlank()){
             bChooseSchool.setText(R.string.choose_school)
         }else{
             bChooseSchool.setText(R.string.change_school)

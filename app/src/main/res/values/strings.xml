@@ -13,8 +13,9 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="school">School</string>
-    <string name="choose_school">Choose</string>
+    <string name="choose_school">Select</string>
     <string name="change_school">Change</string>
+    <string name="no_school_selected">Not selected</string>
     <string name="login_button">Login</string>
     <string name="login_message">Log in to Bakaláři, please</string>
     <string name="invalid_login">Invalid username or password</string>
