@@ -17,7 +17,10 @@ import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 
-class SchoolsAdapter(private val context: Context, private val onClicked: (SchoolInfo) -> Unit, private val retry: () -> Unit) : PagedListAdapter<SchoolInfo, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
+/**
+ * @param onClicked the boolean says whether the url has been selected from list of known schools or selected manually.
+ */
+class SchoolsAdapter(private val context: Context, private val onClicked: (SchoolInfo, Boolean) -> Unit, private val retry: () -> Unit) : PagedListAdapter<SchoolInfo, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
     var onListChanged: (previousList: PagedList<SchoolInfo>?, currentList: PagedList<SchoolInfo>?) -> Unit = { _, _ -> }
 
     public var status: StatusInfo = StatusInfo.unknown()
@@ -39,7 +42,7 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
         val url = if (field.startsWith("https://") || field.startsWith("http://")) field else "https://$field"
         useUrlViewHolders.forEach {
             it.twUseUrl.text = url
-            it.view.setOnClickListener { onClicked(SchoolInfo("",url, url)) }
+            it.view.setOnClickListener { onClicked(SchoolInfo("",url, url), true) }
         }
         if (notify) {
             notifyDataSetChanged()
@@ -153,7 +156,7 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
 
     // VIEW HOLDERS
 
-    inner class ItemViewHolder(val view: View, val onClicked: (SchoolInfo) -> Unit) : RecyclerView.ViewHolder(view) {
+    inner class ItemViewHolder(val view: View, val onClicked: (SchoolInfo, Boolean) -> Unit) : RecyclerView.ViewHolder(view) {
         val twName: TextView  = view.findViewById(R.id.textViewName)
         val twURL: TextView  = view.findViewById(R.id.textViewURL)
         var item: SchoolInfo? = null
@@ -166,7 +169,7 @@ class SchoolsAdapter(private val context: Context, private val onClicked: (Schoo
                 twName.text = item.name
                 twURL.text = item.url
                 view.setOnClickListener {
-                    v: View? -> onClicked(item)
+                    v: View? -> onClicked(item, false)
                 }
             }
         }

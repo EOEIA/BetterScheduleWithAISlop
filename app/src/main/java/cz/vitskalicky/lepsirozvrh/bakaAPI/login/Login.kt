@@ -112,6 +112,10 @@ class Login(val app: MainApplication) {
             }
             is IOException ->
                 return UNREACHABLE
+            is IllegalArgumentException -> {
+                //malformed url
+                return UNREACHABLE
+            }
             else -> {
                 throw e
             }
@@ -148,10 +152,10 @@ class Login(val app: MainApplication) {
     }
 
     suspend fun firstLogin(url: String, username: String, password: String): LoginResult{
-        val url: String = unifyUrl(url)
-        val webservice = getUnloggedRetrofit(url).create(LoginWebservice::class.java)
-
         try {
+            val url: String = unifyUrl(url)
+            val webservice = getUnloggedRetrofit(url).create(LoginWebservice::class.java)
+
             val response: LoginResponse = webservice.firstLogin(username, password)
             //handle success
 
@@ -168,6 +172,8 @@ class Login(val app: MainApplication) {
         }catch (e: HttpException){
             return handleException(e, "login")
         }catch (e: IOException){
+            return handleException(e, "login")
+        }catch (e: IllegalArgumentException){
             return handleException(e, "login")
         }
     }

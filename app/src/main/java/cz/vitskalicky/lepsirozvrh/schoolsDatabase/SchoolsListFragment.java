@@ -17,7 +17,7 @@ import com.jaredrummler.cyanea.app.CyaneaFragment;
 
 import cz.vitskalicky.lepsirozvrh.R;
 import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
 
 public class SchoolsListFragment extends CyaneaFragment {
     RecyclerView recyclerView;
@@ -27,13 +27,13 @@ public class SchoolsListFragment extends CyaneaFragment {
 
     EditText etSearch;
 
-    private Function1<SchoolInfo, Unit> onItemClick = schoolInfo -> {return Unit.INSTANCE;};
+    private Function2<SchoolInfo, Boolean, Unit> onItemClick = (schoolInfo, isManualUrl) -> {return Unit.INSTANCE;};
 
     public SchoolsListFragment() {
         // Required empty public constructor
     }
 
-    public void setOnItemClickListener(Function1<SchoolInfo, Unit> onItemClick){
+    public void setOnItemClickListener(Function2<SchoolInfo, Boolean, Unit> onItemClick){
         this.onItemClick = onItemClick;
     }
 
@@ -72,7 +72,7 @@ public class SchoolsListFragment extends CyaneaFragment {
 
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new SchoolsAdapter(requireContext(), schoolInfo -> onItemClick.invoke(schoolInfo), () -> {viewModel.refreshUnsuspend(); return Unit.INSTANCE;});
+        adapter = new SchoolsAdapter(requireContext(), (schoolInfo, isManualUrl) -> onItemClick.invoke(schoolInfo, isManualUrl), () -> {viewModel.refreshUnsuspend(); return Unit.INSTANCE;});
         adapter.setOnListChanged((previousList, currentList) -> {
             try {
                 // this makes sure it is scrolled to top only if search query changes and not, for example, on screen rotation.

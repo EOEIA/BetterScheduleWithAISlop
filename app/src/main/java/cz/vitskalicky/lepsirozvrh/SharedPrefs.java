@@ -16,6 +16,8 @@ public class SharedPrefs {
 
     //key constants (do not change in future)
     public static final String URL = "url";
+    public static final String SCHOOL_NAME = "school_name";
+    public static final String SCHOOL_ID = "school_id";
     public static final String USERNAME = "username";
     public static final String ACCEESS_TOKEN = "access_token";
     public static final String REFRESH_TOKEN = "refresh_token";

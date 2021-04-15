@@ -1,5 +1,6 @@
 package cz.vitskalicky.lepsirozvrh.activity
 
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,13 +9,18 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputLayout
+import cz.vitskalicky.lepsirozvrh.KotlinUtils
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login.LoginResult
+import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolInfo
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import kotlinx.coroutines.launch
 
@@ -26,6 +32,8 @@ class LoginActivity : BaseActivity() {
     lateinit var bLogin: Button
     lateinit var progressBar: ProgressBar
     lateinit var twMessage: TextView
+
+    private val viewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +52,15 @@ class LoginActivity : BaseActivity() {
         twMessage.text = ""
         twMessage.setTextColor(Theme.of(this).cError)
 
+
         if (tilUsername.editText!!.text.toString().isEmpty()) tilUsername.editText!!.setText(SharedPrefs.getString(this, SharedPrefs.USERNAME))
-        if (tilURL.editText!!.text.toString().isEmpty()) tilURL.editText!!.setText(SharedPrefs.getString(this, SharedPrefs.URL))
+        if (viewModel.schoolInfo == null){
+            viewModel.schoolInfo = SchoolInfo(
+                    SharedPrefs.getString(this, SharedPrefs.SCHOOL_ID),
+                    SharedPrefs.getString(this, SharedPrefs.SCHOOL_NAME).ifBlank { SharedPrefs.getString(this, SharedPrefs.URL) },
+                    SharedPrefs.getString(this, SharedPrefs.URL)
+            )
+        }
         (applicationContext as MainApplication).login.logout()
         bChooseSchool.setOnClickListener(View.OnClickListener { v: View? ->
             val intent = Intent(this, SchoolsListActivity::class.java)
@@ -60,6 +75,33 @@ class LoginActivity : BaseActivity() {
                 logIn()
             }
         })
+
+        tilURL.editText!!.setText(viewModel.schoolInfo?.name ?: "")
+
+        tilUsername.editText!!.addTextChangedListener{
+            tilUsername.error = null
+            tilPassword.error = null
+        }
+        tilPassword.editText!!.addTextChangedListener{
+            tilUsername.error = null
+            tilPassword.error = null
+        }
+
+        //DUBUG
+        bChooseSchool.setOnLongClickListener {
+            lifecycleScope.launch{
+                (application as MainApplication).schoolsDb.schoolDAO().nukeTable()
+            }
+            Toast.makeText(this, "Nuked", Toast.LENGTH_SHORT).show()
+            true
+        }
+    }
+
+
+    private fun clearErrors(){
+        tilUsername.error = null;
+        tilPassword.error = null;
+        tilURL.error = null;
     }
 
     override fun onResume() {
@@ -72,14 +114,10 @@ class LoginActivity : BaseActivity() {
         progressBar.visibility = View.VISIBLE
         twMessage.text = ""
 
-        /*tilUsername.setError(null);
-            tilPassword.setError(null);
-            tilURL.setError(null);*/
-        tilUsername.isErrorEnabled = false
-        tilPassword.isErrorEnabled = false
-        tilURL.isErrorEnabled = false
-        if (tilURL.editText!!.text.toString().isBlank()) {
-            tilURL.error = getText(R.string.enter_url)
+        clearErrors()
+
+        if (viewModel.schoolInfo?.url.isNullOrBlank()) {
+            tilURL.error = getText(R.string.enter_school)
             bLogin.isEnabled = true
             progressBar.visibility = View.GONE
             return
@@ -97,32 +135,40 @@ class LoginActivity : BaseActivity() {
             return
         }
         lifecycleScope.launch {
-            val result = (applicationContext as MainApplication).login.firstLogin(tilURL.editText!!.text.toString(), tilUsername.editText!!.text.toString(), tilPassword.editText!!.text.toString())
+            val result = (applicationContext as MainApplication).login.firstLogin(viewModel.schoolInfo!!.url, tilUsername.editText!!.text.toString(), tilPassword.editText!!.text.toString())
 
-            if (result === LoginResult.SUCCESS) {
+            if (result == LoginResult.SUCCESS) {
                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
                 startActivity(intent)
                 finish()
                 return@launch
             }
-            bLogin.isEnabled = true
-            progressBar.visibility = View.GONE
-            if (result === LoginResult.WRONG_LOGIN) {
+            if (result == LoginResult.WRONG_LOGIN) {
                 tilUsername.error = getText(R.string.invalid_login)
                 tilPassword.error = getText(R.string.invalid_login)
             }
-            if (result === LoginResult.UNREACHABLE) {
-                twMessage.setText(R.string.unreachable)
-                tilURL.error = " "
+            if (result == LoginResult.UNREACHABLE) {
+                //check internet connection and decide on message
+                if (KotlinUtils.isOnline()){
+                    if (viewModel.isManualUrl){
+                        tilURL.error = getText(R.string.unreachable)
+                    }else{
+                        tilURL.error = getText(R.string.school_unreachable)
+                    }
+                }else {
+                    twMessage.setText(R.string.no_internet)
+                }
             }
-            if (result === LoginResult.UNEXPECTED_RESPONSE) {
+            if (result == LoginResult.UNEXPECTED_RESPONSE) {
                 tilURL.error = getText(R.string.unexpected_response)
             }
             /*if (code === Login.ROZVRH_DISABLED) {
                 tilURL!!.error = " "
                 twMessage!!.setText(R.string.schedule_disabled)
             }*/
-        }
+
+            bLogin.isEnabled = true
+            progressBar.visibility = View.GONE}
     }
 
     fun showUnsecureConnectionWanrning() {
@@ -147,8 +193,19 @@ class LoginActivity : BaseActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_PICK_SCHOOL && resultCode == SchoolsListActivity.RESULT_OK && data != null) {
             val url = data.getStringExtra(SchoolsListActivity.EXTRA_URL)
-            if (url != null) {
-                tilURL!!.editText!!.setText(url)
+            val name = data.getStringExtra(SchoolsListActivity.EXTRA_NAME)
+            val id = data.getStringExtra(SchoolsListActivity.EXTRA_ID)
+            val isManualUrl = data.getBooleanExtra(SchoolsListActivity.EXTRA_IS_MANUAL, false)
+            if (url != null && name != null && id != null) {
+                viewModel.schoolInfo = SchoolInfo(id, name, url)
+                viewModel.isManualUrl = isManualUrl
+                tilURL.editText?.setText(viewModel.schoolInfo?.name)
+
+                SharedPrefs.setString(this, SharedPrefs.SCHOOL_ID, id )
+                SharedPrefs.setString(this, SharedPrefs.SCHOOL_NAME, name )
+                SharedPrefs.setString(this, SharedPrefs.URL, url )
+
+                clearErrors()
             } else {
                 Log.e(TAG, "No extra containing url (extra key: " + SchoolsListActivity.EXTRA_URL + ")")
             }
@@ -165,4 +222,11 @@ class LoginActivity : BaseActivity() {
         const val LOGOUT = "logout"
         const val REQUEST_PICK_SCHOOL = 64585 //random number
     }
+}
+
+class LoginViewModel(val app: Application): AndroidViewModel(app){
+
+    var schoolInfo: SchoolInfo? = null;
+    var isManualUrl = true
+
 }
