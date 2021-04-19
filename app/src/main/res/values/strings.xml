@@ -33,6 +33,8 @@
     <string name="loading_schools_info">Loading schools info…</string>
     <string name="schools_retry">Retry</string>
     <string name="use_url">Enter address manually</string>
+    <string name="use_url_dialog_title">Enter server URL address</string>
+    <string name="use_url_dialog_hint">https://bakalari.school.com/bakaweb</string>
 
     <!-- Info messages -->
     <string name="info_last_week">Last week</string>
@@ -167,6 +169,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 
     <string name="about">About</string>
     <string name="source_code">Source code</string>

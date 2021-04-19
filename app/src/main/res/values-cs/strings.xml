@@ -34,6 +34,8 @@
     <string name="loading_schools_info">Načítání informací o školách…</string>
     <string name="schools_retry">Zkusit znovu</string>
     <string name="use_url">Zadat adresu ručně</string>
+    <string name="use_url_dialog_title">Zadejte URL adresu serveru</string>
+    <string name="use_url_dialog_hint">https://bakalari.skola.cz/bakaweb</string>
 
     <string name="info_last_week">Minulý týden</string>
     <string name="info_this_week">Tento týden</string>
@@ -167,6 +169,7 @@
     <string name="yes">Ano</string>
     <string name="no">Ne</string>
     <string name="ok">OK</string>
+    <string name="cancel">Zrušit</string>
 
     <string name="about">O aplikaci</string>
     <string name="source_code">Zdrojový kód</string>
