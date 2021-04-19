@@ -108,7 +108,6 @@ E/AndroidRuntime:     at android.os.Handler.dispatchMessage(Handler.java:99)
             var notify = showUseUrl()
             field = value
             notify = notify != showUseUrl()
-            //todo notify unencrypted is not possible on release
             useUrlViewHolders.forEach {
                 //it.twUseUrl.text = url
                 it.view.setOnClickListener { onShowManualUrlDialog(value) }

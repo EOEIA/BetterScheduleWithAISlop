@@ -64,13 +64,7 @@ class LoginActivity : BaseActivity() {
             startActivityForResult(intent, REQUEST_PICK_SCHOOL)
         })
         bLogin.setOnClickListener(View.OnClickListener { v: View? ->
-            val url = tilURL.editText!!.text.toString()
-            if (url.startsWith("http://")) {
-                //todo ban http unless debug is enabled
-                showUnsecureConnectionWanrning()
-            } else {
-                logIn()
-            }
+            logIn()
         })
 
         tilURL.editText!!.setText(viewModel.schoolInfo?.name ?: "")
@@ -112,9 +106,11 @@ class LoginActivity : BaseActivity() {
         progressBar.visibility = View.VISIBLE
         twMessage.text = ""
 
+        val url: String = viewModel.schoolInfo?.url ?: ""
+
         clearErrors()
 
-        if (viewModel.schoolInfo?.url.isNullOrBlank()) {
+        if (url.isBlank()) {
             tilURL.error = getText(R.string.enter_school)
             bLogin.isEnabled = true
             progressBar.visibility = View.GONE
@@ -133,7 +129,7 @@ class LoginActivity : BaseActivity() {
             return
         }
         lifecycleScope.launch {
-            val result = (applicationContext as MainApplication).login.firstLogin(viewModel.schoolInfo!!.url, tilUsername.editText!!.text.toString(), tilPassword.editText!!.text.toString())
+            val result = (applicationContext as MainApplication).login.firstLogin(url, tilUsername.editText!!.text.toString(), tilPassword.editText!!.text.toString())
 
             if (result == LoginResult.SUCCESS) {
                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
@@ -166,17 +162,8 @@ class LoginActivity : BaseActivity() {
             }*/
 
             bLogin.isEnabled = true
-            progressBar.visibility = View.GONE}
-    }
-
-    fun showUnsecureConnectionWanrning() {
-        val adb = AlertDialog.Builder(this)
-        adb.setTitle(R.string.unsecure_connectio_title)
-                .setMessage(R.string.unsecure_connectio)
-                .setPositiveButton(R.string.unsecure_connection_connect) { dialog, which -> logIn() }
-                .setNegativeButton(R.string.unsecure_connection_cancel) { dialog, which -> }
-                .setIcon(R.drawable.ic_no_encryption_black_24dp)
-        adb.show()
+            progressBar.visibility = View.GONE
+        }
     }
 
     fun updateChooseSchoolButtonText() {
