@@ -114,8 +114,4 @@ public class SchoolsListFragment extends CyaneaFragment {
     public void onDestroy() {
         super.onDestroy();
     }
-
-    /*public static interface OnItemClickListener{
-        public void onClick(String url);
-    }*/
 }

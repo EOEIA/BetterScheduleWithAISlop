@@ -15,10 +15,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputLayout
-import cz.vitskalicky.lepsirozvrh.KotlinUtils
-import cz.vitskalicky.lepsirozvrh.MainApplication
-import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.SharedPrefs
+import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login.LoginResult
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolInfo
 import cz.vitskalicky.lepsirozvrh.theme.Theme
@@ -87,13 +84,14 @@ class LoginActivity : BaseActivity() {
             tilPassword.error = null
         }
 
-        //DUBUG
-        bChooseSchool.setOnLongClickListener {
-            lifecycleScope.launch{
-                (application as MainApplication).schoolsDb.schoolDAO().nukeTable()
+        if (BuildConfig.DEBUG) {
+            bChooseSchool.setOnLongClickListener {
+                lifecycleScope.launch {
+                    (application as MainApplication).schoolsDb.schoolDAO().nukeTable()
+                }
+                Toast.makeText(this, "Schools list cleared", Toast.LENGTH_SHORT).show()
+                true
             }
-            Toast.makeText(this, "Nuked", Toast.LENGTH_SHORT).show()
-            true
         }
     }
 

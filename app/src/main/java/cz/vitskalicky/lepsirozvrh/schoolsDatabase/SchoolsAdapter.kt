@@ -39,7 +39,7 @@ class SchoolsAdapter(private val context: Context,
                 notifyDataSetChanged()
             }
         }
-    /* this error rarely occurred ad I could not reproduce it. I should be fixed, but since I could not reproduce it you can never be sure.
+    /* this error rarely occurred and I could not reproduce it. I should be fixed, but since I could not reproduce it, you can never be sure.
 
     E/AndroidRuntime: FATAL EXCEPTION: main
     Process: cz.vitskalicky.lepsirozvrh, PID: 32503

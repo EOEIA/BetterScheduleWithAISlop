@@ -27,7 +27,7 @@
     <string name="unknown_error">An error occurred</string>
     <string name="enter_username">Enter your username</string>
     <string name="enter_password">Enter your password</string>
-    <string name="enter_school">Choose your school</string>
+    <string name="enter_school">Select your school</string>
     <string name="search">Search or enter URL address…</string>
     <string name="connection_failed">Could not connect to server</string>
     <string name="loading_schools_info">Loading schools info…</string>
