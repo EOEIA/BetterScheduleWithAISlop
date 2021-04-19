@@ -71,8 +71,10 @@
                         android:id="@+id/textEditURL"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:autofillHints="url"
+                        android:clickable="false"
+                        android:cursorVisible="false"
                         android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:inputType="none" />
 
                 </com.google.android.material.textfield.TextInputLayout>
