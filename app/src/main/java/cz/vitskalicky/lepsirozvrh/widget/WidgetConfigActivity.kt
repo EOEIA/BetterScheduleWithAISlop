@@ -63,11 +63,9 @@ abstract class WidgetConfigActivity : AppCompatActivity(), CallbackListener {
 
                 lifecycleScope.launch{
                     val rozvrh: RozvrhRelated? = (application as? MainApplication)?.repository?.getRozvrh(Utils.getCurrentMonday(),true)
-                    if (rozvrh != null) {
-                        val tmp = rozvrh.getWidgetDisplayBlocks(5)
-                        WidgetProvider.update(this@WidgetConfigActivity,widgetID,tmp?.first, tmp?.second )
-                        finish()
-                    }
+                    val tmp = rozvrh?.getWidgetDisplayBlocks(5)
+                    WidgetProvider.update(this@WidgetConfigActivity,widgetID,tmp?.first, tmp?.second )
+                    finish()
                 }
             } else {
                 finish()
