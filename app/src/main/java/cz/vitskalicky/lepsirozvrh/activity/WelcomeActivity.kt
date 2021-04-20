@@ -1,57 +1,61 @@
-package cz.vitskalicky.lepsirozvrh.activity;
+package cz.vitskalicky.lepsirozvrh.activity
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.text.Html
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.SpannedString
+import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
+import android.view.View
+import android.view.textclassifier.TextLinks
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.TextView
+import androidx.core.text.HtmlCompat
+import androidx.core.text.buildSpannedString
+import cz.vitskalicky.lepsirozvrh.BuildConfig
+import cz.vitskalicky.lepsirozvrh.MainApplication
+import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.SharedPrefs
 
-import androidx.appcompat.app.AlertDialog;
-
-import cz.vitskalicky.lepsirozvrh.BuildConfig;
-import cz.vitskalicky.lepsirozvrh.MainApplication;
-import cz.vitskalicky.lepsirozvrh.R;
-import cz.vitskalicky.lepsirozvrh.SharedPrefs;
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login;
-
-public class WelcomeActivity extends BaseActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_welcome);
-        Button buttonStart = findViewById(R.id.buttonStart);
-        CheckBox checkBox = findViewById(R.id.checkBoxSendCrashReports);
-        Button buttonPrivacyPolicy = findViewById(R.id.buttonPrivacyPolicy);
-
-        buttonStart.setOnClickListener(v -> {
-            boolean sendReports = checkBox.isChecked();
-            SharedPrefs.setInt(this, SharedPrefs.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE);
-
-            SharedPrefs.setBoolean(this, getString(R.string.PREFS_SEND_CRASH_REPORTS), sendReports);
-            if (getApplication() instanceof MainApplication) {
+class WelcomeActivity : BaseActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_welcome)
+        val buttonStart = findViewById<Button>(R.id.buttonStart)
+        val checkBox = findViewById<CheckBox>(R.id.checkBoxSendCrashReports)
+        val twPrivacyPolicy = findViewById<TextView>(R.id.textViewPrivacyPolicy)
+        buttonStart.setOnClickListener { v: View? ->
+            val sendReports = checkBox.isChecked
+            SharedPrefs.setInt(this, SharedPrefs.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE)
+            SharedPrefs.setBoolean(this, getString(R.string.PREFS_SEND_CRASH_REPORTS), sendReports)
+            if (application is MainApplication) {
                 if (sendReports) {
-                    ((MainApplication) getApplication()).enableSentry();
+                    (application as MainApplication).enableSentry()
                 } else {
-                    ((MainApplication) getApplication()).diableSentry();
+                    (application as MainApplication).diableSentry()
                 }
             }
-            ((MainApplication) getApplication()).getLogin().checkLogin(this);
-            finish();
-        });
+            (application as MainApplication).login.checkLogin(this)
+            finish()
+        }
 
-        buttonPrivacyPolicy.setOnClickListener(v -> {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.PRIVACY_POLICY_LINK)));
-            startActivity(browserIntent);
-        });
+        //add link to privacy policy
+        val ppText: String = getString(R.string.privacy_policy)
+        val ppLink: String = getString(R.string.PRIVACY_POLICY_LINK)
+        twPrivacyPolicy.text = SpannableStringBuilder()
+                .append(ppText)
+                .apply { setSpan(URLSpan(ppLink), 0, ppText.length, 0) }
+        twPrivacyPolicy.movementMethod = LinkMovementMethod.getInstance();
 
         /*
          * Hide "send crash reports" checkbox on debug builds, because bug reports are allowed on
          * official release builds only. (see build.gradle)
-         */
-        if (!BuildConfig.ALLOW_SENTRY) {
-            checkBox.setVisibility(View.GONE);
+         */if (!BuildConfig.ALLOW_SENTRY) {
+            checkBox.visibility = View.GONE
         }
     }
 }
