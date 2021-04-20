@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 
 import androidx.preference.PreferenceManager;
 
-import com.android.volley.toolbox.StringRequest;
-
 import org.joda.time.format.ISODateTimeFormat;
 
 /**
