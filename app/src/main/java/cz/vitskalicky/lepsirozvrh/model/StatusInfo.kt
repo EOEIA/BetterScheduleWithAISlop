@@ -3,9 +3,9 @@ package cz.vitskalicky.lepsirozvrh.model
 import androidx.annotation.StringRes
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
-import cz.vitskalicky.lepsirozvrh.model.RozvrhStatus.Status.*
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 
-data class RozvrhStatus(
+data class StatusInfo(
     val status: Status,
     @StringRes
     val errMessage: Int? = null,
@@ -15,13 +15,17 @@ data class RozvrhStatus(
     val statusSpecification: Int = 0
 ){
     companion object{
-        fun success(): RozvrhStatus = RozvrhStatus(SUCCESS)
-        fun loading(): RozvrhStatus = RozvrhStatus(LOADING)
-        fun unknown(): RozvrhStatus = RozvrhStatus(UNKNOWN)
+        fun success(): StatusInfo = StatusInfo(SUCCESS)
+        fun loading(): StatusInfo = StatusInfo(LOADING)
+        fun unknown(): StatusInfo = StatusInfo(UNKNOWN)
+        fun error(specification: Int = 0, message: Int? = null): StatusInfo = StatusInfo(ERROR, message, specification)
+    }
 
-        fun unreachable(): RozvrhStatus = RozvrhStatus(ERROR, R.string.info_unreachable, Specification.ERROR_UNREACHABLE)
-        fun loginFailed(): RozvrhStatus = RozvrhStatus(ERROR, R.string.info_login_failed, Specification.ERROR_LOGIN_FAILED)
-        fun unexpectedResponse(): RozvrhStatus = RozvrhStatus(ERROR, R.string.info_unexpected_response, Specification.ERROR_UNEXPECTED_RESPONSE)
+    object Rozvrh{
+
+        fun unreachable(): StatusInfo = StatusInfo(ERROR, R.string.info_unreachable, Specification.ERROR_UNREACHABLE)
+        fun loginFailed(): StatusInfo = StatusInfo(ERROR, R.string.info_login_failed, Specification.ERROR_LOGIN_FAILED)
+        fun unexpectedResponse(): StatusInfo = StatusInfo(ERROR, R.string.info_unexpected_response, Specification.ERROR_UNEXPECTED_RESPONSE)
     }
 
     fun asResource(rozvrh: RozvrhRelated?): Resource<RozvrhRelated>{

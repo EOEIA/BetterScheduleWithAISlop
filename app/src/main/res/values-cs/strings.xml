@@ -13,20 +13,29 @@
     <string name="bakalari_logo">Logo Bakalářů</string>
     <string name="username">Přihlašovací jméno</string>
     <string name="password">Heslo</string>
-    <string name="bakalari_server_adress">Adresa Vašeho serveru Bakaláři</string>
-    <string name="choose_school">Seznam škol…</string>
+    <string name="school">Škola</string>
+    <string name="choose_school">Vybrat</string>
+    <string name="change_school">Změnint</string>
+    <string name="no_school_selected">Nevybráno</string>
     <string name="login_button">Přihlásit se</string>
     <string name="login_message">Přihlaste se do systému Bakaláři</string>
     <string name="invalid_login">Neplatné uživatelské jméno nebo heslo</string>
-    <string name="schedule_disabled">Rozvrh není povolen na tomto serveru</string>
-    <string name="unexpected_response">Neočekávaná odpověď serveru. Prosím, zkontrolujte zadanou adresu serveru.</string>
-    <string name="unreachable">Server nedostupný (zkontrolujte internetové připojení a adresu serveru)</string>
+    <string name="schedule_disabled">Na této škole je rozvrh vypnut</string>
+    <string name="unexpected_response">Neočekávaná odpověď serveru</string>
+    <string name="school_unreachable">Školní server nedostupný</string>
+    <string name="unreachable">Server nedostupný (zkontrolujte adresu)</string>
+    <string name="no_internet">Nejste připojeni k internetu</string>
+    <string name="unknown_error">Nastala chyba</string>
     <string name="enter_username">Zadejte Vaše přihlašovací jméno</string>
     <string name="enter_password">Zadejte heslo</string>
-    <string name="enter_url">Zadejte adresu Vašeho serveru Bakaláři nebo ťukněte na \"vybrat školu\"</string>
-    <string name="search">Vyhledávejte…</string>
+    <string name="enter_school">Vyberte Vaši školu</string>
+    <string name="search">Vyhledávejte nebo zadejte URL adresu…</string>
     <string name="connection_failed">Nepodařilo se připojit k internetu</string>
     <string name="loading_schools_info">Načítání informací o školách…</string>
+    <string name="schools_retry">Zkusit znovu</string>
+    <string name="use_url">Zadat adresu ručně</string>
+    <string name="use_url_dialog_title">Zadejte URL adresu serveru</string>
+    <string name="use_url_dialog_hint">https://bakalari.skola.cz/bakaweb</string>
 
     <string name="info_last_week">Minulý týden</string>
     <string name="info_this_week">Tento týden</string>
@@ -37,10 +46,6 @@
     <string name="info_unreachable">Chyba: nepodařilo se připojit</string>
     <string name="info_login_failed">Chyba: přihlášení selhalo</string>
     <string name="info_unexpected_response">Chyba: neočekávaná odpověď serveru</string>
-    <string name="unsecure_connectio_title">Spojení není zabezpečené!</string>
-    <string name="unsecure_connectio">Vaše škola neumožňuje zabezpečené spojení se serverem. Přenášená data tedy <b>nejsou šifrována</b> a kdokoliv ve stejné síti je může <b>odposlouchávat</b> nebo dokonce i měnit. <b>Nebezpečí</b> je obzvlášť vysoké <b>na veřejných wi-fi sítích</b>.\nOpravdu se chcete přihlásit?</string>
-    <string name="unsecure_connection_connect">Risknu to</string>
-    <string name="unsecure_connection_cancel">Zrušit</string>
 
     <string name="user">Uživatel</string>
     <string name="student">Student</string>
@@ -160,6 +165,7 @@
     <string name="yes">Ano</string>
     <string name="no">Ne</string>
     <string name="ok">OK</string>
+    <string name="cancel">Zrušit</string>
 
     <string name="about">O aplikaci</string>
     <string name="source_code">Zdrojový kód</string>

@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.*
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.Utils
-import cz.vitskalicky.lepsirozvrh.model.RozvrhStatus
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.LocalDate
@@ -14,20 +14,20 @@ class RozvrhViewModel(
 ) : AndroidViewModel(application) {
     private val repository = getApplication<MainApplication>().repository
     private val displayLD: MediatorLiveData<RozvrhRelated> = MediatorLiveData()
-    private val statusLD: MediatorLiveData<RozvrhStatus> = MediatorLiveData()
+    private val statusLD: MediatorLiveData<StatusInfo> = MediatorLiveData()
 
     private var currentlyUsedLD: LiveData<RozvrhRelated>? = null
-    private var currentlyUsedStatusLD: LiveData<RozvrhStatus>? = null
+    private var currentlyUsedStatusLD: LiveData<StatusInfo>? = null
 
     //to make switching instant
     private var nextLD: LiveData<RozvrhRelated>? = null
-    private var nextStatusLD: LiveData<RozvrhStatus>? = null
+    private var nextStatusLD: LiveData<StatusInfo>? = null
     private var prevLD: LiveData<RozvrhRelated>? = null
-    private var prevStatusLD: LiveData<RozvrhStatus>? = null
+    private var prevStatusLD: LiveData<StatusInfo>? = null
     private var permLD: LiveData<RozvrhRelated>? = null
-    private var permStatusLD: LiveData<RozvrhStatus>? = null
+    private var permStatusLD: LiveData<StatusInfo>? = null
     private var thisWeekLD: LiveData<RozvrhRelated>? = null
-    private var thisWeekStatusLD: LiveData<RozvrhStatus>? = null
+    private var thisWeekStatusLD: LiveData<StatusInfo>? = null
 
     /**
      * Tells if the last request was successful. If not, infoline should show "offline" on all weeks.
@@ -35,7 +35,7 @@ class RozvrhViewModel(
     public val isOfflineLD: LiveData<Boolean> = repository.getOfflineStatusLiveData()
 
     fun getDisplayLD(): LiveData<RozvrhRelated> = displayLD
-    fun getStatusLD(): LiveData<RozvrhStatus> = statusLD
+    fun getStatusLD(): LiveData<StatusInfo> = statusLD
 
     var monday: LocalDate = Utils.getCurrentMonday()
     private set
@@ -54,17 +54,17 @@ class RozvrhViewModel(
     /**
      * Loads the LiveData and triggers data load so that it has a value ready to be instantly displayed. todo replace with a better method if you find any.
      */
-    private fun prepareLD(week: Int): Pair<LiveData<RozvrhRelated>, LiveData<RozvrhStatus>>{
+    private fun prepareLD(week: Int): Pair<LiveData<RozvrhRelated>, LiveData<StatusInfo>>{
         val mnd = weekToMonday(week)
         val rozvrhLD = repository.getRozvrhLive(mnd, true)
         val statusLD = repository.getRozvrhStatusLiveData(mnd);
 
         //we must observe the live data to load the value. Observer is removed as soon as it receives any meaningful data.
         var rozvrhObserver = Observer<RozvrhRelated?> { }
-        var statusObserver = Observer<RozvrhStatus?> { };
+        var statusObserver = Observer<StatusInfo?> { };
 
         statusObserver = Observer {
-            if (it?.status == RozvrhStatus.Status.ERROR){
+            if (it?.status == StatusInfo.Status.ERROR){
                 statusLD.removeObserver(statusObserver)
                 rozvrhLD.removeObserver(rozvrhObserver)
             }
@@ -99,7 +99,7 @@ class RozvrhViewModel(
         }
         currentlyUsedStatusLD?.let {
             statusLD.removeSource(it)
-            statusLD.value = RozvrhStatus.loading()
+            statusLD.value = StatusInfo.loading()
         }
 
         if (diff == 1){

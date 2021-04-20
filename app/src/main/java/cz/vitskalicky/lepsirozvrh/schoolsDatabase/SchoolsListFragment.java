@@ -1,13 +1,8 @@
 package cz.vitskalicky.lepsirozvrh.schoolsDatabase;
 
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
@@ -16,45 +11,36 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.android.volley.RequestQueue;
 import com.jaredrummler.cyanea.app.CyaneaFragment;
 
 import cz.vitskalicky.lepsirozvrh.R;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class SchoolsListFragment extends CyaneaFragment {
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
     SchoolsAdapter adapter = null;
-    SchoolsViewModel viewModel = null;
+    SchoolsListViewModel viewModel = null;
 
-    ProgressBar progressBar;
-    TextView twInfo;
     EditText etSearch;
-    TextView twError;
-    ImageView ivError;
 
-    OnItemClickListener listener = url -> {};
-
-    RequestQueue requestQueue = null;
-    SchoolsDatabse database = null;
-    SchoolDAO dao = null;
-
+    private Function1<SchoolInfo, Unit> onItemClick = (schoolInfo) -> {return Unit.INSTANCE;};
+    private Function1<String, Unit> onManualUrlClick = (enteredSoFar) -> {return Unit.INSTANCE;};
 
     public SchoolsListFragment() {
         // Required empty public constructor
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener){
-        this.listener = listener;
+    public void setOnItemClickListener(Function1<SchoolInfo, Unit> onItemClick){
+        this.onItemClick = onItemClick;
+    }
+
+    public void setOnManualUrlClickListener(Function1<String, Unit> onManualUrlClick){
+        this.onManualUrlClick = onManualUrlClick;
     }
 
 
@@ -64,18 +50,9 @@ public class SchoolsListFragment extends CyaneaFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_schools_list, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
-        progressBar = view.findViewById(R.id.progressBar);
-        twInfo = view.findViewById(R.id.textViewInfo);
         etSearch = view.findViewById(R.id.editTextSearch);
-        twError = view.findViewById(R.id.textViewError);
-        ivError = view.findViewById(R.id.imageViewError);
 
-        recyclerView.setVisibility(View.GONE);
-        twError.setVisibility(View.GONE);
-        ivError.setVisibility(View.GONE);
-
-        viewModel = ViewModelProviders.of(this).get(SchoolsViewModel.class);
-        database = viewModel.init(getContext());
+        viewModel = ViewModelProviders.of(this).get(SchoolsListViewModel.class);
 
         etSearch.addTextChangedListener(new TextWatcher() {//<editor-fold desc="unused methods">
             @Override
@@ -93,31 +70,38 @@ public class SchoolsListFragment extends CyaneaFragment {
                 if (viewModel != null){
                     viewModel.setQuery(s.toString());
                 }
+                if (adapter != null){
+                    adapter.setQueryText(s.toString());
+                }
             }
         });
 
-        requestQueue = SchoolsDatabaseAPI.getAllSchools(getContext(), successful -> {
-            if (successful) {
-                layoutManager = new LinearLayoutManager(getContext());
-                recyclerView.setLayoutManager(layoutManager);
+        layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new SchoolsAdapter(requireContext(),
+                (schoolInfo) -> onItemClick.invoke(schoolInfo),
+                () -> {viewModel.refreshUnsuspend(); return Unit.INSTANCE;},
+                (enteredSoFar) -> { onManualUrlClick.invoke(enteredSoFar); return Unit.INSTANCE;}
+                );
+        adapter.setOnListChanged((previousList, currentList) -> {
+            try {
+                // this makes sure it is scrolled to top only if search query changes and not, for example, on screen rotation.
+                if ((currentList != null && previousList != null && currentList.size() > 0) && (currentList.size() != previousList.size())) {
+                    recyclerView.getLayoutManager().scrollToPosition(0);
+                }
+            }catch (NullPointerException ignored){};
+            return Unit.INSTANCE;
+        });
+        recyclerView.setAdapter(adapter);
 
-                adapter = new SchoolsAdapter(getContext(), listener);
+        viewModel.getQueriedSchools().observe(getViewLifecycleOwner(), schoolInfos -> {
+            adapter.submitList(schoolInfos);
+        });
 
-                viewModel.getQueriedSchools().observe(this, adapter::submitList);
 
-                recyclerView.setAdapter(adapter);
-                recyclerView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-                twInfo.setVisibility(View.GONE);
-
-                viewModel.setQuery(etSearch.getText().toString());
-            }else {
-                progressBar.setVisibility(View.GONE);
-                twInfo.setVisibility(View.GONE);
-                twError.setVisibility(View.VISIBLE);
-                ivError.setVisibility(View.VISIBLE);
-            }
-        },database, progressBar);
+        viewModel.getStatusLD().observe(getViewLifecycleOwner(), statusInfo -> {
+            adapter.setStatus(statusInfo);
+        });
 
         //automatically show keyboard
         etSearch.requestFocus();
@@ -129,12 +113,5 @@ public class SchoolsListFragment extends CyaneaFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (requestQueue != null){
-            requestQueue.cancelAll(request -> true/*all requests*/);
-        }
-    }
-
-    public static interface OnItemClickListener{
-        public void onClick(String url);
     }
 }
