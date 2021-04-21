@@ -105,6 +105,16 @@ data class RozvrhRelated(
                     first = false
                 }
             }
+            if (day.day.event != null) {
+                updateTime = day.day.date.toLocalDateTime(LocalTime.MIDNIGHT)
+                if (updateTime!!.isBefore(LocalDateTime.now())) {
+                    updateTime = day.day.date.toLocalDateTime(captions.firstOrNull()?.beginTime?.minusHours(2)
+                            ?: LocalTime.MIDNIGHT)
+                }
+                if (updateTime!!.isBefore(LocalDateTime.now())) {
+                    updateTime = null
+                }
+            }
             index++;
         }
 
