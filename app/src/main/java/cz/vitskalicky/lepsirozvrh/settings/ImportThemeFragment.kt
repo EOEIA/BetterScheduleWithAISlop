@@ -8,7 +8,9 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -59,6 +61,17 @@ class ImportThemeFragment : Fragment() {
             buttonOK = root!!.findViewById(R.id.buttonOK)
             buttonClear = root!!.findViewById(R.id.buttonClear)
             tvInfo = root!!.findViewById(R.id.textViewInfo)
+        }
+
+        //insert more themes link
+        var text = getString(R.string.import_theme_detail)
+        val linkStart: Int = text.indexOf("%1")
+        if (linkStart >= 0){
+            val link = getString(R.string.MORE_THEMES_LINK)
+            text = text.format(link)
+            tvInfo!!.text = SpannableStringBuilder()
+                    .append(text)
+                    .apply { setSpan(URLSpan(link), linkStart, linkStart + link.length, 0) }
         }
         tvInfo!!.movementMethod = LinkMovementMethod.getInstance()
         buttonPaste!!.setOnClickListener { v: View? ->
