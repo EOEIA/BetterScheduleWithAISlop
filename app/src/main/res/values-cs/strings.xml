@@ -82,6 +82,7 @@
 
     <string name="theme_general_settings">Obecné nastavení</string>
     <string name="app_theme">Motiv aplikace</string>
+    <string name="more_themes">Více motivů</string>
     <string name="export_theme">Exportovat motiv</string>
     <string name="export_theme_desc">Vytvoří speciální text, který obsahuje aktuální motiv</string>
     <string name="export_theme_detail">Text níže obsahuje všechna data aktuálního motivu. Pošli ho svým kamarádům, abys s nimi sdílel tvé úžasné designerské dovednosti!</string>

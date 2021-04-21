@@ -82,6 +82,7 @@
 
     <string name="theme_general_settings">General settings</string>
     <string name="app_theme">App theme</string>
+    <string name="more_themes">Get more themes</string>
     <string name="export_theme">Export theme</string>
     <string name="export_theme_desc">Generate a text containing your current theme</string>
     <string name="export_theme_detail">The following text contains all data about your current theme. Send it to your friends to share your amazing design skills with them!</string>

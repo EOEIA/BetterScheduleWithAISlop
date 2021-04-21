@@ -23,6 +23,7 @@
     <string name="PREFS_OSS_LICENCES" translatable="false">prefs-oss-licences</string>
     <string name="GITLAB_LINK" translatable="false">https://gitlab.com/vitSkalicky/lepsi-rozvrh</string>
     <string name="PRIVACY_POLICY_LINK" translatable="false">https://gitlab.com/vitSkalicky/lepsi-rozvrh/-/blob/master/Z%C3%A1sady%20ochrany%20soukrom%C3%AD.md</string>
+    <string name="MORE_THEMES_LINK" translatable="false">https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/</string>
     <string name="THEME_CHANGED" translatable="false">theme-changed</string>
     <string name="PREFS_FOLLOW_SYSTEM_THEME" translatable="false">prefs-follow-system-theme</string>
     <string name="PREFS_LAST_SCHOOLS_LIST_UPDATE" translatable="false">prefs-last-schools-list-update</string>
