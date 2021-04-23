@@ -1,8 +1,6 @@
 Lepší rozvrh je rychlejší a přehlednější aplikace pro rozvrh systému Bakaláři. Od studentů, pro studenty.
 
-Jsem student, kterého nebavilo čekat na oficiální aplikaci Bakalářů než se uráčí načíst rozvrh na pomalé školní WiFi, tak jsem to vzal do svých rukou. Lepší rozvrh si Váš rozvrh pamatuje i bez internetu, takže jej ukáže během okamžiku. Jednoduché a srozumitelné rozhraní usnadňuje orientaci mezi týdny a díky trvalému upozornění se Vaší další hodinu dozvíte už ze zamčené obrazovky!
-
-Celá aplikace je svobodný software s otevřeným zdrojovým kódem. Pokud chcete navrhnou novou funkci, podívat se, jak všechno funguje nebo umíte programovat a chcete aplikaci vylepšit, navštivte GitLab https://gitlab.com/vitSkalicky/lepsi-rozvrh
+Jsem student, kterého nebavilo čekat na oficiální aplikaci Bakalářů než se uráčí načíst rozvrh na pomalé školní WiFi, tak jsem to vzal do vlastních rukou. Lepší rozvrh si Váš rozvrh pamatuje i bez internetu, takže jej ukáže okamžitě. Jednoduché a srozumitelné rozhraní usnadňuje orientaci mezi týdny a díky trvalému upozornění se učebnu Vaši další hodinu dozvíte už ze zamčené obrazovky!
 
 Hlavní funkce:
 • Velmi rychlé zobrazení rozvrhu — Kombinuje offline a online data, aby se rozvrh zobrazil do vteřiny.
@@ -12,3 +10,8 @@ Hlavní funkce:
 • Přehledné rozhraní — Snadné a rychlé přepínání mezi týdny.
 • Motivy — světlý, tmavý nebo Váš vlastní.
 • Svobodný software — Žádné reklamy, žádné špehování, zdarma a navždy.
+
+Nemáte rádi žlutou barvu? Nevadí! V aplikaci můžete všchny barvy změnit nebo použít nějaký z motivů na https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/
+
+Celá aplikace je svobodný software s otevřeným zdrojovým kódem. Pokud chcete navrhnou novou funkci, podívat se, jak všechno funguje nebo umíte programovat a chcete aplikaci vylepšit, navštivte GitLab https://gitlab.com/vitSkalicky/lepsi-rozvrh
+

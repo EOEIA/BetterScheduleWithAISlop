@@ -6,6 +6,8 @@
     alt="Get it on F-Droid"
     height="80">](https://f-droid.org/packages/cz.vitskalicky.lepsirozvrh)
 
+[Webová stránka](https://vitskalicky.gitlab.io/lepsi-rozvrh) / [Webpage](https://vitskalicky.gitlab.io/lepsi-rozvrh/en)
+
 # Lepší rozvrh
 
 Rychlejší a přehlednější klient pro rozvrh systému Bakaláři. Aplikaci jsem vytvořil,
@@ -19,7 +21,7 @@ aplikace.
 - Trvalé upozornění — Kvůli další hodině už aplikaci ani nemusíte otevírat.
 - Stylový widget — Další hodina nebo přehled celého dne vždy na domovské obrazovce.
 - Přehledné rozhraní — Snadné a rychlé přepínání mezi týdny.
-- Motivy - světlý, tmavý nebo Váš vlastní.
+- Motivy - světlý, tmavý nebo Váš vlastní. Další motivy najdete na [https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/](https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/)
 - Svobodný software — Žádné reklamy, žádné špehování, zdarma a navždy.
 
 ## Licence
@@ -43,7 +45,7 @@ because I am annoyed by the slowness of the the official app.
 - Persistent notification — You don't have to open the app to see next lesson any more.
 - Beautiful widget — The next lesson or overview of the entire day always on your home screen.
 - Simple interface — Easy switching between weeks.
-- Themes - light, dark or your very own custom theme.
+- Themes - light, dark or your very own custom theme. Find more themes at [https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/](https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/)
 - Free and open source software — No ads, no spying, free, forever.
 
 ## Licence
