@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     def getGitHash = { ->
@@ -10,13 +12,30 @@ android {
         }
         return stdout.toString().trim()
     }
+
+    // Try reading secrets from file
+    def secretsPropertiesFile = rootProject.file("secrets.properties")
+    def secretProperties = new Properties()
+
+    if (secretsPropertiesFile.exists()) {
+        secretProperties.load(new FileInputStream(secretsPropertiesFile))
+    }
+    // Otherwise read from environment variables, this happens in CI
+    else {
+        secretProperties.setProperty("signing_keystore_location", "${System.getenv('signing_keystore_location')}")
+        secretProperties.setProperty("signing_keystore_password", "${System.getenv('signing_keystore_password')}")
+        secretProperties.setProperty("signing_key_alias", "${System.getenv('signing_key_alias')}")
+        secretProperties.setProperty("signing_key_password", "${System.getenv('signing_key_password')}")
+    }
+
+
     compileSdkVersion 29
     defaultConfig {
         applicationId "cz.vitskalicky.lepsirozvrh"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 19
-        versionName "1.7.3"
+        versionCode 25
+        versionName "1.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "GitHash", "\"${getGitHash()}\""
         /**
@@ -25,32 +44,46 @@ android {
          */
         buildConfigField "Boolean", "ALLOW_SENTRY", "false"
         multiDexEnabled true
+        //changes apk name
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = "Lepší rozvrh v${versionName.replace('.','-')}.apk"
+            }
+        }
+    }
+    signingConfigs {
+        release {
+            storeFile file(secretProperties.getProperty("signing_keystore_location"))
+            storePassword secretProperties.getProperty("signing_keystore_password")
+            keyAlias secretProperties.getProperty("signing_key_alias")
+            keyPassword secretProperties.getProperty("signing_key_password")
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         debug {
             debuggable true
             buildConfigField "Boolean", "ALLOW_SENTRY", "false"
+            versionNameSuffix ".debug_${getGitHash()}"
         }
     }
     flavorDimensions "version"
     productFlavors {
         /**
-         * For almost anything.
-         *
-         * // it is named "defalt" because "default" is a keyword.
-         */
-        defalt {
+         * Use this flavour.
+        */
+        development {
             dimension "version"
         }
         /**
-         * For official fdroid releases only. Allows crash reports using Sentry, which is managed by Vít Skalický.
+         * For official releases only (f-droid and github/gitlab). Allows crash reports using Sentry, which is managed by Vít Skalický.
          * Crashes from your testing are not welcome there.
          */
-        fdroid {
+        official {
             dimension "version"
             buildConfigField "Boolean", "ALLOW_SENTRY", "true"
         }
@@ -59,15 +92,19 @@ android {
          *  Allows crash reports using Sentry, which is managed by Vít Skalický.
          *  Crashes from your testing are not welcome there.
          */
-        play{
+        play {
             dimension "version"
             buildConfigField "Boolean", "ALLOW_SENTRY", "true"
         }
     }
 
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
     lintOptions {
         checkReleaseBuilds false
@@ -89,36 +126,39 @@ licenseReport {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.android.support:multidex:1.0.3'
-    implementation 'com.android.volley:volley:1.1.1'
-    testImplementation 'junit:junit:4.13-beta-3'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'org.simpleframework:simple-xml:2.7.1'
-    implementation 'joda-time:joda-time:2.10.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3"
+    implementation 'androidx.fragment:fragment-ktx:1.3.2'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    implementation 'joda-time:joda-time:2.10.8'
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation 'io.sentry:sentry-android:1.7.28'
-    implementation 'org.slf4j:slf4j-nop:1.7.29'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+    implementation 'org.slf4j:slf4j-nop:1.7.30'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.12.2'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2'
     implementation 'com.jaredrummler:cyanea:1.0.2'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-jackson:2.1.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
+    implementation "androidx.paging:paging-runtime-ktx:2.1.2"
 
-    def room_version = "2.2.5"
+    def room_version = "2.2.6"
 
     implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
 
-    def paging_version = "2.1.2"
-
-    implementation "androidx.paging:paging-runtime:$paging_version"
-
-    playImplementation 'com.android.billingclient:billing:2.2.1'
+    playImplementation 'com.android.billingclient:billing:3.0.3'
 
 }

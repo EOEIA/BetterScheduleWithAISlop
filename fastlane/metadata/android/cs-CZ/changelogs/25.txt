@@ -1,0 +1,2 @@
+- Zjednodušeno přihlašování
+- Velké změny "pod pokličkou" - aplikace je nyní rychlejší a spolehlivější.

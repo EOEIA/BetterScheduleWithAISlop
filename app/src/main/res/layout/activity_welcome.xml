@@ -43,7 +43,6 @@
 
     <Button
         android:id="@+id/buttonStart"
-        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -60,20 +59,21 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:checked="true"
-        android:text="@string/send_crash_desc"
+        android:text="@string/welcome_send_crash"
         app:layout_constraintBottom_toTopOf="@+id/buttonStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/buttonPrivacyPolicy"
-        style="@style/Widget.AppCompat.Button.Borderless"
+    <TextView
+        android:id="@+id/textViewPrivacyPolicy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginBottom="8dp"
-        android:text="@string/privacy_policy"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/buttonStart"
+        tools:text="privacy policy link" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

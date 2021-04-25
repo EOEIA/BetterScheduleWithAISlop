@@ -9,6 +9,13 @@
             android:entries="@array/themes_entries"
             android:entryValues="@array/themes_values"
             android:icon="@drawable/ic_palette_black_24dp"/>
+        <Preference
+            android:title="@string/more_themes"
+            android:icon="@drawable/ic_baseline_add_24">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="@string/MORE_THEMES_LINK" />
+        </Preference>
         <Preference android:title="@string/support_this_app"
             android:key="@string/PREFS_DONATE"
             android:summary="@string/support_this_app_desc"

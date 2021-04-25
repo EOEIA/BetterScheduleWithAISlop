@@ -6,6 +6,8 @@
     alt="Get it on F-Droid"
     height="80">](https://f-droid.org/packages/cz.vitskalicky.lepsirozvrh)
 
+[Webová stránka](https://vitskalicky.gitlab.io/lepsi-rozvrh) / [Webpage](https://vitskalicky.gitlab.io/lepsi-rozvrh/en)
+
 # Lepší rozvrh
 
 Rychlejší a přehlednější klient pro rozvrh systému Bakaláři. Aplikaci jsem vytvořil,
@@ -19,27 +21,17 @@ aplikace.
 - Trvalé upozornění — Kvůli další hodině už aplikaci ani nemusíte otevírat.
 - Stylový widget — Další hodina nebo přehled celého dne vždy na domovské obrazovce.
 - Přehledné rozhraní — Snadné a rychlé přepínání mezi týdny.
-- Motivy - světlý, tmavý nebo Váš vlastní.
+- Motivy - světlý, tmavý nebo Váš vlastní. Další motivy najdete na [https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/](https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/)
 - Svobodný software — Žádné reklamy, žádné špehování, zdarma a navždy.
-
-## Testovací server
-
-Pokud nemáte přístup k serveru Bakalářů, můžete použít [jednoduchý testovací server](https://github.com/vitSkalicky/lepsi-rozvrh-test-server). Stačí zadat následující přihlašovací údaje:
-
-- Přihlašovací jméno: cokoliv
-- Heslo: cokoliv
-- Adresa serveru: [https://lepsi-rozvrh-test-server.herokuapp.com/](https://lepsi-rozvrh-test-server.herokuapp.com/)
 
 ## Licence
 
-Lepší rozvrh je *[svobodný software][1]* licencovaný pod licencí [GPLv3][2], což znamená, že
+Lepší rozvrh je *svobodný software* (free and open source software) licencovaný pod licencí [GPLv3][1], což znamená, že
 
 - můžete aplikaci používat jakkoliv chcete
 - studovat zdrojový kód a upravovat ho jakkoliv chcete
 - sdílet s kýmkoliv chcete
 - šířit vaše úpravy, ale musíte zachovat licenci (aby se uchovala svoboda této aplikace)
-
-Pokud se chcete dozvědět více o tom, co *svobodný software* znamená a jaké má výhody, přečtěte si jeho [definici][1].
 
 # Better schedule
 
@@ -53,26 +45,16 @@ because I am annoyed by the slowness of the the official app.
 - Persistent notification — You don't have to open the app to see next lesson any more.
 - Beautiful widget — The next lesson or overview of the entire day always on your home screen.
 - Simple interface — Easy switching between weeks.
-- Themes - light, dark or your very own custom theme.
+- Themes - light, dark or your very own custom theme. Find more themes at [https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/](https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/)
 - Free and open source software — No ads, no spying, free, forever.
-
-## Testing server
-
-If you don't have access to any Bakaláři server you can use a [simple testing server](https://github.com/vitSkalicky/lepsi-rozvrh-test-server). Just enter the following credentials:
-
-- User name: anything
-- Password: anything
-- Server address: [https://lepsi-rozvrh-test-server.herokuapp.com/](https://lepsi-rozvrh-test-server.herokuapp.com/)
 
 ## Licence
 
-Better Schedule is a *[free software][3]* (not just a freeware) licensed under [GPLv3][2].
+Better Schedule is a *free and open source software* (not just a freeware) licensed under [GPLv3][1].
 
 # Screenshots
 
-<img src="fastlane/metadata/android/en/images/phoneScreenshots/screenshot%201.png" width="500px">
-<img src="fastlane/metadata/android/en/images/phoneScreenshots/screenshot%202.png" width="500px">
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1_en-US.png" width="500px">
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2_en-US.png" width="500px">
 
-[1]: https://www.gnu.org/philosophy/free-sw.cs.html
-[2]: https://www.gnu.org/licenses/gpl-3.0.en.html
-[3]: https://www.gnu.org/philosophy/free-sw.en.html
+[1]: https://www.gnu.org/licenses/gpl-3.0.en.html
