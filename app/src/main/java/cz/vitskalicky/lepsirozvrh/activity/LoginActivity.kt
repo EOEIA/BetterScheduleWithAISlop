@@ -129,7 +129,7 @@ class LoginActivity : BaseActivity() {
             return
         }
         lifecycleScope.launch {
-            val result = (applicationContext as MainApplication).login.firstLogin(url, tilUsername.editText!!.text.toString(), tilPassword.editText!!.text.toString())
+            val result = (applicationContext as MainApplication).login.firstLogin(url, tilUsername.editText!!.text.toString(), tilPassword.editText!!.text.toString(), viewModel.isManualUrl)
 
             if (result == LoginResult.SUCCESS) {
                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
