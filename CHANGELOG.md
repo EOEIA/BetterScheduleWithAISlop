@@ -1,5 +1,15 @@
 # Seznam změn / Changelog
 
+## 1.8 (25. 4 2021)
+
+- Zjednodušeno přihlašování
+- Velké změny "pod pokličkou" - aplikace je nyní rychlejší a spolehlivější.
+
+---
+
+- Improved login screen
+- Big changes under the hood - app is now faster and more reliable.
+
 ## 1.7.3 (12. 9. 2020)
 
 - Opravy chyb

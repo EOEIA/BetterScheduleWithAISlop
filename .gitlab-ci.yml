@@ -55,8 +55,8 @@ manualContainer:
   after_script:
     - rm -f android-signing-keystore.keystore || true
     # finds all outputs and extracts their verison name and code to text file next to them
-    - find app/build/outputs/apk -name "output.json" -execdir bash -c "jq -r '.[0].apkData.versionCode' {} > ./version_code.txt" \;
-    - find app/build/outputs/apk -name "output.json" -execdir bash -c "jq -r '.[0].apkData.versionName' {} > ./version_name.txt" \;
+    - find app/build/outputs/apk -name "output-metadata.json" -execdir bash -c "jq -r '.elements|first|.versionCode' {} > ./version_code.txt" \;
+    - find app/build/outputs/apk -name "output-metadata.json" -execdir bash -c "jq -r '.elements|first|.versionName' {} > ./version_name.txt" \;
   artifacts:
     paths:
       - app/build/outputs
