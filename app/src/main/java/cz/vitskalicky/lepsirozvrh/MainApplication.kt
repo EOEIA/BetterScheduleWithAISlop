@@ -332,6 +332,7 @@ class MainApplication : MultiDexApplication() {
             if (!SharedPrefs.contains(this, SharedPrefs.SENTRY_ID) || SharedPrefs.getString(this, SharedPrefs.SENTRY_ID).isEmpty()) {
                 SharedPrefs.setString(this, SharedPrefs.SENTRY_ID, "android:" + java.lang.Long.toHexString(Random().nextLong()))
             }
+            Sentry.getContext().addExtra("build variant", BuildConfig.FLAVOR + " " + BuildConfig.BUILD_TYPE)
             Sentry.getContext().user = User(SharedPrefs.getString(this, SharedPrefs.SENTRY_ID), null, null, null)
         } else {
             diableSentry()
