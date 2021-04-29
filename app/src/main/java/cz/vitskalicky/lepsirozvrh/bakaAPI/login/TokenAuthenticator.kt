@@ -21,7 +21,6 @@ class TokenAuthenticator(val app: MainApplication) : Authenticator, Interceptor 
         }
         val usedAccessToken: String? = origRequest.header("Authorization")?.removePrefix("Bearer ")
         synchronized(app) {
-            //todo debug random logout
             var currentAccessToken: String = sprefs.getString(SharedPrefs.ACCEESS_TOKEN, null) ?: ""
             if (usedAccessToken == currentAccessToken) {
                 val refreshResult: Login.LoginResult = runBlocking {
@@ -52,11 +51,13 @@ class TokenAuthenticator(val app: MainApplication) : Authenticator, Interceptor 
     data class Retried(val count: Int)
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token: String? = runBlocking {
-            try {
-                app.login.getAccessToken()
-            } catch (_: LoginRequiredException) {
-                null
+        val token: String? = synchronized(app){
+            runBlocking {
+                try {
+                    app.login.getAccessToken()
+                } catch (_: LoginRequiredException) {
+                    null
+                }
             }
         }
         if (!token.isNullOrBlank()) {
