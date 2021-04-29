@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.fasterxml.jackson.databind.JsonMappingException
+import cz.vitskalicky.lepsirozvrh.KotlinUtils
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
@@ -58,18 +59,24 @@ class SchoolsListViewModel(
         }catch (e: JsonMappingException){
             val f = RuntimeException("Failed to parse schools list", e)
             app().sendReport(f)
-            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.connection_failed)
+            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.schools_info_connection_failed)
             null
         }catch (e : IOException){
-            statusLD.value = StatusInfo.error(Specification.ERROR_UNREACHABLE, R.string.connection_failed)
+            statusLD.value = StatusInfo.error(Specification.ERROR_UNREACHABLE, R.string.schools_info_connection_failed)
+            if (!KotlinUtils.isOnline()){
+                statusLD.value = StatusInfo.error(Specification.ERROR_UNREACHABLE, R.string.no_internet)
+            }
             null
         }catch (e: HttpException){
-            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.connection_failed)
+            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.schools_info_connection_failed)
+            if (!KotlinUtils.isOnline()){
+                statusLD.value = StatusInfo.error(Specification.ERROR_UNREACHABLE, R.string.no_internet)
+            }
             null
         }catch (e: Exception){
-            val f = RuntimeException("Failed to load schools list", e)
+            val f = RuntimeException("Failed to load schools list: ${e.message}", e)
             app().sendReport(f)
-            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.connection_failed)
+            statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.schools_info_connection_failed)
             null
         }
 
@@ -81,7 +88,7 @@ class SchoolsListViewModel(
             }else{
                 val f = RuntimeException("Schools list is empty")
                 app().sendReport(f)
-                statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.connection_failed)
+                statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.schools_info_connection_failed)
             }
         }
     }
