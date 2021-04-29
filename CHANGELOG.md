@@ -1,6 +1,14 @@
 # Seznam změn / Changelog
 
-## 1.8 (25. 4 2021)
+## 1.8.1 (29. 4. 2021)
+
+- Drobné opravy
+
+---
+
+- Minor fixes
+
+## 1.8 (25. 4. 2021)
 
 - Zjednodušeno přihlašování
 - Velké změny "pod pokličkou" - aplikace je nyní rychlejší a spolehlivější.
