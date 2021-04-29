@@ -112,11 +112,11 @@ createRelease:
     - version_code=$(cat app/build/outputs/apk/official/release/version_code.txt)
     - version_name=$(cat app/build/outputs/apk/official/release/version_name.txt)
     
-    - echo $(cat fastlane/metadata/android/cs-CZ/changelogs/$version_code.txt) > description.txt
+    - cat fastlane/metadata/android/cs-CZ/changelogs/$version_code.txt > description.txt
     - echo "" >> description.txt
     - echo "-----" >> description.txt
     - echo "" >> description.txt
-    - echo $(cat fastlane/metadata/android/en-US/changelogs/$version_code.txt) >> description.txt
+    - cat fastlane/metadata/android/en-US/changelogs/$version_code.txt >> description.txt
 
     - cd app/build/outputs/apk/official/release/
     - apk_name=$(ls *.apk)

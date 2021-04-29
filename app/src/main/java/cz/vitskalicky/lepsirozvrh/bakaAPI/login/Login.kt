@@ -3,6 +3,7 @@ package cz.vitskalicky.lepsirozvrh.bakaAPI.login
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
@@ -28,6 +29,7 @@ import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.IOException
+import kotlin.math.min
 import kotlin.reflect.KClass
 
 
@@ -82,7 +84,7 @@ class Login(val app: MainApplication) {
         }
     }
 
-    suspend fun handleException(e: Exception, whichAPI: String): LoginResult{
+    suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResult{
         when (e) {
             is HttpException -> {
                 //probably could not parse the response
@@ -106,8 +108,16 @@ class Login(val app: MainApplication) {
                     //wrong password username or refresh token
                     return WRONG_LOGIN
                 }
+                if (isUrlManual){
+                    // do not report if user has entered the url manually
+                    return UNEXPECTED_RESPONSE
+                }
+                //avoid reporting 404s with html response
+                if (e.code() == 404 && rawBody?.substring(0, min(100, rawBody?.length ?: 0))?.toLowerCase()?.contains("html") == true){
+                    return UNREACHABLE
+                }
                 //unexpected - report
-                Sentry.capture(IOException("Unexpected $whichAPI API response. Raw response: \'${rawBody}\' Message of exception while parsing (which is also set as cause of this exception): \'${parseException?.message}\'", parseException))
+                app.sendReport(IOException("Unexpected $whichAPI API response. Url: \'$url\'. Raw response: \'${rawBody}\' Message of exception while parsing (which is also set as cause of this exception): \'${parseException?.message}\'", parseException))
                 return UNEXPECTED_RESPONSE
             }
             is IOException ->
@@ -151,9 +161,9 @@ class Login(val app: MainApplication) {
         }
     }
 
-    suspend fun firstLogin(url: String, username: String, password: String): LoginResult{
+    suspend fun firstLogin(url: String, username: String, password: String, isUrlManual: Boolean): LoginResult{
+        val url: String = unifyUrl(url)
         try {
-            val url: String = unifyUrl(url)
             val webservice = getUnloggedRetrofit(url).create(LoginWebservice::class.java)
 
             val response: LoginResponse = webservice.firstLogin(username, password)
@@ -170,11 +180,11 @@ class Login(val app: MainApplication) {
 
             return SUCCESS
         }catch (e: HttpException){
-            return handleException(e, "login")
+            return handleException(e, "login", url, isUrlManual)
         }catch (e: IOException){
-            return handleException(e, "login")
+            return handleException(e, "login", url, isUrlManual)
         }catch (e: IllegalArgumentException){
-            return handleException(e, "login")
+            return handleException(e, "login", url, isUrlManual)
         }
     }
 

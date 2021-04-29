@@ -29,12 +29,12 @@
     <string name="enter_password">Enter your password</string>
     <string name="enter_school">Select your school</string>
     <string name="search">Search or enter URL address…</string>
-    <string name="connection_failed">Could not connect to server</string>
+    <string name="schools_info_connection_failed">Downloading school list failed</string>
     <string name="loading_schools_info">Loading schools info…</string>
     <string name="schools_retry">Retry</string>
-    <string name="use_url">Enter address manually</string>
+    <string name="use_url">Enter URL address manually</string>
     <string name="use_url_dialog_title">Enter server URL address</string>
-    <string name="use_url_dialog_hint">https://bakalari.school.com/bakaweb</string>
+    <string name="use_url_dialog_hint">e.g.: https://bakalari.school.com/bakaweb</string>
 
     <!-- Info messages -->
     <string name="info_last_week">Last week</string>
