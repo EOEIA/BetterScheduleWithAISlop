@@ -186,7 +186,7 @@ E/AndroidRuntime:     at android.os.Handler.dispatchMessage(Handler.java:99)
     }
 
     private fun showUseUrl(): Boolean {
-        return queryText.isNotBlank()
+        return queryText.isNotBlank() || status.status == ERROR
     }
 
     override fun getItemCount(): Int {

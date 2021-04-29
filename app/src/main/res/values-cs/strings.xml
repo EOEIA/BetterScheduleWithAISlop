@@ -35,7 +35,7 @@
     <string name="schools_retry">Zkusit znovu</string>
     <string name="use_url">Zadat URL adresu ručně</string>
     <string name="use_url_dialog_title">Zadejte URL adresu serveru</string>
-    <string name="use_url_dialog_hint">https://bakalari.skola.cz/bakaweb</string>
+    <string name="use_url_dialog_hint">např.: https://bakalari.skola.cz/bakaweb</string>
 
     <string name="info_last_week">Minulý týden</string>
     <string name="info_this_week">Tento týden</string>
