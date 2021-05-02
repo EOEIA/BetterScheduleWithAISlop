@@ -35,7 +35,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     fun getCurrentWeekLD(): LiveData<RozvrhRelated>{
         if (currentWeekLD.value == null){
             scope.launch {
-                currentWeekLD.value = getRozvrh(Utils.getCurrentMonday(), foreground = false)
+                currentWeekLD.value = getRozvrh(Utils.getDisplayWeekMonday(application), foreground = false)
             }
         }
         return currentWeekLD
