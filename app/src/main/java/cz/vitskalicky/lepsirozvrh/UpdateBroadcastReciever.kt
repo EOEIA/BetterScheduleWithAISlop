@@ -25,6 +25,16 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
             application.scheduleUpdate(application.notificationState.offsetResetTime)
         }
         GlobalScope.launch {
+            if (application.repository.refreshNeeded(Utils.getCurrentMonday(), false)){
+                //If the rozvrh needs to be refresh, then the network call might take a long time
+                // and there would be a significant delay between user clicking "next week"
+                // in notification and any UI response.
+                // So we display the cached one immediately.
+                val cachedRozvrh = application.repository.getCachedRozvrh(Utils.getCurrentMonday());
+                if (cachedRozvrh != null){
+                    PermanentNotification.update(cachedRozvrh,application)
+                }
+            }
             val rozvrh: RozvrhRelated? = application.repository.getRozvrh(Utils.getCurrentMonday(), false)
             PermanentNotification.update(rozvrh,application)
             WidgetProvider.updateAll(rozvrh, context)

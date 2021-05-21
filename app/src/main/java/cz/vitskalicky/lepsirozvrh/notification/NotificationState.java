@@ -21,7 +21,7 @@ public class NotificationState {
     private int offset;
     private LocalDateTime offsetTime;
 
-    private static final int RESET_OFFSET_AFTER_MINUTES = 5;
+    private static final int RESET_OFFSET_AFTER_MINUTES = 1;
 
     public NotificationState(Context context) {
         this.context = context;
