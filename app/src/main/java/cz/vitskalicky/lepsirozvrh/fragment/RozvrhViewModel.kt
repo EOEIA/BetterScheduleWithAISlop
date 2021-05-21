@@ -37,7 +37,7 @@ class RozvrhViewModel(
     fun getDisplayLD(): LiveData<RozvrhRelated> = displayLD
     fun getStatusLD(): LiveData<StatusInfo> = statusLD
 
-    var monday: LocalDate = Utils.getCurrentMonday()
+    var monday: LocalDate = Utils.getDisplayWeekMonday(application)
     private set
 
     /**
@@ -48,7 +48,7 @@ class RozvrhViewModel(
     private fun weekToMonday(week: Int): LocalDate = if(week == PERM) {
         Rozvrh.PERM
     }else{
-        Utils.getCurrentMonday().plusWeeks(week)
+        Utils.getDisplayWeekMonday(getApplication()).plusWeeks(week)
     }
 
     /**

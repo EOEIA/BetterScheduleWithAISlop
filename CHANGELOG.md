@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 1.8.2 (21. 5. 2021)
+
+- Další drobné opravy
+
+---
+
+- More minor fixes
+
 ## 1.8.1 (29. 4. 2021)
 
 - Drobné opravy

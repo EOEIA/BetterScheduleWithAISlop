@@ -35,7 +35,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     fun getCurrentWeekLD(): LiveData<RozvrhRelated>{
         if (currentWeekLD.value == null){
             scope.launch {
-                currentWeekLD.value = getRozvrh(Utils.getCurrentMonday(), foreground = false)
+                currentWeekLD.value = getRozvrh(Utils.getDisplayWeekMonday(application), foreground = false)
             }
         }
         return currentWeekLD
@@ -69,6 +69,9 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         }
     }
 
+    /**
+     * Loads the "freshest" rozvrh available and returns it.
+     */
     suspend fun getRozvrh(rozvrhId: LocalDate, foreground: Boolean): RozvrhRelated?{
         val monday: LocalDate = Utils.getWeekMonday(rozvrhId)
         try {
@@ -81,6 +84,14 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
             }
         }
         return db.rozvrhDao().loadRozvrhRelated(monday)
+    }
+
+    /**
+     * lads the cached rozvrh or `null` if not available. Disadvantage: it may not be very fresh; usually [getRozvrh] is better.
+     */
+    suspend fun getCachedRozvrh(rozvrhId: LocalDate): RozvrhRelated?{
+        val monday: LocalDate = Utils.getWeekMonday(rozvrhId);
+        return db.rozvrhDao().loadRozvrhRelated(monday);
     }
 
     fun getRozvrhStatusLiveData(rozvrhId: LocalDate): LiveData<StatusInfo>{
@@ -115,7 +126,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         return time
     }
 
-    private suspend fun refreshNeeded(rozvrhId: LocalDate, foreground: Boolean = false): Boolean{
+    suspend fun refreshNeeded(rozvrhId: LocalDate, foreground: Boolean = false): Boolean{
         if (statusStr[rozvrhId].status == StatusInfo.Status.ERROR){
             return true
         }

@@ -120,24 +120,27 @@ public class Billing implements PurchasesUpdatedListener {
         boolean oldsmall = smallPurchased;
         boolean oldbig = bigPurchased;
 
-        Purchase.PurchasesResult purchases = billingClient.queryPurchases(BillingClient.SkuType.INAPP);
-        if (purchases.getPurchasesList() != null) {
-            for (Purchase item : purchases.getPurchasesList()) {
-                handlePurchase(item);
+        billingClient.queryPurchasesAsync(BillingClient.SkuType.INAPP, (billingResult, purchases) -> {
+            if (purchases != null) {
+                for (Purchase item : purchases) {
+                    handlePurchase(item);
+                }
             }
-        }
-        if (oldsmall != isSmallPurchased() || oldbig != isBigPurchased()){
-            notifyOnPurchaseListeners();
-        }
+            if (oldsmall != isSmallPurchased() || oldbig != isBigPurchased()){
+                notifyOnPurchaseListeners();
+            }
+        });
     }
 
     private void handlePurchase(Purchase p) {
         if (p.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
-            if (SKU_SMALL_DONATION.equals(p.getSku())) {
-                smallPurchased = true;
-            }
-            if (SKU_BIG_DONATION.equals(p.getSku())) {
-                bigPurchased = true;
+            for (String sku : p.getSkus()) {
+                if (SKU_SMALL_DONATION.equals(sku)) {
+                    smallPurchased = true;
+                }
+                if (SKU_BIG_DONATION.equals(sku)) {
+                    bigPurchased = true;
+                }
             }
 
             if (!p.isAcknowledged()) {

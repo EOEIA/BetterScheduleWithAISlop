@@ -1,6 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3
 
 import android.content.Context
+import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
@@ -23,6 +24,8 @@ object RozvrhConverter {
             "WorkDay" to R.string.day_type_workday,
             "Holiday" to R.string.day_type_holiday,
             "Celebration" to  R.string.day_type_celebration,
+            "Weekend" to R.string.day_type_weekend,
+            "DirectorDay" to R.string.day_type_director_day
     )
 
     /**
@@ -121,7 +124,7 @@ object RozvrhConverter {
                         //prevent spam
                         if (sendUnknownDayTypeReport){
                             sendUnknownDayTypeReport = false
-                            Sentry.capture("Unknown day type: ${item.dayType}")
+                            (context.applicationContext as MainApplication).sendReport(java.lang.Exception("[NOT CRITICAL] Unknown day type: ${item.dayType}"));
                         }
                         event = null
                     }else{
@@ -190,22 +193,22 @@ object RozvrhConverter {
                 }
 
                 val lessonGroups = ArrayList<RozvrhGroup>()
-                atom.groupIds?.forEach {
+                atom.groupIds.forEach {
                     groups[it]?.let{
                         lessonGroups.add(RozvrhGroup(it.id, it.name, it.abbrev))
                     }
                 }
 
                 val lessonCycles = ArrayList<RozvrhCycle>()
-                atom.cycleIds?.forEach {
+                atom.cycleIds.forEach {
                     cycles[it]?.let {
                         lessonCycles.add(RozvrhCycle(it.id, it.name, it.abbrev))
                     }
                 }
 
                 val homeworkIds = ArrayList<String>()
-                atom.homeworkIds?.map {
-                    if (it.length > 3 && atom.groupIds != null){
+                atom.homeworkIds.map {
+                    if (it.length > 3){
                         val id = it.substring(2, 4)
                         for (grp in atom.groupIds) {
                             if (grp == id) {

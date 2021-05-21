@@ -234,6 +234,7 @@ class Login(val app: MainApplication) {
         }
         app.rozvrhStatusStore.clear()
         app.clearObjects()
+        app.notificationState.offset = 0
         PermanentNotification.update(null, 0, app)
         WidgetProvider.updateAll(null, app)
     }

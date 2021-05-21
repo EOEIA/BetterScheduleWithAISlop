@@ -224,6 +224,8 @@
     <string name="day_type_workday"></string>
     <string name="day_type_holiday">Prázdniny</string>
     <string name="day_type_celebration">Státní svátek</string>
+    <string name="day_type_weekend">Víkend</string>
+    <string name="day_type_director_day">Ředitelské volno</string>
 
     <string name="app_updated">Aplikace byla aktualizována</string>
     <string name="whats_new">Co je nového</string>
