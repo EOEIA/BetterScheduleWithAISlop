@@ -11,6 +11,7 @@ import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Specification
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import okio.IOException
 import org.joda.time.DateTime
@@ -67,12 +68,14 @@ class SchoolsListViewModel(
                 statusLD.value = StatusInfo.error(Specification.ERROR_UNREACHABLE, R.string.no_internet)
             }
             null
-        }catch (e: HttpException){
+        }catch (e: HttpException) {
             statusLD.value = StatusInfo.error(Specification.ERROR_UNEXPECTED_RESPONSE, R.string.schools_info_connection_failed)
-            if (!KotlinUtils.isOnline()){
+            if (!KotlinUtils.isOnline()) {
                 statusLD.value = StatusInfo.error(Specification.ERROR_UNREACHABLE, R.string.no_internet)
             }
             null
+        }catch (e: CancellationException) {
+            throw e;
         }catch (e: Exception){
             val f = RuntimeException("Failed to load schools list: ${e.message}", e)
             app().sendReport(f)
