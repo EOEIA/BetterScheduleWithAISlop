@@ -224,6 +224,8 @@
     <string name="day_type_workday"></string>
     <string name="day_type_holiday">Holiday</string>
     <string name="day_type_celebration">Public holiday</string>
+    <string name="day_type_weekend">Weekend</string>
+    <string name="day_type_director_day">Free day</string>
 
     <string name="app_updated">App has been updated</string>
     <string name="whats_new">What\'s new</string>
