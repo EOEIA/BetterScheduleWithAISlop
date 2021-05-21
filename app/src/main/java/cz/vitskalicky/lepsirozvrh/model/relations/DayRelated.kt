@@ -93,16 +93,16 @@ data class DayRelated(
         //remove empty blocks at the end and beginning of the day
         val blocksToCheck = blocks.toMutableList()
         while (true){
-            val item = blocksToCheck.last()
-            if (item.lessons.isEmpty()){
+            val item = blocksToCheck.lastOrNull()
+            if (item?.lessons?.isEmpty() == true){
                 blocksToCheck.removeLast()
             }else{
                 break
             }
         }
         while (true){
-            val item = blocksToCheck.first()
-            if (item.lessons.isEmpty()){
+            val item = blocksToCheck.firstOrNull()
+            if (item?.lessons?.isEmpty() == true){
                 blocksToCheck.removeFirst()
             }else{
                 break
