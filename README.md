@@ -24,6 +24,19 @@ aplikace.
 - Motivy - světlý, tmavý nebo Váš vlastní. Další motivy najdete na [https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/](https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/)
 - Svobodný software — Žádné reklamy, žádné špehování, zdarma a navždy.
 
+## Testovací server
+
+Pokud nemáte účet na žádném Bakaláři serveru, můžete Lepší rozvrh vyzkoušet pomocí [testovacího serveru](https://gitlab.com/vitSkalicky/lepis-rozvrh-test-server).
+
+1. Otevřete Lepší rozvrh
+2. Ve výběru školy vyhledejte a vyberte "Testovací server pro Lepší rozvrh"
+3. Přihlašovací jméno: `student`
+4. Heslo je stejné jako přihlašovací jméno
+
+⚠ Testovací server může být velmi pomalý, takže se Vám nejspíše nepovede přihlásit napoprvé. Zároveň Vás přibližně po hodině odhlásí.
+
+Zdrojový kód a podrobnější instrukce k testovacímu serveru najdete zde: [https://gitlab.com/vitSkalicky/lepis-rozvrh-test-server](https://gitlab.com/vitSkalicky/lepis-rozvrh-test-server)
+
 ## Licence
 
 Lepší rozvrh je *svobodný software* (free and open source software) licencovaný pod licencí [GPLv3][1], což znamená, že
@@ -48,6 +61,19 @@ because I am annoyed by the slowness of the the official app.
 - Themes - light, dark or your very own custom theme. Find more themes at [https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/](https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/)
 - Free and open source software — No ads, no spying, free, forever.
 
+## Testing server
+
+If you don't have any Bakaláři account you can try out Better Schedule using the [testing server](https://gitlab.com/vitSkalicky/lepis-rozvrh-test-server).
+
+1. Open Better Schedule
+2. In school picker search and choose "Testovací server pro Lepší rozvrh"
+3. Username: `student`
+4. Password is the same as username
+
+⚠ Testing server may be very slow so you might need several attempts to log in the first time. I also logs you out after roughly an hour.
+
+Source code and more details on the testing server can be found here: [https://gitlab.com/vitSkalicky/lepis-rozvrh-test-server](https://gitlab.com/vitSkalicky/lepis-rozvrh-test-server)
+
 ## Licence
 
 Better Schedule is a *free and open source software* (not just a freeware) licensed under [GPLv3][1].
@@ -56,5 +82,7 @@ Better Schedule is a *free and open source software* (not just a freeware) licen
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1_en-US.png" width="500px">
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2_en-US.png" width="500px">
+
+Více snímků obrazovky naleznete na [webové stránce](https://vitskalicky.gitlab.io/lepsi-rozvrh) / More screenshots can be found on the [webpage](https://vitskalicky.gitlab.io/lepsi-rozvrh/en)
 
 [1]: https://www.gnu.org/licenses/gpl-3.0.en.html
