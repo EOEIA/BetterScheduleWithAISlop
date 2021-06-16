@@ -61,8 +61,10 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                     }
                 }catch (e: Exception){
                     e.printStackTrace()
-                    withContext(Dispatchers.Main){
-                        reportError(e, rozvrhMonday)
+                    withContext(NonCancellable) {
+                        withContext(Dispatchers.Main) {
+                            reportError(e, rozvrhMonday)
+                        }
                     }
                 }
             }
@@ -79,8 +81,10 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                 return fetchAndCache(monday)
             }
         }catch (e: Exception){
-            withContext(Dispatchers.Main){
-                reportError(e, rozvrhId)
+            withContext(NonCancellable) {
+                withContext(Dispatchers.Main) {
+                    reportError(e, rozvrhId)
+                }
             }
         }
         return db.rozvrhDao().loadRozvrhRelated(monday)
@@ -190,7 +194,18 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     }
 
     /**
-     * must run on UI thread
+     * must run on UI thread and **make sure a coroutine is not cancelled too soon**
+     * When switching to UI thread use:
+     * ```
+withContext(NonCancellable) {
+    withContext(Dispatchers.Main) {
+        reportError(e, rozvrhId)
+    }
+}
+    ```
+     * to make sure the coroutine is not cancelled on `withContext(Dispatchers.Main)`, which could
+     * leave [RozvrhStatusStore] stuck on loading state and it would never refresh until full app
+     * restart.
      */
     private fun reportError(e: Exception, rozvrhId: LocalDate) {
         statusStr.isOffline.value = true
