@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 1.8.3 (17. 6. 2021)
+
+- Opraveno nekonečné načítání
+
+---
+
+- Fixed infinite loading
+
 ## 1.8.2 (21. 5. 2021)
 
 - Další drobné opravy
