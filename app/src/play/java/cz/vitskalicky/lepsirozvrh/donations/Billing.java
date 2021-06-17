@@ -162,6 +162,10 @@ public class Billing implements PurchasesUpdatedListener {
 
     public void buySmall(Activity activity) {
         if (!isInitialized()) return;
+        if (smallDetails == null) {
+            Toast.makeText(activity, activity.getString( R.string.purchase_error, "null"), Toast.LENGTH_LONG ).show();
+            return;
+        };
         BillingFlowParams flowParams = BillingFlowParams.newBuilder()
                 .setSkuDetails(smallDetails)
                 .build();
@@ -171,6 +175,10 @@ public class Billing implements PurchasesUpdatedListener {
 
     public void buyBig(Activity activity) {
         if (!isInitialized()) return;
+        if (smallDetails == null) {
+            Toast.makeText(activity, activity.getString( R.string.purchase_error, "null"), Toast.LENGTH_LONG ).show();
+            return;
+        };
         BillingFlowParams flowParams = BillingFlowParams.newBuilder()
                 .setSkuDetails(bigDetails)
                 .build();
