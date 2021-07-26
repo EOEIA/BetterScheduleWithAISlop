@@ -15,7 +15,7 @@
     <string name="password">Heslo</string>
     <string name="school">Škola</string>
     <string name="choose_school">Vybrat</string>
-    <string name="change_school">Změnint</string>
+    <string name="change_school">Změnit</string>
     <string name="no_school_selected">Nevybráno</string>
     <string name="login_button">Přihlásit se</string>
     <string name="login_message">Přihlaste se do systému Bakaláři</string>
@@ -178,7 +178,7 @@
     <string name="welcome_send_crash">Automaticky hlásit chyby v aplikaci vývojářům, aby mohly být opraveny</string>
     <string name="privacy_policy">Zásady ochrany soukromí</string>
     <string name="oss_licences">Open source licence</string>
-    <string name="oss_licences_desc">Zobrazit licence svobodných a open source knihoven</string>
+    <string name="oss_licences_desc">Zobrazit licence open source knihoven</string>
     <string name="app_version">Verze aplikace</string>
     <string name="email_message">Zde jsou podrobnosti o verzi aplikace. Prosím, neodstraňujte je - jsou nezbytné k řešení většiny chyb a problémů.</string>
     <string name="send_email">Odeslat email…</string>
