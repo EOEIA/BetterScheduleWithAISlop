@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 1.8.4 (21. 9. 2021)
+
+- Opravena chyba při importu motivu
+
+---
+
+- Fix theme import
+
 ## 1.8.3 (17. 6. 2021)
 
 - Opraveno nekonečné načítání

@@ -1,0 +1,1 @@
+- Opravena chyba při importu motivu
