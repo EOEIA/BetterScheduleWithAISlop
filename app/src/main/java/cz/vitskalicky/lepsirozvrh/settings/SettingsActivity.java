@@ -97,9 +97,6 @@ public class SettingsActivity extends BaseActivity implements Utils.RecreateWith
                 clearBackstack();
                 showThemeSettings();
                 showImportFragment();
-                if (!donations.isSponsor()){
-                    donations.showDialog();
-                }
                 importThemeFragment.setString(data);
                 intent.putExtra("ignore",true);
             }
@@ -208,7 +205,7 @@ public class SettingsActivity extends BaseActivity implements Utils.RecreateWith
             themeSettingsFragment.updateDonationEnability();
         }
         if (importThemeFragment != null){
-            importThemeFragment.updateDonationsStatus();
+            //importThemeFragment.updateDonationsStatus();
         }
     }
 

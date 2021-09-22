@@ -116,8 +116,12 @@ class Login(val app: MainApplication) {
                 if (e.code() == 404 && rawBody?.substring(0, min(100, rawBody?.length ?: 0))?.toLowerCase()?.contains("html") == true){
                     return UNREACHABLE
                 }
+                //avoid reporting Internal server errors
+                if (e.code() in 500..599 && rawBody?.substring(0, min(100, rawBody?.length ?: 0))?.toLowerCase()?.contains("html") == true){
+                    return UNREACHABLE
+                }
                 //unexpected - report
-                app.sendReport(IOException("Unexpected $whichAPI API response. Url: \'$url\'. Raw response: \'${rawBody}\' Message of exception while parsing (which is also set as cause of this exception): \'${parseException?.message}\'", parseException))
+                app.sendReport(IOException("Unexpected $whichAPI API response. Url: \'$url\'. Raw response: \'${rawBody}\'. Response code: \'${e.code()}\'. Message of exception while parsing (which is also set as cause of this exception): \'${parseException?.message}\'", parseException))
                 return UNEXPECTED_RESPONSE
             }
             is IOException ->

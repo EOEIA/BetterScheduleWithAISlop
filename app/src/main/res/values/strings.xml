@@ -52,11 +52,11 @@
     <string name="teacher">Teacher</string>
     <string name="parent">Parent</string>
     <string name="logout">Logout</string>
-    <string name="look_and_behaviour">App look &amp; behaviour</string>
+    <string name="look_and_behaviour">App look &amp; behavior</string>
     <string name="info_line">Info-line</string>
     <string name="info_line_desc">Show information line</string>
     <string name="switch_to_next_week">Switch to the next week</string>
-    <string name="center_to_current_lesson">Center schedule to the current lesson</string>
+    <string name="center_to_current_lesson">Jump to the current lesson</string>
     <string name="notification">Persistent notification</string>
     <string name="notification_desc">Shows a silent notification with your next lesson</string>
     <string name="notification_detials">Persistent notification informs you about your current or next lesson during school. It begins to show the first lesson 1 hour before it starts and then switches to the next one always 10 minutes before the current lesson ends. After the school finishes the notification disappears.\n\nThis feature can be disabled in the settings.</string>
@@ -78,7 +78,7 @@
 
     <!-- Theme preferences -->
     <string name="app_theme_screen">Theme settings</string>
-    <string name="app_theme_screen_desc">Customize colours of this app</string>
+    <string name="app_theme_screen_desc">Customize colors of this app</string>
 
     <string name="theme_general_settings">General settings</string>
     <string name="app_theme">App theme</string>
@@ -101,12 +101,12 @@
     <string name="import_edittext_hint">Paste here</string>
 
     <string name="theme_custom_settings">Custom theme settings</string>
-    <string name="primary_color">Primary colour</string>
+    <string name="primary_color">Primary color</string>
     <string name="primary_color_desc">App bar, buttons,…</string>
-    <string name="accent_color">Accent colour</string>
+    <string name="accent_color">Accent color</string>
     <string name="accent_color_desc">Switches, checkboxes,…</string>
-    <string name="background_color">Background colour</string>
-    <string name="cells_background">Cell fill colour</string>
+    <string name="background_color">Background color</string>
+    <string name="cells_background">Cell fill color</string>
     <string name="cell_background">Fill</string>
     <string name="cell_primary_t">Primary text</string>
     <string name="cell_primary_t_desc">Subject and day of week abbreviations</string>
@@ -116,29 +116,29 @@
     <string name="cell_room_t_desc">Classroom number</string>
     <string name="type_normal_lesson">Normal lesson</string>
     <string name="type_change">Change</string>
-    <string name="type_change_desc">Lesson cancelled, moved, etc.</string>
+    <string name="type_change_desc">Lesson canceled, moved, etc.</string>
     <string name="type_no_school">No school</string>
     <string name="type_no_school_desc">School trip, museum visit, etc.</string>
     <string name="type_empty">Empty cell</string>
     <string name="type_header">Headers</string>
     <string name="type_header_desc">Day and time cells</string>
     <string name="other">Other</string>
-    <string name="divider_color">Divider colour</string>
+    <string name="divider_color">Divider color</string>
     <string name="divider_width">Divider width</string>
-    <string name="highlight_color">Highlight colour</string>
+    <string name="highlight_color">Highlight color</string>
     <string name="highlight_color_desc">Highlight of current lesson</string>
     <string name="highlight_width">Highlight width</string>
     <string name="infoline_fill">Info-line fill</string>
     <string name="infoline_fill_desc">The little text on the bottom, if enabled</string>
-    <string name="infoline_text_color">Info-line text colour</string>
+    <string name="infoline_text_color">Info-line text color</string>
     <string name="infoline_text_size">Info-line text size</string>
     <string name="customize_less">Customize less details</string>
-    <string name="customize_less_desc">Generates some colours automatically based on provided values</string>
+    <string name="customize_less_desc">Generates some colors automatically based on provided values</string>
     <string name="customize_more">Customize more details</string>
     <string name="customize_more_desc">You choose everything</string>
     <string name="not_a_float_error">Enter a decimal number like 4.2</string>
-    <string name="homework_color">Homework dot colour</string>
-    <string name="homework_color_desc">Colour of the little dot which marks that there is a homework for the lesson</string>
+    <string name="homework_color">Homework dot color</string>
+    <string name="homework_color_desc">Color of the little dot which marks that there is a homework for the lesson</string>
     <string name="homework_size">Homework dot size</string>
 
     <!--These are shown in the lesson details dialog-->
@@ -159,7 +159,7 @@
 
     <string name="next_lesson">Next lesson</string>
     <string name="prev_lesson">Previous lesson</string>
-    <string name="lesson_cancelled">Cancelled</string>
+    <string name="lesson_cancelled">Canceled</string>
     <string name="nothing">No lesson</string>
 
     <string name="close">Close</string>
@@ -177,8 +177,8 @@
     <string name="send_crash_desc">Automatically report crashes to the developers so that they can be fixed</string>
     <string name="welcome_send_crash">Automatically report crashes to the developers so that they can be fixed</string>
     <string name="privacy_policy">Privacy policy</string>
-    <string name="oss_licences">Open source licences</string>
-    <string name="oss_licences_desc">Show licences of free/libre and open source libraries</string>
+    <string name="oss_licences">Open source licenses</string>
+    <string name="oss_licences_desc">Show licenses of open source libraries</string>
     <string name="app_version">App version</string>
     <string name="email_message">These are information about installation of this app. Please don\'t remove them - they are essential for troubleshooting your problem.</string>
     <string name="send_email">Send email…</string>
@@ -198,12 +198,12 @@
     <string name="widget_logged_out">Logged out</string>
     <string name="widget_background">Background</string>
     <string name="widget_transparency">Transparency</string>
-    <string name="widget_autotext">Automatic text colour</string>
-    <string name="widget_text_color">Text colour</string>
+    <string name="widget_autotext">Automatic text color</string>
+    <string name="widget_text_color">Text color</string>
 
     <string name="donate_title">Become a sponsor</string>
     <string name="donate_text1">Support app development and get some bonus features:</string>
-    <string name="donate_bonus_features">- Custom widget colour and transparency\n- Black theme\n- Custom themes\n- Any theme you find on the internet\n- You can share your amazing theme on the internet</string>
+    <string name="donate_bonus_features">- Custom widget color and transparency\n- Black theme\n- Custom themes\n- Any theme you find on the internet\n- You can share your amazing theme on the internet</string>
     <string name="donate_a_little">Donate a little (%s)</string>
     <string name="donate_a_little_no_price">Donate a little</string>
     <string name="donate_more">Donate more (%s)</string>
@@ -216,7 +216,7 @@
     <string name="restore_purchases_desc">Checks purchases on your Google account. Use if you did donate, but bonus features are still locked.</string>
     <string name="purchases_restored">Purchases restored</string>
 
-    <string name="purchase_cancelled">Purchase cancelled by user</string>
+    <string name="purchase_cancelled">Purchase canceled by user</string>
     <string name="purchase_error">Purchase failed (%s)</string>
     <string name="error_code">error %s</string>
 

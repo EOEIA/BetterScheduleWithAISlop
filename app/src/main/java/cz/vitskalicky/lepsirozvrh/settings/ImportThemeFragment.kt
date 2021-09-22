@@ -41,7 +41,6 @@ class ImportThemeFragment : Fragment() {
     private var tvInfo: TextView? = null
     fun init(donations: Donations?) {
         this.donations = donations
-        updateDonationsStatus()
     }
 
     fun setString(preloadedString: String) {
@@ -80,9 +79,14 @@ class ImportThemeFragment : Fragment() {
                 editTextData!!.setText(clipboard.primaryClip!!.getItemAt(0).text)
             }
         }
-        buttonOK!!.setOnClickListener { v: View -> doImport(v) }
+        buttonOK!!.setOnClickListener { v: View ->
+            if (donations?.isSponsor == true){
+                doImport()
+            }else{
+                donations?.showDialog()
+            }
+        }
         buttonClear!!.setOnClickListener { v: View? -> editTextData!!.setText("") }
-        updateDonationsStatus()
         return root
     }
 
@@ -94,7 +98,7 @@ class ImportThemeFragment : Fragment() {
         }
     }
 
-    private fun doImport(v: View) {
+    private fun doImport() {
         AsyncTask.execute {
             var td: ThemeData? = null
             val original = editTextData!!.text.toString().replace("\\s".toRegex(), "") //remove all whitespaces
@@ -145,17 +149,6 @@ class ImportThemeFragment : Fragment() {
                     val s = Snackbar.make(root!!, R.string.import_invalid, Snackbar.LENGTH_LONG)
                     s.show()
                 }
-            }
-        }
-    }
-
-    fun updateDonationsStatus() {
-        if (donations != null && root != null) {
-            buttonOK!!.isEnabled = donations!!.isSponsor
-            if (donations!!.isSponsor) {
-                buttonOK!!.setOnClickListener { v: View -> doImport(v) }
-            } else {
-                buttonOK!!.setOnClickListener { v: View? -> donations!!.showDialog() }
             }
         }
     }
