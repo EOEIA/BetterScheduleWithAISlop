@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 1.8.5 (12. 8. 2022)
+
+- Opraveno vysoké využití baterie pokud školní server soustavně neodpovídá
+
+---
+
+- Fix battery drain when school server does not respond permanently
+
 ## 1.8.4 (21. 9. 2021)
 
 - Opravena chyba při importu motivu

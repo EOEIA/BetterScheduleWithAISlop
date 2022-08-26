@@ -36,6 +36,15 @@ abstract class RozvrhDao {
     @Query("SELECT lastUpdate < :expireTime FROM rozvrh WHERE id= :monday")
     abstract suspend fun isExpired(monday: LocalDate, expireTime: DateTime): Boolean?
 
+    /** Works line `touch` command in linux. Sets rozvrh's lastUpdate to the given time (DateTime.now() is default).
+     * Used for prolonging validity of certain rozvrh.
+     * */
+    @Query("UPDATE rozvrh SET lastUpdate = :updateTime WHERE id = :monday")
+    abstract suspend fun setLastUpdate(monday: LocalDate, updateTime: DateTime = DateTime.now())
+
+    /** Sets last update time of given rozvrh to now */
+    suspend fun resetExpiration(monday: LocalDate) = setLastUpdate(monday)
+
     @Query("DELETE FROM Rozvrh WHERE permanent = 0 AND id < :start OR id > :end")
     abstract fun deleteOutside(start: LocalDate, end: LocalDate)
 

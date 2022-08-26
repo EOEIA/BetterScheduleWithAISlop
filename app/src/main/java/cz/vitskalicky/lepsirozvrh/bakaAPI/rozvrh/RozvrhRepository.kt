@@ -14,7 +14,6 @@ import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
 import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
-import io.sentry.Sentry
 import kotlinx.coroutines.*
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
@@ -52,19 +51,10 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     fun refresh(rozvrhMonday: LocalDate, foreground: Boolean, force: Boolean = false, invalidateOthersIfSuccessful: Boolean = false){
         scope.launch(){
             if (force || refreshNeeded(rozvrhMonday, foreground)){
-                try{
-                    fetchAndCache(rozvrhMonday)
-                    if (invalidateOthersIfSuccessful){
-                        withContext(Dispatchers.IO){
-                            db.rozvrhDao().invalidateAllOther(rozvrhMonday)
-                        }
-                    }
-                }catch (e: Exception){
-                    e.printStackTrace()
-                    withContext(NonCancellable) {
-                        withContext(Dispatchers.Main) {
-                            reportError(e, rozvrhMonday)
-                        }
+                val success = fetchAndCache(rozvrhMonday) != null
+                if (success && invalidateOthersIfSuccessful){
+                    withContext(Dispatchers.IO){
+                        db.rozvrhDao().invalidateAllOther(rozvrhMonday)
                     }
                 }
             }
@@ -76,26 +66,21 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
      */
     suspend fun getRozvrh(rozvrhId: LocalDate, foreground: Boolean): RozvrhRelated?{
         val monday: LocalDate = Utils.getWeekMonday(rozvrhId)
-        try {
-            if (refreshNeeded(monday, foreground)){
-                return fetchAndCache(monday)
-            }
-        }catch (e: Exception){
-            withContext(NonCancellable) {
-                withContext(Dispatchers.Main) {
-                    reportError(e, rozvrhId)
-                }
-            }
-        }
-        return db.rozvrhDao().loadRozvrhRelated(monday)
+
+        val result: RozvrhRelated? = if (refreshNeeded(monday, foreground)){
+            fetchAndCache(monday, foreground) //is null on error
+        } else null
+        return result ?:
+            //if refresh not needed or refresh failed
+            db.rozvrhDao().loadRozvrhRelated(monday)
     }
 
     /**
      * lads the cached rozvrh or `null` if not available. Disadvantage: it may not be very fresh; usually [getRozvrh] is better.
      */
     suspend fun getCachedRozvrh(rozvrhId: LocalDate): RozvrhRelated?{
-        val monday: LocalDate = Utils.getWeekMonday(rozvrhId);
-        return db.rozvrhDao().loadRozvrhRelated(monday);
+        val monday: LocalDate = Utils.getWeekMonday(rozvrhId)
+        return db.rozvrhDao().loadRozvrhRelated(monday)
     }
 
     fun getRozvrhStatusLiveData(rozvrhId: LocalDate): LiveData<StatusInfo>{
@@ -112,7 +97,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     suspend fun getUpdateDisplayedDataTime():LocalDateTime?{
 
         val current: RozvrhRelated? = getRozvrh(Utils.getCurrentMonday(), false)
-        var time: LocalDateTime? = null
+        var time: LocalDateTime?
         if (current == null){
             return null
         }else{
@@ -130,8 +115,8 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         return time
     }
 
-    suspend fun refreshNeeded(rozvrhId: LocalDate, foreground: Boolean = false): Boolean{
-        if (statusStr[rozvrhId].status == StatusInfo.Status.ERROR){
+    suspend fun refreshNeeded(rozvrhId: LocalDate, foreground: Boolean = true): Boolean{
+        if (statusStr[rozvrhId].status == StatusInfo.Status.ERROR && foreground){ // when from background don't bother refreshing failed requests unless they are expired.
             return true
         }
         if (statusStr[rozvrhId].status == StatusInfo.Status.LOADING){
@@ -148,49 +133,78 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     }
 
     /**
-     * Fetches from network and saves to database.
-     * @throws IOException on network error
-     * @throws RozvrhConverter.RozvrhConversionException on rozvrh conversion failure
-     * @throws HttpException (probably) on [Rozvrh3] parsing failure
-     * @throws LoginRequiredException if authentication fails
-     * @throws Exception on other error such as parse error
+     * Fetches from network and saves to database. Returns null on error.
+     *
+     * If [foreground] if false, a stricter timeout will be set to avoid ANR (application not responding) when running in
+     * the background. Also resets refresh timeout if refresh fails in the background.
+     *
      */
-    @Throws(Exception::class)
-    private suspend fun fetchAndCache(rozvrhId: LocalDate): RozvrhRelated {
+    private suspend fun fetchAndCache(rozvrhId: LocalDate, foreground: Boolean = true): RozvrhRelated? {
         withContext(Dispatchers.Main) {
             statusStr[rozvrhId] = StatusInfo.loading()
         }
-        val rozvrh3: Rozvrh3 = try {
-            //check for demo mode
-            if (application.debugUtils.isDemoMode) {
-                //simulate slow net
-                delay(Random.nextLong(3000))
-                //return demo rozvrh
-                application.debugUtils.getDemoRozvrh3(rozvrhId)
-            } else {
-                //download true from server
-                application.webservice?.getSchedule(rozvrhId)
-                        ?: throw IOException("Webservice not ready")
+        try {
+            val rozvrh3: Rozvrh3 = try {
+                //check for demo mode
+                if (application.debugUtils.isDemoMode) {
+                    //simulate slow net
+                    delay(Random.nextLong(3000))
+                    //return demo rozvrh
+                    application.debugUtils.getDemoRozvrh3(rozvrhId)
+                } else {
+                    withTimeout(if (foreground) Long.MAX_VALUE else 7000) { //use 7 second timeout if from background to avoid ANR
+                        //download new from server
+                        application.webservice?.getSchedule(rozvrhId)
+                            ?: throw IOException("Webservice not ready")
+                    }
+                }
+            } catch (e: Exception) {
+                when (e) {
+                    is HttpException -> if (e.code() == 401) //unauthorized
+                        throw LoginRequiredException()
+                    else
+                        throw e
+                    is TimeoutCancellationException, is IOException -> {
+                        //transform timeoutCancell..tion to IOException
+                        val newe =
+                            if (e is TimeoutCancellationException) IOException("Request for rozvrh id '$rozvrhId' timed out") else e
+                        if (!foreground) {
+                            //if from background, reset refresh timeout to avoid battery drain
+                            db.rozvrhDao().resetExpiration(rozvrhId)
+                        }
+                        throw newe
+                    }
+                    else -> throw e
+                }
             }
-        } catch (e: HttpException) {
-            if (e.code() == 401) //unauthorized
-                throw LoginRequiredException()
-            else
-                throw e
-        }
 
-        val rozvrh = withContext(Dispatchers.IO) { RozvrhConverter.convert(rozvrh3, rozvrhId, application) }
-        db.insertRozvrhRelated(rozvrh)
-        if (rozvrh.rozvrh.id == Utils.getCurrentMonday()) {
-            withContext(Dispatchers.Main) {
-                currentWeekLD.value = rozvrh;
+            val rozvrh = withContext(Dispatchers.IO) {
+                RozvrhConverter.convert(
+                    rozvrh3,
+                    rozvrhId,
+                    application
+                )
             }
+            db.insertRozvrhRelated(rozvrh)
+            if (rozvrh.rozvrh.id == Utils.getCurrentMonday()) {
+                withContext(Dispatchers.Main) {
+                    currentWeekLD.value = rozvrh
+                }
+            }
+            withContext(Dispatchers.Main) {
+                statusStr.isOffline.value = false
+                statusStr[rozvrhId] = StatusInfo.success()
+            }
+            return rozvrh
+        }catch (e: Exception){
+            withContext(NonCancellable) {
+                withContext(Dispatchers.Main) {
+                    reportError(e, rozvrhId)
+                }
+            }
+            if (e is CancellationException) throw e
+            return null
         }
-        withContext(Dispatchers.Main) {
-            statusStr.isOffline.value = false
-            statusStr[rozvrhId] = StatusInfo.success()
-        }
-        return rozvrh
     }
 
     /**
