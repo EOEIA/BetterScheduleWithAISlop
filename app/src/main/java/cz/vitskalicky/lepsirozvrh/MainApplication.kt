@@ -283,7 +283,7 @@ class MainApplication : MultiDexApplication() {
         var type: Int = AlarmManager.RTC_WAKEUP;
         if (triggerTime == null){
             type = AlarmManager.RTC
-            triggerTime = LocalDateTime.now().plusHours(1)
+            triggerTime = LocalDateTime.now().plusHours(12) //happens only if the current schedule is not available - could happen if server has been unreachable for over a week
         }
         alarmManager.setRepeating(type, triggerTime!!.toDate().time, (60 * 60000).toLong(), pendingIntent)
         Log.d(TAG, "Scheduled an update on " + triggerTime.toString("MM-dd HH:mm:ss"))
