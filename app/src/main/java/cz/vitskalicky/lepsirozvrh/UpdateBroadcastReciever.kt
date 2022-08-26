@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 class UpdateBroadcastReciever : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "Broadcast received")
         val application = context.applicationContext as MainApplication
         val pendingResult = goAsync()
         if (intent.action != null && intent.action == ACTION_NEXT_PREV && intent.hasExtra(EXTRA_NEXT_PREV)) {
