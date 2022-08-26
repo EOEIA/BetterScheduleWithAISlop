@@ -6,11 +6,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +25,7 @@ class LoginActivity : BaseActivity() {
     lateinit var tilUsername: TextInputLayout
     lateinit var tilPassword: TextInputLayout
     lateinit var tilURL: TextInputLayout
+    lateinit var etUrl: EditText
     lateinit var bChooseSchool: Button
     lateinit var bLogin: Button
     lateinit var progressBar: ProgressBar
@@ -38,6 +39,7 @@ class LoginActivity : BaseActivity() {
         tilUsername = findViewById(R.id.textInputLayoutName)
         tilPassword = findViewById(R.id.textInputLayoutPassword)
         tilURL = findViewById(R.id.textInputLayoutURL)
+        etUrl = findViewById(R.id.textEditURL)
         bChooseSchool = findViewById(R.id.buttonSchoolList)
         bLogin = findViewById(R.id.buttonLogin)
         progressBar = findViewById(R.id.progressBar)
@@ -59,13 +61,16 @@ class LoginActivity : BaseActivity() {
             )
         }
         (applicationContext as MainApplication).login.logout()
-        bChooseSchool.setOnClickListener(View.OnClickListener { v: View? ->
+        val chooseSchoolListener = View.OnClickListener { v: View? ->
             val intent = Intent(this, SchoolsListActivity::class.java)
             startActivityForResult(intent, REQUEST_PICK_SCHOOL)
-        })
-        bLogin.setOnClickListener(View.OnClickListener { v: View? ->
+        }
+        bChooseSchool.setOnClickListener(chooseSchoolListener)
+        tilURL.setOnClickListener(chooseSchoolListener)
+        etUrl.setOnClickListener(chooseSchoolListener)
+        bLogin.setOnClickListener {
             logIn()
-        })
+        }
 
         tilURL.editText!!.setText(viewModel.schoolInfo?.name ?: "")
 
@@ -91,9 +96,9 @@ class LoginActivity : BaseActivity() {
 
 
     private fun clearErrors(){
-        tilUsername.error = null;
-        tilPassword.error = null;
-        tilURL.error = null;
+        tilUsername.error = null
+        tilPassword.error = null
+        tilURL.error = null
     }
 
     override fun onResume() {
@@ -211,7 +216,7 @@ class LoginActivity : BaseActivity() {
 
 class LoginViewModel(val app: Application): AndroidViewModel(app){
 
-    var schoolInfo: SchoolInfo? = null;
+    var schoolInfo: SchoolInfo? = null
     var isManualUrl = true
 
 }
