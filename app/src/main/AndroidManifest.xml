@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <meta-data android:name="io.sentry.auto-init" android:value="false" />
         <activity
             android:name=".widget.SmallWidgetConfigActivity"
             android:theme="@style/AppTheme.WallpaperBackground"
