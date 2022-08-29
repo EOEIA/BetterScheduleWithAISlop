@@ -17,16 +17,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <meta-data android:name="io.sentry.auto-init" android:value="false" />
         <activity
             android:name=".widget.SmallWidgetConfigActivity"
-            android:theme="@style/AppTheme.WallpaperBackground">
+            android:theme="@style/AppTheme.WallpaperBackground"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
         <activity
             android:name=".widget.WideWidgetConfigActivity"
-            android:theme="@style/AppTheme.WallpaperBackground">
+            android:theme="@style/AppTheme.WallpaperBackground"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
@@ -34,7 +37,8 @@
         <activity android:name=".activity.LicencesActivity" />
         <activity android:name=".activity.WelcomeActivity" />
         <activity android:name=".settings.SettingsActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -56,7 +60,8 @@
         </activity>
         <activity android:name=".activity.SchoolsListActivity" />
         <activity android:name=".activity.LoginActivity" />
-        <activity android:name=".activity.MainActivity">
+        <activity android:name=".activity.MainActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -64,14 +69,16 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".UpdateBroadcastReciever">
+        <receiver android:name=".UpdateBroadcastReciever"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".widget.SmallWidgetProvider"
-            android:label="@string/small_widget_label">
+            android:label="@string/small_widget_label"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -82,7 +89,8 @@
         </receiver>
         <receiver
             android:name=".widget.WideWidgetProvider"
-            android:label="@string/wide_widget_label">
+            android:label="@string/wide_widget_label"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

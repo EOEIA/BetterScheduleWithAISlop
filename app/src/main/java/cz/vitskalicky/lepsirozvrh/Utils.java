@@ -54,6 +54,7 @@ public class Utils {
 
         try {
             Date date = sdf.parse(rawDate);
+            if (date == null) return null;
             return readable.format(date);
         } catch (ParseException ex) {
             ex.printStackTrace();
@@ -62,7 +63,7 @@ public class Utils {
     }
 
     public static int minutesOfDay(String t) {
-        String time[] = t.split(":");
+        String[] time = t.split(":");
         int hours = Integer.valueOf(time[0]);
         int minutes = Integer.valueOf(time[1]);
         return minutes + hours * 60;
@@ -184,8 +185,9 @@ public class Utils {
                         body = "\n\n-----------------------------\n" + context.getString(R.string.email_message) + "\n Device OS: Android \n Device OS version: " +
                                 Build.VERSION.RELEASE + "\n App Version: " + body + "\n Commit hash: " + BuildConfig.GitHash + "Build type: " + BuildConfig.BUILD_TYPE + "\n Device Brand: " + Build.BRAND +
                                 "\n Device Model: " + Build.MODEL + "\n Device Manufacturer: " + Build.MANUFACTURER;
-                        if (Sentry.getContext() != null && Sentry.getContext().getUser() != null){
-                            body += "\n Sentry client id: " + Sentry.getStoredClient().getContext().getUser().getId();
+                        String sentryId = SharedPrefs.getString(context, SharedPrefs.SENTRY_ID);
+                        if (sentryId != null && !sentryId.isEmpty()){
+                            body += "\n Sentry client id: " + sentryId;
                         }else {
                             body += "\n Sentry client id not available";
                         }

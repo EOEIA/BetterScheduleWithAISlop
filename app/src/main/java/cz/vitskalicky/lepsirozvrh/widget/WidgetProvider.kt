@@ -12,10 +12,7 @@ import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
-import cz.vitskalicky.lepsirozvrh.AppSingleton
-import cz.vitskalicky.lepsirozvrh.MainApplication
-import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.UpdateBroadcastReciever
+import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
 import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
@@ -138,7 +135,9 @@ open class WidgetProvider : AppWidgetProvider() {
             views.setInt(R.id.bgcolor, "setColorFilter", widgetSettings.backgroundColor or -0x1000000)
             val intent = Intent(context, MainActivity::class.java)
             intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
-            val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_REQUEST_CODE, intent, 0)
+            val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_REQUEST_CODE, intent,
+                KotlinUtils.FLAG_IMMUTABLE
+            )
             views.setOnClickPendingIntent(R.id.root, pendingIntent)
             appWidgetManager.updateAppWidget(widgetID, views)
         }

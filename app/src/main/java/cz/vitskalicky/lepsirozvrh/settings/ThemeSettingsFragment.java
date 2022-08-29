@@ -22,7 +22,6 @@ import cz.vitskalicky.lepsirozvrh.donations.Donations;
 import cz.vitskalicky.lepsirozvrh.theme.DefaultThemes;
 import cz.vitskalicky.lepsirozvrh.theme.Theme;
 import io.sentry.Sentry;
-import io.sentry.event.BreadcrumbBuilder;
 
 public class ThemeSettingsFragment extends MyCyaneaPreferenceFragmentCompat {
 
@@ -198,12 +197,12 @@ public class ThemeSettingsFragment extends MyCyaneaPreferenceFragmentCompat {
             return true;
         });
         exportPref.setOnPreferenceClickListener(preference -> {
-            Sentry.getContext().recordBreadcrumb(new BreadcrumbBuilder().setMessage("Exporting theme.").build());
+            Sentry.addBreadcrumb("Exporting theme.");
             exportListener.method();
             return true;
         });
         importPref.setOnPreferenceClickListener(preference -> {
-            Sentry.getContext().recordBreadcrumb(new BreadcrumbBuilder().setMessage("Importing theme.").build());
+            Sentry.addBreadcrumb("Importing theme.");
             importListener.method();
             return true;
         });

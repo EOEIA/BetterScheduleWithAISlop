@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.jaredrummler.cyanea.Cyanea
+import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.TokenAuthenticator
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhRepository
@@ -33,8 +34,8 @@ import cz.vitskalicky.lepsirozvrh.theme.SystemTheme
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import io.sentry.Sentry
-import io.sentry.android.AndroidSentryClientFactory
-import io.sentry.event.User
+import io.sentry.android.core.SentryAndroid
+import io.sentry.protocol.User
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -277,7 +278,7 @@ class MainApplication : MultiDexApplication() {
             return
         }
         val intent = Intent(this, UpdateBroadcastReciever::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, UpdateBroadcastReciever.REQUEST_CODE, intent, 0)
+        val pendingIntent = PendingIntent.getBroadcast(this, UpdateBroadcastReciever.REQUEST_CODE, intent, FLAG_IMMUTABLE)
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
 
         var type: Int = AlarmManager.RTC_WAKEUP;
@@ -327,13 +328,16 @@ class MainApplication : MultiDexApplication() {
          * Only enable sentry on the official release build
          */
         if (BuildConfig.ALLOW_SENTRY) {
-            Sentry.init("https://d13d732d380444f5bed7487cfea65814@sentry.io/1820627", AndroidSentryClientFactory(this))
-            Sentry.getContext().addExtra("commit hash", BuildConfig.GitHash)
+            SentryAndroid.init(this) { options ->
+                options.dsn = "https://d13d732d380444f5bed7487cfea65814@o322743.ingest.sentry.io/1820627"
+            }
+            Sentry.setExtra("commit hash", BuildConfig.GitHash)
             if (!SharedPrefs.contains(this, SharedPrefs.SENTRY_ID) || SharedPrefs.getString(this, SharedPrefs.SENTRY_ID).isEmpty()) {
                 SharedPrefs.setString(this, SharedPrefs.SENTRY_ID, "android:" + java.lang.Long.toHexString(Random().nextLong()))
             }
-            Sentry.getContext().addExtra("build variant", BuildConfig.FLAVOR + " " + BuildConfig.BUILD_TYPE)
-            Sentry.getContext().user = User(SharedPrefs.getString(this, SharedPrefs.SENTRY_ID), null, null, null)
+            User()
+            Sentry.setExtra("build variant", BuildConfig.FLAVOR + " " + BuildConfig.BUILD_TYPE)
+            Sentry.setUser(User().also { it.id = SharedPrefs.getString(this, SharedPrefs.SENTRY_ID)})
         } else {
             diableSentry()
             SharedPrefs.setBooleanPreference(this, R.string.PREFS_SEND_CRASH_REPORTS, false)
@@ -352,7 +356,7 @@ class MainApplication : MultiDexApplication() {
         val msg = e.message?.takeUnless { it.isBlank() } ?: e.stackTraceToString()
         if (!reported.contains(msg)){
             reported.add(msg)
-            Sentry.capture(e)
+            Sentry.captureException(e)
         }
     }
 

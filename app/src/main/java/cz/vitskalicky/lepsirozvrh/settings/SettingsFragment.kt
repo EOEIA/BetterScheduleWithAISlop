@@ -4,9 +4,6 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -21,14 +18,9 @@ import cz.vitskalicky.lepsirozvrh.donations.Donations
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification.showInfoDialog
 import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewFragment
-import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.util.*
 
 /**
@@ -191,12 +183,12 @@ ${context.getString(R.string.email_message)}
  Device Brand: ${Build.BRAND}
  Device Model: ${Build.MODEL}
  Device Manufacturer: ${Build.MANUFACTURER}"""
-            body += if (Sentry.getContext() != null && Sentry.getContext().user != null) {
+            body += SharedPrefs.getString(context, SharedPrefs.SENTRY_ID).let { if ( !it.isNullOrBlank()) {
                 """
- Sentry client id: ${Sentry.getStoredClient().context.user.id}"""
+ Sentry client id: $it"""
             } else {
                 "\n Sentry client id not available"
-            }
+            }}
             body += """
  Sentry enabled: ${SharedPrefs.getBooleanPreference(context, R.string.PREFS_SEND_CRASH_REPORTS)}"""
             val finBody: String = body
@@ -204,9 +196,9 @@ ${context.getString(R.string.email_message)}
                 val mainApplication = context.applicationContext as MainApplication
                 lifecycleScope.launch(Dispatchers.IO) {
                     val current = mainApplication.repository.getRozvrh(Utils.getDisplayWeekMonday(context), true)
-                    val currentText = MainApplication.objectMapper.writeValueAsString(current);
+                    val currentText = MainApplication.objectMapper.writeValueAsString(current)
                     val perm = mainApplication.repository.getRozvrh(Rozvrh.PERM, true)
-                    val permText = MainApplication.objectMapper.writeValueAsString(perm);
+                    val permText = MainApplication.objectMapper.writeValueAsString(perm)
                     withContext(Dispatchers.Main){
                         var newBody = finBody
                         newBody += "\nCurrent schedule:\n\n$currentText\n"
