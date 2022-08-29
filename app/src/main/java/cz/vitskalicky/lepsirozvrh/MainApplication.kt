@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.jaredrummler.cyanea.Cyanea
+import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.TokenAuthenticator
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhRepository
@@ -277,7 +278,7 @@ class MainApplication : MultiDexApplication() {
             return
         }
         val intent = Intent(this, UpdateBroadcastReciever::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, UpdateBroadcastReciever.REQUEST_CODE, intent, 0)
+        val pendingIntent = PendingIntent.getBroadcast(this, UpdateBroadcastReciever.REQUEST_CODE, intent, FLAG_IMMUTABLE)
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
 
         var type: Int = AlarmManager.RTC_WAKEUP;

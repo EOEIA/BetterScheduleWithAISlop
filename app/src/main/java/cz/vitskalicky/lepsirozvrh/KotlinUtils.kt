@@ -1,5 +1,8 @@
 package cz.vitskalicky.lepsirozvrh
 
+import android.app.PendingIntent
+import android.os.Build
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -26,5 +29,11 @@ object KotlinUtils {
                 false
             }
         }
+    }
+
+    val FLAG_IMMUTABLE: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        PendingIntent.FLAG_IMMUTABLE
+    } else {
+        0
     }
 }

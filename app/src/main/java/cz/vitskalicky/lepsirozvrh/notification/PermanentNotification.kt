@@ -14,6 +14,7 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.*
+import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
 import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
@@ -152,17 +153,17 @@ object PermanentNotification {
         val nextIntent = Intent(context, UpdateBroadcastReciever::class.java)
         nextIntent.action = UpdateBroadcastReciever.ACTION_NEXT_PREV
         nextIntent.putExtra(UpdateBroadcastReciever.EXTRA_NEXT_PREV, 1)
-        val nextPendingIntent = PendingIntent.getBroadcast(context, 458631, nextIntent, 0)
+        val nextPendingIntent = PendingIntent.getBroadcast(context, 458631, nextIntent, FLAG_IMMUTABLE)
         val prevIntent = Intent(context, UpdateBroadcastReciever::class.java)
         prevIntent.action = UpdateBroadcastReciever.ACTION_NEXT_PREV
         prevIntent.putExtra(UpdateBroadcastReciever.EXTRA_NEXT_PREV, -1)
-        val prevPendingIntent = PendingIntent.getBroadcast(context, 4586, prevIntent, 0)
+        val prevPendingIntent = PendingIntent.getBroadcast(context, 4586, prevIntent, FLAG_IMMUTABLE)
         val intent = Intent(context, MainActivity::class.java)
         intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
         intent.putExtra(EXTRA_NOTIFICATION, true)
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntentWithParentStack(intent)
-        val pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
 
         //create notification
         val builder = NotificationCompat.Builder(context, PERMANENT_CHANNEL_ID)
