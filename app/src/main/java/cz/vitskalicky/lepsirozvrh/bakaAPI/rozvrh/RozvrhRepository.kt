@@ -29,9 +29,9 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     private val statusStr: RozvrhStatusStore = application.rozvrhStatusStore
     private val scope: CoroutineScope = scope ?: application.mainScope
 
-    private val currentWeekLD: MutableLiveData<RozvrhRelated> = MutableLiveData()
+    private val currentWeekLD: MutableLiveData<RozvrhRelated?> = MutableLiveData()
 
-    fun getCurrentWeekLD(): LiveData<RozvrhRelated>{
+    fun getCurrentWeekLD(): LiveData<RozvrhRelated?>{
         if (currentWeekLD.value == null){
             scope.launch {
                 currentWeekLD.value = getRozvrh(Utils.getDisplayWeekMonday(application), foreground = false)
@@ -140,71 +140,85 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
      *
      */
     private suspend fun fetchAndCache(rozvrhId: LocalDate, foreground: Boolean = true): RozvrhRelated? {
-        withContext(Dispatchers.Main) {
-            statusStr[rozvrhId] = StatusInfo.loading()
-        }
-        try {
-            val rozvrh3: Rozvrh3 = try {
-                //check for demo mode
-                if (application.debugUtils.isDemoMode) {
-                    //simulate slow net
-                    delay(Random.nextLong(3000))
-                    //return demo rozvrh
-                    application.debugUtils.getDemoRozvrh3(rozvrhId)
-                } else {
-                    withTimeout(if (foreground) Long.MAX_VALUE else 7000) { //use 7 second timeout if from background to avoid ANR
-                        //download new from server
-                        application.webservice?.getSchedule(rozvrhId)
-                            ?: throw IOException("Webservice not ready")
-                    }
-                }
-            } catch (e: Exception) {
-                when (e) {
-                    is HttpException -> if (e.code() == 401) //unauthorized
-                        throw LoginRequiredException()
-                    else
-                        throw e
-                    is TimeoutCancellationException, is IOException -> {
-                        //transform timeoutCancell..tion to IOException
-                        val newe =
-                            if (e is TimeoutCancellationException) IOException("Request for rozvrh id '$rozvrhId' timed out") else e
-                        if (!foreground) {
-                            //if from background, reset refresh timeout to avoid battery drain
-                            db.rozvrhDao().resetExpiration(rozvrhId)
-                        }
-                        throw newe
-                    }
-                    else -> throw e
-                }
-            }
-
-            val rozvrh = withContext(Dispatchers.IO) {
-                RozvrhConverter.convert(
-                    rozvrh3,
-                    rozvrhId,
-                    application
-                )
-            }
-            db.insertRozvrhRelated(rozvrh)
-            if (rozvrh.rozvrh.id == Utils.getCurrentMonday()) {
-                withContext(Dispatchers.Main) {
-                    currentWeekLD.value = rozvrh
-                }
-            }
+        val deferred: Deferred<RozvrhRelated?> = scope.async {
             withContext(Dispatchers.Main) {
-                statusStr.isOffline.value = false
-                statusStr[rozvrhId] = StatusInfo.success()
+                statusStr[rozvrhId] = StatusInfo.loading()
             }
-            return rozvrh
-        }catch (e: Exception){
-            withContext(NonCancellable) {
+            try {
+                val rozvrh3: Rozvrh3 = try {
+                    //check for demo mode
+                    if (application.debugUtils.isDemoMode) {
+                        //simulate slow net
+                        delay(Random.nextLong(3000))
+                        //return demo rozvrh
+                        application.debugUtils.getDemoRozvrh3(rozvrhId)
+                    } else {
+                        withTimeout(if (foreground) Long.MAX_VALUE else 7000) { //use 7 second timeout if from background to avoid ANR
+                            //download new from server
+                            application.webservice?.getSchedule(rozvrhId)
+                                ?: throw IOException("Webservice not ready")
+                        }
+                    }
+                } catch (e: Exception) {
+                    when (e) {
+                        is HttpException -> if (e.code() == 401) //unauthorized
+                            throw LoginRequiredException()
+                        else
+                            throw e
+                        is TimeoutCancellationException, is IOException -> {
+                            //transform timeoutCancell..tion to IOException
+                            val newe =
+                                if (e is TimeoutCancellationException) IOException("Request for rozvrh id '$rozvrhId' timed out") else e
+                            if (!foreground) {
+                                //if from background, reset refresh timeout to avoid battery drain
+                                db.rozvrhDao().resetExpiration(rozvrhId)
+                            }
+                            throw newe
+                        }
+                        else -> throw e
+                    }
+                }
+
+                val rozvrh = withContext(Dispatchers.IO) {
+                    RozvrhConverter.convert(
+                        rozvrh3,
+                        rozvrhId,
+                        application
+                    )
+                }
+                db.insertRozvrhRelated(rozvrh)
+                if (rozvrh.rozvrh.id == Utils.getCurrentMonday()) {
+                    withContext(Dispatchers.Main) {
+                        currentWeekLD.value = rozvrh
+                    }
+                }
                 withContext(Dispatchers.Main) {
-                    reportError(e, rozvrhId)
+                    statusStr.isOffline.value = false
+                    statusStr[rozvrhId] = StatusInfo.success()
+                }
+                return@async rozvrh
+            } catch (e: Exception) {
+                withContext(NonCancellable) {
+                    withContext(Dispatchers.Main) {
+                        reportError(e, rozvrhId)
+                    }
+                }
+                if (e is CancellationException) throw e
+                return@async null
+            }
+        }
+        //ensure for the third time that status is not loading after job completed
+        deferred.invokeOnCompletion {cause ->
+            scope.launch(NonCancellable) {
+                withContext(Dispatchers.Main) {
+                    if (statusStr[rozvrhId].status == StatusInfo.Status.LOADING) {
+                        application.sendReport(IllegalStateException("Status was still LOADING after job completed", cause))
+                        statusStr[rozvrhId] = StatusInfo.Rozvrh.appError()
+                    }
                 }
             }
-            if (e is CancellationException) throw e
-            return null
         }
+        return deferred.await()
     }
 
     /**

@@ -46,6 +46,7 @@
     <string name="info_unreachable">Error: connection failed</string> <!-- Same as 'info_offline', but when user uses refresh button -->
     <string name="info_login_failed">Error: login failed</string>
     <string name="info_unexpected_response">Error: unexpected server response</string> <!-- Same as 'info_offline', but when user uses refresh button -->
+    <string name="info_app_error">Error: unknown</string>
 
     <string name="user">User</string>
     <string name="student">Student</string>

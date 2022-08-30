@@ -26,6 +26,7 @@ data class StatusInfo(
         fun unreachable(): StatusInfo = StatusInfo(ERROR, R.string.info_unreachable, Specification.ERROR_UNREACHABLE)
         fun loginFailed(): StatusInfo = StatusInfo(ERROR, R.string.info_login_failed, Specification.ERROR_LOGIN_FAILED)
         fun unexpectedResponse(): StatusInfo = StatusInfo(ERROR, R.string.info_unexpected_response, Specification.ERROR_UNEXPECTED_RESPONSE)
+        fun appError(): StatusInfo = StatusInfo(ERROR, R.string.info_app_error, Specification.ERROR_APP)
     }
 
     fun asResource(rozvrh: RozvrhRelated?): Resource<RozvrhRelated>{
@@ -64,5 +65,6 @@ data class StatusInfo(
         const val ERROR_UNREACHABLE: Int = 1
         const val ERROR_LOGIN_FAILED: Int = 2
         const val ERROR_UNEXPECTED_RESPONSE: Int = 3
+        const val ERROR_APP: Int = 4
     }
 }

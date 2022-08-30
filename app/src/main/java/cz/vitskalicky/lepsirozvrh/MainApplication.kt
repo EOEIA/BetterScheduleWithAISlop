@@ -66,8 +66,8 @@ class MainApplication : MultiDexApplication() {
     lateinit var notificationState: NotificationState
         private set
     private var updateTime: LocalDateTime? = null
-    private lateinit var currentWeekLivedata: LiveData<RozvrhRelated>
-    private lateinit var currentWeekObserver: Observer<RozvrhRelated>
+    private lateinit var currentWeekLivedata: LiveData<RozvrhRelated?>
+    private lateinit var currentWeekObserver: Observer<RozvrhRelated?>
 
     /**
      * Warning: never keep an instance! Always get one using [MainApplication.retrofit] to make sure it uses the current URL even after logout.
