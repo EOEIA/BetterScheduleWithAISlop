@@ -1,0 +1,2 @@
+- Fix battery drain when school server does not respond permanently
+- Bug fixes

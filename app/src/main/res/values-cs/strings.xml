@@ -46,6 +46,7 @@
     <string name="info_unreachable">Chyba: nepodařilo se připojit</string>
     <string name="info_login_failed">Chyba: přihlášení selhalo</string>
     <string name="info_unexpected_response">Chyba: neočekávaná odpověď serveru</string>
+    <string name="info_app_error">Neznámá chyba</string>
 
     <string name="user">Uživatel</string>
     <string name="student">Student</string>
