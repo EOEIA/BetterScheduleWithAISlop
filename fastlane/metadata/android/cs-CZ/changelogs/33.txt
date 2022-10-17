@@ -1,0 +1,2 @@
+- Opraveno vysoké využití baterie pokud školní server soustavně neodpovídá
+- Opravy chyb
