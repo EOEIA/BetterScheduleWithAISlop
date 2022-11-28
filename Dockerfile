@@ -53,5 +53,6 @@ RUN apt-get install -y jq xxd
 # Fastlane
 RUN bash -c '\
   apt-get install -y ruby-full && \
+  gen install bundler && \
   bundle install \
   '
