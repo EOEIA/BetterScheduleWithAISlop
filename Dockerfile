@@ -16,6 +16,7 @@ ENV ANDROID_BUILD_TOOLS="30.0.3"
 # when the script was last modified for latest compileSdkVersion, it was which is written down below
 ENV ANDROID_SDK_TOOLS="7583922"
 
+# Android
 RUN bash -c ' \
     apt-get --quiet update --yes && \
     apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1 && \
@@ -45,4 +46,12 @@ RUN bash -c ' \
     sdkmanager "platform-tools" && \
     sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" \
 '
+
+# utilities
 RUN apt-get install -y jq xxd
+
+# Fastlane
+RUN bash -c '\
+  apt-get install -y ruby-full && \
+  bundle install \
+  '
