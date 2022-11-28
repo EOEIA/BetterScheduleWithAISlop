@@ -19,7 +19,7 @@ ENV ANDROID_SDK_TOOLS="7583922"
 RUN apt-get --quiet update --yes
 RUN apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1
 # Setup path as ANDROID_HOME for moving/exporting the downloaded sdk into it
-RUN export ANDROID_HOME="${PWD}/android-home"
+ENV ANDROID_HOME="${PWD}/android-home"
 # Create a new directory at specified location
 RUN install -d $ANDROID_HOME
 # Here we are installing androidSDK tools from official source,
