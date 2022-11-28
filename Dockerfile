@@ -45,3 +45,4 @@ RUN bash -c ' \
     sdkmanager "platform-tools" && \
     sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" \
 '
+RUN apt-get install -y jq xxd
