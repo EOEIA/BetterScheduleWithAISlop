@@ -16,23 +16,7 @@ ENV ANDROID_BUILD_TOOLS="30.0.3"
 # when the script was last modified for latest compileSdkVersion, it was which is written down below
 ENV ANDROID_SDK_TOOLS="7583922"
 
-RUN bash -c ' apt-get --quiet update --yes &&
-              apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1 &&
-              export ANDROID_HOME="${PWD}/android-home" &&
-              install -d $ANDROID_HOME &&
-              wget --output-document=$ANDROID_HOME/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS}_latest.zip &&
-              pushd $ANDROID_HOME &&
-              unzip -d cmdline-tools cmdline-tools.zip &&
-              pushd cmdline-tools &&
-              mv cmdline-tools tools || true &&
-              popd &&
-              popd &&
-              export PATH=$PATH:${ANDROID_HOME}/cmdline-tools/tools/bin/ &&
-              sdkmanager --version &&
-              yes | sdkmanager --licenses || true &&
-              sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" &&
-              sdkmanager "platform-tools" &&
-              sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}"'
+RUN bash -c ' apt-get --quiet update --yes && apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1 && export ANDROID_HOME="${PWD}/android-home" && install -d $ANDROID_HOME && wget --output-document=$ANDROID_HOME/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS}_latest.zip && pushd $ANDROID_HOME && unzip -d cmdline-tools cmdline-tools.zip && pushd cmdline-tools && mv cmdline-tools tools || true && popd && popd && export PATH=$PATH:${ANDROID_HOME}/cmdline-tools/tools/bin/ && sdkmanager --version && yes | sdkmanager --licenses || true && sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" && sdkmanager "platform-tools" && sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}"'
 
 
 
