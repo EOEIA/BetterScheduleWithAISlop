@@ -54,5 +54,4 @@ RUN apt-get install -y jq xxd
 RUN bash -c '\
   apt-get install -y ruby-full && \
   gem install bundler && \
-  bundle install \
   '

@@ -51,7 +51,8 @@ manualContainer:
   before_script:
     # We store this binary file in a variable as hex with this command: `xxd -p android-app.keystore`
     # Then we convert the hex back to a binary file
-    - echo "$signing_keystore_file_hex" | xxd -r -p - > android-signing-keystore.keystore    
+    - echo "$signing_keystore_file_hex" | xxd -r -p - > android-signing-keystore.keystore
+    - bundle install   
   after_script:
     - rm -f android-signing-keystore.keystore || true
     # finds all outputs and extracts their verison name and code to text file next to them
