@@ -16,12 +16,12 @@ ENV ANDROID_BUILD_TOOLS="30.0.3"
 # when the script was last modified for latest compileSdkVersion, it was which is written down below
 ENV ANDROID_SDK_TOOLS="7583922"
 
+ENV ANDROID_HOME="${PWD}/android-home"
+
 # Android
 RUN bash -c ' \
     apt-get --quiet update --yes && \
     apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1 && \
-  # Setup path as ANDROID_HOME for moving/exporting the downloaded sdk into it \
-    export ANDROID_HOME="${PWD}/android-home" && \
   # Create a new directory at specified location \
     install -d $ANDROID_HOME && \
   # Here we are installing androidSDK tools from official source, \
