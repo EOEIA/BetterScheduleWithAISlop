@@ -52,6 +52,6 @@ RUN apt-get install -y jq xxd
 
 # Fastlane
 RUN bash -c '\
-  apt-get install -y ruby-full && \
+  apt-get install -y ruby-full build-essential g++ && \
   gem install bundler \
   '
