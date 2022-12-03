@@ -34,8 +34,8 @@ android {
         applicationId "cz.vitskalicky.lepsirozvrh"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 34
-        versionName "1.8.6"
+        versionCode 35
+        versionName "1.8.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "GitHash", "\"${getGitHash()}\""
         /**
@@ -106,12 +106,11 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
-    lintOptions {
-        checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in release builds,
-        // but continue the build even when errors are found:
+    lint {
         abortOnError false
+        checkReleaseBuilds false
     }
+    namespace 'cz.vitskalicky.lepsirozvrh'
 
 }
 
