@@ -186,7 +186,9 @@ object PermanentNotification {
         val ntf = builder.build()
 
         // notificationId is a unique int for each notification that you must
-        notificationManager.notify(PERMANENT_NOTIFICATION_ID, ntf)
+        if (notificationManager.areNotificationsEnabled()) {
+            notificationManager.notify(PERMANENT_NOTIFICATION_ID, ntf)
+        }
     }
 
     fun showInfoDialog(context: Context?, ignoreSetting: Boolean) {
@@ -198,7 +200,7 @@ object PermanentNotification {
         val contentView = LayoutInflater.from(context).inflate(R.layout.notification_dialog, null)
         val checkBox = contentView.findViewById<CheckBox>(R.id.checkBox)
         builder.setView(contentView)
-        builder.setPositiveButton(android.R.string.yes) { dialog: DialogInterface?, which: Int -> SharedPrefs.setBoolean(context, PREF_DONT_SHOW_INFO_DIALOG, checkBox.isChecked) }
+        builder.setPositiveButton(android.R.string.ok) { dialog: DialogInterface?, which: Int -> SharedPrefs.setBoolean(context, PREF_DONT_SHOW_INFO_DIALOG, checkBox.isChecked) }
         builder.show()
     }
 }

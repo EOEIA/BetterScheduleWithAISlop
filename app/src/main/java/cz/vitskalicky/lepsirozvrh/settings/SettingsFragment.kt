@@ -1,11 +1,14 @@
 package cz.vitskalicky.lepsirozvrh.settings
 
+import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -100,11 +103,33 @@ class SettingsFragment : MyCyaneaPreferenceFragmentCompat() {
         switchToNextWeek!!.summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
         val notificationPreference = findPreference<SwitchPreferenceCompat>(getString(R.string.PREFS_NOTIFICATION))
         notificationPreference!!.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference: Preference?, newValue: Any ->
-            if (newValue as Boolean) {
+            val enable = {
                 showInfoDialog(context, false)
                 (requireContext().applicationContext as MainApplication).enableNotification()
-            } else {
+            };
+            val disable = {
                 (requireContext().applicationContext as MainApplication).disableNotification()
+            }
+            if (newValue as Boolean) {
+                when {
+                    ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED -> {
+                        enable();
+                    }
+                    else -> {
+                        registerForActivityResult(ActivityResultContracts.RequestPermission()) {isGranted: Boolean ->
+                            if (isGranted){
+                                enable();
+                            }else{
+                                disable();
+                            }
+                        }
+                    }
+                }
+            } else {
+               disable();
             }
             true
         }

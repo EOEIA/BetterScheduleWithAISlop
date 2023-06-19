@@ -1,11 +1,16 @@
 package cz.vitskalicky.lepsirozvrh.activity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.cyanea.Cyanea;
 import com.jaredrummler.cyanea.utils.ColorUtils;
@@ -60,6 +65,19 @@ public class MainActivity extends BaseActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(ColorUtils.darker(Theme.of(this).getCHeaderBg()));
         }
+        // ask for permission to show notifications
+        // TODO Do this properly
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                            if (!isGranted) {
+                                ((MainApplication) getApplication()).disableNotification();
+                            }
+                        }).launch(Manifest.permission.POST_NOTIFICATIONS);
+                    }
+        }
+
     }
 
     @Override

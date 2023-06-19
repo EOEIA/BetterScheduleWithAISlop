@@ -20,7 +20,7 @@ data class SchoolInfo(
  * Removes all accents, converts punctuation to spaces, deletes all non-alphanumerical characters and removes duplicate spaces
  */
 fun String.simplified():String {
-    val normalized = Normalizer.normalize(this.toLowerCase(), Normalizer.Form.NFD).toCharArray() //converts letters with accents to letter without an accent and combining character, which gets removed 3 lines later.
+    val normalized = Normalizer.normalize(this.lowercase(), Normalizer.Form.NFD).toCharArray() //converts letters with accents to letter without an accent and combining character, which gets removed 3 lines later.
     val sb = StringBuilder()
     var last: Char = ' ';
     var i = 0;

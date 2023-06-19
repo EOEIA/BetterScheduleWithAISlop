@@ -16,10 +16,7 @@ import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login.LoginResult.*
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.joda.time.DateTime
@@ -113,11 +110,11 @@ class Login(val app: MainApplication) {
                     return UNEXPECTED_RESPONSE
                 }
                 //avoid reporting 404s with html response
-                if (e.code() == 404 && rawBody?.substring(0, min(100, rawBody?.length ?: 0))?.toLowerCase()?.contains("html") == true){
+                if (e.code() == 404 && rawBody?.substring(0, min(100, rawBody?.length ?: 0))?.lowercase()?.contains("html") == true){
                     return UNREACHABLE
                 }
                 //avoid reporting Internal server errors
-                if (e.code() in 500..599 && rawBody?.substring(0, min(100, rawBody?.length ?: 0))?.toLowerCase()?.contains("html") == true){
+                if (e.code() in 500..599 && rawBody?.substring(0, min(100, rawBody?.length ?: 0))?.lowercase()?.contains("html") == true){
                     return UNREACHABLE
                 }
                 //unexpected - report
@@ -223,6 +220,7 @@ class Login(val app: MainApplication) {
     /**
      * Logs out user (deletes credentials)
      */
+    @OptIn(DelicateCoroutinesApi::class)
     fun logout() {
         sprefs.edit().apply {
             remove(SharedPrefs.REFRESH_TOKEN)
