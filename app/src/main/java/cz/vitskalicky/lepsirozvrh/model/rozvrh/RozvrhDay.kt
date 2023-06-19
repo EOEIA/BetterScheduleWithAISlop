@@ -2,7 +2,7 @@ package cz.vitskalicky.lepsirozvrh.model.rozvrh
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.ForeignKey.CASCADE
+import androidx.room.ForeignKey.Companion.CASCADE
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import org.joda.time.LocalDate

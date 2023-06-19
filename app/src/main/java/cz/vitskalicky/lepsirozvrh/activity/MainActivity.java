@@ -113,7 +113,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        ((MainApplication) getApplication()).pruneDatabase();
+        ((MainApplication) getApplication()).pruneDatabaseAsync();
         rFragment.jumpToWeek(0);
         rFragment.setCenterToCurrentLesson(true);
         moveTaskToBack(true);

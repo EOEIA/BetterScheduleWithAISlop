@@ -4,7 +4,6 @@ import android.app.*
 import android.content.Intent
 import android.media.AudioAttributes
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -369,9 +368,15 @@ class MainApplication : MultiDexApplication() {
         noAuthRetrofit = null;
     }
 
-    public fun pruneDatabase() {
-        AsyncTask.execute {
-            rozvrhDb.rozvrhDao().deleteUnnecessary()
+    public suspend fun pruneDatabase() {
+        rozvrhDb.rozvrhDao().deleteUnnecessary()
+    }
+
+    /** Calling a suspend fun from java is annoying
+     */
+    public fun pruneDatabaseAsync() {
+        mainScope.launch {
+            pruneDatabase()
         }
     }
 

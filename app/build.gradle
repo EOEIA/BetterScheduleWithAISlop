@@ -29,11 +29,11 @@ android {
     }
 
 
-    compileSdkVersion 32
+    compileSdk 33
     defaultConfig {
         applicationId "cz.vitskalicky.lepsirozvrh"
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 35
         versionName "1.8.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -45,9 +45,14 @@ android {
         buildConfigField "Boolean", "ALLOW_SENTRY", "false"
         multiDexEnabled true
         //changes apk name
-        applicationVariants.all { variant ->
-            variant.outputs.all {
+        applicationVariants.configureEach { variant ->
+            variant.outputs.configureEach {
                 outputFileName = "Lepší rozvrh v${versionName.replace('.','-')}.apk"
+            }
+        }
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas")
             }
         }
     }
@@ -125,39 +130,39 @@ licenseReport {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.5.0'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.android.support:multidex:1.0.3'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
-    implementation 'androidx.fragment:fragment-ktx:1.5.2'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+    implementation 'androidx.fragment:fragment-ktx:1.6.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test:runner:1.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'joda-time:joda-time:2.11.1'
     implementation 'androidx.preference:preference-ktx:1.2.0'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation 'io.sentry:sentry-android:6.4.0'
     implementation 'org.slf4j:slf4j-nop:2.0.0'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.13.3'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.13.4'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4'
     implementation 'com.jaredrummler:cyanea:1.0.2'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
     implementation "androidx.paging:paging-runtime-ktx:3.1.1"
 
-    def room_version = "2.4.3"
+    def room_version = "2.5.1"
 
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
-    playImplementation 'com.android.billingclient:billing:5.0.0'
+    playImplementation 'com.android.billingclient:billing:6.0.0'
 
 }

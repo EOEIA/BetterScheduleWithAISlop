@@ -46,9 +46,9 @@ abstract class RozvrhDao {
     suspend fun resetExpiration(monday: LocalDate) = setLastUpdate(monday)
 
     @Query("DELETE FROM Rozvrh WHERE permanent = 0 AND id < :start OR id > :end")
-    abstract fun deleteOutside(start: LocalDate, end: LocalDate)
+    abstract suspend fun deleteOutside(start: LocalDate, end: LocalDate)
 
-    fun deleteUnnecessary(){
+    suspend fun deleteUnnecessary(){
         deleteOutside(Utils.getCurrentMonday().minusWeeks(2), Utils.getCurrentMonday().plusWeeks(2))
     }
 
