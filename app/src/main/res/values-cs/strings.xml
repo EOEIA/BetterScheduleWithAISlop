@@ -61,6 +61,8 @@
     <string name="notification">Stálé upozornění</string>
     <string name="notification_desc">Zobrazuje tiché upozornění, které Vás informuje o další hodině</string>
     <string name="notification_detials">Stálé upozornění zobrazuje během školy právě probíhající nebo následující hodinu. První hodinu začne zobrazovat 1 hodinu před jejím začátkem a na další hodinu přepíná vždy 10 minut před koncem právě probíhající hodiny. Po skončení školy zmizí.\n\nTuto funkci lze vypnout v nastavení.</string>
+    <string name="notification_no_permission_title">Upozornění jsou zakázána</string>
+    <string name="notification_no_permission">Upozornění Lepšího Rozvrhu jsou blokována Androidem. Odblokujte je prosím v nastavení vašeho zařízení a poté zkuste stálé upozornění zapnout znovu.</string>
     <string name="support_this_app">Podpořit vývojáře</string>
     <string name="support_this_app_desc">Přispějte na vývoj této aplikace</string>
     <string name="supporting_this_app">Již tuto aplikace podporujete</string>

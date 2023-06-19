@@ -203,4 +203,12 @@ object PermanentNotification {
         builder.setPositiveButton(android.R.string.ok) { dialog: DialogInterface?, which: Int -> SharedPrefs.setBoolean(context, PREF_DONT_SHOW_INFO_DIALOG, checkBox.isChecked) }
         builder.show()
     }
+
+    fun showNoPermissionDialog(context: Context?){
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle(R.string.notification_no_permission_title)
+        builder.setMessage(R.string.notification_no_permission)
+        builder.setPositiveButton(android.R.string.ok){_,_ ->}
+        builder.show()
+    }
 }

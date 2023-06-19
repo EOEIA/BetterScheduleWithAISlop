@@ -61,6 +61,8 @@
     <string name="notification">Persistent notification</string>
     <string name="notification_desc">Shows a silent notification with your next lesson</string>
     <string name="notification_detials">Persistent notification informs you about your current or next lesson during school. It begins to show the first lesson 1 hour before it starts and then switches to the next one always 10 minutes before the current lesson ends. After the school finishes the notification disappears.\n\nThis feature can be disabled in the settings.</string>
+    <string name="notification_no_permission_title">Notifications are disabled</string>
+    <string name="notification_no_permission">This app\'s notifications are blocked by Android. Please unblock them in device settings and try again.</string>
     <string name="support_this_app">Support developer</string>
     <string name="support_this_app_desc">Donate to support development of this app</string>
     <string name="supporting_this_app">You are a sponsor</string>

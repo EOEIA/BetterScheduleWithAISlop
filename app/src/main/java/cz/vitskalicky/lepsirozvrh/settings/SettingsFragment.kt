@@ -19,6 +19,7 @@ import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.activity.LicencesActivity
 import cz.vitskalicky.lepsirozvrh.donations.Donations
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification.showInfoDialog
 import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewFragment
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,21 @@ class SettingsFragment : MyCyaneaPreferenceFragmentCompat() {
     fun init(donations: Donations?) {
         this.donations = donations
     }
+
+    val requestNotificationPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                setNotificationEnabled(true);
+            } else {
+                setNotificationEnabled(false);
+                if (context != null) {
+                    PermanentNotification.showNoPermissionDialog(context);
+                }
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,33 +119,27 @@ class SettingsFragment : MyCyaneaPreferenceFragmentCompat() {
         switchToNextWeek!!.summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
         val notificationPreference = findPreference<SwitchPreferenceCompat>(getString(R.string.PREFS_NOTIFICATION))
         notificationPreference!!.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference: Preference?, newValue: Any ->
-            val enable = {
-                showInfoDialog(context, false)
-                (requireContext().applicationContext as MainApplication).enableNotification()
-            };
-            val disable = {
-                (requireContext().applicationContext as MainApplication).disableNotification()
-            }
             if (newValue as Boolean) {
                 when {
                     ContextCompat.checkSelfPermission(
                         requireContext(),
                         Manifest.permission.POST_NOTIFICATIONS
                     ) == PackageManager.PERMISSION_GRANTED -> {
-                        enable();
+                        setNotificationEnabled(true);
                     }
                     else -> {
-                        registerForActivityResult(ActivityResultContracts.RequestPermission()) {isGranted: Boolean ->
-                            if (isGranted){
-                                enable();
-                            }else{
-                                disable();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }else{
+                            if (context != null) {
+                                PermanentNotification.showNoPermissionDialog(context);
                             }
-                        }
+                        };
+                        return@OnPreferenceChangeListener false;
                     }
                 }
             } else {
-               disable();
+                setNotificationEnabled(false);
             }
             true
         }
@@ -186,6 +196,15 @@ class SettingsFragment : MyCyaneaPreferenceFragmentCompat() {
         }
     }
 
+    fun setNotificationEnabled(enable: Boolean){
+        if (enable){
+            showInfoDialog(context, false)
+            (requireContext().applicationContext as MainApplication).enableNotification()
+        }else {
+            (requireContext().applicationContext as MainApplication).disableNotification()
+        }
+        findPreference<SwitchPreferenceCompat>(getString(R.string.PREFS_NOTIFICATION))?.isChecked = enable;
+    }
 
     fun sendFeedback(includeRozvrh: Boolean) {
         val context = context
