@@ -1,12 +1,10 @@
 package cz.vitskalicky.lepsirozvrh.model.rozvrh
 
-import cz.vitskalicky.lepsirozvrh.model.CycleConverters
+import kotlinx.serialization.Serializable
 
-/**
-* When changing structure don't forget to update [CycleConverters]
-*/
+@Serializable
 data class RozvrhCycle(
-        val id: String,
-        val name: String,
-        val abbrev: String
+    val id: String,
+    val name: String,
+    val abbrev: String
 )
