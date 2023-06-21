@@ -1,12 +1,14 @@
 package cz.vitskalicky.lepsirozvrh.model
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
-@Entity(primaryKeys = ["account","monday"], foreignKeys = [ForeignKey(
+@Entity(foreignKeys = [ForeignKey(
     entity = Account::class,
     parentColumns = ["id"],
     childColumns = ["account"],
@@ -15,8 +17,14 @@ import org.joda.time.LocalDate
     deferred = true
 )])
 data class RozvrhRecord(
-    val account: Int,
-    val monday: LocalDate,
+    @PrimaryKey
+    @Embedded
+    val key: Key,
     val lastUpdate: DateTime,
     val data: Rozvrh
-)
+){
+    data class Key(
+        val account: Int,
+        val monday: LocalDate
+    )
+}
