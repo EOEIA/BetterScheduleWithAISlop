@@ -11,9 +11,10 @@ import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice.Companion.getS
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Rozvrh3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.RozvrhConverter
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import kotlinx.coroutines.*
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
@@ -22,6 +23,7 @@ import org.joda.time.LocalTime
 import retrofit2.HttpException
 import java.io.IOException
 import kotlin.random.Random
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key
 
 class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     private val application: MainApplication = context.applicationContext as MainApplication
@@ -29,32 +31,33 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     private val statusStr: RozvrhStatusStore = application.rozvrhStatusStore
     private val scope: CoroutineScope = scope ?: application.mainScope
 
-    private val currentWeekLD: MutableLiveData<RozvrhRelated?> = MutableLiveData()
+    /** LiveData of the current week for each account. Useful for notification and widgets */
+    private val currentWeekLD: HashMap<Int,MutableLiveData<Rozvrh?>> = HashMap()
 
-    fun getCurrentWeekLD(): LiveData<RozvrhRelated?>{
-        if (currentWeekLD.value == null){
+    private fun getCurrentWeekMutLD(account: Int): MutableLiveData<Rozvrh?>{
+        val ld = currentWeekLD.getOrPut(account){MutableLiveData()}
+        if (ld.value == null){
             scope.launch {
-                currentWeekLD.value = getRozvrh(Utils.getDisplayWeekMonday(application), foreground = false)
+                ld.value = getRozvrh(Key(account, Utils.getDisplayWeekMonday(application)), foreground = false)
             }
         }
-        return currentWeekLD
+        return ld
+    }
+    fun getCurrentWeekLD(account: Int): LiveData<Rozvrh?> = getCurrentWeekMutLD(account)
+
+    fun getRozvrhLive(rozvrhId: Key, foreground: Boolean): LiveData<RozvrhRecord/*todo do we want to return rozvrh or rozvrhRecord?*/> {
+
+        refresh(rozvrhId, foreground, false)
+        return db.rozvrhDao().loadRozvrhLive(rozvrhId)
     }
 
-    fun getRozvrhLive(rozvrhId: LocalDate, foreground: Boolean): LiveData<RozvrhRelated> {
-        //fail-safe
-        val rozvrhMonday: LocalDate = Utils.getWeekMonday(rozvrhId)
-
-        refresh(rozvrhMonday, foreground, false)
-        return db.rozvrhDao().loadRozvrhRelatedLive(rozvrhMonday)
-    }
-
-    fun refresh(rozvrhMonday: LocalDate, foreground: Boolean, force: Boolean = false, invalidateOthersIfSuccessful: Boolean = false){
+    fun refresh(rozvrhId: Key, foreground: Boolean, force: Boolean = false, invalidateOthersIfSuccessful: Boolean = false){
         scope.launch(){
-            if (force || refreshNeeded(rozvrhMonday, foreground)){
-                val success = fetchAndCache(rozvrhMonday) != null
+            if (force || refreshNeeded(rozvrhId, foreground)){
+                val success = fetchAndCache(rozvrhId) != null
                 if (success && invalidateOthersIfSuccessful){
                     withContext(Dispatchers.IO){
-                        db.rozvrhDao().invalidateAllOther(rozvrhMonday)
+                        db.rozvrhDao().invalidateAllOther(rozvrhId)
                     }
                 }
             }
@@ -64,26 +67,23 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     /**
      * Loads the "freshest" rozvrh available and returns it.
      */
-    suspend fun getRozvrh(rozvrhId: LocalDate, foreground: Boolean): RozvrhRelated?{
-        val monday: LocalDate = Utils.getWeekMonday(rozvrhId)
-
-        val result: RozvrhRelated? = if (refreshNeeded(monday, foreground)){
-            fetchAndCache(monday, foreground) //is null on error
+    suspend fun getRozvrh(key: Key, foreground: Boolean): Rozvrh?{
+        val result: Rozvrh? = if (refreshNeeded(key, foreground)){
+            fetchAndCache(/*todo*/key, foreground) //is null on error
         } else null
         return result ?:
             //if refresh not needed or refresh failed
-            db.rozvrhDao().loadRozvrhRelated(monday)
+            db.rozvrhDao().loadRozvrh(key)?.data
     }
 
     /**
      * lads the cached rozvrh or `null` if not available. Disadvantage: it may not be very fresh; usually [getRozvrh] is better.
      */
-    suspend fun getCachedRozvrh(rozvrhId: LocalDate): RozvrhRelated?{
-        val monday: LocalDate = Utils.getWeekMonday(rozvrhId)
-        return db.rozvrhDao().loadRozvrhRelated(monday)
+    suspend fun getCachedRozvrh(rozvrhId: Key): Rozvrh?{
+        return db.rozvrhDao().loadRozvrh(rozvrhId)?.data
     }
 
-    fun getRozvrhStatusLiveData(rozvrhId: LocalDate): LiveData<StatusInfo>{
+    fun getRozvrhStatusLiveData(rozvrhId: Key): LiveData<StatusInfo>{
         return statusStr.getLiveData(rozvrhId)
     }
 
@@ -94,9 +94,9 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     /**
      * Returns the time when data on widget and in notification should be updated. `null` means, that it could not be determined and should be checked again later.
      */
-    suspend fun getUpdateDisplayedDataTime():LocalDateTime?{
+    suspend fun getUpdateDisplayedDataTime():LocalDateTime?{//todo
 
-        val current: RozvrhRelated? = getRozvrh(Utils.getCurrentMonday(), false)
+        val current: Rozvrh? = getRozvrh(Utils.getCurrentMonday(), false)
         var time: LocalDateTime?
         if (current == null){
             return null
@@ -115,7 +115,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         return time
     }
 
-    suspend fun refreshNeeded(rozvrhId: LocalDate, foreground: Boolean = true): Boolean{
+    suspend fun refreshNeeded(rozvrhId: Key, foreground: Boolean = true): Boolean{
         if (statusStr[rozvrhId].status == StatusInfo.Status.ERROR && foreground){ // when from background don't bother refreshing failed requests unless they are expired.
             return true
         }
@@ -139,8 +139,8 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
      * the background. Also resets refresh timeout if refresh fails in the background.
      *
      */
-    private suspend fun fetchAndCache(rozvrhId: LocalDate, foreground: Boolean = true): RozvrhRelated? {
-        val deferred: Deferred<RozvrhRelated?> = scope.async {
+    private suspend fun fetchAndCache(rozvrhId: Key, foreground: Boolean = true): Rozvrh? {
+        val deferred: Deferred<Rozvrh?> = scope.async {
             withContext(Dispatchers.Main) {
                 statusStr[rozvrhId] = StatusInfo.loading()
             }
@@ -151,11 +151,11 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                         //simulate slow net
                         delay(Random.nextLong(3000))
                         //return demo rozvrh
-                        application.debugUtils.getDemoRozvrh3(rozvrhId)
+                        application.debugUtils.getDemoRozvrh3(rozvrhId)/*todo*/
                     } else {
-                        withTimeout(if (foreground) Long.MAX_VALUE else 7000) { //use 7 second timeout if from background to avoid ANR
+                        withTimeout(if (foreground) 15000 else 7000) { //use 7 second timeout if from background to avoid ANR
                             //download new from server
-                            application.webservice?.getSchedule(rozvrhId)
+                            application.webservice?.getSchedule(rozvrhId) /*todo*/
                                 ?: throw IOException("Webservice not ready")
                         }
                     }
@@ -179,17 +179,21 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                     }
                 }
 
-                val rozvrh = withContext(Dispatchers.IO) {
-                    RozvrhConverter.convert(
+                val rozvrh: Rozvrh = withContext(Dispatchers.IO) {
+                    RozvrhConverter.convert(//todo
                         rozvrh3,
                         rozvrhId,
                         application
                     )
                 }
-                db.insertRozvrhRelated(rozvrh)
-                if (rozvrh.rozvrh.id == Utils.getCurrentMonday()) {
+                db.rozvrhDao().insertRozvrh(RozvrhRecord(
+                    rozvrhId,
+                    DateTime.now(),
+                    rozvrh
+                ))
+                if (rozvrh.monday == Utils.getCurrentMonday()) {
                     withContext(Dispatchers.Main) {
-                        currentWeekLD.value = rozvrh
+                        getCurrentWeekMutLD(rozvrhId.account).value = rozvrh
                     }
                 }
                 withContext(Dispatchers.Main) {
@@ -200,7 +204,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
             } catch (e: Exception) {
                 withContext(NonCancellable) {
                     withContext(Dispatchers.Main) {
-                        reportError(e, rozvrhId)
+                        reportError(e, rozvrhId)//todo
                     }
                 }
                 if (e is CancellationException) throw e
@@ -235,7 +239,7 @@ withContext(NonCancellable) {
      * leave [RozvrhStatusStore] stuck on loading state and it would never refresh until full app
      * restart.
      */
-    private fun reportError(e: Exception, rozvrhId: LocalDate) {
+    private fun reportError(e: Exception, rozvrhId: Key) {
         statusStr.isOffline.value = true
         statusStr[rozvrhId] = when (e) {
             is JsonMappingException ->{
