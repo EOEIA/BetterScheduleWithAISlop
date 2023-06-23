@@ -16,7 +16,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputLayout
 import cz.vitskalicky.lepsirozvrh.*
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login.LoginResult
+import cz.vitskalicky.lepsirozvrh.model.Login.LoginResult
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolInfo
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import kotlinx.coroutines.launch

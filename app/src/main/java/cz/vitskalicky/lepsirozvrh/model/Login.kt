@@ -1,9 +1,8 @@
-package cz.vitskalicky.lepsirozvrh.bakaAPI.login
+package cz.vitskalicky.lepsirozvrh.model
 
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.preference.PreferenceManager
 import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
@@ -12,10 +11,13 @@ import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.activity.LoginActivity
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.activity.WelcomeActivity
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login.LoginResult.*
+import cz.vitskalicky.lepsirozvrh.bakaAPI.login.LoginResponse
+import cz.vitskalicky.lepsirozvrh.bakaAPI.login.LoginWebservice
+import cz.vitskalicky.lepsirozvrh.bakaAPI.login.UserResponse
+import cz.vitskalicky.lepsirozvrh.bakaAPI.login.UserWebservice
+import cz.vitskalicky.lepsirozvrh.model.Login.LoginResult.*
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
-import io.sentry.Sentry
 import kotlinx.coroutines.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -81,7 +83,7 @@ class Login(val app: MainApplication) {
         }
     }
 
-    suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResult{
+    suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResult {
         when (e) {
             is HttpException -> {
                 //probably could not parse the response
@@ -162,7 +164,7 @@ class Login(val app: MainApplication) {
         }
     }
 
-    suspend fun firstLogin(url: String, username: String, password: String, isUrlManual: Boolean): LoginResult{
+    suspend fun firstLogin(url: String, username: String, password: String, isUrlManual: Boolean): LoginResult {
         val url: String = unifyUrl(url)
         try {
             val webservice = getUnloggedRetrofit(url).create(LoginWebservice::class.java)
@@ -189,7 +191,7 @@ class Login(val app: MainApplication) {
         }
     }
 
-    suspend fun refreshUserInfo(): LoginResult{
+    suspend fun refreshUserInfo(): LoginResult {
 
         val userWebservice: UserWebservice = app.retrofit?.create(UserWebservice::class.java)!!
         try {

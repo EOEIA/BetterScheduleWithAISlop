@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh
+package cz.vitskalicky.lepsirozvrh.model
 
 import android.content.Context
 import androidx.lifecycle.LiveData
@@ -6,18 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import com.fasterxml.jackson.databind.JsonMappingException
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.Utils
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.LoginRequiredException
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice.Companion.getSchedule
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Rozvrh3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.RozvrhConverter
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
-import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
-import cz.vitskalicky.lepsirozvrh.model.StatusInfo
-import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import kotlinx.coroutines.*
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
 import retrofit2.HttpException

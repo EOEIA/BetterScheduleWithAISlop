@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.model
+package cz.vitskalicky.lepsirozvrh.database
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

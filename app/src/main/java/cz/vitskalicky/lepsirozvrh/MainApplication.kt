@@ -17,9 +17,9 @@ import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.jaredrummler.cyanea.Cyanea
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login
+import cz.vitskalicky.lepsirozvrh.model.Login
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.TokenAuthenticator
-import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhRepository
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRepository
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore

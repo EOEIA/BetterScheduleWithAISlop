@@ -1,6 +1,5 @@
-package cz.vitskalicky.lepsirozvrh.model
+package cz.vitskalicky.lepsirozvrh.database
 
-import android.util.Log
 import androidx.room.TypeConverter
 import com.fasterxml.jackson.databind.type.TypeFactory
 import cz.vitskalicky.lepsirozvrh.MainApplication
@@ -51,14 +50,14 @@ object DateTimeConverters {
     @JvmStatic
     fun toDateTime(value: String?): DateTime? {
         return value?.let {
-            return DateTimeConverters.dateTimeFormatter.parseDateTime(value).withZone(DateTimeZone.getDefault())
+            return dateTimeFormatter.parseDateTime(value).withZone(DateTimeZone.getDefault())
         }
     }
 
     @TypeConverter
     @JvmStatic
     fun fromDateTime(date: DateTime?): String? {
-        return date?.withZone(DateTimeZone.UTC)?.toString(DateTimeConverters.dateTimeFormatter)
+        return date?.withZone(DateTimeZone.UTC)?.toString(dateTimeFormatter)
     }
 }
 

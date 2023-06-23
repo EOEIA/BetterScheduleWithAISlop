@@ -1,7 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.model.rozvrh
 
 import androidx.room.TypeConverter
-import cz.vitskalicky.lepsirozvrh.model.LocalDateSerializer
+import cz.vitskalicky.lepsirozvrh.database.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

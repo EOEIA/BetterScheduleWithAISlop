@@ -5,8 +5,9 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login.LoginResult.*
-import io.sentry.Sentry
+import cz.vitskalicky.lepsirozvrh.model.Login
+import cz.vitskalicky.lepsirozvrh.model.Login.LoginResult.*
+import cz.vitskalicky.lepsirozvrh.model.LoginRequiredException
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 

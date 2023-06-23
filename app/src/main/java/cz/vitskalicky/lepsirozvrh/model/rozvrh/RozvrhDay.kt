@@ -1,6 +1,6 @@
 package cz.vitskalicky.lepsirozvrh.model.rozvrh
 
-import cz.vitskalicky.lepsirozvrh.model.LocalDateSerializer
+import cz.vitskalicky.lepsirozvrh.database.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import org.joda.time.LocalDate
 
