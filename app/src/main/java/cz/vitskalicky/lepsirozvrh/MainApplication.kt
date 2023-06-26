@@ -79,13 +79,6 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         ).build()
     }
 
-    /**
-     * Warning: never keep an instance! Always get one using [MainApplication.retrofit] to make sure it uses the current URL even after logout.
-     */
-    var webservice: RozvrhWebservice? = null
-        get() = field ?: retrofit?.create(RozvrhWebservice::class.java)
-        private set
-
     val repository: RozvrhRepository by lazy {
         RozvrhRepository(this)
     }

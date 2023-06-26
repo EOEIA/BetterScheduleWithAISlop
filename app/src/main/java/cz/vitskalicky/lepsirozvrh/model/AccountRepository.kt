@@ -11,6 +11,7 @@ import cz.vitskalicky.lepsirozvrh.activity.LoginActivity
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.activity.WelcomeActivity
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
+import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResult.*
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
@@ -37,6 +38,8 @@ class AccountRepository(val app: MainApplication) {
     // the accounts are automatically updated
     private val tokenAuthenticators: MutableMap<Int, TokenAuthenticator> = HashMap()
     private val retrofits: MutableMap<Int, Retrofit> = HashMap()
+
+    private val webservices: MutableMap<Int, RozvrhWebservice> = HashMap()
 
     init {
         accountLDs.observe(app){
@@ -68,12 +71,22 @@ class AccountRepository(val app: MainApplication) {
 
     }
 
+    /** Returns an instance of retrofit (cached for each account) or `null` if it could not be created (likely because the URL is invalid, see [createRetrofit]) */
     fun getRetrofit(account: Account): Retrofit? {
         var retrofit = retrofits[account.id];
         if (retrofit == null){
             retrofit = createRetrofit(account)?.also { retrofits[account.id] = it }
         }
         return retrofit;
+    }
+
+    /** Returns an instance of webservice (cached for each account) or `null` if corresponding retrofit could not be created (see [getRetrofit])*/
+    fun getWebservice(account: Account): RozvrhWebservice?{
+        var webservice = webservices[account.id]
+        if (webservice == null){
+            webservice = getRetrofit(account)?.create(RozvrhWebservice::class.java)?.also { webservices[account.id] = it }
+        }
+        return webservice
     }
 
     fun getAccountsLD(): LiveData<List<Account>> = dao.loadAllAccountsLD()
@@ -336,6 +349,7 @@ class AccountRepository(val app: MainApplication) {
             .build()
     }
 
+    /** Creates new instance of Retrofit with the account's URL and login credentials (automatically updated according to database). If the URL is invalid, `null` is returned.*/
     private fun createRetrofit(account: Account): Retrofit? {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -383,4 +397,6 @@ class AccountRepository(val app: MainApplication) {
     }
 }
 
-public class LoginRequiredException(): RuntimeException("You need to log in first to perform this action")
+public open class LoginException(message: String?): RuntimeException(message)
+public class LoginRequiredException(): LoginException("You need to log in first to perform this action")
+
