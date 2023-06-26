@@ -3,6 +3,7 @@ package cz.vitskalicky.lepsirozvrh.model
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import androidx.lifecycle.LiveData
 import androidx.preference.PreferenceManager
 import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
@@ -11,10 +12,8 @@ import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.activity.LoginActivity
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.activity.WelcomeActivity
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.LoginResponse
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.LoginWebservice
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.UserResponse
-import cz.vitskalicky.lepsirozvrh.bakaAPI.login.UserWebservice
+import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
+import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.Login.LoginResult.*
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
@@ -33,9 +32,16 @@ import kotlin.reflect.KClass
 
 
 class Login(val app: MainApplication) {
+    private val db: RozvrhDatabase = app.rozvrhDb
+    private val dao = db.accountDao()
 
-    private val sprefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(app)
+    private val accountLDs: LiveData<Map<Int, Account>> = dao.loadAllAccountsLDMap()
+    // the accounts are automatically updated
+    private val tokenAuthenticators: MutableMap<Int, TokenAuthenticator> = HashMap() //todo automatic token update
 
+    init {
+        //accountLDs.observeForever(){} todo automatic token updates
+    }
     /**
      * Returns a new retrofit which does not inject login token.
      */
@@ -52,36 +58,62 @@ class Login(val app: MainApplication) {
 
     }
 
+    fun getAccountsLD(): LiveData<List<Account>> = dao.loadAllAccountsLD()
+    fun getAccountLD(id: Int): LiveData<Account?> = dao.loadAccountLD(id)
+
     /**
-     * Returns a valid access token or null (if network not available) or throw [LoginRequiredException] if not logged in.
-     * @throws LoginRequiredException if not logged in
+     * Does what its name suggest.
+     *
+     * If [refreshTokens] is `true`, [Account.accessToken] and [Account.refreshToken] will be refreshed if expired (and
+     * if internet connection available) */
+    suspend fun getAccount(id: Int, refreshTokens: Boolean = false): Account?{
+        if (refreshTokens){
+            refreshToken(id, force = false)
+        }
+        return dao.loadAccount(id);
+    }
+
+    /**
+     * If [account] has expired access token, refresh it and return [Account] with fresh tokens. If access token is not
+     * expired, simply return [account].
      */
-    suspend fun getAccessToken(): String? {
-        if (sprefs.getString(SharedPrefs.ACCEESS_TOKEN, "").isNullOrBlank() ||
-                sprefs.getString(SharedPrefs.REFRESH_TOKEN, "").isNullOrBlank() ||
-                sprefs.getString(SharedPrefs.ACCESS_EXPIRES, "").isNullOrBlank()){
-            throw LoginRequiredException()
-        }
-
-        val expiresStr: String = sprefs.getString(SharedPrefs.ACCESS_EXPIRES, null)!!
-        val expires: LocalDateTime = LocalDateTime.parse(expiresStr, ISODateTimeFormat.dateTimeParser())
-
-        if (expires.isAfter(LocalDateTime.now())){
-            return sprefs.getString(SharedPrefs.ACCEESS_TOKEN, null)
-        }
-
-        val refreshStatus: LoginResult = refreshToken()
-        when (refreshStatus){
-            SUCCESS -> {
-                return sprefs.getString(SharedPrefs.ACCEESS_TOKEN, null)
-            }
-            WRONG_LOGIN -> {
-                throw LoginRequiredException()
-            }
-            else -> return null
-
+    suspend fun tryRefresh(account: Account): Account {
+        return if (account.isAccessExpired()){
+            getAccount(account.id, refreshTokens = true) ?: account /*the account may have been deleted from database*/
+        }else{
+            account
         }
     }
+
+//    /**
+//     * Returns a valid access token or null (if network not available).
+//     */
+//    suspend fun getAccessToken(id: Int): String? {
+//        if (sprefs.getString(SharedPrefs.ACCEESS_TOKEN, "").isNullOrBlank() ||
+//                sprefs.getString(SharedPrefs.REFRESH_TOKEN, "").isNullOrBlank() ||
+//                sprefs.getString(SharedPrefs.ACCESS_EXPIRES, "").isNullOrBlank()){
+//            throw LoginRequiredException()
+//        }
+//
+//        val expiresStr: String = sprefs.getString(SharedPrefs.ACCESS_EXPIRES, null)!!
+//        val expires: LocalDateTime = LocalDateTime.parse(expiresStr, ISODateTimeFormat.dateTimeParser())
+//
+//        if (expires.isAfter(LocalDateTime.now())){
+//            return sprefs.getString(SharedPrefs.ACCEESS_TOKEN, null)
+//        }
+//
+//        val refreshStatus: LoginResult = refreshToken()
+//        when (refreshStatus){
+//            SUCCESS -> {
+//                return sprefs.getString(SharedPrefs.ACCEESS_TOKEN, null)
+//            }
+//            WRONG_LOGIN -> {
+//                throw LoginRequiredException()
+//            }
+//            else -> return null
+//
+//        }
+//    }
 
     suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResult {
         when (e) {
@@ -135,25 +167,35 @@ class Login(val app: MainApplication) {
         }
     }
 
-    suspend fun refreshToken(): LoginResult {
-        val refreshToken: String = sprefs.getString(SharedPrefs.REFRESH_TOKEN, null)?.takeUnless { it.isBlank() } ?: return WRONG_LOGIN
-
-        val retrofit: Retrofit = app.noAuthRetrofit!!
-        val webservice: LoginWebservice = retrofit.create(LoginWebservice::class.java)
+    /** Token will be updated in database */
+    suspend fun refreshToken(id: Int, force: Boolean = true): LoginResult {
+        val account = dao.loadAccount(id) ?: return WRONG_LOGIN;
+        if (!force && !account.isAccessExpired()){
+            return SUCCESS;
+        }
+//        val refreshToken: String = sprefs.getString(SharedPrefs.REFRESH_TOKEN, null)?.takeUnless { it.isBlank() } ?: return WRONG_LOGIN
 
         try {
-            val response: LoginResponse = webservice.refreshLogin(refreshToken)
+            val retrofit: Retrofit = createRetrofitNoAuth(account.serverUrl);
+            val webservice: LoginWebservice = retrofit.create(LoginWebservice::class.java)
 
-            sprefs.edit().apply {
-                putString(SharedPrefs.REFRESH_TOKEN, response.refresh_token)
-                putString(SharedPrefs.ACCEESS_TOKEN, response.access_token)
-                putString(SharedPrefs.ACCESS_EXPIRES, LocalDateTime.now().plusSeconds(response.expires_in).toString(ISODateTimeFormat.dateTime()))
-            }.apply()
+            val response: LoginResponse = webservice.refreshLogin(account.refreshToken)
+
+//            sprefs.edit().apply {
+//                putString(SharedPrefs.REFRESH_TOKEN, response.refresh_token)
+//                putString(SharedPrefs.ACCEESS_TOKEN, response.access_token)
+//                putString(SharedPrefs.ACCESS_EXPIRES, LocalDateTime.now().plusSeconds(response.expires_in).toString(ISODateTimeFormat.dateTime()))
+//            }.apply()
+            val updatedAccount = account.copy(
+                refreshToken = response.refresh_token,
+                accessToken = response.access_token,
+                accessExpires = DateTime.now().plusSeconds(response.expires_in)
+            )
+            dao.updateAccount(updatedAccount)
 
             //check if user info should be refreshed
-            val semesterEnd: DateTime? = sprefs.getString(SharedPrefs.SEMESTER_END, null)?.takeUnless { it.isBlank() }?.let {ISODateTimeFormat.dateTime().parseDateTime(it)}
-            if (semesterEnd == null || semesterEnd.isBeforeNow){
-                refreshUserInfo()
+            if (account.semesterEnd == null || account.semesterEnd.isBeforeNow){
+                refreshUserInfo(account.id)
             }
 
             return SUCCESS
@@ -161,7 +203,7 @@ class Login(val app: MainApplication) {
             return handleException(e, "login")
         }catch (e: IOException){
             return handleException(e, "login")
-        }
+        }//todo catch invalid url
     }
 
     suspend fun firstLogin(url: String, username: String, password: String, isUrlManual: Boolean): LoginResult {
@@ -191,7 +233,7 @@ class Login(val app: MainApplication) {
         }
     }
 
-    suspend fun refreshUserInfo(): LoginResult {
+    suspend fun refreshUserInfo(accountId: Int): LoginResult {
 
         val userWebservice: UserWebservice = app.retrofit?.create(UserWebservice::class.java)!!
         try {
@@ -282,6 +324,35 @@ class Login(val app: MainApplication) {
             return MainActivity::class
         }
         return null
+    }
+
+    suspend fun getTokenAuthenticator(accountId: Int): TokenAuthenticator? { //todo
+        TODO()
+        var auth = tokenAuthenticators[accountId]
+        if (auth == null){
+            val acc
+        }
+        val account = getAccount(accountId) ?: return null;
+        tokenAuthenticators.getOrPut(accountId) {
+            val account = getAccount(accountId) ?: return@getOrPut null
+            TokenAuthenticator(app, account)
+        }
+    }
+
+    private fun createRetrofitNoAuth(url: String): Retrofit{
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        val client = OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
+        return Retrofit.Builder()
+            .baseUrl(url) //todo test invalid url
+            .addConverterFactory(JacksonConverterFactory.create(MainApplication.objectMapper))
+            .client(client)
+            .build()
+    }
+
+    private fun createRetrofit(account: Account): Retrofit{
+        //todo
+        TODO()
     }
 
     companion object{
