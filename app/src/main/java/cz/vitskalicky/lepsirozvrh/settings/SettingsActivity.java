@@ -148,7 +148,7 @@ public class SettingsActivity extends BaseActivity implements Utils.RecreateWith
         if (settingsFragment != null) {
             settingsFragment.init(donations);
             settingsFragment.setLogoutListener(() -> {
-                ((MainApplication)getApplicationContext()).getLogin().logout();
+                ((MainApplication)getApplicationContext()).getAccountRepository().logout();
                 finish();
                 return;
             });

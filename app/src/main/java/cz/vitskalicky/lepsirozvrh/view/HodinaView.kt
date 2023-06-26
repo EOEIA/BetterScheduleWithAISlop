@@ -49,7 +49,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
 
             var zkruc: String? = hodinan.teacherAbbrev
 
-            if ((context.applicationContext as MainApplication).login.isTeacher()) {
+            if ((context.applicationContext as MainApplication).accountRepository.isTeacher()) {
                 // to teacher's we want to show the class, not the teacher
                 // the class name is saved in zkrskup and skup
                 zkruc = hodinan.groups.joinToString(", ") { if (it.abbrev.isBlank()) {it.abbrev} else {it.name} }
@@ -205,7 +205,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
 
             var zkruc: String = lesson.teacherAbbrev
 
-            if ((context.applicationContext as MainApplication).login.isTeacher()) {
+            if ((context.applicationContext as MainApplication).accountRepository.isTeacher()) {
                 // to teacher's we want to show the class, not the teacher
                 // the class name is saved in zkrskup and skup
                 zkruc = lesson.groups.joinToString(", ") { if (it.abbrev.isBlank()) {it.abbrev} else {it.name} }

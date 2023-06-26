@@ -16,7 +16,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputLayout
 import cz.vitskalicky.lepsirozvrh.*
-import cz.vitskalicky.lepsirozvrh.model.Login.LoginResult
+import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResult
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolInfo
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import kotlinx.coroutines.launch
@@ -60,7 +60,7 @@ class LoginActivity : BaseActivity() {
                     SharedPrefs.getString(this, SharedPrefs.URL)
             )
         }
-        (applicationContext as MainApplication).login.logout()
+        (applicationContext as MainApplication).accountRepository.logout()
         val chooseSchoolListener = View.OnClickListener { v: View? ->
             val intent = Intent(this, SchoolsListActivity::class.java)
             startActivityForResult(intent, REQUEST_PICK_SCHOOL)
@@ -134,7 +134,7 @@ class LoginActivity : BaseActivity() {
             return
         }
         lifecycleScope.launch {
-            val result = (applicationContext as MainApplication).login.firstLogin(url, tilUsername.editText!!.text.toString(), tilPassword.editText!!.text.toString(), viewModel.isManualUrl)
+            val result = (applicationContext as MainApplication).accountRepository.firstLogin(url, tilUsername.editText!!.text.toString(), tilPassword.editText!!.text.toString(), viewModel.isManualUrl)
 
             if (result == LoginResult.SUCCESS) {
                 val intent = Intent(this@LoginActivity, MainActivity::class.java)

@@ -3,8 +3,8 @@ package cz.vitskalicky.lepsirozvrh.bakaAPI.login
 import android.util.Log
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.model.Account
-import cz.vitskalicky.lepsirozvrh.model.Login
-import cz.vitskalicky.lepsirozvrh.model.Login.LoginResult.*
+import cz.vitskalicky.lepsirozvrh.model.AccountRepository
+import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResult.*
 import cz.vitskalicky.lepsirozvrh.model.LoginRequiredException
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
@@ -22,9 +22,9 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?/*if nul
         synchronized(app) {
             var currentAccessToken: String = account?.accessToken ?: return null
             if (usedAccessToken == currentAccessToken) {
-                val refreshResult: Login.LoginResult = runBlocking {
+                val refreshResult: AccountRepository.LoginResult = runBlocking {
                     if (account == null) return@runBlocking WRONG_LOGIN
-                    app.login.refreshToken(account!!.id)
+                    app.accountRepository.refreshToken(account!!.id)
                 }
                 when (refreshResult) {
                     WRONG_LOGIN -> {
@@ -38,7 +38,7 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?/*if nul
                     SUCCESS -> {
                         account = runBlocking {
                             if (account == null) return@runBlocking null
-                            app.login.getAccount(account!!.id) //get refreshed account
+                            app.accountRepository.getAccount(account!!.id) //get refreshed account
                         } ?: return null
                         currentAccessToken = account?.accessToken ?: return null
                     }
@@ -59,7 +59,7 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?/*if nul
             runBlocking {
                 if (account == null) return@runBlocking null
                 try {
-                    account = app.login.tryRefresh(account!!) // ensure token is valid
+                    account = app.accountRepository.tryRefresh(account!!) // ensure token is valid
                     account?.accessToken
                 } catch (_: LoginRequiredException) {
                     null

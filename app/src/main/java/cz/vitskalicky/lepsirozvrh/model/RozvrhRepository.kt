@@ -253,7 +253,7 @@ withContext(NonCancellable) {
                 StatusInfo.Rozvrh.unexpectedResponse()
             }
             is LoginRequiredException -> {
-                application.login.logout()
+                application.accountRepository.logout()
                 StatusInfo.Rozvrh.loginFailed()
             }
             is HttpException -> {

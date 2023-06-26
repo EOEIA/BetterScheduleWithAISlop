@@ -17,7 +17,7 @@ import cz.vitskalicky.lepsirozvrh.BuildConfig;
 import cz.vitskalicky.lepsirozvrh.MainApplication;
 import cz.vitskalicky.lepsirozvrh.R;
 import cz.vitskalicky.lepsirozvrh.SharedPrefs;
-import cz.vitskalicky.lepsirozvrh.model.Login;
+import cz.vitskalicky.lepsirozvrh.model.AccountRepository;
 import cz.vitskalicky.lepsirozvrh.fragment.RozvrhFragment;
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification;
 import cz.vitskalicky.lepsirozvrh.theme.Theme;
@@ -112,9 +112,9 @@ public class MainActivity extends BaseActivity {
         if (finishing){
             return;
         }
-        Login login = ((MainApplication)getApplication()).getLogin();
-        if (login.checkLogin(this) != null) {
-            login.logout();
+        AccountRepository accountRepository = ((MainApplication)getApplication()).getAccountRepository();
+        if (accountRepository.checkLogin(this) != null) {
+            accountRepository.logout();
             finish();
             finishing = true;
         }

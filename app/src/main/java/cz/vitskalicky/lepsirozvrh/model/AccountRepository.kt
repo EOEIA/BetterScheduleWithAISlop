@@ -2,9 +2,7 @@ package cz.vitskalicky.lepsirozvrh.model
 
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
-import androidx.preference.PreferenceManager
 import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
@@ -14,7 +12,7 @@ import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.activity.WelcomeActivity
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
-import cz.vitskalicky.lepsirozvrh.model.Login.LoginResult.*
+import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResult.*
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import kotlinx.coroutines.*
@@ -31,7 +29,7 @@ import kotlin.math.min
 import kotlin.reflect.KClass
 
 
-class Login(val app: MainApplication) {
+class AccountRepository(val app: MainApplication) {
     private val db: RozvrhDatabase = app.rozvrhDb
     private val dao = db.accountDao()
 

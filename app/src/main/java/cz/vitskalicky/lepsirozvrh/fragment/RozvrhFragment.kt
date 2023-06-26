@@ -24,7 +24,6 @@ import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import cz.vitskalicky.lepsirozvrh.view.RozvrhLayout
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
-import org.joda.time.LocalDateTime
 
 class RozvrhFragment : Fragment() {
 
@@ -180,7 +179,7 @@ class RozvrhFragment : Fragment() {
                             it.checkLogin()
                         }else{
                             //this is technically redundant. just future proof.
-                            if ((context?.applicationContext as? MainApplication)?.login?.checkLogin(it) != null){
+                            if ((context?.applicationContext as? MainApplication)?.accountRepository?.checkLogin(it) != null){
                                 activity?.finish()
                             }
                         }

@@ -1,21 +1,13 @@
 package cz.vitskalicky.lepsirozvrh.activity
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.text.Html
 import android.text.SpannableStringBuilder
-import android.text.Spanned
-import android.text.SpannedString
 import android.text.method.LinkMovementMethod
 import android.text.style.URLSpan
 import android.view.View
-import android.view.textclassifier.TextLinks
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
-import androidx.core.text.HtmlCompat
-import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
@@ -39,7 +31,7 @@ class WelcomeActivity : BaseActivity() {
                     (application as MainApplication).diableSentry()
                 }
             }
-            (application as MainApplication).login.checkLogin(this)
+            (application as MainApplication).accountRepository.checkLogin(this)
             finish()
         }
 
