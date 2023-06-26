@@ -6,7 +6,7 @@ import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.multidex.MultiDexApplication
 import androidx.room.Room
@@ -46,7 +46,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.util.*
 
-class MainApplication : MultiDexApplication() {
+class MainApplication : MultiDexApplication(), LifecycleOwner {
+
+    // a lifecycle alive for the entire life of MainApplication
+    private val lifecycleRegistry = LifecycleRegistry(this);
+    public override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
 
     companion object {
         private val TAG = MainApplication::class.java.simpleName
@@ -217,7 +222,7 @@ class MainApplication : MultiDexApplication() {
         }
 
         currentWeekLivedata = repository.getCurrentWeekLD()
-        currentWeekLivedata.observeForever(currentWeekObserver)
+        currentWeekLivedata.observe(this, currentWeekObserver)
         if (!SharedPrefs.containsPreference(this, R.string.PREFS_THEME_cHBg)) {
             //theme not initialized yet (first start or after update from pre-themes version)
             SharedPrefs.setStringPreference(this, R.string.PREFS_APP_THEME, "0")
@@ -259,6 +264,11 @@ class MainApplication : MultiDexApplication() {
                 3 -> theme.themeData = DefaultThemes.getBlackTheme()
             }
         }
+        // "start up" the lifecycle
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
         //this just needs to be run time by time, so I thought this could be a good place
         mainScope.launch {
             //delay to give time for the first schedule to load and display as fast as possible and not overload the database with another request.
@@ -383,8 +393,11 @@ class MainApplication : MultiDexApplication() {
 
 
     override fun onTerminate() {
-        //prevent leaks
-        currentWeekLivedata.removeObserver(currentWeekObserver)
+        // "destroy" the lifecycle
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
         mainScope.cancel()
         super.onTerminate()
     }
