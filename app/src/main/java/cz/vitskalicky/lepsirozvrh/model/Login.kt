@@ -37,10 +37,22 @@ class Login(val app: MainApplication) {
 
     private val accountLDs: LiveData<Map<Int, Account>> = dao.loadAllAccountsLDMap()
     // the accounts are automatically updated
-    private val tokenAuthenticators: MutableMap<Int, TokenAuthenticator> = HashMap() //todo automatic token update
+    private val tokenAuthenticators: MutableMap<Int, TokenAuthenticator> = HashMap()
+    private val retrofits: MutableMap<Int, Retrofit> = HashMap()
 
     init {
-        //accountLDs.observeForever(){} todo automatic token updates
+        accountLDs.observe(app){
+            val toRemove = HashSet(tokenAuthenticators.keys);
+            for (account in it.values){
+                toRemove.remove(account.id)
+                tokenAuthenticators.getOrPut(account.id){TokenAuthenticator(app, account)}
+                    .account = account
+            }
+            for (id in toRemove){
+                tokenAuthenticators[id]?.account = null
+                tokenAuthenticators.remove(id)
+            }
+        }
     }
     /**
      * Returns a new retrofit which does not inject login token.
@@ -56,6 +68,14 @@ class Login(val app: MainApplication) {
                 .client(client)
                 .build()
 
+    }
+
+    fun getRetrofit(account: Account): Retrofit? {
+        var retrofit = retrofits[account.id];
+        if (retrofit == null){
+            retrofit = createRetrofit(account)?.also { retrofits[account.id] = it }
+        }
+        return retrofit;
     }
 
     fun getAccountsLD(): LiveData<List<Account>> = dao.loadAllAccountsLD()
@@ -84,36 +104,6 @@ class Login(val app: MainApplication) {
             account
         }
     }
-
-//    /**
-//     * Returns a valid access token or null (if network not available).
-//     */
-//    suspend fun getAccessToken(id: Int): String? {
-//        if (sprefs.getString(SharedPrefs.ACCEESS_TOKEN, "").isNullOrBlank() ||
-//                sprefs.getString(SharedPrefs.REFRESH_TOKEN, "").isNullOrBlank() ||
-//                sprefs.getString(SharedPrefs.ACCESS_EXPIRES, "").isNullOrBlank()){
-//            throw LoginRequiredException()
-//        }
-//
-//        val expiresStr: String = sprefs.getString(SharedPrefs.ACCESS_EXPIRES, null)!!
-//        val expires: LocalDateTime = LocalDateTime.parse(expiresStr, ISODateTimeFormat.dateTimeParser())
-//
-//        if (expires.isAfter(LocalDateTime.now())){
-//            return sprefs.getString(SharedPrefs.ACCEESS_TOKEN, null)
-//        }
-//
-//        val refreshStatus: LoginResult = refreshToken()
-//        when (refreshStatus){
-//            SUCCESS -> {
-//                return sprefs.getString(SharedPrefs.ACCEESS_TOKEN, null)
-//            }
-//            WRONG_LOGIN -> {
-//                throw LoginRequiredException()
-//            }
-//            else -> return null
-//
-//        }
-//    }
 
     suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResult {
         when (e) {
@@ -326,15 +316,13 @@ class Login(val app: MainApplication) {
         return null
     }
 
-    suspend fun getTokenAuthenticator(accountId: Int): TokenAuthenticator? { //todo
-        TODO()
-        var auth = tokenAuthenticators[accountId]
-        if (auth == null){
-            val acc
-        }
-        val account = getAccount(accountId) ?: return null;
-        tokenAuthenticators.getOrPut(accountId) {
-            val account = getAccount(accountId) ?: return@getOrPut null
+    private fun getTokenAuthenticator(account: Account): TokenAuthenticator {
+//        var account: Account? = tokenAuthenticators[accountId]?.account
+//        if (account == null){ //token authenticator does not exist
+//            account = getAccount(accountId) ?: return null
+//            // function above is suspending, tokenAuthenticators mich have changed
+//        }
+        return tokenAuthenticators.getOrPut(account.id) {
             TokenAuthenticator(app, account)
         }
     }
@@ -350,9 +338,24 @@ class Login(val app: MainApplication) {
             .build()
     }
 
-    private fun createRetrofit(account: Account): Retrofit{
-        //todo
-        TODO()
+    private fun createRetrofit(account: Account): Retrofit? {
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.level = HttpLoggingInterceptor.Level.BODY
+        val tokenAuthenticator = getTokenAuthenticator(account) ?: return null
+        val client = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .addInterceptor(tokenAuthenticator)
+            .authenticator(tokenAuthenticator)
+            .build()
+        return try {
+            Retrofit.Builder()
+                .baseUrl(account.serverUrl)
+                .addConverterFactory(JacksonConverterFactory.create(MainApplication.objectMapper))
+                .client(client)
+                .build()
+        } catch (e: IllegalArgumentException) {
+            null
+        }
     }
 
     companion object{

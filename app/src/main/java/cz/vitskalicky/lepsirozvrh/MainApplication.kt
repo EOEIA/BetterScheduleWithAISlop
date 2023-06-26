@@ -73,57 +73,6 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     private lateinit var currentWeekLivedata: LiveData<RozvrhRelated?>
     private lateinit var currentWeekObserver: Observer<RozvrhRelated?>
 
-    /**
-     * Warning: never keep an instance! Always get one using [MainApplication.retrofit] to make sure it uses the current URL even after logout.
-     */
-    var retrofit: Retrofit? = null
-        get() {
-            if (SharedPrefs.contains(this, SharedPrefs.URL)) {
-                val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.BODY
-                val tokenAuthenticator = TokenAuthenticator(this)
-                val client = OkHttpClient.Builder()
-                        .addInterceptor(interceptor)
-                        .addInterceptor(tokenAuthenticator)
-                        .authenticator(tokenAuthenticator)
-                        .build()
-                field = try {
-                    Retrofit.Builder()
-                            .baseUrl(SharedPrefs.getString(this, SharedPrefs.URL))
-                            .addConverterFactory(JacksonConverterFactory.create(objectMapper))
-                            .client(client)
-                            .build()
-                } catch (e: IllegalArgumentException) {
-                    return null
-                }
-                return field
-            }
-            return null
-        }
-    private set
-
-    /**
-     * note: this retrofit is bound to the url, but does not authenticate
-     * Warning: never keep an instance! Always get one using [MainApplication.noAuthRetrofit] to make sure it uses the current URL even after logout.
-     */
-    var noAuthRetrofit: Retrofit? = null
-        get() {
-            if (field != null)
-                return field
-
-            val loggingInterceptor = HttpLoggingInterceptor()
-            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-            val client = OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
-            field = Retrofit.Builder()
-                        .baseUrl(SharedPrefs.getString(this, SharedPrefs.URL))
-                        .addConverterFactory(JacksonConverterFactory.create(objectMapper))
-                        .client(client)
-                        .build()
-
-            return field
-        }
-    private set
-
     val rozvrhDb: RozvrhDatabase by lazy {
         Room.databaseBuilder(
                 applicationContext,
