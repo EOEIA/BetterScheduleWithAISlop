@@ -4,12 +4,19 @@ import android.util.Log
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
-import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResult.*
+import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResultStatus.*
 import cz.vitskalicky.lepsirozvrh.model.LoginRequiredException
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 
-class TokenAuthenticator(val app: MainApplication, var account: Account?/*if null, user has been logged out*/) : Authenticator, Interceptor {
+/**
+ * Inserts authentication headers to requests
+ *
+ * - [account] - if null, user has been logged out
+ * - [connectDb] - Whether to refresh tokens automatically if they expire and save them to database. If `true`, but the
+ *      account isn't in database, things might break.
+ */
+class TokenAuthenticator(val app: MainApplication, var account: Account?, val connectDb: Boolean = true) : Authenticator, Interceptor {
 
     override fun authenticate(route: Route?, response: Response): Request? {
         if (account == null) return null
@@ -23,10 +30,10 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?/*if nul
             var currentAccessToken: String = account?.accessToken ?: return null
             if (usedAccessToken == currentAccessToken) {
                 val refreshResult: AccountRepository.LoginResult = runBlocking {
-                    if (account == null) return@runBlocking WRONG_LOGIN
-                    app.accountRepository.refreshToken(account!!.id)
+                    if (account == null) return@runBlocking WRONG_LOGIN.fail()
+                    if (connectDb) app.accountRepository.refreshToken(account!!.id) else SUCCESS.ok(account!!)
                 }
-                when (refreshResult) {
+                when (refreshResult.status) {
                     WRONG_LOGIN -> {
                         return null
                     }
@@ -36,10 +43,7 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?/*if nul
                                 .build()
                     }
                     SUCCESS -> {
-                        account = runBlocking {
-                            if (account == null) return@runBlocking null
-                            app.accountRepository.getAccount(account!!.id) //get refreshed account
-                        } ?: return null
+                        account = refreshResult.account
                         currentAccessToken = account?.accessToken ?: return null
                     }
                 }
@@ -59,7 +63,7 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?/*if nul
             runBlocking {
                 if (account == null) return@runBlocking null
                 try {
-                    account = app.accountRepository.tryRefresh(account!!) // ensure token is valid
+                    if (connectDb) account = app.accountRepository.tryRefresh(account!!) // ensure token is valid
                     account?.accessToken
                 } catch (_: LoginRequiredException) {
                     null

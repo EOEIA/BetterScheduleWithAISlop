@@ -13,14 +13,13 @@ import cz.vitskalicky.lepsirozvrh.activity.WelcomeActivity
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
-import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResult.*
+import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResultStatus.*
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import kotlinx.coroutines.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.joda.time.DateTime
-import org.joda.time.LocalDateTime
 import org.joda.time.format.ISODateTimeFormat
 import retrofit2.HttpException
 import retrofit2.Retrofit
@@ -39,7 +38,8 @@ class AccountRepository(val app: MainApplication) {
     private val tokenAuthenticators: MutableMap<Int, TokenAuthenticator> = HashMap()
     private val retrofits: MutableMap<Int, Retrofit> = HashMap()
 
-    private val webservices: MutableMap<Int, RozvrhWebservice> = HashMap()
+    private val rozvrhWebservices: MutableMap<Int, RozvrhWebservice> = HashMap()
+    private val userWebservices: MutableMap<Int, UserWebservice> = HashMap()
 
     init {
         accountLDs.observe(app){
@@ -71,7 +71,10 @@ class AccountRepository(val app: MainApplication) {
 
     }
 
-    /** Returns an instance of retrofit (cached for each account) or `null` if it could not be created (likely because the URL is invalid, see [createRetrofit]) */
+    /** Returns an instance of retrofit (cached for each account) or `null` if it could not be created (likely because the URL is invalid, see [createRetrofit]).
+     * Also, the [account] must have a valid id and be stored in database, otherwise the credentials will not be renewed,
+     * may be replaced by credentials of a different account with the same id or other bad things might happen
+     * */
     fun getRetrofit(account: Account): Retrofit? {
         var retrofit = retrofits[account.id];
         if (retrofit == null){
@@ -81,10 +84,19 @@ class AccountRepository(val app: MainApplication) {
     }
 
     /** Returns an instance of webservice (cached for each account) or `null` if corresponding retrofit could not be created (see [getRetrofit])*/
-    fun getWebservice(account: Account): RozvrhWebservice?{
-        var webservice = webservices[account.id]
+    fun getRozvrhWebservice(account: Account): RozvrhWebservice?{
+        var webservice = rozvrhWebservices[account.id]
         if (webservice == null){
-            webservice = getRetrofit(account)?.create(RozvrhWebservice::class.java)?.also { webservices[account.id] = it }
+            webservice = getRetrofit(account)?.create(RozvrhWebservice::class.java)?.also { rozvrhWebservices[account.id] = it }
+        }
+        return webservice
+    }
+
+    /** Returns an instance of webservice (cached for each account) or `null` if corresponding retrofit could not be created (see [getRetrofit])*/
+    fun getUserWebservice(account: Account): UserWebservice?{
+        var webservice = userWebservices[account.id]
+        if (webservice == null){
+            webservice = getRetrofit(account)?.create(UserWebservice::class.java)?.also { userWebservices[account.id] = it }
         }
         return webservice
     }
@@ -116,7 +128,7 @@ class AccountRepository(val app: MainApplication) {
         }
     }
 
-    suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResult {
+    private suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResultStatus {
         when (e) {
             is HttpException -> {
                 //probably could not parse the response
@@ -124,7 +136,6 @@ class AccountRepository(val app: MainApplication) {
                 var parseException: IOException? = null
                 var rawBody: String? = null;
                 val errorBody: Map<String, Any>? = e.response()?.errorBody()?.let {
-                    @Suppress("BlockingMethodInNonBlockingContext")
                     withContext(Dispatchers.IO) {
                         try {
                             val str = it.string()
@@ -168,11 +179,11 @@ class AccountRepository(val app: MainApplication) {
         }
     }
 
-    /** Token will be updated in database */
+    /** Token will also be updated in database */
     suspend fun refreshToken(id: Int, force: Boolean = true): LoginResult {
-        val account = dao.loadAccount(id) ?: return WRONG_LOGIN;
+        val account = dao.loadAccount(id) ?: return WRONG_LOGIN.fail();
         if (!force && !account.isAccessExpired()){
-            return SUCCESS;
+            return SUCCESS.ok(account);
         }
 //        val refreshToken: String = sprefs.getString(SharedPrefs.REFRESH_TOKEN, null)?.takeUnless { it.isBlank() } ?: return WRONG_LOGIN
 
@@ -199,66 +210,108 @@ class AccountRepository(val app: MainApplication) {
                 refreshUserInfo(account.id)
             }
 
-            return SUCCESS
+            return SUCCESS.ok(updatedAccount)
         }catch (e: HttpException){
-            return handleException(e, "login")
+            return handleException(e, "login").fail()
         }catch (e: IOException){
-            return handleException(e, "login")
+            return handleException(e, "login").fail()
         }//todo catch invalid url
     }
 
-    suspend fun firstLogin(url: String, username: String, password: String, isUrlManual: Boolean): LoginResult {
+    suspend fun addAccount(url: String, username: String, password: String, isUrlManual: Boolean): LoginResult {
         val url: String = unifyUrl(url)
         try {
             val webservice = getUnloggedRetrofit(url).create(LoginWebservice::class.java)
 
             val response: LoginResponse = webservice.firstLogin(username, password)
             //handle success
+            val partialAccount = Account(
+                url, username, response.access_token, response.refresh_token,
+                accessExpires = DateTime.now().plusSeconds(response.expires_in),
+                schoolName = "",
+                fullName = "",
+                userType = "",
+                userTypeText = "",
+                semesterEnd = null,
+                userUID = "",
+                clazz = Class("","","")
+            )
+            val userWebservice = createRetrofit(partialAccount, connectDb = false)?.create(UserWebservice::class.java)
+            val userResponse = userWebservice?.getUser()
+            if (userResponse == null) {
+                return UNEXPECTED_RESPONSE.fail()
+            }
+            val semesterEnd: DateTime? = userResponse.settingModules?.common?.actualSemester?.to?.let {
+                try {
+                    ISODateTimeFormat.dateTimeParser().withOffsetParsed().parseDateTime(it)
+                }catch (e: IllegalArgumentException){
+                    e.printStackTrace()
+                    null
+                }
+            }
+            val partialAccount2 = Account(
+                url, username, response.access_token, response.refresh_token,
+                accessExpires = DateTime.now().plusSeconds(response.expires_in),
+                schoolName = userResponse.schoolOrganizationName ?: "",
+                fullName = userResponse.fullName ?: "",
+                userType = userResponse.userType ?: "",
+                userTypeText = userResponse.userTypeText ?: "",
+                semesterEnd = semesterEnd,
+                userUID = userResponse.userUID ?: "",
+                clazz = userResponse.clazz?.run { Class(id?:"", abbrev?:"", name?:"") } ?: Class("","","")
+            )
+            val accountId = dao.insertAccount(partialAccount2)
+            val account = dao.loadAccount(accountId) //todo test if the id from insert account matches account's id
 
-            sprefs.edit().apply {
-                putString(SharedPrefs.REFRESH_TOKEN, response.refresh_token)
-                putString(SharedPrefs.ACCEESS_TOKEN, response.access_token)
-                putString(SharedPrefs.ACCESS_EXPIRES, LocalDateTime.now().plusSeconds(response.expires_in).toString(ISODateTimeFormat.dateTime()))
-                putString(SharedPrefs.URL, url)
-            }.apply()
+            if (account == null){
+                throw RuntimeException("hmm, the id did not match")
+                //todo resolve properly
+            }
 
-            refreshUserInfo()
-
-            return SUCCESS
+            return SUCCESS.ok(account)
         }catch (e: HttpException){
-            return handleException(e, "login", url, isUrlManual)
+            return handleException(e, "login", url, isUrlManual).fail()
         }catch (e: IOException){
-            return handleException(e, "login", url, isUrlManual)
+            return handleException(e, "login", url, isUrlManual).fail()
         }catch (e: IllegalArgumentException){
-            return handleException(e, "login", url, isUrlManual)
+            return handleException(e, "login", url, isUrlManual).fail()
         }
     }
 
-    suspend fun refreshUserInfo(accountId: Int): LoginResult {
+    suspend fun refreshUserInfo(account: Account): LoginResult {
 
-        val userWebservice: UserWebservice = app.retrofit?.create(UserWebservice::class.java)!!
+        val userWebservice: UserWebservice = getUserWebservice(account)?: return UNREACHABLE.fail()
         try {
-            val user: UserResponse = userWebservice.getUser()
+            val userResponse: UserResponse = userWebservice.getUser()
 
-            sprefs.edit().apply {
-                putString(SharedPrefs.NAME, user.fullName ?: "")
-                putString(SharedPrefs.TYPE, user.userType ?: "")
-                putString(SharedPrefs.TYPE_TEXT, user.userTypeText ?: "")
-                val semesterEnd: DateTime? = user.settingModules?.common?.actualSemester?.to?.let {
-                    try {
-                        ISODateTimeFormat.dateTimeParser().withOffsetParsed().parseDateTime(it)
-                    }catch (e: IllegalArgumentException){
-                        e.printStackTrace()
-                        null
-                    }
+            val semesterEnd: DateTime? = userResponse.settingModules?.common?.actualSemester?.to?.let {
+                try {
+                    ISODateTimeFormat.dateTimeParser().withOffsetParsed().parseDateTime(it)
+                }catch (e: IllegalArgumentException){
+                    e.printStackTrace()
+                    null
                 }
-                putString(SharedPrefs.SEMESTER_END, if (semesterEnd == null) "" else ISODateTimeFormat.dateTime().print(semesterEnd))
-            }.apply()
-            return SUCCESS
+            }
+            val modifiedAccount = account.copy(
+                schoolName = userResponse.schoolOrganizationName ?: "",
+                fullName = userResponse.fullName ?: "",
+                userType = userResponse.userType ?: "",
+                userTypeText = userResponse.userTypeText ?: "",
+                semesterEnd = semesterEnd,
+                userUID = userResponse.userUID ?: "",
+                clazz = userResponse.clazz?.run {
+                    Class(
+                        id ?: "",
+                        abbrev ?: "",
+                        name ?: ""
+                    )
+                } ?: Class("", "", "")
+            )
+            return SUCCESS.ok(modifiedAccount)
         }catch (e: HttpException){
-            return handleException(e, "user")
+            return handleException(e, "user").fail()
         }catch (e: IOException){
-            return handleException(e, "user")
+            return handleException(e, "user").fail()
         }
     }
 
@@ -266,24 +319,21 @@ class AccountRepository(val app: MainApplication) {
      * Logs out user (deletes credentials)
      */
     @OptIn(DelicateCoroutinesApi::class)
-    fun logout() {
-        sprefs.edit().apply {
-            remove(SharedPrefs.REFRESH_TOKEN)
-            remove(SharedPrefs.ACCEESS_TOKEN)
-            remove(SharedPrefs.ACCESS_EXPIRES)
-            remove(SharedPrefs.NAME)
-            remove(SharedPrefs.TYPE)
-            remove(SharedPrefs.TYPE_TEXT)
-            remove(SharedPrefs.SEMESTER_END)
-        }.apply()
-        GlobalScope.launch {
-            app.rozvrhDb.clearAllTables()
+    suspend fun logout(account: Account) {
+        withContext(NonCancellable) {
+            dao.deleteAccount(account)
+            app.rozvrhStatusStore.clear()
+            rozvrhWebservices.remove(account.id)
+            userWebservices.remove(account.id)
+            retrofits.remove(account.id)
+            tokenAuthenticators[account.id]?.account = null
+            tokenAuthenticators.remove(account.id)
+
+            //todo notification and widget cleanup
+//            app.notificationState.offset = 0
+//            PermanentNotification.update(null, 0, app)
+//            WidgetProvider.updateAll(null, app)
         }
-        app.rozvrhStatusStore.clear()
-        app.clearObjects()
-        app.notificationState.offset = 0
-        PermanentNotification.update(null, 0, app)
-        WidgetProvider.updateAll(null, app)
     }
 
     fun isLoggedIn(): Boolean {
@@ -327,12 +377,17 @@ class AccountRepository(val app: MainApplication) {
         return null
     }
 
-    private fun getTokenAuthenticator(account: Account): TokenAuthenticator {
+    /**
+     * Returns an instance of TokenAuthenticator for the given account. If [connectDb] is `true`, it is stored in a cache and its tokens are
+     * automatically updated according to database. If [connectDb] is `false` the database will not be touched.
+     */
+    private fun getTokenAuthenticator(account: Account, connectDb: Boolean = true): TokenAuthenticator {
 //        var account: Account? = tokenAuthenticators[accountId]?.account
 //        if (account == null){ //token authenticator does not exist
 //            account = getAccount(accountId) ?: return null
 //            // function above is suspending, tokenAuthenticators mich have changed
 //        }
+        if (!connectDb) return TokenAuthenticator(app, account, connectDb = false)
         return tokenAuthenticators.getOrPut(account.id) {
             TokenAuthenticator(app, account)
         }
@@ -349,11 +404,15 @@ class AccountRepository(val app: MainApplication) {
             .build()
     }
 
-    /** Creates new instance of Retrofit with the account's URL and login credentials (automatically updated according to database). If the URL is invalid, `null` is returned.*/
-    private fun createRetrofit(account: Account): Retrofit? {
+    /**
+     * Creates new instance of Retrofit with the account's URL and login credentials. If the URL is invalid, `null` is returned.
+     *
+     * If [connectDb] is `true` the credentials will automatically be renewed and stored in database, and if `false`, the DB will not be touched.
+     * */
+    private fun createRetrofit(account: Account, connectDb: Boolean = true): Retrofit? {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
-        val tokenAuthenticator = getTokenAuthenticator(account) ?: return null
+        val tokenAuthenticator = getTokenAuthenticator(account, connectDb) ?: return null
         val client = OkHttpClient.Builder()
             .addInterceptor(interceptor)
             .addInterceptor(tokenAuthenticator)
@@ -389,12 +448,18 @@ class AccountRepository(val app: MainApplication) {
         }
     }
 
-    enum class LoginResult{
+    enum class LoginResultStatus{
         SUCCESS,
         UNREACHABLE,
         WRONG_LOGIN,
-        UNEXPECTED_RESPONSE
+        UNEXPECTED_RESPONSE;
+        fun ok(account: Account) = LoginResult(this, account)
+        fun fail() = LoginResult(this, null)
     }
+    data class LoginResult(
+        val status: LoginResultStatus,
+        val account: Account?
+    )
 }
 
 public open class LoginException(message: String?): RuntimeException(message)

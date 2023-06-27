@@ -310,15 +310,6 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         }
     }
 
-    /**
-     * Call this after logout to clear all objects that might have saved url and credentials
-     */
-    fun clearObjects() {
-        retrofit = null;
-        webservice = null;
-        noAuthRetrofit = null;
-    }
-
     public suspend fun pruneDatabase() {
         rozvrhDb.rozvrhDao().deleteUnnecessary()
     }

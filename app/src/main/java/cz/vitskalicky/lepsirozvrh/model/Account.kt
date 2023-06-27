@@ -15,7 +15,6 @@ data class Account(
     val accessExpires: DateTime,
 
     val schoolName: String,
-    val schoolId: String,
     val fullName: String,
     /** Example: parents */
     val userType: String,

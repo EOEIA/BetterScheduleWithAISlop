@@ -152,7 +152,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                         withTimeout(if (foreground) 15000 else 7000) { //use 7 second timeout if from background to avoid ANR
                             //download new from server
                             val account = accountRep.getAccount(rozvrhId.account)?: throw LoginException("There is no account with id \"${rozvrhId.account}\" in app's database.");
-                            accountRep.getWebservice(account)?.getSchedule(rozvrhId.monday)
+                            accountRep.getRozvrhWebservice(account)?.getSchedule(rozvrhId.monday)
                                 ?: throw LoginException("Webservice could not be created")
                         }
                     }
