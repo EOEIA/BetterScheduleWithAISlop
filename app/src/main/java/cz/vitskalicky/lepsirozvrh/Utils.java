@@ -18,12 +18,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -102,6 +104,13 @@ public class Utils {
         }
 
         return getWeekMonday(LocalDate.now().plusDays(offset));
+    }
+
+    public static @Nullable RozvrhRecord.Key getNotificationRozvrhKey(@NonNull Context context){
+        if (!SharedPrefs.contains(context, SharedPrefs.NOTIFICATION_ACCOUNT)){
+            return null;
+        }
+        return new RozvrhRecord.Key(SharedPrefs.getInt(context, SharedPrefs.NOTIFICATION_ACCOUNT), getCurrentMonday());
     }
 
     /**

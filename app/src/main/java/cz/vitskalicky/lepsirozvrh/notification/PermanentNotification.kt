@@ -19,6 +19,7 @@ import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
@@ -30,14 +31,18 @@ object PermanentNotification {
     const val PREF_DONT_SHOW_INFO_DIALOG = "dont-show-notification-info-dialog-again"
     public val EXTRA_NOTIFICATION = PermanentNotification::class.java.canonicalName + "-extra-notification"
 
-    suspend fun update(application: MainApplication) {
-        if (!SharedPrefs.getBooleanPreference(application, R.string.PREFS_NOTIFICATION, true)) {
-            update(application, null, 0)
+    suspend fun update(app: MainApplication) {
+        val accountId: Int? = if (SharedPrefs.contains(app, SharedPrefs.NOTIFICATION_ACCOUNT))
+            SharedPrefs.getInt(app, SharedPrefs.NOTIFICATION_ACCOUNT)
+        else null;
+        val account = accountId?.let{ app.accountRepository.getAccount(it) }
+        if (account == null){
+            update(app, null as Rozvrh?, false)
             return
         }
-        application.repository.getRozvrh(Utils.getCurrentMonday(), false).let {
-            update(application, it)
-        }
+        val key = RozvrhRecord.Key(accountId, Utils.getCurrentMonday());
+        val rozvrh = app.repository.getRozvrh(key, false)
+        update(app, rozvrh, account.isTeacher())
     }
 
     /**
