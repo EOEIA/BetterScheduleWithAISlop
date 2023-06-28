@@ -29,6 +29,11 @@ data class Account(
     val id: Int = 0,
 ){
     fun isAccessExpired(): Boolean = accessExpires.isBefore(DateTime.now().plusMinutes(1))
+    /**
+     * Whether to show teacher's or students rozvrh (each is fetched and displayed slightly differently)
+     * @return `true` if the user logged in is a teacher or `false` if not (then it is a student or a parent)
+     */
+    fun isTeacher(): Boolean = userType == "teacher"
 }
 
 data class Class(

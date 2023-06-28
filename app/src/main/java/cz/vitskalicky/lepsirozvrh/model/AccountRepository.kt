@@ -198,7 +198,7 @@ class AccountRepository(val app: MainApplication) {
 //                putString(SharedPrefs.ACCEESS_TOKEN, response.access_token)
 //                putString(SharedPrefs.ACCESS_EXPIRES, LocalDateTime.now().plusSeconds(response.expires_in).toString(ISODateTimeFormat.dateTime()))
 //            }.apply()
-            val updatedAccount = account.copy(
+            var updatedAccount = account.copy(
                 refreshToken = response.refresh_token,
                 accessToken = response.access_token,
                 accessExpires = DateTime.now().plusSeconds(response.expires_in)
@@ -207,7 +207,7 @@ class AccountRepository(val app: MainApplication) {
 
             //check if user info should be refreshed
             if (account.semesterEnd == null || account.semesterEnd.isBeforeNow){
-                refreshUserInfo(account.id)
+                updatedAccount = refreshUserInfo(account).account ?: updatedAccount
             }
 
             return SUCCESS.ok(updatedAccount)
@@ -319,34 +319,21 @@ class AccountRepository(val app: MainApplication) {
      * Logs out user (deletes credentials)
      */
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun logout(account: Account) {
+    suspend fun logout(accountId: Int) {
         withContext(NonCancellable) {
-            dao.deleteAccount(account)
+            dao.deleteAccountById(accountId)
             app.rozvrhStatusStore.clear()
-            rozvrhWebservices.remove(account.id)
-            userWebservices.remove(account.id)
-            retrofits.remove(account.id)
-            tokenAuthenticators[account.id]?.account = null
-            tokenAuthenticators.remove(account.id)
+            rozvrhWebservices.remove(accountId)
+            userWebservices.remove(accountId)
+            retrofits.remove(accountId)
+            tokenAuthenticators[accountId]?.account = null
+            tokenAuthenticators.remove(accountId)
 
             //todo notification and widget cleanup
 //            app.notificationState.offset = 0
 //            PermanentNotification.update(null, 0, app)
 //            WidgetProvider.updateAll(null, app)
         }
-    }
-
-    fun isLoggedIn(): Boolean {
-        return ! sprefs.getString(SharedPrefs.REFRESH_TOKEN, "").isNullOrBlank()
-    }
-
-    /**
-     * Whether to show teacher's or students rozvrh (each is fetched and displayed slightly differently)
-     * @return `true` if the user logged in is a teacher or `false` if not (then it is a student or a parent)
-     */
-    fun isTeacher(): Boolean {
-        val type = sprefs.getString(SharedPrefs.TYPE, "")
-        return type == "teacher"
     }
 
     /**
@@ -356,7 +343,7 @@ class AccountRepository(val app: MainApplication) {
      *
      * @return An activity which is being started or `null` if no activity will be started.
      */
-    fun checkLogin(currentActivity: Activity): KClass<out Activity>? {
+    fun checkLogin(currentActivity: Activity): KClass<out Activity>? { //todo
         val ctx = currentActivity
         val seenWelcome = SharedPrefs.containsPreference(app, R.string.PREFS_SEND_CRASH_REPORTS)
         if (!seenWelcome && currentActivity !is WelcomeActivity) {
@@ -364,7 +351,7 @@ class AccountRepository(val app: MainApplication) {
             ctx.startActivity(intent)
             return WelcomeActivity::class
         }
-        if (!isLoggedIn() && currentActivity !is LoginActivity) {
+        if (false /*!isLoggedIn()*/ && currentActivity !is LoginActivity) {
             val intent = Intent(ctx, LoginActivity::class.java)
             ctx.startActivity(intent)
             return LoginActivity::class

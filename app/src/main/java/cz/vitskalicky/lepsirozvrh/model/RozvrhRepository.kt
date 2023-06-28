@@ -87,6 +87,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         return statusStr.isOffline
     }
 
+/*
     /**
      * Returns the time when data on widget and in notification should be updated. `null` means, that it could not be determined and should be checked again later.
      */
@@ -110,7 +111,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         }
         return time
     }
-
+*/
     suspend fun refreshNeeded(rozvrhId: Key, foreground: Boolean = true): Boolean{
         if (statusStr[rozvrhId].status == StatusInfo.Status.ERROR && foreground){ // when from background don't bother refreshing failed requests unless they are expired.
             return true
@@ -147,7 +148,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                         //simulate slow net
                         delay(Random.nextLong(3000))
                         //return demo rozvrh
-                        application.debugUtils.getDemoRozvrh3(rozvrhId)/*todo*/
+                        application.debugUtils.getDemoRozvrh3(rozvrhId.monday)
                     } else {
                         withTimeout(if (foreground) 15000 else 7000) { //use 7 second timeout if from background to avoid ANR
                             //download new from server
@@ -177,9 +178,9 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                 }
 
                 val rozvrh: Rozvrh = withContext(Dispatchers.IO) {
-                    RozvrhConverter.convert(//todo
+                    RozvrhConverter.convert(
                         rozvrh3,
-                        rozvrhId,
+                        rozvrhId.monday,
                         application
                     )
                 }
@@ -236,7 +237,7 @@ withContext(NonCancellable) {
      * leave [RozvrhStatusStore] stuck on loading state and it would never refresh until full app
      * restart.
      */
-    private fun reportError(e: Exception, rozvrhId: Key) {
+    private suspend fun reportError(e: Exception, rozvrhId: Key) {
         statusStr.isOffline.value = true
         statusStr[rozvrhId] = when (e) {
             is JsonMappingException ->{
@@ -255,7 +256,7 @@ withContext(NonCancellable) {
                 StatusInfo.Rozvrh.unexpectedResponse()
             }
             is LoginRequiredException -> {
-                application.accountRepository.logout()
+                application.accountRepository.logout(rozvrhId.account)
                 StatusInfo.Rozvrh.loginFailed()
             }
             is HttpException -> {

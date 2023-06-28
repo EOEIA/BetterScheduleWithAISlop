@@ -4,9 +4,6 @@ import android.content.Context
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.Utils
-import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.DayRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.*
 import io.sentry.Sentry
 import org.joda.time.DateTime
@@ -34,7 +31,7 @@ object RozvrhConverter {
     var sendUnknownDayTypeReport = true
 
     @Throws(RozvrhConversionException::class)
-    fun convert(rozvrh3: Rozvrh3, date: LocalDate?, context: Context): RozvrhRelated{
+    fun convert(rozvrh3: Rozvrh3, date: LocalDate?, context: Context): Rozvrh{
         //todo perform further testing after creating a testing server
         val rozvrh3 = remove0thCaptionIfUnnecessary(rozvrh3)
 
@@ -50,30 +47,25 @@ object RozvrhConverter {
                 }
             }
 
-        val rozvrh = Rozvrh(monday, DateTime.now(), monday == Rozvrh.PERM, cycle)
-
         //caption3 id and corresponding RozvrhCaption
         val captionsUnsorted = ArrayList<Pair<String,RozvrhCaption>>()
         for (value in rozvrh3.hours.withIndex()) {
             val item = value.value
             val nev = RozvrhCaption(
-                    monday,
-                    monday.toString() + "-" + (item.id.hashCode() * item.beginTime.hashCode()).hashCode().toString(16),
-                    item.caption,
-                    LocalTime.parse(item.beginTime),
-                    LocalTime.parse(item.endTime),
-                    value.index
+                name = item.caption,
+                beginTime = LocalTime.parse(item.beginTime),
+                endTime = LocalTime.parse(item.endTime)
             )
             captionsUnsorted.add(Pair(item.id.toString(), nev))
         }
 
         //to be extra sure, we sort the caption ascending by begin time to make sure it has the right index
         captionsUnsorted.sortWith( compareBy { it.second.beginTime } )
-        //here we have the RozvrhCaptions. Key is the hourId
-        val captionsMap = HashMap<String, RozvrhCaption>()
-        captionsUnsorted.forEachIndexed { index, pair -> captionsMap[pair.first] = pair.second.copy(index = index) }
+        //here we have the RozvrhCaptions. Key is the hourId, first in the pair is the index and second is th caption
+        val captionsMap = HashMap<String, Pair<Int,RozvrhCaption>>()
+        captionsUnsorted.forEachIndexed { index, pair -> captionsMap[pair.first] = Pair(index, pair.second) }
         //and here they are sorted by index
-        val captions: List<RozvrhCaption> = captionsUnsorted.mapIndexed { index, pair -> pair.second.copy(index = index) }
+        val captions: List<RozvrhCaption> = captionsUnsorted.mapIndexed { index, pair -> pair.second }
 
         val hours = HashMap<String, Hour3>()
         for (item in rozvrh3.hours) {
@@ -104,7 +96,7 @@ object RozvrhConverter {
             cycles[item.id] = item
         }
 
-        val days = ArrayList<DayRelated>()
+        val days = ArrayList<RozvrhDay>()
 
         for (item in rozvrh3.days) {
 
@@ -137,22 +129,11 @@ object RozvrhConverter {
                 }
             }
 
-            val day = RozvrhDay(dayDate, monday, event)
-            val blocks = Array<RozvrhBlock?>(captions.size) {null}
-            for (i in captions.indices){
-                blocks[i] = RozvrhBlock(
-                        day.date,
-                        captions[i].id
-                )
-            }
-
             val lessons = Array<ArrayList<RozvrhLesson>>(captions.size) { ArrayList() }
             for (atom in item.atoms) {
-                val caption: RozvrhCaption = captionsMap[atom.hourId] ?:
+                val captionIndex: Int = captionsMap[atom.hourId]?.first ?:
                     //report problem
                     throw RozvrhConversionException("Failed to parse Rozvrh3 to Rozvrh: Could not find a caption for an atom: searched for '${atom.hourId}' available caption ids: ${captionsMap.keys}")
-
-                val captionId: String = caption.id
 
                 var subjectName: String = ""
                 var subjectAbbrev: String = ""
@@ -219,9 +200,7 @@ object RozvrhConverter {
                     }
                 }
 
-                lessons[caption.index].add(RozvrhLesson(
-                        blocks[caption.index]!!.id ,
-                        lessons[caption.index].size,
+                lessons[captionIndex].add(RozvrhLesson(
                         subjectName,
                         subjectAbbrev,
                         teacherName,
@@ -237,23 +216,10 @@ object RozvrhConverter {
                 ))
             }
 
-            val blocksRelated = ArrayList<BlockRelated>(captions.size)
-
-            for (capt in captions){
-                blocksRelated.add(BlockRelated(
-                        RozvrhBlock(
-                            dayDate,
-                            capt.id
-                        ),
-                        capt,
-                        lessons[capt.index].toSet()
-                    )
-                )
-            }
-            days.add(DayRelated(day, blocksRelated))
+            days.add(RozvrhDay(dayDate, event, lessons.toList()))
         }
         
-        return RozvrhRelated(rozvrh, captions, days)
+        return Rozvrh(monday, monday == Rozvrh.PERM, cycle,captions, days)
     }
 
     /**

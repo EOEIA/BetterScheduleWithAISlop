@@ -7,7 +7,6 @@ import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Atom3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Day3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Rozvrh3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.RozvrhConverter.convert
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
@@ -42,7 +41,7 @@ class DebugUtils constructor(ctx: Context) {
         }
     }
 
-    fun getDemoRozvrh(mondayDate: LocalDate): RozvrhRelated {
+    fun getDemoRozvrh(mondayDate: LocalDate): Rozvrh {
         return convert(getDemoRozvrh3(mondayDate), demoDate, context)
     }
 
