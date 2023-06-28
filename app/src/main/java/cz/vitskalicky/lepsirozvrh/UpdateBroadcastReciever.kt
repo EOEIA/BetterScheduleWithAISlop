@@ -3,12 +3,10 @@ package cz.vitskalicky.lepsirozvrh
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
@@ -35,11 +33,11 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
                     // So we display the cached one immediately.
                     val cachedRozvrh = application.repository.getCachedRozvrh(Utils.getCurrentMonday());
                     if (cachedRozvrh != null){
-                        PermanentNotification.update(cachedRozvrh,application)
+                        PermanentNotification.update(application, cachedRozvrh)
                     }
                 }
                 val rozvrh: RozvrhRelated? = application.repository.getRozvrh(Utils.getCurrentMonday(), false)
-                PermanentNotification.update(rozvrh,application)
+                PermanentNotification.update(application, rozvrh)
                 WidgetProvider.updateAll(rozvrh, context)
                 application.updateUpdateTime()
             }finally {

@@ -19,10 +19,8 @@ import com.jaredrummler.cyanea.Cyanea
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRepository
-import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import cz.vitskalicky.lepsirozvrh.notification.NotificationState
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsDatabase
@@ -157,7 +155,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             updateUpdateTime(rozvrhWrapper.oldRozvrh)*/
             WidgetProvider.updateAll(rozvrh, this)
             if (SharedPrefs.getBooleanPreference(this, R.string.PREFS_NOTIFICATION, true)) {
-                PermanentNotification.update(rozvrh, this)
+                PermanentNotification.update(this, rozvrh)
             }
             updateUpdateTime(rozvrh)
         }
@@ -261,12 +259,12 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
 
     fun enableNotification() {
         SharedPrefs.setBoolean(this, getString(R.string.PREFS_NOTIFICATION), true)
-        PermanentNotification.update(currentWeekLivedata.value, this)
+        PermanentNotification.update(this, currentWeekLivedata.value)
     }
 
     fun disableNotification() {
         SharedPrefs.setBoolean(this, getString(R.string.PREFS_NOTIFICATION), false)
-        PermanentNotification.update(null, 0, this)
+        PermanentNotification.update(this, null, 0)
     }
 
     /**

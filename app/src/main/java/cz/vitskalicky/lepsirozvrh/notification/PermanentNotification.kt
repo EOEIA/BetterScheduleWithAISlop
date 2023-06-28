@@ -1,13 +1,16 @@
 package cz.vitskalicky.lepsirozvrh.notification
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.view.LayoutInflater
 import android.widget.CheckBox
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -16,8 +19,8 @@ import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
-import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import org.joda.time.format.DateTimeFormat
 
@@ -29,48 +32,40 @@ object PermanentNotification {
 
     suspend fun update(application: MainApplication) {
         if (!SharedPrefs.getBooleanPreference(application, R.string.PREFS_NOTIFICATION, true)) {
-            update(null, 0, application)
+            update(application, null, 0)
             return
         }
         application.repository.getRozvrh(Utils.getCurrentMonday(), false).let {
-            update(it, application)
+            update(application, it)
         }
     }
 
     /**
      * Same as [update], but gets the RozvrhHodina for you.
      */
-    fun update(rozvrh: RozvrhRelated?, application: MainApplication) {
+    fun update(application: MainApplication, rozvrh: Rozvrh?, isTeacher: Boolean) {
         val context: Context = application
-        if (!SharedPrefs.getBooleanPreference(context, R.string.PREFS_NOTIFICATION, true)) {
-            update(null, 0, context)
-            return
-        }
         if (rozvrh != null) {
-            val block = rozvrh.getHighlightBlock(true)
+            val blockIndexes = rozvrh.getHighlightBlockIndexes(true)
+
             val offset = application.notificationState.offset
-            if (block == null) {
-                update(null, 0, context)
+            if (blockIndexes == null) {
+                update(context, null, isTeacher)
             } else {
-                val hodiny = rozvrh.days.find { it.day.date == block.block.day }?.blocks
-                val hodinaIndex = block.caption.index + offset
-                val newBlock = hodiny?.getOrNull(hodinaIndex)
-                update(newBlock, offset, context)
+                val offsetBlock: RozvrhBlock? = rozvrh.getAsRozvrhBlock(blockIndexes.first, blockIndexes.second + offset)
+                update(context, offsetBlock, isTeacher, offset)
             }
         } else {
-            if (!(context.applicationContext as MainApplication).accountRepository.isLoggedIn()) {
-                update(null, 0, context)
-            }
+            update(context, null, isTeacher)
         }
     }
 
     /**
-     * Updates the notification with the data of the first lesson of supplied [BlockRelated]. If there are no lesson "no lesson" text in notification is showed. If [block] is `null`, the notification is hidden.
+     * Updates the notification with the data of the first lesson of supplied [BlockRelated]. If there are no lesson "no lesson" text in notification is showed. If [block] is `null` and offset is 0, the notification is hidden.
      */
-    fun update(block: BlockRelated?, offset: Int, context: Context) {
+    fun update(context: Context, block: RozvrhBlock?, isTeacher: Boolean, offset: Int = 0) {
         val notificationManager = NotificationManagerCompat.from(context)
-        val isTeacher = (context.applicationContext as MainApplication).accountRepository.isTeacher()
-        if (block == null && offset == 0 || !SharedPrefs.getBooleanPreference(context, R.string.PREFS_NOTIFICATION, true)) {
+        if (block == null && offset == 0) {
             notificationManager.cancel(PERMANENT_NOTIFICATION_ID)
             return
         }
@@ -185,10 +180,13 @@ object PermanentNotification {
                 .addAction(R.drawable.ic_navigate_next_black_24dp, context.getString(R.string.next_lesson), nextPendingIntent)
         val ntf = builder.build()
 
-        // notificationId is a unique int for each notification that you must
-        if (notificationManager.areNotificationsEnabled()) {
-            notificationManager.notify(PERMANENT_NOTIFICATION_ID, ntf)
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
         }
+        notificationManager.notify(PERMANENT_NOTIFICATION_ID, ntf)
     }
 
     fun showInfoDialog(context: Context?, ignoreSetting: Boolean) {
