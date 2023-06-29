@@ -26,7 +26,9 @@ data class Rozvrh(
 ){
     companion object{
         val PERM: LocalDate = LocalDate.parse("0000-01-01").plusWeeks(1).withDayOfWeek(DateTimeConstants.MONDAY)
+    }
 
+    object Converter{
         @TypeConverter
         fun toJsonString(value: Rozvrh):String = Json.encodeToString(value);
         @TypeConverter

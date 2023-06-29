@@ -1,12 +1,10 @@
 package cz.vitskalicky.lepsirozvrh.model
 
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
+import androidx.room.*
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
+import kotlin.reflect.full.companionObject
 
 @Entity(foreignKeys = [ForeignKey(
     entity = Account::class,
@@ -15,7 +13,7 @@ import org.joda.time.LocalDate
     onDelete = ForeignKey.CASCADE,
     onUpdate = ForeignKey.CASCADE,
     deferred = true
-)])
+)], tableName = "Rozvrh")
 data class RozvrhRecord(
     @PrimaryKey
     @Embedded

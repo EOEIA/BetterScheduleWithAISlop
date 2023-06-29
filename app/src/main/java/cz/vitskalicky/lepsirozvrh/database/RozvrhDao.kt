@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
@@ -18,16 +19,16 @@ abstract class RozvrhDao {
     @Update
     abstract suspend fun updateRozvrh(vararg rozvrhs: RozvrhRecord)
 
-    @Query("SELECT * FROM rozvrh WHERE monday = :monday AND account = :account")
+    @Query("SELECT * FROM Rozvrh WHERE monday = :monday AND account = :account")
     abstract fun loadRozvrhLive(account: Int, monday: LocalDate): LiveData<RozvrhRecord?>
 
     fun loadRozvrhLive(key: RozvrhRecord.Key): LiveData<RozvrhRecord?> = loadRozvrhLive(key.account, key.monday)
 
-    @Query("SELECT * FROM rozvrh WHERE monday = :monday AND account = :account")
+    @Query("SELECT * FROM Rozvrh WHERE monday = :monday AND account = :account")
     abstract suspend fun loadRozvrh(account: Int, monday: LocalDate): RozvrhRecord?
     suspend fun loadRozvrh(key: RozvrhRecord.Key): RozvrhRecord? = loadRozvrh(key.account, key.monday)
 
-    @Query("SELECT lastUpdate < :expireTime FROM rozvrh WHERE monday = :monday AND account = :account")
+    @Query("SELECT lastUpdate < :expireTime FROM Rozvrh WHERE monday = :monday AND account = :account")
     abstract suspend fun isExpired(account: Int, monday: LocalDate, expireTime: DateTime): Boolean?
     suspend fun isExpired(key: RozvrhRecord.Key, expireTime: DateTime): Boolean? = isExpired(key.account, key.monday, expireTime)
 
@@ -42,8 +43,9 @@ abstract class RozvrhDao {
     suspend fun resetExpiration(account: Int, monday: LocalDate) = setLastUpdate(account, monday, DateTime.now())
     suspend fun resetExpiration(key: RozvrhRecord.Key) = setLastUpdate(key, DateTime.now())
 
-    @Query("DELETE FROM Rozvrh WHERE permanent = 0 AND monday < :start OR monday > :end")
-    abstract suspend fun deleteOutside(start: LocalDate, end: LocalDate) //todo do we need to specify account here?
+    /** Leave [permdate] default - did not find any elegant way to insert it into the query*/
+    @Query("DELETE FROM Rozvrh WHERE monday != :permdate AND monday < :start OR monday > :end")
+    abstract suspend fun deleteOutside(start: LocalDate, end: LocalDate, permdate: LocalDate = Rozvrh.PERM) //todo do we need to specify account here?
 
     suspend fun deleteUnnecessary(){
         deleteOutside(Utils.getCurrentMonday().minusWeeks(2), Utils.getCurrentMonday().plusWeeks(2))
