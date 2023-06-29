@@ -19,9 +19,9 @@ abstract class RozvrhDao {
     abstract suspend fun updateRozvrh(vararg rozvrhs: RozvrhRecord)
 
     @Query("SELECT * FROM rozvrh WHERE monday = :monday AND account = :account")
-    abstract fun loadRozvrhLive(account: Int, monday: LocalDate): LiveData<RozvrhRecord>
+    abstract fun loadRozvrhLive(account: Int, monday: LocalDate): LiveData<RozvrhRecord?>
 
-    fun loadRozvrhLive(key: RozvrhRecord.Key): LiveData<RozvrhRecord> = loadRozvrhLive(key.account, key.monday)
+    fun loadRozvrhLive(key: RozvrhRecord.Key): LiveData<RozvrhRecord?> = loadRozvrhLive(key.account, key.monday)
 
     @Query("SELECT * FROM rozvrh WHERE monday = :monday AND account = :account")
     abstract suspend fun loadRozvrh(account: Int, monday: LocalDate): RozvrhRecord?
@@ -52,4 +52,7 @@ abstract class RozvrhDao {
     @Query("UPDATE rozvrh SET lastUpdate = \"1980-10-12T00:00:00.042Z\" WHERE monday != :monday AND account = :account")
     abstract fun invalidateAllOther(account: Int, monday: LocalDate)
     fun invalidateAllOther(key:RozvrhRecord.Key) = invalidateAllOther(key.account, key.monday)
+
+    @Query("SELECT * FROM Rozvrh WHERE monday = :monday ORDER BY account")
+    abstract fun getAllRozvrhsOfWeekLive(monday: LocalDate): LiveData<List<RozvrhRecord>>
 }

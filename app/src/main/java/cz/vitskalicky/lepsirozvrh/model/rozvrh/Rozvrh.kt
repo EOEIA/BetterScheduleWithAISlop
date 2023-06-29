@@ -9,6 +9,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
+import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
 
 @Serializable
@@ -173,5 +174,57 @@ data class Rozvrh(
             }
         }
         return Pair(ret, null)
+    }
+
+    /**
+     * Return time when the notification and widget should be updated or `null` if this week is already over.
+     */
+    @JsonIgnore
+    fun getUpdateDisplayedDataTime(): LocalDateTime?{
+        val nowDate = LocalDate.now()
+        val nowTime = LocalTime.now()
+
+        var updateTime: LocalDateTime? = null;
+
+        val futureDays: List<RozvrhDay> = days.filter { !it.date.isBefore(nowDate) }
+        var index = 0;
+
+        while (updateTime == null && index < futureDays.size) {
+
+            val day: RozvrhDay = futureDays[index]
+
+            var first = true
+
+            for (i in day.blocks.indices) {
+                val item: RozvrhBlock = RozvrhBlock(day, captions[i], day.blocks[i])
+                val lesson: RozvrhLesson? = item.lessons.getOrNull(0)
+                if (lesson != null || !first) {
+                    if (nowTime.isBefore(item.caption.endTime.minusMinutes(10))) {
+                        if (first && nowTime.isBefore(item.caption.beginTime.minusHours(3))) {
+                            updateTime = day.date.toLocalDateTime(item.caption.beginTime.minusHours(3));
+                        } else if (first && nowTime.isBefore(item.caption.beginTime.minusHours(1))) {
+                            updateTime = day.date.toLocalDateTime(item.caption.beginTime.minusHours(1));
+                        } else {
+                            updateTime = day.date.toLocalDateTime(item.caption.endTime.minusMinutes(10));
+                        }
+                        break
+                    }
+                    first = false
+                }
+            }
+            if (day.event != null) {
+                updateTime = day.date.toLocalDateTime(LocalTime.MIDNIGHT)
+                if (updateTime!!.isBefore(LocalDateTime.now())) {
+                    updateTime = day.date.toLocalDateTime(captions.firstOrNull()?.beginTime?.minusHours(2)
+                        ?: LocalTime.MIDNIGHT)
+                }
+                if (updateTime!!.isBefore(LocalDateTime.now())) {
+                    updateTime = null
+                }
+            }
+            index++;
+        }
+
+        return updateTime
     }
 }

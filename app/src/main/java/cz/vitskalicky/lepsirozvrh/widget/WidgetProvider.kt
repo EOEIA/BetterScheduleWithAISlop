@@ -20,6 +20,10 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings.Widget
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 open class WidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -46,6 +50,7 @@ open class WidgetProvider : AppWidgetProvider() {
             AppSingleton.getInstance(context).saveWidgetsSettings()
         }
         // this will update data
+        //todo let livedata handle the updates
         val updateIntent = Intent(context, UpdateBroadcastReciever::class.java)
         context.sendBroadcast(updateIntent)
     }
@@ -84,11 +89,18 @@ open class WidgetProvider : AppWidgetProvider() {
         const val WIDGET_LENGTH = 5
         suspend fun updateAll(app: MainApplication){
             val widgetsSettings = AppSingleton.getInstance(app).widgetsSettings
+            val scope = CoroutineScope(coroutineContext) //parallelize requests
+            val jobs = ArrayList<Job>()
             for (item in widgetsSettings.widgets){
-                val account = app.accountRepository.getAccount(item.key) ?: run {updateLoggedOut(app, item.key); null} ?: continue
-                val rozvrh = app.repository.getRozvrh(RozvrhRecord.Key(account.id, Utils.getCurrentMonday()), false)
-                val display = rozvrh?.getWidgetDisplayBlocks(WIDGET_LENGTH)
-                update(app, item.key, display?.first, account.isTeacher(), display?.second)
+                jobs.add(scope.launch {
+                    val account = app.accountRepository.getAccount(item.key) ?: run {updateLoggedOut(app, item.key); null} ?: return@launch
+                    val rozvrh = app.repository.getRozvrh(RozvrhRecord.Key(account.id, Utils.getCurrentMonday()), false)
+                    val display = rozvrh?.getWidgetDisplayBlocks(WIDGET_LENGTH)
+                    update(app, item.key, display?.first, account.isTeacher(), display?.second)
+                })
+            }
+            for (item in jobs) {
+                item.join()
             }
         }
         fun updateAllForAccount(account: Account, rozvrh: Rozvrh?, context: Context) {

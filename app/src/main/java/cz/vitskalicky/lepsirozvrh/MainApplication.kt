@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.multidex.MultiDexApplication
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -17,10 +18,12 @@ import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.jaredrummler.cyanea.Cyanea
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
-import cz.vitskalicky.lepsirozvrh.model.AccountRepository
-import cz.vitskalicky.lepsirozvrh.model.RozvrhRepository
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
+import cz.vitskalicky.lepsirozvrh.model.AccountRepository
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRepository
 import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.notification.NotificationState
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsDatabase
@@ -42,6 +45,7 @@ import org.joda.time.LocalDateTime
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.util.*
+import kotlin.collections.HashSet
 
 class MainApplication : MultiDexApplication(), LifecycleOwner {
 
@@ -67,8 +71,10 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     lateinit var notificationState: NotificationState
         private set
     private var updateTime: LocalDateTime? = null
-    private lateinit var currentWeekLivedata: LiveData<RozvrhRelated?>
-    private lateinit var currentWeekObserver: Observer<RozvrhRelated?>
+    private lateinit var notificationAccountLD: LiveData<Int?>
+    private lateinit var notificationRozvrhLD: LiveData<RozvrhRecord?>
+    private lateinit var allCurrentWeekLivedata: LiveData<List<RozvrhRecord>>
+    //private lateinit var currentWeekObserver: Observer<RozvrhRelated?>
 
     val rozvrhDb: RozvrhDatabase by lazy {
         Room.databaseBuilder(
@@ -145,23 +151,27 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
-        currentWeekObserver = Observer { rozvrh: RozvrhRelated? ->
-            /*if (rozvrhWrapper!!.oldRozvrh != null) {
-                WidgetProvider.updateAll(rozvrhWrapper.oldRozvrh, this)
-                if (SharedPrefs.getBooleanPreference(this, R.string.PREFS_NOTIFICATION, true)) {
-                    PermanentNotification.update(rozvrhWrapper.oldRozvrh, this)
-                }
+
+        notificationAccountLD = PreferenceManager.getDefaultSharedPreferences(this).intLiveData(SharedPrefs.NOTIFICATION_ACCOUNT, -1).map { it.takeUnless { it == -1 } }
+        notificationRozvrhLD = notificationAccountLD.switchMap {
+            if (it ==null){
+                return@switchMap null
             }
-            updateUpdateTime(rozvrhWrapper.oldRozvrh)*/
-            WidgetProvider.updateAll(rozvrh, this)
-            if (SharedPrefs.getBooleanPreference(this, R.string.PREFS_NOTIFICATION, true)) {
-                PermanentNotification.update(this, rozvrh)
-            }
-            updateUpdateTime(rozvrh)
+            repository.getCurrentWeekLD(it)
         }
 
-        currentWeekLivedata = repository.getCurrentWeekLD()
-        currentWeekLivedata.observe(this, currentWeekObserver)
+        allCurrentWeekLivedata = repository.allCurrentWeekLD
+        allCurrentWeekLivedata.observe(this) {
+            mainScope.launch {
+                WidgetProvider.updateAll(tohle)
+                updateUpdateTime()
+            }
+        }
+        notificationRozvrhLD.observe(this){
+            mainScope.launch {
+                PermanentNotification.update(tohle)
+            }
+        }
         if (!SharedPrefs.containsPreference(this, R.string.PREFS_THEME_cHBg)) {
             //theme not initialized yet (first start or after update from pre-themes version)
             SharedPrefs.setStringPreference(this, R.string.PREFS_APP_THEME, "0")
@@ -171,11 +181,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             Theme.of(this).checkSystemTheme()
         }
         notificationState = NotificationState(this)
-        if (SharedPrefs.getBooleanPreference(this, R.string.PREFS_NOTIFICATION, true)) {
-            enableNotification()
-        } else {
-            disableNotification()
-        }
+
         if (SharedPrefs.getInt(this, SharedPrefs.LAST_VERSION_SEEN) < BuildConfig.VERSION_CODE) {
             //a new version is here
             // LAST_VERSION_SEEN is set by MainActivity
@@ -244,7 +250,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
      *
      * @return true if updated, false if the update time could not be determined from the given rozvrh.
      */
-    private fun updateUpdateTime(rozvrh: RozvrhRelated?): Boolean {
+    private fun updateUpdateTime(rozvrh: Rozvrh?): Boolean {
         val time = rozvrh?.getUpdateDisplayedDataTime() ?: return false
 
         scheduleUpdate(time)
@@ -253,18 +259,11 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     }
 
     suspend fun updateUpdateTime() {
-        val time: LocalDateTime? = repository.getUpdateDisplayedDataTime()
+        val accounts = HashSet<Int>()
+        notificationAccountLD.value?.let { accounts.add(it) }
+        accounts.addAll(AppSingleton.getInstance(this).widgetsSettings.widgets.values.map{it.accountId})
+        val time: LocalDateTime? = repository.getUpdateDisplayedDataTime(accounts)
         scheduleUpdate(time)
-    }
-
-    fun enableNotification() {
-        SharedPrefs.setBoolean(this, getString(R.string.PREFS_NOTIFICATION), true)
-        PermanentNotification.update(this, currentWeekLivedata.value)
-    }
-
-    fun disableNotification() {
-        SharedPrefs.setBoolean(this, getString(R.string.PREFS_NOTIFICATION), false)
-        PermanentNotification.update(this, null, 0)
     }
 
     /**

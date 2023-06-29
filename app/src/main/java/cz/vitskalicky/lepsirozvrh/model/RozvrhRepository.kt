@@ -3,6 +3,8 @@ package cz.vitskalicky.lepsirozvrh.model
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.switchMap
 import com.fasterxml.jackson.databind.JsonMappingException
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.Utils
@@ -19,6 +21,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import kotlin.random.Random
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key
+import org.joda.time.LocalDate
 
 class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     private val application: MainApplication = context.applicationContext as MainApplication
@@ -28,20 +31,27 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     private val accountRep = application.accountRepository
 
     /** LiveData of the current week for each account. Useful for notification and widgets */
-    private val currentWeekLD: HashMap<Int,MutableLiveData<Rozvrh?>> = HashMap()
+    private val currentWeekLD: HashMap<Int,LiveData<RozvrhRecord?>> = HashMap()
+    private val currentMondayLD: MutableLiveData<LocalDate> = MutableLiveData(Utils.getCurrentMonday())
+    val allCurrentWeekLD = currentMondayLD.distinctUntilChanged().switchMap { db.rozvrhDao().getAllRozvrhsOfWeekLive(it).distinctUntilChanged() }
 
-    private fun getCurrentWeekMutLD(account: Int): MutableLiveData<Rozvrh?>{
-        val ld = currentWeekLD.getOrPut(account){MutableLiveData()}
-        if (ld.value == null){
-            scope.launch {
-                ld.value = getRozvrh(Key(account, Utils.getDisplayWeekMonday(application)), foreground = false)
-            }
+    fun getCurrentWeekLD(account: Int): LiveData<RozvrhRecord?>{
+        val ld: LiveData<RozvrhRecord?> = currentWeekLD.getOrPut(account){
+            currentMondayLD.distinctUntilChanged().switchMap { getRozvrhLive(Key(account, it), false).distinctUntilChanged() }
         }
         return ld
     }
-    fun getCurrentWeekLD(account: Int): LiveData<Rozvrh?> = getCurrentWeekMutLD(account)
 
-    fun getRozvrhLive(rozvrhId: Key, foreground: Boolean): LiveData<RozvrhRecord/*todo do we want to return rozvrh or rozvrhRecord?*/> {
+    /**
+     * currentWeekLD changes over time, therefore this method must be sometimes called to switch to the next week.
+     */
+    fun updateTime(){
+        if (currentMondayLD.value != Utils.getCurrentMonday()){
+            currentMondayLD.value = Utils.getCurrentMonday()
+        }
+    }
+
+    fun getRozvrhLive(rozvrhId: Key, foreground: Boolean): LiveData<RozvrhRecord?> {
 
         refresh(rozvrhId, foreground, false)
         return db.rozvrhDao().loadRozvrhLive(rozvrhId)
@@ -58,6 +68,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                 }
             }
         }
+        updateTime()
     }
 
     /**
@@ -87,13 +98,12 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         return statusStr.isOffline
     }
 
-/*
     /**
      * Returns the time when data on widget and in notification should be updated. `null` means, that it could not be determined and should be checked again later.
      */
-    suspend fun getUpdateDisplayedDataTime():LocalDateTime?{//todo
+    suspend fun getUpdateDisplayedDataTime(accountId: Int):LocalDateTime?{
 
-        val current: Rozvrh? = getRozvrh(Utils.getCurrentMonday(), false)
+        val current: Rozvrh? = getRozvrh(Key(accountId, Utils.getCurrentMonday()), false)
         var time: LocalDateTime?
         if (current == null){
             return null
@@ -102,7 +112,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         }
 
         if (time == null){
-            val next = getRozvrh(Utils.getCurrentMonday().plusWeeks(1), false)
+            val next = getRozvrh(Key(accountId, Utils.getCurrentMonday()), false)
             if (next == null){
                 return null
             }else{
@@ -111,7 +121,21 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
         }
         return time
     }
-*/
+
+    /**
+     * Returns the time when data on widget and in notification should be updated. `null` means, that it could not be determined and should be checked again later.
+     */
+     suspend fun getUpdateDisplayedDataTime(accounts: Set<Int>):LocalDateTime?{
+        var earliest = LocalDateTime.now().plusDays(13)
+        for (item in accounts){
+            val time = getUpdateDisplayedDataTime(item)?:continue
+            if (earliest.isAfter(time)){
+                earliest = time;
+            }
+        }
+        return earliest;
+     }
+
     suspend fun refreshNeeded(rozvrhId: Key, foreground: Boolean = true): Boolean{
         if (statusStr[rozvrhId].status == StatusInfo.Status.ERROR && foreground){ // when from background don't bother refreshing failed requests unless they are expired.
             return true
@@ -189,11 +213,6 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                     DateTime.now(),
                     rozvrh
                 ))
-                if (rozvrh.monday == Utils.getCurrentMonday()) {
-                    withContext(Dispatchers.Main) {
-                        getCurrentWeekMutLD(rozvrhId.account).value = rozvrh
-                    }
-                }
                 withContext(Dispatchers.Main) {
                     statusStr.isOffline.value = false
                     statusStr[rozvrhId] = StatusInfo.success()
