@@ -27,6 +27,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     /** how far from left does this cell start */
     var eventStart: Int = 0
     private var perm = false
+    private var isTeacher = false
     private val mistPaint: Paint
     private val highlightPaint: Paint
     private val highlightedDividerPaint: Paint
@@ -49,7 +50,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
 
             var zkruc: String? = hodinan.teacherAbbrev
 
-            if ((context.applicationContext as MainApplication).accountRepository.isTeacher()) {
+            if (isTeacher) {
                 // to teacher's we want to show the class, not the teacher
                 // the class name is saved in zkrskup and skup
                 zkruc = hodinan.groups.joinToString(", ") { if (it.abbrev.isBlank()) {it.abbrev} else {it.name} }
@@ -89,9 +90,10 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     /**
      * Updates the content to display a lesson
      */
-    fun setHodina(hodina: RozvrhLesson?, perm: Boolean) {
+    fun setHodina(hodina: RozvrhLesson?, perm: Boolean, isTeacher: Boolean) {
         this.hodina = hodina
         this.perm = perm
+        this.isTeacher = isTeacher
         event = null
         eventStart = 0
         eventWidth = 0
@@ -205,7 +207,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
 
             var zkruc: String = lesson.teacherAbbrev
 
-            if ((context.applicationContext as MainApplication).accountRepository.isTeacher()) {
+            if (isTeacher) {
                 // to teacher's we want to show the class, not the teacher
                 // the class name is saved in zkrskup and skup
                 zkruc = lesson.groups.joinToString(", ") { if (it.abbrev.isBlank()) {it.abbrev} else {it.name} }

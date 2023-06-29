@@ -7,15 +7,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
-import cz.vitskalicky.lepsirozvrh.activity.LoginActivity
-import cz.vitskalicky.lepsirozvrh.activity.MainActivity
-import cz.vitskalicky.lepsirozvrh.activity.WelcomeActivity
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResultStatus.*
-import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
-import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import kotlinx.coroutines.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -336,33 +331,33 @@ class AccountRepository(val app: MainApplication) {
         }
     }
 
-    /**
-     * Checks if user is logged in or has seen the welcome screen (where crash reports are
-     * enabled/disabled), the starts the corresponding activity (if it isn't already started).
-     * `finish()` **won't** be called on the current activity.
-     *
-     * @return An activity which is being started or `null` if no activity will be started.
-     */
-    fun checkLogin(currentActivity: Activity): KClass<out Activity>? { //todo
-        val ctx = currentActivity
-        val seenWelcome = SharedPrefs.containsPreference(app, R.string.PREFS_SEND_CRASH_REPORTS)
-        if (!seenWelcome && currentActivity !is WelcomeActivity) {
-            val intent = Intent(ctx, WelcomeActivity::class.java)
-            ctx.startActivity(intent)
-            return WelcomeActivity::class
-        }
-        if (false /*!isLoggedIn()*/ && currentActivity !is LoginActivity) {
-            val intent = Intent(ctx, LoginActivity::class.java)
-            ctx.startActivity(intent)
-            return LoginActivity::class
-        }
-        if (currentActivity !is MainActivity) {
-            val intent = Intent(ctx, MainActivity::class.java)
-            ctx.startActivity(intent)
-            return MainActivity::class
-        }
-        return null
-    }
+//    /**
+//     * Checks if user is logged in or has seen the welcome screen (where crash reports are
+//     * enabled/disabled), the starts the corresponding activity (if it isn't already started).
+//     * `finish()` **won't** be called on the current activity.
+//     *
+//     * @return An activity which is being started or `null` if no activity will be started.
+//     */
+//    fun checkLogin(currentActivity: Activity): KClass<out Activity>? { //todo
+//        val ctx = currentActivity
+//        val seenWelcome = SharedPrefs.containsPreference(app, R.string.PREFS_SEND_CRASH_REPORTS)
+//        if (!seenWelcome && currentActivity !is WelcomeActivity) {
+//            val intent = Intent(ctx, WelcomeActivity::class.java)
+//            ctx.startActivity(intent)
+//            return WelcomeActivity::class
+//        }
+//        if (false /*!isLoggedIn()*/ && currentActivity !is LoginActivity) {
+//            val intent = Intent(ctx, LoginActivity::class.java)
+//            ctx.startActivity(intent)
+//            return LoginActivity::class
+//        }
+//        if (currentActivity !is MainActivity) {
+//            val intent = Intent(ctx, MainActivity::class.java)
+//            ctx.startActivity(intent)
+//            return MainActivity::class
+//        }
+//        return null
+//    }
 
     /**
      * Returns an instance of TokenAuthenticator for the given account. If [connectDb] is `true`, it is stored in a cache and its tokens are

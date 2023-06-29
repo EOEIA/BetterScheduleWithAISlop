@@ -5,13 +5,13 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.HorizontalScrollView
+import androidx.room.util.copy
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
-import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.DayRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCaption
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhDay
 import org.joda.time.LocalDate
 
 class RozvrhLayout : ViewGroup {
@@ -30,7 +30,7 @@ class RozvrhLayout : ViewGroup {
             return minWidth
         }
     private var childHeightWhenCalculatingNaturalCellWidth = -1
-    private var rozvrh: RozvrhRelated? = null
+    private var rozvrh: Rozvrh? = null
     private var perm = false
     private var rows = -1 //only actual lessons - add 1 to calculate with captions as well
     private var columns = -1 //only actual lessons - add 1 to calculate with day cells as well
@@ -237,7 +237,7 @@ class RozvrhLayout : ViewGroup {
         SharedPrefs.setInt(context, SharedPrefs.REMEMBERED_COLUMNS, columns)
     }
 
-    fun setRozvrh(rozvrh: RozvrhRelated?, centerToCurrentlesson: Boolean) {
+    fun setRozvrh(rozvrh: Rozvrh?, isTeacher: Boolean, centerToCurrentlesson: Boolean) {
         //debug timing: Log.d(TAG_TIMER, "populate start " + Utils.getDebugTime());
         //todo sentry extra
         /*if (rozvrh != null) {
@@ -260,40 +260,40 @@ class RozvrhLayout : ViewGroup {
         }
         rows = rozvrh.days.size
         columns = rozvrh.captions.size
-        perm = rozvrh.rozvrh.permanent
+        perm = rozvrh.permanent
         createViews()
         rememberRows(rows)
         rememberColumns(columns)
 
         //populate
-        cornerView?.text = rozvrh.rozvrh.cycle?.name ?: ""
+        cornerView?.text = rozvrh.cycle?.name ?: ""
         for (i in 0 until columns) {
             captionViews[i].caption = rozvrh.captions[i]
         }
         for (i in 0 until rows) {
-            val den: DayRelated = rozvrh.days[i]
-            denViews[i].rozvrhDay = den.day
+            val den: RozvrhDay = rozvrh.days[i]
+            denViews[i].rozvrhDay = den
 
-            if (den.day.event == null){
-                den.blocks.forEach {
+            if (den.event == null){
+                den.blocks.forEachIndexed {index: Int, it ->
                     val blck = it
-                    it.lessonsSorted().forEach {
+                    it.forEach {
                         val view = hodinaViewRecycler.retrieve()
-                        view.setHodina(it, perm)
+                        view.setHodina(it, perm, isTeacher)
                         addView(view)
-                        hodinasByCaptions[blck.caption.index][i].add(view)
+                        hodinasByCaptions[index][i].add(view)
                     }
-                    it.lessonsSorted().ifEmpty {
+                    it.ifEmpty {
                         val view = hodinaViewRecycler.retrieve()
-                        view.setHodina(null, perm)
+                        view.setHodina(null, perm, isTeacher)
                         addView(view)
-                        hodinasByCaptions[blck.caption.index][i].add(view)
+                        hodinasByCaptions[index][i].add(view)
                     }
                 }
             }else{
                 for (j in 0 until columns){
                     val view = hodinaViewRecycler.retrieve()
-                    view.setEvent(den.day.event)
+                    view.setEvent(den.event)
                     addView(view)
                     hodinasByCaptions[j][i].add(view)
                 }
@@ -309,7 +309,12 @@ class RozvrhLayout : ViewGroup {
 
     var displayingWtfRozvrhDialog = false
     fun highlightCurrentLesson() {
-        val toHighlight: BlockRelated? = rozvrh?.getHighlightBlock(false)
+        val indexes = rozvrh?.getHighlightBlockIndexes(false)
+        val dayIndex = indexes?.first
+        val captionIndex = indexes?.second
+        val toHighlight: RozvrhBlock? = if (dayIndex == null || captionIndex == null)
+            null
+        else rozvrh?.getAsRozvrhBlock(dayIndex, captionIndex);
 
 
         //unhighlight
@@ -323,13 +328,12 @@ class RozvrhLayout : ViewGroup {
         nextHodinaViewRight = null
         nextHodinaViewBottom = null
         nextHodinaViewCorner = null
-        if (toHighlight == null) {
+        if (toHighlight == null || dayIndex == null || captionIndex == null) {
             return
         }
-        val block: RozvrhBlock = toHighlight.block
-        val day:LocalDate = block.day
+        val block: RozvrhBlock = toHighlight
+        val day:LocalDate = block.day.date
         val caption: RozvrhCaption = toHighlight.caption
-        val dayIndex: Int = rozvrh?.days?.indexOfFirst { it.day.date == day }.takeUnless { it==-1 } ?: return
 
         //fail-safe
         /*if (hodinaIndex >= hodinasByCaptions.size || denIndex >= hodinasByCaptions[hodinaIndex].length) {
@@ -348,20 +352,20 @@ class RozvrhLayout : ViewGroup {
             denIndex = Math.min(denIndex, hodinasByCaptions[hodinaIndex].length - 1)
         }*/
 
-        nextHodinaView = hodinasByCaptions[caption.index][dayIndex].firstOrNull() ?: return //todo report error. this should not happen
+        nextHodinaView = hodinasByCaptions[captionIndex][dayIndex].firstOrNull() ?: return //todo report error. this should not happen
 
         nextHodinaView?.hightlightEdges(true, true, true)
         nextHodinaView?.highlightEntire(true)
-        if (dayIndex + 1 < rows && caption.index < columns) {
-            nextHodinaViewBottom = hodinasByCaptions[caption.index][dayIndex + 1].firstOrNull()
+        if (dayIndex + 1 < rows && captionIndex < columns) {
+            nextHodinaViewBottom = hodinasByCaptions[captionIndex][dayIndex + 1].firstOrNull()
             nextHodinaViewBottom?.hightlightEdges(true, false, true)
         }
-        if (dayIndex < rows && caption.index + 1 < columns) {
-            nextHodinaViewRight = hodinasByCaptions[caption.index + 1][dayIndex].firstOrNull()
+        if (dayIndex < rows && captionIndex + 1 < columns) {
+            nextHodinaViewRight = hodinasByCaptions[captionIndex + 1][dayIndex].firstOrNull()
             nextHodinaViewRight?.hightlightEdges(false, true, true)
         }
-        if (dayIndex + 1 < rows && caption.index + 1 < columns) {
-            nextHodinaViewCorner = hodinasByCaptions[caption.index + 1][dayIndex + 1].firstOrNull()
+        if (dayIndex + 1 < rows && captionIndex + 1 < columns) {
+            nextHodinaViewCorner = hodinasByCaptions[captionIndex + 1][dayIndex + 1].firstOrNull()
             nextHodinaViewCorner?.hightlightEdges(false, false, true)
         }
     }
@@ -404,7 +408,7 @@ class RozvrhLayout : ViewGroup {
                     addView(view)
                     hodinasByCaptions[i][j].add(view)
                 }
-                hodinasByCaptions[i][j].forEach { it.setHodina(null, perm) }
+                hodinasByCaptions[i][j].forEach { it.setHodina(null, perm, false) }
             }
         }
         highlightCurrentLesson()
