@@ -31,11 +31,11 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     private val accountRep = application.accountRepository
 
     /** LiveData of the current week for each account. Useful for notification and widgets */
-    private val currentWeekLD: HashMap<Int,LiveData<RozvrhRecord?>> = HashMap()
+    private val currentWeekLD: HashMap<Long,LiveData<RozvrhRecord?>> = HashMap()
     private val currentMondayLD: MutableLiveData<LocalDate> = MutableLiveData(Utils.getCurrentMonday())
     val allCurrentWeekLD = currentMondayLD.distinctUntilChanged().switchMap { db.rozvrhDao().getAllRozvrhsOfWeekLive(it).distinctUntilChanged() }
 
-    fun getCurrentWeekLD(account: Int): LiveData<RozvrhRecord?>{
+    fun getCurrentWeekLD(account: Long): LiveData<RozvrhRecord?>{
         val ld: LiveData<RozvrhRecord?> = currentWeekLD.getOrPut(account){
             currentMondayLD.distinctUntilChanged().switchMap { getRozvrhLive(Key(account, it), false).distinctUntilChanged() }
         }
@@ -101,7 +101,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     /**
      * Returns the time when data on widget and in notification should be updated. `null` means, that it could not be determined and should be checked again later.
      */
-    suspend fun getUpdateDisplayedDataTime(accountId: Int):LocalDateTime?{
+    suspend fun getUpdateDisplayedDataTime(accountId: Long):LocalDateTime?{
 
         val current: Rozvrh? = getRozvrh(Key(accountId, Utils.getCurrentMonday()), false)
         var time: LocalDateTime?
@@ -125,7 +125,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     /**
      * Returns the time when data on widget and in notification should be updated. `null` means, that it could not be determined and should be checked again later.
      */
-     suspend fun getUpdateDisplayedDataTime(accounts: Set<Int>):LocalDateTime?{
+     suspend fun getUpdateDisplayedDataTime(accounts: Set<Long>):LocalDateTime?{
         var earliest = LocalDateTime.now().plusDays(13)
         for (item in accounts){
             val time = getUpdateDisplayedDataTime(item)?:continue

@@ -4,7 +4,6 @@ import androidx.room.*
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
-import kotlin.reflect.full.companionObject
 
 @Entity(foreignKeys = [ForeignKey(
     entity = Account::class,
@@ -22,7 +21,7 @@ data class RozvrhRecord(
     val data: Rozvrh
 ){
     data class Key(
-        val account: Int,
+        val account: Long,
         val monday: LocalDate
     )
 }

@@ -31,8 +31,8 @@ object PermanentNotification {
     public val EXTRA_NOTIFICATION = PermanentNotification::class.java.canonicalName + "-extra-notification"
 
     suspend fun update(app: MainApplication) {
-        val accountId: Int? = if (SharedPrefs.contains(app, SharedPrefs.NOTIFICATION_ACCOUNT))
-            SharedPrefs.getInt(app, SharedPrefs.NOTIFICATION_ACCOUNT)
+        val accountId: Long? = if (SharedPrefs.contains(app, SharedPrefs.NOTIFICATION_ACCOUNT))
+            SharedPrefs.getLong(app, SharedPrefs.NOTIFICATION_ACCOUNT)
         else null;
         val account = accountId?.let{ app.accountRepository.getAccount(it) }
         if (account == null){

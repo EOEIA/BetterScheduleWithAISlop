@@ -13,18 +13,18 @@ abstract class AccountDao {
     @Delete
     abstract suspend fun deleteAccount(account: Account): Int
     @Query("DELETE FROM account WHERE id = :accountId")
-    abstract suspend fun deleteAccountById(accountId: Int): Int
+    abstract suspend fun deleteAccountById(accountId: Long): Int
     @Query("SELECT * FROM account")
     abstract fun loadAllAccountsLD(): LiveData<List<Account>>
     @MapInfo(keyColumn = "id", valueColumn = "")
     @Query("SELECT * FROM account")
     //todo check if it is working as intended
-    abstract fun loadAllAccountsLDMap(): LiveData<Map<Int, Account>>
+    abstract fun loadAllAccountsLDMap(): LiveData<Map<Long, Account>>
     @Query("SELECT * FROM account")
     abstract suspend fun loadAllAccounts(): List<Account>
     @Query("SELECT * FROM account WHERE id = :id")
-    abstract fun loadAccountLD(id: Int): LiveData<Account?>
+    abstract fun loadAccountLD(id: Long): LiveData<Account?>
     @Query("SELECT * FROM account WHERE id = :id")
-    abstract suspend fun loadAccount(id: Int): Account?
+    abstract suspend fun loadAccount(id: Long): Account?
 
 }

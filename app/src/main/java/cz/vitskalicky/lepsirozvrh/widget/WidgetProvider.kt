@@ -92,7 +92,7 @@ open class WidgetProvider : AppWidgetProvider() {
             val jobs = ArrayList<Job>()
             for (item in widgetsSettings.widgets){
                 jobs.add(scope.launch {
-                    val account = app.accountRepository.getAccount(item.key) ?: run {updateLoggedOut(app, item.key); null} ?: return@launch
+                    val account = app.accountRepository.getAccount(item.value.accountId) ?: run {updateLoggedOut(app, item.key); null} ?: return@launch
                     val rozvrh = app.repository.getRozvrh(RozvrhRecord.Key(account.id, Utils.getCurrentMonday()), false)
                     val display = rozvrh?.getWidgetDisplayBlocks(WIDGET_LENGTH)
                     update(app, item.key, display?.first, account.isTeacher(), display?.second)
@@ -114,7 +114,7 @@ open class WidgetProvider : AppWidgetProvider() {
             }
         }
 
-        fun updateAccountLoggedOut(context: Context, accountId: Int){
+        fun updateAccountLoggedOut(context: Context, accountId: Long){
             val widgetsSettings = AppSingleton.getInstance(context).widgetsSettings
             val widgetIds = widgetsSettings.widgetIds
             for (id in widgetIds) {

@@ -71,7 +71,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     lateinit var notificationState: NotificationState
         private set
     private var updateTime: LocalDateTime? = null
-    private lateinit var notificationAccountLD: LiveData<Int?>
+    private lateinit var notificationAccountLD: LiveData<Long?>
     private lateinit var notificationRozvrhLD: LiveData<RozvrhRecord?>
     private lateinit var allCurrentWeekLivedata: LiveData<List<RozvrhRecord>>
     //private lateinit var currentWeekObserver: Observer<RozvrhRelated?>
@@ -152,7 +152,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             notificationManager.createNotificationChannel(channel)
         }
 
-        notificationAccountLD = PreferenceManager.getDefaultSharedPreferences(this).intLiveData(SharedPrefs.NOTIFICATION_ACCOUNT, -1).map { it.takeUnless { it == -1 } }
+        notificationAccountLD = PreferenceManager.getDefaultSharedPreferences(this).longLiveData(SharedPrefs.NOTIFICATION_ACCOUNT, -1).map { it.takeUnless { it == -1L } }
         notificationRozvrhLD = notificationAccountLD.switchMap {
             if (it ==null){
                 return@switchMap null
@@ -259,7 +259,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     }
 
     suspend fun updateUpdateTime() {
-        val accounts = HashSet<Int>()
+        val accounts = HashSet<Long>()
         notificationAccountLD.value?.let { accounts.add(it) }
         accounts.addAll(AppSingleton.getInstance(this).widgetsSettings.widgets.values.map{it.accountId})
         val time: LocalDateTime? = repository.getUpdateDisplayedDataTime(accounts)

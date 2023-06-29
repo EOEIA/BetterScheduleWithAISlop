@@ -10,7 +10,7 @@ public class WidgetsSettings {
     public HashMap<Integer, Widget> widgets;
 
     public static class Widget {
-        public int accountId;
+        public long accountId;
         public int backgroundColor;
         public int primaryTextColor;
         public int secondaryTextColor;

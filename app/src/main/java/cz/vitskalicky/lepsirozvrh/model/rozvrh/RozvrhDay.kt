@@ -20,4 +20,6 @@ data class RozvrhDay(
      * shall be exactly the length of the captions list of the rozvrh.
      */
     val blocks: List<List<RozvrhLesson>>
-)
+){
+    fun isPerm(): Boolean = !date.isAfter(Rozvrh.PERM.plusDays(7))
+}

@@ -26,7 +26,7 @@ data class Account(
     val clazz: Class,
     /** > Insert methods treat 0 as not-set while inserting the item.*/
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0,
 ){
     fun isAccessExpired(): Boolean = accessExpires.isBefore(DateTime.now().plusMinutes(1))
     /**

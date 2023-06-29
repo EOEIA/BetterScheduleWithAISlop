@@ -89,6 +89,18 @@ public class SharedPrefs {
         preferenceManager.apply();
     }
 
+    public static long getLong(Context context, String key){
+        return PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getLong(key, 0);
+    }
+
+    public static void setLong(Context context, String key, long value) {
+        SharedPreferences.Editor preferenceManager = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        preferenceManager.putLong(key, value);
+        preferenceManager.apply();
+    }
+
     public static float getFloat(Context context, String key){
         return PreferenceManager
                 .getDefaultSharedPreferences(context)

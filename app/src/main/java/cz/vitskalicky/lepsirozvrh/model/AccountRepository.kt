@@ -1,12 +1,8 @@
 package cz.vitskalicky.lepsirozvrh.model
 
-import android.app.Activity
-import android.content.Intent
 import androidx.lifecycle.LiveData
 import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
-import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
@@ -21,20 +17,19 @@ import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.IOException
 import kotlin.math.min
-import kotlin.reflect.KClass
 
 
 class AccountRepository(val app: MainApplication) {
     private val db: RozvrhDatabase = app.rozvrhDb
     private val dao = db.accountDao()
 
-    private val accountLDs: LiveData<Map<Int, Account>> = dao.loadAllAccountsLDMap()
+    private val accountLDs: LiveData<Map<Long, Account>> = dao.loadAllAccountsLDMap()
     // the accounts are automatically updated
-    private val tokenAuthenticators: MutableMap<Int, TokenAuthenticator> = HashMap()
-    private val retrofits: MutableMap<Int, Retrofit> = HashMap()
+    private val tokenAuthenticators: MutableMap<Long, TokenAuthenticator> = HashMap()
+    private val retrofits: MutableMap<Long, Retrofit> = HashMap()
 
-    private val rozvrhWebservices: MutableMap<Int, RozvrhWebservice> = HashMap()
-    private val userWebservices: MutableMap<Int, UserWebservice> = HashMap()
+    private val rozvrhWebservices: MutableMap<Long, RozvrhWebservice> = HashMap()
+    private val userWebservices: MutableMap<Long, UserWebservice> = HashMap()
 
     init {
         accountLDs.observe(app){
@@ -97,14 +92,14 @@ class AccountRepository(val app: MainApplication) {
     }
 
     fun getAccountsLD(): LiveData<List<Account>> = dao.loadAllAccountsLD()
-    fun getAccountLD(id: Int): LiveData<Account?> = dao.loadAccountLD(id)
+    fun getAccountLD(id: Long): LiveData<Account?> = dao.loadAccountLD(id)
 
     /**
      * Does what its name suggest.
      *
      * If [refreshTokens] is `true`, [Account.accessToken] and [Account.refreshToken] will be refreshed if expired (and
      * if internet connection available) */
-    suspend fun getAccount(id: Int, refreshTokens: Boolean = false): Account?{
+    suspend fun getAccount(id: Long, refreshTokens: Boolean = false): Account?{
         if (refreshTokens){
             refreshToken(id, force = false)
         }
@@ -175,7 +170,7 @@ class AccountRepository(val app: MainApplication) {
     }
 
     /** Token will also be updated in database */
-    suspend fun refreshToken(id: Int, force: Boolean = true): LoginResult {
+    suspend fun refreshToken(id: Long, force: Boolean = true): LoginResult {
         val account = dao.loadAccount(id) ?: return WRONG_LOGIN.fail();
         if (!force && !account.isAccessExpired()){
             return SUCCESS.ok(account);
@@ -314,7 +309,7 @@ class AccountRepository(val app: MainApplication) {
      * Logs out user (deletes credentials)
      */
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun logout(accountId: Int) {
+    suspend fun logout(accountId: Long) {
         withContext(NonCancellable) {
             dao.deleteAccountById(accountId)
             app.rozvrhStatusStore.clear()
