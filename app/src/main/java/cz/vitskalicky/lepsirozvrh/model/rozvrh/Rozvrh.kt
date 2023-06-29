@@ -2,6 +2,7 @@ package cz.vitskalicky.lepsirozvrh.model.rozvrh
 
 import androidx.room.TypeConverter
 import com.fasterxml.jackson.annotation.JsonIgnore
+import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.database.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -95,5 +96,82 @@ data class Rozvrh(
         val day = days.getOrNull(dayIndex) ?: return null
         val caption = captions.getOrNull(blockIndex) ?: return null
         return RozvrhBlock(day, caption, day.blocks.getOrNull(blockIndex) ?: return null)
+    }
+
+    /**
+     * Returns lessons that should be displayed on a widget or an empty list if all the lessons are already over. If there is en event on the current day ([RozvrhDay.event] != null),
+     * the list is `null` and the string contains name of the event. Otherwise the string is `null`.
+     *
+     * If this is not the current week, the pair is `null`.
+     *
+     * @param length how many lessons does the widget display - determines the length of the returned list.
+     * @return a [Pair] of nullable list and nullable string or `null` if this is not the current week.
+     * The first parameter is list of lessons which should be displayed or empty list if all the lessons
+     * are already over or `null` if there is an event on that day. The second parameter is the description of current event or `null`
+     * if there is no event on that day.
+     */
+    @JsonIgnore
+    fun getWidgetDisplayBlocks(length: Int): Pair<List<RozvrhBlock>?,String?>?{
+        if (Utils.getCurrentMonday() != monday){
+            return null
+        }
+        return days.indexOfFirst { it.date == LocalDate.now() }.takeUnless { it == -1 }?.let { getWidgetDisplayBlocksForDay(it, length) } ?: Pair(emptyList(), null)
+    }
+
+    /**
+     * Returns lessons that should be displayed on a widget or an empty list if all the lessons are already over. If there is en event on the day ([RozvrhDay.event] != null),
+     * the list is `null` and the string contains name of the event. Otherwise the string is `null`.
+     *
+     * If this is not today, the pair is `null`.
+     *
+     * @param length how many lessons does the widget display - determines the length of the returned list.
+     * @return a [Pair] of nullable list and nullable string or `null` if this is not today.
+     * The first parameter is list of lessons which should be displayed or empty list if all the lessons
+     * are already over or `null` if there is an event on that day. The second parameter is the description of current event or `null`
+     * if there is no event on that day.
+     */
+    private fun getWidgetDisplayBlocksForDay(dayIndex: Int, length: Int): Pair<List<RozvrhBlock>?,String?>?{
+        val nowDate = LocalDate.now()
+        val nowTime = LocalTime.now()
+        val day = days[dayIndex]
+
+        if (nowDate != day.date){
+            return null
+        }
+        if (day.event != null){
+            return Pair(null, day.event)
+        }
+
+        //remove empty blocks at the end and beginning of the day
+        val blocksToCheck = day.blocks.toMutableList()
+        while (true){
+            val item = blocksToCheck.lastOrNull()
+            if (item?.isEmpty() == true){
+                blocksToCheck.removeLast()
+            }else{
+                break
+            }
+        }
+        var skip = 0;
+        while (true){
+            val item = blocksToCheck.getOrNull(skip)
+            if (item?.isEmpty() == true){
+                skip++
+            }else{
+                break
+            }
+        }
+
+        var nowIndex = skip;
+        while ( nowIndex < blocksToCheck.size && captions[nowIndex].endTime.minusMinutes(10).isBefore(nowTime)){
+            nowIndex++
+        }
+        val ret = ArrayList<RozvrhBlock>()
+        for (i in 0 until length){
+            if (nowIndex + i < blocksToCheck.size){
+                ret.add(RozvrhBlock(day, captions[nowIndex+1], blocksToCheck[nowIndex + i]))
+            }
+        }
+        return Pair(ret, null)
     }
 }

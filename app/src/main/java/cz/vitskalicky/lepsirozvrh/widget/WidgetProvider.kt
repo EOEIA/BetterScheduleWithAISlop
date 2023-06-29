@@ -14,8 +14,9 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
-import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
+import cz.vitskalicky.lepsirozvrh.model.Account
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings.Widget
 
@@ -78,22 +79,53 @@ open class WidgetProvider : AppWidgetProvider() {
     companion object {
         val TAG = WidgetProvider::class.java.simpleName
         const val PENDING_INTENT_REQUEST_CODE = 85321
-        fun updateAll(rozvrh: RozvrhRelated?, context: Context) {
+        fun updateAllForAccount(account: Account, rozvrh: Rozvrh?, context: Context) {
             val widgetsSettings = AppSingleton.getInstance(context).widgetsSettings
-            val display: Pair<List<BlockRelated>?,String?>? = rozvrh?.getWidgetDisplayBlocks(5)
+            val display: Pair<List<RozvrhBlock>?,String?>? = rozvrh?.getWidgetDisplayBlocks(5)
             val widgetIds = widgetsSettings.widgetIds
             for (id in widgetIds) {
-                update(context, id, display?.first,display?.second)
+                val settings: Widget = widgetsSettings.widgets[id] ?: Widget() //fail-safe
+                if (settings.accountId == account.id) {
+                    update(context, id, display?.first, account.isTeacher(), display?.second)
+                }
             }
+        }
+
+        /** The account for the widget has logged out - show a message and configure another account on tap */
+        fun updateLoggedOut(context: Context, widgetID: Int){
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            var widgetSettings:Widget = AppSingleton.getInstance(context).widgetsSettings.widgets[widgetID] ?: /*fail-safe*/run {
+                // fail-safe
+                Log.e(TAG, "There are widget settings missing for widget with id $widgetID")
+                Widget()
+            }
+            val views: RemoteViews = RemoteViews(context.packageName, R.layout.small_widget)
+            views.setTextViewText(R.id.textViewZkrpr, "")
+            views.setViewVisibility(R.id.textViewZkrpr, View.GONE)
+            views.setTextViewText(R.id.textViewSecondary, context.getString(R.string.widget_logged_out))
+            views.setInt(R.id.textViewZkrpr, "setTextColor", widgetSettings.primaryTextColor)
+            views.setInt(R.id.textViewSecondary, "setTextColor", widgetSettings.secondaryTextColor)
+            views.setFloat(R.id.textViewZkrpr, "setTextSize", widgetSettings.primaryTextSize)
+            views.setFloat(R.id.textViewSecondary, "setTextSize", widgetSettings.secondaryTextSize)
+            views.setInt(R.id.bgcolor, "setImageAlpha", widgetSettings.backgroundColor and -0x1000000 shr 24)
+            views.setInt(R.id.bgcolor, "setColorFilter", widgetSettings.backgroundColor or -0x1000000)
+
+            //todo account picker UI
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
+            val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_REQUEST_CODE, intent,
+                KotlinUtils.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.root, pendingIntent)
+            appWidgetManager.updateAppWidget(widgetID, views)
         }
 
         /**
          * Updates the widget with the given id. If there is an event today, leave [hodiny] `null` and put the event name into [event]. Otherwise leave [event] `null`.
          */
-        fun update(context: Context, widgetID: Int, hodiny: List<BlockRelated>?, event: String? = null) {
+        fun update(context: Context, widgetID: Int, hodiny: List<RozvrhBlock>?,isTeacher: Boolean, event: String? = null ) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             var widgetSettings = AppSingleton.getInstance(context).widgetsSettings.widgets[widgetID]
-            var loggedIn: Boolean = (context.applicationContext as MainApplication).accountRepository.isLoggedIn()
 
             // failsafe
             if (widgetSettings == null) {
@@ -105,29 +137,20 @@ open class WidgetProvider : AppWidgetProvider() {
             val options = appWidgetManager.getAppWidgetOptions(widgetID)
             val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
             val views: RemoteViews
-            if (!loggedIn) {
-                views = RemoteViews(context.packageName, R.layout.small_widget)
-                views.setTextViewText(R.id.textViewZkrpr, "")
-                views.setViewVisibility(R.id.textViewZkrpr, View.GONE)
-                views.setTextViewText(R.id.textViewSecondary, context.getString(R.string.widget_logged_out))
-                views.setInt(R.id.textViewZkrpr, "setTextColor", widgetSettings.primaryTextColor)
-                views.setInt(R.id.textViewSecondary, "setTextColor", widgetSettings.secondaryTextColor)
-                views.setFloat(R.id.textViewZkrpr, "setTextSize", widgetSettings.primaryTextSize)
-                views.setFloat(R.id.textViewSecondary, "setTextSize", widgetSettings.secondaryTextSize)
-            } else if (width < 250 || allEmpty || !event.isNullOrBlank()) {
+            if (width < 250 || allEmpty || !event.isNullOrBlank()) {
                 views = RemoteViews(context.packageName, R.layout.small_widget)
                 val hodina: RozvrhLesson? = hodiny?.firstOrNull()?.lessons?.firstOrNull()
-                updateCell(views, R.id.textViewZkrpr, R.id.textViewSecondary, hodina, event, widgetSettings, false, context)
+                updateCell(views, R.id.textViewZkrpr, R.id.textViewSecondary, hodina,isTeacher, event, widgetSettings, false, context)
             } else {
                 views = RemoteViews(context.packageName, R.layout.wide_widget)
 
-                val lesson: List<RozvrhLesson?> = hodiny!!.map { it.lessonsSorted().firstOrNull() }
+                val lesson: List<RozvrhLesson?> = hodiny!!.map { it.lessons.firstOrNull() }
 
-                updateCell(views, R.id.textViewZkrpr0, R.id.textViewSecondary0, lesson.getOrNull(0), null,widgetSettings, true, context)
-                updateCell(views, R.id.textViewZkrpr1, R.id.textViewSecondary1, lesson.getOrNull(1), null,widgetSettings, true, context)
-                updateCell(views, R.id.textViewZkrpr2, R.id.textViewSecondary2, lesson.getOrNull(2), null,widgetSettings, true, context)
-                updateCell(views, R.id.textViewZkrpr3, R.id.textViewSecondary3, lesson.getOrNull(3), null,widgetSettings, true, context)
-                updateCell(views, R.id.textViewZkrpr4, R.id.textViewSecondary4, lesson.getOrNull(4), null,widgetSettings, true, context)
+                updateCell(views, R.id.textViewZkrpr0, R.id.textViewSecondary0, lesson.getOrNull(0), isTeacher, null,widgetSettings, true, context)
+                updateCell(views, R.id.textViewZkrpr1, R.id.textViewSecondary1, lesson.getOrNull(1), isTeacher, null,widgetSettings, true, context)
+                updateCell(views, R.id.textViewZkrpr2, R.id.textViewSecondary2, lesson.getOrNull(2), isTeacher, null,widgetSettings, true, context)
+                updateCell(views, R.id.textViewZkrpr3, R.id.textViewSecondary3, lesson.getOrNull(3), isTeacher, null,widgetSettings, true, context)
+                updateCell(views, R.id.textViewZkrpr4, R.id.textViewSecondary4, lesson.getOrNull(4), isTeacher, null,widgetSettings, true, context)
                 views.setInt(R.id.imageViewDivider, "setImageAlpha", 255)
                 views.setInt(R.id.imageViewDivider, "setColorFilter", widgetSettings.primaryTextColor)
             }
@@ -142,7 +165,7 @@ open class WidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(widgetID, views)
         }
 
-        private fun updateCell(views: RemoteViews, primaryTextId: Int, secondaryTextId: Int, hodina: RozvrhLesson?, event: String?, settings: Widget, allowEmpty: Boolean, context: Context) {
+        private fun updateCell(views: RemoteViews, primaryTextId: Int, secondaryTextId: Int, hodina: RozvrhLesson?, isTeacher: Boolean, event: String?, settings: Widget, allowEmpty: Boolean, context: Context) {
             if (!event.isNullOrBlank()){
                 views.setTextViewText(primaryTextId, "")
                 views.setViewVisibility(primaryTextId, View.GONE)
@@ -163,7 +186,7 @@ open class WidgetProvider : AppWidgetProvider() {
                     }
                 } else {
                     var tchr = hodina.teacherAbbrev
-                    if ((context.applicationContext as MainApplication).accountRepository.isTeacher()) {
+                    if (isTeacher) {
                         // to teacher's we want to show the class, not the teacher
                         // the class name is saved in zkrskup and skup
                         tchr = hodina.groups.joinToString(", ") { it.abbrev }
