@@ -15,6 +15,7 @@ import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.Account
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
@@ -44,6 +45,7 @@ open class WidgetProvider : AppWidgetProvider() {
         if (somethingAdded) {
             AppSingleton.getInstance(context).saveWidgetsSettings()
         }
+        // this will update data
         val updateIntent = Intent(context, UpdateBroadcastReciever::class.java)
         context.sendBroadcast(updateIntent)
     }
@@ -79,14 +81,35 @@ open class WidgetProvider : AppWidgetProvider() {
     companion object {
         val TAG = WidgetProvider::class.java.simpleName
         const val PENDING_INTENT_REQUEST_CODE = 85321
+        const val WIDGET_LENGTH = 5
+        suspend fun updateAll(app: MainApplication){
+            val widgetsSettings = AppSingleton.getInstance(app).widgetsSettings
+            for (item in widgetsSettings.widgets){
+                val account = app.accountRepository.getAccount(item.key) ?: run {updateLoggedOut(app, item.key); null} ?: continue
+                val rozvrh = app.repository.getRozvrh(RozvrhRecord.Key(account.id, Utils.getCurrentMonday()), false)
+                val display = rozvrh?.getWidgetDisplayBlocks(WIDGET_LENGTH)
+                update(app, item.key, display?.first, account.isTeacher(), display?.second)
+            }
+        }
         fun updateAllForAccount(account: Account, rozvrh: Rozvrh?, context: Context) {
             val widgetsSettings = AppSingleton.getInstance(context).widgetsSettings
-            val display: Pair<List<RozvrhBlock>?,String?>? = rozvrh?.getWidgetDisplayBlocks(5)
+            val display: Pair<List<RozvrhBlock>?,String?>? = rozvrh?.getWidgetDisplayBlocks(WIDGET_LENGTH)
             val widgetIds = widgetsSettings.widgetIds
             for (id in widgetIds) {
                 val settings: Widget = widgetsSettings.widgets[id] ?: Widget() //fail-safe
                 if (settings.accountId == account.id) {
                     update(context, id, display?.first, account.isTeacher(), display?.second)
+                }
+            }
+        }
+
+        fun updateAccountLoggedOut(context: Context, accountId: Int){
+            val widgetsSettings = AppSingleton.getInstance(context).widgetsSettings
+            val widgetIds = widgetsSettings.widgetIds
+            for (id in widgetIds) {
+                val settings: Widget = widgetsSettings.widgets[id] ?: Widget() //fail-safe
+                if (settings.accountId == accountId) {
+                    updateLoggedOut(context, id)
                 }
             }
         }

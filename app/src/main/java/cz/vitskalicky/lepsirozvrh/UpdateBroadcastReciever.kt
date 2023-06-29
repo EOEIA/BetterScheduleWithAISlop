@@ -3,6 +3,7 @@ package cz.vitskalicky.lepsirozvrh
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
@@ -27,8 +28,9 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
         CoroutineScope(SupervisorJob()).launch(EmptyCoroutineContext) {
             try{
                 val rozvrhKey = Utils.getNotificationRozvrhKey(application)
+                val account: Account? = rozvrhKey?.let { application.accountRepository.getAccount(it.account) }
                 val isTeacher = if (rozvrhKey == null) false else application.accountRepository.getAccount(rozvrhKey.account)?.isTeacher() ?: false
-                if (rozvrhKey != null && application.repository.refreshNeeded(rozvrhKey, false)){
+                if (account != null && application.repository.refreshNeeded(rozvrhKey, false)){
                     //If the rozvrh needs to be refreshed, then the network call might take a long time
                     // and there would be a significant delay between user clicking "next week"
                     // in notification and any UI response.
@@ -38,9 +40,17 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
                         PermanentNotification.update(application, cachedRozvrh,isTeacher)
                     }
                 }
-                val rozvrh: Rozvrh? = rozvrhKey?.let { application.repository.getRozvrh(it, false) }
-                PermanentNotification.update(application, rozvrh, isTeacher)
-                WidgetProvider.updateAll(rozvrh, context)
+                //todo move widget updating elsewhere
+                if (account == null){
+                    PermanentNotification.update(application, null, false, 0)
+                    if (rozvrhKey != null) {
+                        WidgetProvider.updateAccountLoggedOut(context, rozvrhKey.account)
+                    }
+                }else {
+                    val rozvrh: Rozvrh? = application.repository.getRozvrh(rozvrhKey, false)
+                    PermanentNotification.update(application, rozvrh, isTeacher)
+                    WidgetProvider.updateAllForAccount(account, rozvrh, context)
+                }
                 application.updateUpdateTime()
             }finally {
                 pendingResult.finish()

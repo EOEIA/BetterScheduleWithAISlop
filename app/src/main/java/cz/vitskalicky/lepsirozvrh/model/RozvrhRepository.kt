@@ -65,7 +65,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
      */
     suspend fun getRozvrh(key: Key, foreground: Boolean): Rozvrh?{
         val result: Rozvrh? = if (refreshNeeded(key, foreground)){
-            fetchAndCache(/*todo*/key, foreground) //is null on error
+            fetchAndCache(key, foreground) //is null on error
         } else null
         return result ?:
             //if refresh not needed or refresh failed

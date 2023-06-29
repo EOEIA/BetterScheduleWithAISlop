@@ -9,12 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings;
 
+//todo remove this class, use MainApplication
 public class AppSingleton {
     private static final String TAG = AppSingleton.class.getSimpleName();
 
-    @SuppressLint("StaticFieldLeak")
     private static AppSingleton instance;
-    @SuppressLint("StaticFieldLeak")
     private static Context ctx;
     //private RequestQueue requestQueue;
     //private RozvrhAPI rozvrhAPI;
