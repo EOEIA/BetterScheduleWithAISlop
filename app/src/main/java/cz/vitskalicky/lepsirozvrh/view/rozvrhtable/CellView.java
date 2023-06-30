@@ -1,9 +1,7 @@
-package cz.vitskalicky.lepsirozvrh.view;
+package cz.vitskalicky.lepsirozvrh.view.rozvrhtable;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
@@ -11,7 +9,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import cz.vitskalicky.lepsirozvrh.R;
 import cz.vitskalicky.lepsirozvrh.theme.Theme;
 
 /**

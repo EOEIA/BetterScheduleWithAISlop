@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.view;
+package cz.vitskalicky.lepsirozvrh.view.rozvrhtable;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh;
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhDay;
 
 public class DenView extends CellView {

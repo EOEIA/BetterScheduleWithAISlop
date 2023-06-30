@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.view;
+package cz.vitskalicky.lepsirozvrh.view.rozvrhtable;
 
 import android.content.Context;
 

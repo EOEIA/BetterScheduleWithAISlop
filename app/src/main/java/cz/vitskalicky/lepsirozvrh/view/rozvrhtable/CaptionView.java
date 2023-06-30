@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.view;
+package cz.vitskalicky.lepsirozvrh.view.rozvrhtable;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,10 +7,6 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 
 import androidx.annotation.Nullable;
-
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
-import org.joda.time.format.ISODateTimeFormat;
 
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCaption;
 

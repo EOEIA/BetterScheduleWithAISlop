@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.view
+package cz.vitskalicky.lepsirozvrh.view.rozvrhtable
 
 import android.content.Context
 import android.graphics.Canvas
@@ -12,7 +12,6 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.theme.Theme

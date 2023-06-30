@@ -22,7 +22,7 @@ import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
 import cz.vitskalicky.lepsirozvrh.theme.Theme
-import cz.vitskalicky.lepsirozvrh.view.RozvrhLayout
+import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhLayout
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 
 class RozvrhFragment : Fragment() {

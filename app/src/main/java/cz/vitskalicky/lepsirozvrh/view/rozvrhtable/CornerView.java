@@ -1,16 +1,13 @@
-package cz.vitskalicky.lepsirozvrh.view;
+package cz.vitskalicky.lepsirozvrh.view.rozvrhtable;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 
 import androidx.annotation.Nullable;
-
-import cz.vitskalicky.lepsirozvrh.R;
 
 public class CornerView extends CellView {
     private String text = "";

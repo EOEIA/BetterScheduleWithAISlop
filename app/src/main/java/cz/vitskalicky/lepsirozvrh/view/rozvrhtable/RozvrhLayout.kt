@@ -1,11 +1,10 @@
-package cz.vitskalicky.lepsirozvrh.view
+package cz.vitskalicky.lepsirozvrh.view.rozvrhtable
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.HorizontalScrollView
-import androidx.room.util.copy
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
@@ -43,7 +42,8 @@ class RozvrhLayout : ViewGroup {
     private var nextHodinaViewBottom: HodinaView? = null //the bottom one from the highlighted one (it has its top highlighted)
     private var nextHodinaViewCorner: HodinaView? = null //the corner one from the highlighted one (it has its corner highlighted)
     private var hodinasByCaptions: Array<Array<ArrayList<HodinaView>>> = Array(0) { Array(0){ ArrayList() } } //the first paramemter is caption index, second day and the list contains all lessons in that block
-    private var hodinaViewRecycler: HodinaViewRecycler = HodinaViewRecycler(context)
+    private var hodinaViewRecycler: HodinaViewRecycler =
+        HodinaViewRecycler(context)
     private var columnSizes = IntArray(1) // includes days column
 
     constructor(context: Context) : super(context)
