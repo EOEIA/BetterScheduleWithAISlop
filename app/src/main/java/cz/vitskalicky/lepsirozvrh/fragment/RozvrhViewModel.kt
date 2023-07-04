@@ -1,215 +1,24 @@
 package cz.vitskalicky.lepsirozvrh.fragment
 
-import android.app.Application
-import androidx.lifecycle.*
-import cz.vitskalicky.lepsirozvrh.MainApplication
-import cz.vitskalicky.lepsirozvrh.Utils
+import androidx.lifecycle.LiveData
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
-import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
-import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
-import org.joda.time.LocalDate
+import cz.vitskalicky.lepsirozvrh.compose.RozvrhWithControls
 
-class RozvrhViewModel(
-    application: Application,
-) : AndroidViewModel(application) {
-    private val repository = getApplication<MainApplication>().repository
-    private val accountRepository = getApplication<MainApplication>().accountRepository
-    private val accountIdLD = MutableLiveData<Long?>()
-    private val accountLD: LiveData<Account?> = accountIdLD.switchMap { it?.let { accountRepository.getAccountLD(it) } ?: MutableLiveData(null) }
-    fun getAccountLD(): LiveData<Account?> = accountLD
-    private val displayLD: MediatorLiveData<RozvrhRecord?> = MediatorLiveData()
-    fun getDisplayLD(): LiveData<RozvrhRecord?> = displayLD
-    private val statusLD: MediatorLiveData<StatusInfo> = MediatorLiveData()
-    fun getStatusLD(): LiveData<StatusInfo> = statusLD
+/** Interface for [RozvrhWithControls] so that it is not tied to MainActivity*/
+interface RozvrhViewModel {
+    fun getAccountIdLD(): LiveData<Long?>
+    fun getAccountLD(): LiveData<Account?>
+    fun getDisplayLD(): LiveData<RozvrhRecord?>
+    fun getStatusLD(): LiveData<StatusInfo>
+    fun getIsOfflineLD(): LiveData<Boolean>
 
-    private var currentlyUsedLD: LiveData<RozvrhRecord?>? = null
-    private var currentlyUsedStatusLD: LiveData<StatusInfo>? = null
-
-    //to make switching instant
-    private var nextLD: LiveData<RozvrhRecord?>? = null
-    private var nextStatusLD: LiveData<StatusInfo>? = null
-    private var prevLD: LiveData<RozvrhRecord?>? = null
-    private var prevStatusLD: LiveData<StatusInfo>? = null
-    private var permLD: LiveData<RozvrhRecord?>? = null
-    private var permStatusLD: LiveData<StatusInfo>? = null
-    private var thisWeekLD: LiveData<RozvrhRecord?>? = null
-    private var thisWeekStatusLD: LiveData<StatusInfo>? = null
-
-    /**
-     * Tells if the last request was successful. If not, infoline should show "offline" on all weeks.
-     */
-    public val isOfflineLD: LiveData<Boolean> = repository.getOfflineStatusLiveData()
-
-
-    var monday: LocalDate = Utils.getDisplayWeekMonday(application)
-        private set
-
-    /**
-     * If loading rozvrh fails, but there is one in cache, then show the user a messege that they are offline. But when the user refreshed then show the true error.
-     */
-    var showError: Boolean = false
-    private set
-
-    private fun weekToMonday(week: Int): LocalDate = if(week == PERM) {
-        Rozvrh.PERM
-    }else{
-        Utils.getDisplayWeekMonday(getApplication()).plusWeeks(week)
-    }
-
-    /**
-     * Loads the LiveData and triggers data load so that it has a value ready to be instantly displayed. todo replace with a better method if you find any.
-     */
-    private fun prepareLD(week: Int): Pair<LiveData<RozvrhRecord?>, LiveData<StatusInfo>>{
-        val mnd = weekToMonday(week)
-        val rozvrhLD: LiveData<RozvrhRecord?> = getRozvrhLD(mnd)
-        val statusLD: LiveData<StatusInfo> = getRozvrhStatusLD(mnd)
-
-        //we must observe the live data to load the value. Observer is removed as soon as it receives any meaningful data.
-        var rozvrhObserver = Observer<RozvrhRecord?> { }
-        var statusObserver = Observer<StatusInfo> { };
-
-        statusObserver = Observer {
-            if (it.status == StatusInfo.Status.ERROR){
-                statusLD.removeObserver(statusObserver)
-                rozvrhLD.removeObserver(rozvrhObserver)
-            }
-        }
-        rozvrhObserver = Observer {
-            statusLD.removeObserver(statusObserver)
-            rozvrhLD.removeObserver(rozvrhObserver)
-        }
-
-        //make sure the observer gets removed
-        rozvrhLD.observeForever(rozvrhObserver)
-        statusLD.observeForever(statusObserver)
-
-        return Pair(rozvrhLD, statusLD)
-    }
-
-    /** Returns a live data for given week bound to account of this viewModel */
-    private fun getRozvrhLD(monday: LocalDate): LiveData<RozvrhRecord?>{
-        return accountIdLD.switchMap { accntId ->
-            if (accntId != null) {
-                repository.getRozvrhLive(Key(accntId, monday), true)
-            } else {
-                MutableLiveData<RozvrhRecord?>(null)
-            }
-        }
-    }
-    /** Returns a live data for given week bound to account of this viewModel */
-    private fun getRozvrhStatusLD(monday: LocalDate): LiveData<StatusInfo>{
-        return accountIdLD.switchMap { accntId ->
-            if (accntId != null){
-                repository.getRozvrhStatusLiveData(Key(accntId,monday))
-            }else {
-                MutableLiveData<StatusInfo>(StatusInfo.unknown())
-            }
-        }
-    }
-    var accountId: Long?
-        get() = accountIdLD.value
-        set(value) {
-            accountIdLD.value = value
-        }
-
-    /**
-     *  0 = current week, 1 = next week, -1 = previous week, [Int.MIN_VALUE] = permanent
-     */
-    var weekPosition: Int = 0
-        set(value) {
-            val old = field
-            val diff = value - old;
-            field = value;
-            monday = weekToMonday(value)
-
-            currentlyUsedLD?.let {
-                displayLD.removeSource(it)
-                displayLD.value = null
-            }
-            currentlyUsedStatusLD?.let {
-                statusLD.removeSource(it)
-                statusLD.value = StatusInfo.loading()
-            }
-
-            if (diff == 1){
-                //shift the livedata
-                prevLD = currentlyUsedLD
-                prevStatusLD = currentlyUsedStatusLD
-                currentlyUsedLD = nextLD ?: getRozvrhLD(monday)
-                currentlyUsedStatusLD = nextStatusLD ?: getRozvrhStatusLD(monday)
-                val nextLDs = prepareLD(field + 1)
-                nextLD = nextLDs.first
-                nextStatusLD = nextLDs.second
-            } else if (diff == -1){
-                //shift the livedata
-                nextLD = currentlyUsedLD
-                nextStatusLD = currentlyUsedStatusLD
-                currentlyUsedLD = prevLD ?: getRozvrhLD(monday)
-                currentlyUsedStatusLD = prevStatusLD ?: getRozvrhStatusLD(monday)
-                val prevLDs = prepareLD(field - 1)
-                prevLD = prevLDs.first
-                prevStatusLD = prevLDs.second
-            } else {
-
-                if (field == 0){
-                    //jumped to current week
-                    currentlyUsedLD = thisWeekLD
-                    currentlyUsedStatusLD = thisWeekStatusLD
-                }else if (field == PERM){
-                    currentlyUsedLD = permLD
-                    currentlyUsedStatusLD = permStatusLD
-                }else{
-                    currentlyUsedLD = getRozvrhLD(monday)
-                    currentlyUsedStatusLD = getRozvrhStatusLD(monday)
-                }
-
-                if (field != PERM){
-                    val prevLDs = prepareLD(field - 1)
-                    prevLD = prevLDs.first
-                    prevStatusLD = prevLDs.second
-                    val nextLDs = prepareLD( field + 1)
-                    nextLD = nextLDs.first
-                    nextStatusLD = nextLDs.second
-                }
-            }
-
-            //soft refresh in case the data has expired (there is no expiration check when just switching live data)
-            accountId?.let {
-                repository.refresh(Key(it, monday), true, force = false)
-                if (field != PERM){
-                    repository.refresh(Key(it, monday.plusWeeks(1)),true, force = false)
-                    repository.refresh(Key(it, monday.plusWeeks(-1)),true, force = false)
-                }
-            }
-
-            displayLD.addSource(currentlyUsedLD!!) {displayLD.value = it}
-            statusLD.addSource(currentlyUsedStatusLD!!) {statusLD.value = it}
-
-            showError = false
-        }
-
-    fun forceRefresh(){
-        showError = true
-        accountId?.let {
-            repository.refresh(Key(it, monday), true, true, true)
-        }
-    }
-
-    init {
-        val thisWeekLDs = prepareLD( 0)
-        thisWeekLD = thisWeekLDs.first
-        thisWeekStatusLD = thisWeekLDs.second
-        val permLDs = prepareLD( PERM)
-        permLD = permLDs.first
-        permStatusLD = permLDs.second
-
-        weekPosition = weekPosition
-    }
+    var weekPosition: Int
+    val showError: Boolean
+    fun forceRefresh()
 
     companion object{
         const val PERM: Int = Int.MIN_VALUE
     }
 }
-

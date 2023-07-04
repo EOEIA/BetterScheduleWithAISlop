@@ -46,7 +46,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
             else -> ""
         }
     }
-    if (viewModel.isOfflineLD.value != false){
+    if (viewModel.getIsOfflineLD().value != false){
         if ((viewModel.showError || viewModel.getDisplayLD().value == null) && status?.errMessage != null){
             infotext = status?.errMessage?.let{ stringResource(it) } ?: ""
         }else{
@@ -64,8 +64,8 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         onPrevPress = {viewModel.weekPosition--},
         onCurrentPress = {viewModel.weekPosition = 0},
         onPermPress = {viewModel.weekPosition = RozvrhViewModel.PERM},
-        onSettingsPress = {viewModel.forceRefresh()},
-        onRefreshPress = {/*todo*/}
+        onSettingsPress = {/*todo*/},
+        onRefreshPress = {viewModel.forceRefresh()}
     )
 }
 

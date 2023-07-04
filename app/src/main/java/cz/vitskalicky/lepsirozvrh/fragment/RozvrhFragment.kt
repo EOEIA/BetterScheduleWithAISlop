@@ -1,6 +1,5 @@
 package cz.vitskalicky.lepsirozvrh.fragment
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -25,7 +24,7 @@ import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 
 class RozvrhFragment : Fragment() {
 
-    private val viewModel: RozvrhViewModel by viewModels()
+    private val viewModel: MainActivityViewModel by viewModels()
 
     private lateinit var rozvrhLayout: RozvrhLayout
 
@@ -188,7 +187,7 @@ class RozvrhFragment : Fragment() {
             }
             updateInfoLine()
         }
-        viewModel.isOfflineLD.observe(viewLifecycleOwner) {
+        viewModel.getIsOfflineLD().observe(viewLifecycleOwner) {
             updateInfoLine()
         }
     }
@@ -241,7 +240,7 @@ class RozvrhFragment : Fragment() {
                     }
                 }
         val status: StatusInfo = viewModel.getStatusLD().value ?: StatusInfo.unknown()
-        if (viewModel.isOfflineLD.value != false){
+        if (viewModel.getIsOfflineLD().value != false){
             if ((viewModel.showError || viewModel.getDisplayLD().value == null) && status.errMessage != null){
                 infoLine.text = getString(status.errMessage)
             }else{
