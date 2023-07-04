@@ -42,10 +42,13 @@
     <string name="info_next_week">Next week</string>
     <string name="info_permanent">Permanent schedule</string>
 
-    <string name="info_offline">%1$s (offline)</string> <!-- first argument is week "name" such as 'This week'. Result looks like this: 'This week (offline)'. Signal that user if offline-->
-    <string name="info_unreachable">Error: connection failed</string> <!-- Same as 'info_offline', but when user uses refresh button -->
+    <string name="info_offline">%1$s (offline)
+    </string> <!-- first argument is week "name" such as 'This week'. Result looks like this: 'This week (offline)'. Signal that user if offline-->
+    <string name="info_unreachable">Error: connection failed
+    </string> <!-- Same as 'info_offline', but when user uses refresh button -->
     <string name="info_login_failed">Error: login failed</string>
-    <string name="info_unexpected_response">Error: unexpected server response</string> <!-- Same as 'info_offline', but when user uses refresh button -->
+    <string name="info_unexpected_response">Error: unexpected server response
+    </string> <!-- Same as 'info_offline', but when user uses refresh button -->
     <string name="info_app_error">Error: unknown</string>
 
     <string name="user">User</string>
@@ -60,9 +63,15 @@
     <string name="center_to_current_lesson">Jump to the current lesson</string>
     <string name="notification">Persistent notification</string>
     <string name="notification_desc">Shows a silent notification with your next lesson</string>
-    <string name="notification_detials">Persistent notification informs you about your current or next lesson during school. It begins to show the first lesson 1 hour before it starts and then switches to the next one always 10 minutes before the current lesson ends. After the school finishes the notification disappears.\n\nThis feature can be disabled in the settings.</string>
+    <string name="notification_detials">Persistent notification informs you about your current or next lesson during
+        school. It begins to show the first lesson 1 hour before it starts and then switches to the next one always 10
+        minutes before the current lesson ends. After the school finishes the notification disappears.\n\nThis feature
+        can be disabled in the settings.
+    </string>
     <string name="notification_no_permission_title">Notifications are disabled</string>
-    <string name="notification_no_permission">This app\'s notifications are blocked by Android. Please unblock them in device settings and try again.</string>
+    <string name="notification_no_permission">This app\'s notifications are blocked by Android. Please unblock them in
+        device settings and try again.
+    </string>
     <string name="support_this_app">Support developer</string>
     <string name="support_this_app_desc">Donate to support development of this app</string>
     <string name="supporting_this_app">You are a sponsor</string>
@@ -88,16 +97,23 @@
     <string name="more_themes">Get more themes</string>
     <string name="export_theme">Export theme</string>
     <string name="export_theme_desc">Generate a text containing your current theme</string>
-    <string name="export_theme_detail">The following text contains all data about your current theme. Send it to your friends to share your amazing design skills with them!</string>
+    <string name="export_theme_detail">The following text contains all data about your current theme. Send it to your
+        friends to share your amazing design skills with them!
+    </string>
     <string name="import_theme">Import theme</string>
     <string name="import_theme_desc">Import theme from a text generated using the button above</string>
-    <string name="import_theme_detail">Paste text generated using the \'export theme\' feature here. Get one from your friends or at %1$s</string>
+    <string name="import_theme_detail">Paste text generated using the \'export theme\' feature here. Get one from your
+        friends or at %1$s
+    </string>
     <string name="import_invalid">Invalid data. Make sure you haven\'t missed any letters at the end.</string>
     <string name="copy_to_clipboard">Copy</string>
     <string name="paste_from_clipboard">Paste from clipboard</string>
     <string name="share">Share</string>
     <string name="share_subject">My Better Schedule theme</string>
-    <string name="share_instructions">I made this amazing theme for Better Schedule! Use the link below or paste it (make sure you paste the whole link) into \'Better Schedule &gt; Settings &gt; Theme settings &gt; Import theme\' to apply this theme.</string>
+    <string name="share_instructions">I made this amazing theme for Better Schedule! Use the link below or paste it
+        (make sure you paste the whole link) into \'Better Schedule &gt; Settings &gt; Theme settings &gt; Import
+        theme\' to apply this theme.
+    </string>
     <string name="share_via">Share…</string>
     <string name="import_button">Import</string>
     <string name="import_clear">Clear</string>
@@ -141,7 +157,8 @@
     <string name="customize_more_desc">You choose everything</string>
     <string name="not_a_float_error">Enter a decimal number like 4.2</string>
     <string name="homework_color">Homework dot color</string>
-    <string name="homework_color_desc">Color of the little dot which marks that there is a homework for the lesson</string>
+    <string name="homework_color_desc">Color of the little dot which marks that there is a homework for the lesson
+    </string>
     <string name="homework_size">Homework dot size</string>
 
     <!--These are shown in the lesson details dialog-->
@@ -183,17 +200,22 @@
     <string name="oss_licences">Open source licenses</string>
     <string name="oss_licences_desc">Show licenses of open source libraries</string>
     <string name="app_version">App version</string>
-    <string name="email_message">These are information about installation of this app. Please don\'t remove them - they are essential for troubleshooting your problem.</string>
+    <string name="email_message">These are information about installation of this app. Please don\'t remove them - they
+        are essential for troubleshooting your problem.
+    </string>
     <string name="send_email">Send email…</string>
     <string name="no_email_client">There are no email clients installed.</string>
     <string name="copy_address">Copy address and message</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="include_schedule">Include schedule?</string>
-    <string name="include_schedule_desc">Include your schedule in the message?\n\nDefinitely choose \'yes\' if reporting a visual bug.</string>
+    <string name="include_schedule_desc">Include your schedule in the message?\n\nDefinitely choose \'yes\' if reporting
+        a visual bug.
+    </string>
 
     <string name="notification_channel_name">Permanent notification</string>
 
-    <string name="crash_reports_not_allowed">Automatic crash reports are allowed only on official release builds.</string>
+    <string name="crash_reports_not_allowed">Automatic crash reports are allowed only on official release builds.
+    </string>
 
     <string name="small_widget_label">Current lesson</string>
     <string name="wide_widget_label">5-lesson overview</string>
@@ -206,17 +228,23 @@
 
     <string name="donate_title">Become a sponsor</string>
     <string name="donate_text1">Support app development and get some bonus features:</string>
-    <string name="donate_bonus_features">- Custom widget color and transparency\n- Black theme\n- Custom themes\n- Any theme you find on the internet\n- You can share your amazing theme on the internet</string>
+    <string name="donate_bonus_features">- Custom widget color and transparency\n- Black theme\n- Custom themes\n- Any
+        theme you find on the internet\n- You can share your amazing theme on the internet
+    </string>
     <string name="donate_a_little">Donate a little (%s)</string>
     <string name="donate_a_little_no_price">Donate a little</string>
     <string name="donate_more">Donate more (%s)</string>
     <string name="donate_more_no_price">Donate more</string>
     <string name="donate_text2">Naturally, you get all the bonus features even for a small donation.</string>
     <string name="donate_title_ok">You are a sponsor!</string>
-    <string name="donate_text1_ok">You have supported the app development and you have unlocked all the bonus features:</string>
+    <string name="donate_text1_ok">You have supported the app development and you have unlocked all the bonus
+        features:
+    </string>
     <string name="use_promo_code">Redeem code</string>
     <string name="restore_purchases">Restore purchases</string>
-    <string name="restore_purchases_desc">Checks purchases on your Google account. Use if you did donate, but bonus features are still locked.</string>
+    <string name="restore_purchases_desc">Checks purchases on your Google account. Use if you did donate, but bonus
+        features are still locked.
+    </string>
     <string name="purchases_restored">Purchases restored</string>
 
     <string name="purchase_cancelled">Purchase canceled by user</string>
@@ -236,7 +264,9 @@
     <string name="interesting_themes">Customize this app using themes!</string>
 
     <string name="wtf_rozvrh_title">An error occurred</string>
-    <string name="wtf_rozvrh_message">Your schedule could not be rendered correctly! Would you like to report this issue via email now? The problematic schedule will be included in the report.</string>
+    <string name="wtf_rozvrh_message">Your schedule could not be rendered correctly! Would you like to report this issue
+        via email now? The problematic schedule will be included in the report.
+    </string>
     <string name="wtf_rozvrh_report">Report</string>
     <string name="wtf_rozvrh_later">Not now</string>
     <string name="wtf_not_fot_month">Not for a month</string>
@@ -249,5 +279,6 @@
         <item quantity="one">%d week forward</item>
         <item quantity="other">%d weeks forward</item>
     </plurals>
+    <string name="title_activity_main">MainActivity</string>
 
 </resources>

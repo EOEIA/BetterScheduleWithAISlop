@@ -10,4 +10,6 @@
     <color name="widgetDarkPrimaryText">#dedede</color>
     <color name="widgetDarkSecondaryText">#a0a0a0</color>
     <color name="widgetDarkBackground">#FF000000</color>
+
+    <color name="purple_700">#7B1FA2</color>
 </resources>
