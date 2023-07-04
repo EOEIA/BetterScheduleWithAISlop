@@ -7,10 +7,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.HorizontalScrollView
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
-import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
-import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
-import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCaption
-import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhDay
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.*
 import org.joda.time.LocalDate
 
 class RozvrhLayout : ViewGroup {
@@ -45,6 +42,11 @@ class RozvrhLayout : ViewGroup {
     private var hodinaViewRecycler: HodinaViewRecycler =
         HodinaViewRecycler(context)
     private var columnSizes = IntArray(1) // includes days column
+
+    private var onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit = {_,_,_,_ ->}
+    fun setOnLessonPress(onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit){
+        this.onLessonPress = onLessonPress
+    }
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -282,6 +284,9 @@ class RozvrhLayout : ViewGroup {
                         view.setHodina(it, perm, isTeacher)
                         addView(view)
                         hodinasByCaptions[index][i].add(view)
+                        view.setOnClickListener {_ ->
+                            onLessonPress(i,index,hodinasByCaptions[index][i].size - 1, it)
+                        }
                     }
                     it.ifEmpty {
                         val view = hodinaViewRecycler.retrieve()

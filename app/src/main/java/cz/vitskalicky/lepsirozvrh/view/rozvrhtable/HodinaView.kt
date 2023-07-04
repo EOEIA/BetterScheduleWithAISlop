@@ -308,7 +308,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         }
     }
 
-    fun showDetailDialog() {
+    /*fun showDetailDialog() {
         if (hodina == null) return
         val lesson: RozvrhLesson = hodina!!
         val builder = AlertDialog.Builder(context)
@@ -334,7 +334,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         builder.setPositiveButton(R.string.close) { dialog, which -> }
         val dialog = builder.create()
         dialog.show()
-    }
+    }*/
 
     init {
         mistPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -352,7 +352,6 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         homeworkPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         homeworkPaint.color = t.cHomework
         homeworkSize = t.pxHomework
-        setOnClickListener { v: View? -> showDetailDialog() }
         setDrawDividers(true, true, true)
     }
 }

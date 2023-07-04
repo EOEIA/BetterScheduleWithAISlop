@@ -6,23 +6,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.material.color.MaterialColors
 import cz.vitskalicky.lepsirozvrh.DebugUtils
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCycle
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhGroup
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhLayout
 
@@ -34,7 +34,6 @@ fun RozvrhWithControls(
     /** null to hide the statusline */
     statusLineText: String?,
     middleButton: MiddleButton,
-    onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlockIndex: Int, lesson: RozvrhLesson) -> Unit,
     onNextPress: () -> Unit,
     onPrevPress: () -> Unit,
     onCurrentPress: () -> Unit,
@@ -43,6 +42,11 @@ fun RozvrhWithControls(
     onRefreshPress: () -> Unit,
 ){
     val scroolState = rememberScrollState()
+    // the lesson which is shown in dialog or null
+    var dialogLesson by remember { mutableStateOf(null as RozvrhLesson?) }
+    dialogLesson?.let{
+        LessonDialog(it, rozvrh.permanent, onDismiss = {dialogLesson = null})
+    }
     Column(
         verticalArrangement = Arrangement.Top
     ) {
@@ -54,7 +58,8 @@ fun RozvrhWithControls(
                 modifier = Modifier.fillMaxWidth(),
                 factory = { context ->
                     RozvrhLayout(context).apply {
-                        this.createViews()
+                        setOnLessonPress { _, _, _, lesson -> dialogLesson = lesson }
+                        createViews()
                     }
                 },
                 update = {rozvrhLayout ->
@@ -126,7 +131,66 @@ enum class MiddleButton{
     PERMANENT
 }
 
+@Composable
+fun LessonDialog(lesson: RozvrhLesson, isPerm: Boolean, onDismiss: () -> Unit){
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        buttons = {
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth())
+            {
+                TextButton(onClick = onDismiss){ Text(stringResource(R.string.close)) }
+                Spacer(Modifier.size(8.dp))
+            }
+        },
+        title = {
+            Text(lesson.subjectName)
+        },
+        text = {
+            val data = listOf<Pair<String, String>?>(
+                if (lesson.homeworkIds.isNotEmpty()) Pair(stringResource(R.string.homework), lesson.homeworkIds.size.toString()) else null,
+                if (isPerm) Pair(stringResource(R.string.cycle), lesson.cycles.joinToString(", "){ it.abbrev.ifBlank { it.name }}) else null,
+                Pair(stringResource(R.string.group), lesson.groups.joinToString(", "){ it.abbrev.ifBlank { it.name }}), //you don't see group on the simplified tile anymore, therefore it is one of the main reasons you may want to see this dialog,
+                Pair(stringResource(R.string.lesson_teacher), lesson.teacherName.ifBlank { lesson.teacherAbbrev }),
+                Pair(stringResource(R.string.room), lesson.roomName.ifBlank { lesson.roomAbbrev }),
+                Pair(stringResource(R.string.subject_name), lesson.subjectName.ifBlank { lesson.subjectAbbrev }),
+                Pair(stringResource(R.string.topic), lesson.theme),
+                lesson.changeDescription?.let { Pair(stringResource(R.string.change), it)},
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                for (item in data.filterNotNull().filter { it.second.isNotBlank() }){
+                    Row {
+                        Text(item.first, modifier = Modifier.weight(0.4F), textAlign = TextAlign.Right, fontWeight = FontWeight.Bold )
+                        Spacer(Modifier.size(4.dp))
+                        Text(item.second, modifier = Modifier.weight(0.6F))
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
 @Preview
+fun LessonPreview(){
+    LessonDialog(
+        RozvrhLesson(
+            "Matematicka a její aplikace",
+            "MA",
+            "Mgr. Milan Kohout",
+            "Ko",
+            "A105",
+            "A105",
+            listOf(RozvrhGroup("123","6.A","6.A")),
+            listOf(RozvrhCycle("1", "Lichý", "L"), RozvrhCycle("2", "Sudý", "S")),
+            emptyList(),
+            "Kvadratické funkce a jejich graf",
+            RozvrhLesson.NO_CHANGE,
+            null
+        ),false,{} )
+}
+
 @Composable
 fun Rozvrhpreview(){
     RozvrhWithControls(
@@ -135,7 +199,6 @@ fun Rozvrhpreview(){
         StatusInfo.Status.SUCCESS,
         "Aktuální týden",
         MiddleButton.CURRENT_WEEK,
-        {_,_,_,_ ->},
         {},
         {},
         {},

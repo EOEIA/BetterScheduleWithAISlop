@@ -16,6 +16,7 @@ public class HodinaViewRecycler {
     public void store(HodinaView... items){
         for (HodinaView item :items) {
             item.setHodina(null, false,false);
+            item.setOnClickListener(null);
             buffer.add(item);
         }
     }
