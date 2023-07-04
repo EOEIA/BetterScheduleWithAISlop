@@ -2,7 +2,10 @@ package cz.vitskalicky.lepsirozvrh
 
 import android.app.PendingIntent
 import android.os.Build
+import androidx.annotation.PluralsRes
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -35,5 +38,10 @@ object KotlinUtils {
         PendingIntent.FLAG_IMMUTABLE
     } else {
         0
+    }
+
+    @Composable
+    fun quantityStringResource(@PluralsRes id: Int, quantity: Int, vararg formatArgs: Any): String {
+        return LocalContext.current.resources.getQuantityString(id, quantity, *formatArgs)
     }
 }

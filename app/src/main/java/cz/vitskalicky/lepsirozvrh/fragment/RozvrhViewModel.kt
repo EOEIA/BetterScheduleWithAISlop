@@ -18,6 +18,7 @@ class RozvrhViewModel(
     private val accountRepository = getApplication<MainApplication>().accountRepository
     private val accountIdLD = MutableLiveData<Long?>()
     private val accountLD: LiveData<Account?> = accountIdLD.switchMap { it?.let { accountRepository.getAccountLD(it) } ?: MutableLiveData(null) }
+    fun getAccountLD(): LiveData<Account?> = accountLD
     private val displayLD: MediatorLiveData<RozvrhRecord?> = MediatorLiveData()
     fun getDisplayLD(): LiveData<RozvrhRecord?> = displayLD
     private val statusLD: MediatorLiveData<StatusInfo> = MediatorLiveData()

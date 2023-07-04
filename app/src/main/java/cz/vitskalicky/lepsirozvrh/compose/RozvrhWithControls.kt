@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -17,8 +18,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.DebugUtils
+import cz.vitskalicky.lepsirozvrh.KotlinUtils.quantityStringResource
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.Utils
+import cz.vitskalicky.lepsirozvrh.fragment.RozvrhViewModel
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCycle
@@ -27,13 +30,53 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhLayout
 
 @Composable
+fun RozvrhWithControls(viewModel: RozvrhViewModel){
+    val rozvrh by viewModel.getDisplayLD().observeAsState()
+    val status by viewModel.getStatusLD().observeAsState()
+    val account by viewModel.getAccountLD().observeAsState()
+
+    var infotext = viewModel.weekPosition.let {
+        when{
+            it == RozvrhViewModel.PERM -> stringResource(R.string.info_permanent)
+            it == 0 -> stringResource(R.string.info_this_week)
+            it == 1 -> stringResource(R.string.info_next_week)
+            it == -1 -> stringResource(R.string.info_last_week)
+            it < -1 -> quantityStringResource(R.plurals.info_weeks_back, -it, -it)
+            it > 1 -> quantityStringResource(R.plurals.info_weeks_forward, it, it)
+            else -> ""
+        }
+    }
+    if (viewModel.isOfflineLD.value != false){
+        if ((viewModel.showError || viewModel.getDisplayLD().value == null) && status?.errMessage != null){
+            infotext = status?.errMessage?.let{ stringResource(it) } ?: ""
+        }else{
+            infotext = stringResource(R.string.info_offline, infotext)
+        }
+    }
+
+    RozvrhWithControls(
+        rozvrh = rozvrh?.data,
+        isTeacher = account?.isTeacher() ?: false,
+        weekPosition = viewModel.weekPosition,
+        status = status?.status ?: StatusInfo.Status.UNKNOWN,
+        statusLineText = infotext, //todo theme hide infoline
+        onNextPress = {viewModel.weekPosition++},
+        onPrevPress = {viewModel.weekPosition--},
+        onCurrentPress = {viewModel.weekPosition = 0},
+        onPermPress = {viewModel.weekPosition = RozvrhViewModel.PERM},
+        onSettingsPress = {viewModel.forceRefresh()},
+        onRefreshPress = {/*todo*/}
+    )
+}
+
+@Composable
 fun RozvrhWithControls(
-    rozvrh: Rozvrh,
+    rozvrh: Rozvrh?,
     isTeacher: Boolean,
+    weekPosition: Int,
     status: StatusInfo.Status,
     /** null to hide the statusline */
     statusLineText: String?,
-    middleButton: MiddleButton,
     onNextPress: () -> Unit,
     onPrevPress: () -> Unit,
     onCurrentPress: () -> Unit,
@@ -45,80 +88,80 @@ fun RozvrhWithControls(
     // the lesson which is shown in dialog or null
     var dialogLesson by remember { mutableStateOf(null as RozvrhLesson?) }
     dialogLesson?.let{
-        LessonDialog(it, rozvrh.permanent, onDismiss = {dialogLesson = null})
+        LessonDialog(it, rozvrh?.permanent?:false, onDismiss = {dialogLesson = null})
     }
     Column(
         verticalArrangement = Arrangement.Top
     ) {
 
-        Row(
+        Box(
             modifier = Modifier.horizontalScroll(scroolState).weight(1F)
         ) {
-            AndroidView(
-                modifier = Modifier.fillMaxWidth(),
-                factory = { context ->
-                    RozvrhLayout(context).apply {
-                        setOnLessonPress { _, _, _, lesson -> dialogLesson = lesson }
-                        createViews()
+            Row{
+                AndroidView(
+                    modifier = Modifier.fillMaxWidth(),
+                    factory = { context ->
+                        RozvrhLayout(context).apply {
+                            setOnLessonPress { _, _, _, lesson -> dialogLesson = lesson }
+                            createViews()
+                        }
+                    },
+                    update = { rozvrhLayout ->
+                        rozvrhLayout.setRozvrh(rozvrh, isTeacher, false)
                     }
-                },
-                update = {rozvrhLayout ->
-                    rozvrhLayout.setRozvrh(rozvrh, isTeacher, false)
-                }
-            )
+                )
+            }
+        }
+        //todo shadow
+
+        if (statusLineText != null) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xff757575),//todo theming
+                //contentColor = Color(0xffffffff)
+            ) {
+                Text(statusLineText, textAlign = TextAlign.Center)
+            }
         }
         Surface(
-            elevation = 5F.dp
+            color = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.onPrimary,
         ) {
-            Column {
-                if (statusLineText != null) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color(0xff757575),//todo theming
-                        //contentColor = Color(0xffffffff)
-                    ) {
-                        Text(statusLineText, textAlign = TextAlign.Center)
-                    }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                //todo tooltips
+                IconButton(onSettingsPress) {
+                    Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                 }
-                Surface(
-                    color = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        //todo tooltips
-                        IconButton(onSettingsPress) {
-                            Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                Row {
+                    if (weekPosition != RozvrhViewModel.PERM)
+                        IconButton(onPrevPress) {
+                            Icon(Icons.Default.NavigateBefore, contentDescription = stringResource(R.string.prev_week))
                         }
-                        Row {
-                            IconButton(onPrevPress) {
-                                Icon(Icons.Default.NavigateBefore, contentDescription = stringResource(R.string.prev_week))
-                            }
-                            if (middleButton == MiddleButton.CURRENT_WEEK){
-                                IconButton(onCurrentPress) {
-                                    Icon(Icons.Default.Today, contentDescription = stringResource(R.string.current_week))
-                                }
-                            }else{
-                                IconButton(onPermPress) {
-                                    Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.permanent_schedule))
-                                }
-                            }
-                            IconButton(onNextPress) {
-                                Icon(Icons.Default.NavigateNext, contentDescription = stringResource(R.string.next_week))
-                            }
+                    if (weekPosition != 0){
+                        IconButton(onCurrentPress) {
+                            Icon(Icons.Default.Today, contentDescription = stringResource(R.string.current_week))
                         }
-                        if(status == StatusInfo.Status.LOADING){
-                            CircularProgressIndicator()
-                        }else{
-                            IconButton(onRefreshPress) {
-                                Icon(
-                                    if (status == StatusInfo.Status.ERROR) Icons.Default.SyncProblem else Icons.Default.Sync,
-                                    contentDescription = stringResource(R.string.prev_week)
-                                )
-                            }
+                    }else{
+                        IconButton(onPermPress) {
+                            Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.permanent_schedule))
                         }
+                    }
+                    if (weekPosition != RozvrhViewModel.PERM)
+                        IconButton(onNextPress) {
+                            Icon(Icons.Default.NavigateNext, contentDescription = stringResource(R.string.next_week))
+                        }
+                }
+                if(status == StatusInfo.Status.LOADING){
+                    CircularProgressIndicator()
+                }else{
+                    IconButton(onRefreshPress) {
+                        Icon(
+                            if (status == StatusInfo.Status.ERROR) Icons.Default.SyncProblem else Icons.Default.Sync,
+                            contentDescription = stringResource(R.string.prev_week)
+                        )
                     }
                 }
             }
@@ -126,10 +169,6 @@ fun RozvrhWithControls(
     }
 }
 
-enum class MiddleButton{
-    CURRENT_WEEK,
-    PERMANENT
-}
 
 @Composable
 fun LessonDialog(lesson: RozvrhLesson, isPerm: Boolean, onDismiss: () -> Unit){
@@ -196,9 +235,9 @@ fun Rozvrhpreview(){
     RozvrhWithControls(
         DebugUtils.getDemoRozvrh(Utils.getCurrentMonday(), LocalContext.current),
         false,
+        0,
         StatusInfo.Status.SUCCESS,
         "Aktuální týden",
-        MiddleButton.CURRENT_WEEK,
         {},
         {},
         {},
