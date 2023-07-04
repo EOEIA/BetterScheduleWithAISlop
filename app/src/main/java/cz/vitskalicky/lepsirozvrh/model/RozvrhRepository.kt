@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import com.fasterxml.jackson.databind.JsonMappingException
+import cz.vitskalicky.lepsirozvrh.DebugUtils
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice.Companion.getSchedule
@@ -172,7 +173,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                         //simulate slow net
                         delay(Random.nextLong(3000))
                         //return demo rozvrh
-                        application.debugUtils.getDemoRozvrh3(rozvrhId.monday)
+                        DebugUtils.getDemoRozvrh3(rozvrhId.monday)
                     } else {
                         withTimeout(if (foreground) 15000 else 7000) { //use 7 second timeout if from background to avoid ANR
                             //download new from server

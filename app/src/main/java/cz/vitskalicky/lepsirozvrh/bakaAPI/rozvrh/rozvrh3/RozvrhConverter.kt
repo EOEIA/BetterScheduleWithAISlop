@@ -116,7 +116,7 @@ object RozvrhConverter {
                         //prevent spam
                         if (sendUnknownDayTypeReport){
                             sendUnknownDayTypeReport = false
-                            (context.applicationContext as MainApplication).sendReport(java.lang.Exception("[NOT CRITICAL] Unknown day type: ${item.dayType}"));
+                            (context.applicationContext as? MainApplication)?.sendReport(java.lang.Exception("[NOT CRITICAL] Unknown day type: ${item.dayType}"));
                         }
                         event = null
                     }else{
