@@ -1,0 +1,48 @@
+package cz.vitskalicky.lepsirozvrh
+
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
+
+class SharedPrefsKt(context: Context){
+    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+    fun string(key: String): String? = sharedPreferences.getString(key,null)
+    fun int(key: String): Int? = if (sharedPreferences.contains(key)) sharedPreferences.getInt(key,0) else null
+    fun boolean(key: String): Boolean? = if (sharedPreferences.contains(key)) sharedPreferences.getBoolean(key,false) else null
+    fun float(key: String): Float? = if (sharedPreferences.contains(key)) sharedPreferences.getFloat(key,0.0f) else null
+    fun long(key: String): Long? = if (sharedPreferences.contains(key)) sharedPreferences.getLong(key,0) else null
+
+    fun stringSet(key: String): Set<String>? = if (sharedPreferences.contains(key)) sharedPreferences.getStringSet(key,null) else null
+
+    /** Use only to save single values. For batch operations, use [edit].*/
+    fun putOne(key:String, value: String) = sharedPreferences.edit().apply { putString(key, value);apply() }
+    /** Use only to save single values. For batch operations, use [edit].*/
+
+    fun putOne(key:String, value: Int) = sharedPreferences.edit().apply { putInt(key, value);apply() }
+    /** Use only to save single values. For batch operations, use [edit].*/
+    fun putOne(key:String, value: Boolean) = sharedPreferences.edit().apply { putBoolean(key, value);apply() }
+    /** Use only to save single values. For batch operations, use [edit].*/
+    fun putOne(key:String, value: Float) = sharedPreferences.edit().apply { putFloat(key, value);apply() }
+    /** Use only to save single values. For batch operations, use [edit].*/
+    fun putOne(key:String, value: Long) = sharedPreferences.edit().apply { putLong(key, value);apply() }
+    /** Use only to save single values. For batch operations, use [edit].*/
+    fun putOne(key:String, value: Set<String>) = sharedPreferences.edit().apply { putStringSet(key, value);apply() }
+
+    /** Use only to save single values. For batch operations, use [edit].*/
+    fun deleteOne(key: String) = sharedPreferences.edit().apply { remove(key) }
+
+    /** Performs edits on the shared preferences and applies them automatically.*/
+    fun edit(block: SharedPreferences.Editor.() -> Unit){
+        val editor = sharedPreferences.edit();
+        block(editor)
+        editor.apply()
+    }
+}
+
+val Context.prefs: SharedPrefsKt
+    get() = SharedPrefsKt(this)
+
+object PrefsConsts {
+    const val ACTIVE_ACCOUNT_ID = "int_active_account_id"
+}
