@@ -18,9 +18,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.distinctUntilChanged
 import com.jaredrummler.cyanea.Cyanea
 import cz.vitskalicky.lepsirozvrh.*
-import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
-import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhLayout
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
@@ -59,10 +57,11 @@ class RozvrhFragment : Fragment() {
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        val rootView = inflater.inflate(R.layout.rozvrh_fragment, container, false)
-        rozvrhLayout = rootView.findViewById(R.id.rozvrhLayout)
+        //todo
+//        val rootView = inflater.inflate(R.layout.rozvrh_fragment, container, false)
+//        rozvrhLayout = rootView.findViewById(R.id.rozvrhLayout)
 
-        bottomAppBar = rootView.findViewById<Toolbar>(R.id.toolbar)
+//        bottomAppBar = rootView.findViewById<Toolbar>(R.id.toolbar)
         (activity as? AppCompatActivity)?.setSupportActionBar(bottomAppBar)
 
         val actionBar = (activity as? AppCompatActivity)?.supportActionBar
@@ -76,23 +75,17 @@ class RozvrhFragment : Fragment() {
         }
 
         //displayInfo = DisplayInfo()
-        infoLine = rootView.findViewById<TextView>(R.id.infoLine)
-        /*displayInfo.addOnMessageChangeListener { oldMessage: String?, newMessage: String? ->
-            infoLine.text = newMessage
-            if (displayInfo.errorMessage != null) {
-                TooltipCompat.setTooltipText(ibRefresh, displayInfo.errorMessage)
-            } else {
-                TooltipCompat.setTooltipText(ibRefresh, getText(R.string.refresh))
-            }
-        }*/
+//        infoLine = rootView.findViewById<TextView>(R.id.infoLine)
 
-        ibSettings = rootView.findViewById<ImageButton>(R.id.settings)
-        ibPrev = rootView.findViewById<ImageButton>(R.id.prev)
-        ibCurrent = rootView.findViewById<ImageButton>(R.id.curent)
-        ibPermanent = rootView.findViewById<ImageButton>(R.id.permanent)
-        ibNext = rootView.findViewById<ImageButton>(R.id.next)
-        ibRefresh = rootView.findViewById<ImageButton>(R.id.refresh)
-        progressBar = rootView.findViewById<ProgressBar>(R.id.progressBar)
+        //todo
+
+//        ibSettings = rootView.findViewById<ImageButton>(R.id.settings)
+//        ibPrev = rootView.findViewById<ImageButton>(R.id.prev)
+//        ibCurrent = rootView.findViewById<ImageButton>(R.id.curent)
+//        ibPermanent = rootView.findViewById<ImageButton>(R.id.permanent)
+//        ibNext = rootView.findViewById<ImageButton>(R.id.next)
+//        ibRefresh = rootView.findViewById<ImageButton>(R.id.refresh)
+//        progressBar = rootView.findViewById<ProgressBar>(R.id.progressBar)
 
         progressBar.visibility = View.GONE
 
@@ -100,8 +93,9 @@ class RozvrhFragment : Fragment() {
 
         ibSettings.setOnClickListener { view: View? ->
             if (activity != null) {
-                val intent = Intent(activity, SettingsActivity::class.java)
-                startActivity(intent)
+                //todo
+//                val intent = Intent(activity, SettingsActivity::class.java)
+//                startActivity(intent)
             }else{
                 Log.e(this::class.qualifiedName, "Could not launch setting activity, as gatActivity() returned null!")
             }
@@ -145,14 +139,14 @@ class RozvrhFragment : Fragment() {
             }
         }
 
-        return rootView
+        return TextView(requireContext())//rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.getDisplayLD().distinctUntilChanged().observe(viewLifecycleOwner){
-            rozvrhLayout.setRozvrh(it, centerToCurrentLesson)
+            rozvrhLayout.setRozvrh(it?.data,false/*todo*/, centerToCurrentLesson)
             //reset center to current lesson once it happened
             if (it != null){
                 centerToCurrentLesson = false
@@ -174,15 +168,16 @@ class RozvrhFragment : Fragment() {
                     TooltipCompat.setTooltipText(ibRefresh, getText(it.errMessage ?: R.string.refresh))
 
                     activity?.let {
-                        if (it is MainActivity){
-                            //makes sure it does not launch login activity twice
-                            it.checkLogin()
-                        }else{
-                            //this is technically redundant. just future proof.
-                            if ((context?.applicationContext as? MainApplication)?.accountRepository?.checkLogin(it) != null){
-                                activity?.finish()
-                            }
-                        }
+                        //todo
+//                        if (it is MainActivity){
+//                            //makes sure it does not launch login activity twice
+//                            it.checkLogin()
+//                        }else{
+//                            //this is technically redundant. just future proof.
+//                            if ((context?.applicationContext as? MainApplication)?.accountRepository?.checkLogin(it) != null){
+//                                activity?.finish()
+//                            }
+//                        }
                     }
 
                 }
