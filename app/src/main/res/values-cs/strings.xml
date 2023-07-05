@@ -28,6 +28,8 @@
     <string name="unknown_error">Nastala chyba</string>
     <string name="enter_username">Zadejte Vaše přihlašovací jméno</string>
     <string name="enter_password">Zadejte heslo</string>
+    <string name="show_password">Zobrazit heslo</string>
+    <string name="hide_password">Skrýt heslo</string>
     <string name="enter_school">Vyberte Vaši školu</string>
     <string name="search">Vyhledávejte nebo zadejte URL adresu…</string>
     <string name="schools_info_connection_failed">Nepodařilo se stáhnout seznam škol</string>
