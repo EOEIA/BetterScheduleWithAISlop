@@ -10,6 +10,7 @@ data class SchoolInfo(
         val id: String,
         val name: String,
         val url: String,
+        val isManual: Boolean = false,
         /**
          * only letters and digits from 'name', lowercase (accents are removed)
          */

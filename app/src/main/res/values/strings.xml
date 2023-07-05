@@ -282,5 +282,6 @@
         <item quantity="other">%d weeks forward</item>
     </plurals>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
 
 </resources>
