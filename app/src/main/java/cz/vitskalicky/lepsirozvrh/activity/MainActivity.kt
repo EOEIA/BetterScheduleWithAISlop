@@ -1,5 +1,6 @@
 package cz.vitskalicky.lepsirozvrh.activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,6 +15,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.getAccountIdLD().observe(this@MainActivity){
+            if (it == null){
+                // todo start account picker activity
+                val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        }
         setContent {
             LepsirozvrhTheme {
                 RozvrhWithControls(viewModel)

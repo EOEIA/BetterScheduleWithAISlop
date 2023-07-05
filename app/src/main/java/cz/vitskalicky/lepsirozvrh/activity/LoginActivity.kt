@@ -1,5 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.activity
 
+import android.app.Application
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +12,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import cz.vitskalicky.lepsirozvrh.KotlinUtils
 import cz.vitskalicky.lepsirozvrh.MainApplication
+import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus
 import cz.vitskalicky.lepsirozvrh.compose.StatefulLoginForm
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
@@ -24,37 +27,43 @@ import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SCHOOL_UNREACHABLE
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.MANUAL_URL_UNREACHABLE
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_INTERNET
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNEXPECTED_RESPONSE
+import cz.vitskalicky.lepsirozvrh.prefs
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
 
-class LoginViewModel(application: MainApplication): AndroidViewModel(application) {
-    private val accountRepository = application.accountRepository
+class LoginViewModel(
+    application: Application,
+) : AndroidViewModel(application) {
+    private val app = application as MainApplication
+    private val accountRepository = app.accountRepository
     private val loginScreenStatusLD= MutableLiveData<LoginScreenStatus>(LoginScreenStatus.UNKNOWN)
     fun getLoginScreenStatusLD(): LiveData<LoginScreenStatus> = loginScreenStatusLD
 
-    suspend fun login(schoolInfo: SchoolInfo?, username: String, password: String){
+    /** Tries to log in. [loginScreenStatusLD] is updated with the result, `null` is returned if it is fail or the new
+     * account's ID, if successful. */
+    suspend fun login(schoolInfo: SchoolInfo?, username: String, password: String): Long?{
         loginScreenStatusLD.value = LOADING
 
         val url: String = schoolInfo?.url ?: ""
 
         if (url.isBlank()) {
             loginScreenStatusLD.value = NO_SCHOOL
-            return
+            return null
         }
         if (username.isBlank()) {
             loginScreenStatusLD.value = NO_USERNAME
-            return
+            return null
         }
         if (password.isBlank()) {
             loginScreenStatusLD.value = NO_PASSWORD
-            return
+            return null
         }
         val result = accountRepository.addAccount(url, username, password, schoolInfo?.isManual ?: false)
 
         when (result.status){
             AccountRepository.LoginResultStatus.WRONG_LOGIN -> {
                 loginScreenStatusLD.value = WRONG_LOGIN
-                return
+                return null
             }
             AccountRepository.LoginResultStatus.UNREACHABLE -> {
                 loginScreenStatusLD.value = if (KotlinUtils.isOnline()){
@@ -66,15 +75,17 @@ class LoginViewModel(application: MainApplication): AndroidViewModel(application
                 }else {
                     NO_INTERNET
                 }
-                return
+                return null
             }
             AccountRepository.LoginResultStatus.UNEXPECTED_RESPONSE -> {
                 loginScreenStatusLD.value = UNEXPECTED_RESPONSE
-                return
+                return null
             }
             AccountRepository.LoginResultStatus.SUCCESS -> {
+                //set active account and start main activity
+                app.prefs.putOne(PrefsConsts.ACTIVE_ACCOUNT_ID, result.account!!.id)
                 loginScreenStatusLD.value = SUCCESS
-                //todo success
+                return result.account.id //the activity must start the main activity
             }
         }
     }
@@ -90,9 +101,19 @@ class LoginActivity : ComponentActivity() {
             LepsirozvrhTheme {
                 StatefulLoginForm(
                     viewModel.getLoginScreenStatusLD(),
-                    {schoolInfo, username, password -> scope.launch { viewModel.login(schoolInfo, username, password) } }
+                    {schoolInfo, username, password ->
+                        scope.launch {
+                            val accountId: Long? = viewModel.login(schoolInfo, username, password)
+                            if (accountId != null){
+                                val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
+                        }
+                    }
                 )
             }
         }
+
     }
 }
