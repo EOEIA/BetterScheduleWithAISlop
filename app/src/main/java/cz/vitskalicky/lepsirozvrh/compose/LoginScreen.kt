@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +25,21 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolInfo
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNKNOWN
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.LOADING
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SUCCESS
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_SCHOOL
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_USERNAME
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_PASSWORD
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.WRONG_LOGIN
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SCHOOL_UNREACHABLE
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.MANUAL_URL_UNREACHABLE
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_INTERNET
+import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNEXPECTED_RESPONSE
 
 /** Does not implement all features of TextField*/
 @Composable
@@ -180,20 +195,71 @@ fun LoginForm(
     }
 }
 
+enum class LoginScreenStatus{
+    UNKNOWN,
+    LOADING,
+    SUCCESS,
+    NO_SCHOOL,
+    NO_USERNAME,
+    NO_PASSWORD,
+    WRONG_LOGIN,
+    SCHOOL_UNREACHABLE,
+    MANUAL_URL_UNREACHABLE,
+    NO_INTERNET,
+    UNEXPECTED_RESPONSE
+}
+
+@Composable
+fun StatefulLoginForm(
+    loginScreenStatus: LiveData<LoginScreenStatus>,
+    onSubmit: (schoolInfo: SchoolInfo?, username: String, password:String) -> Unit,
+    defaultSchoolInfo: SchoolInfo? = null,
+    defaultUsername: String = "",
+    defaultPassword:String = "",
+){
+    var schoolInfo by rememberSaveable { mutableStateOf(defaultSchoolInfo) }
+    var username by rememberSaveable { mutableStateOf(defaultUsername) }
+    var password by rememberSaveable { mutableStateOf(defaultPassword) }
+    val status: LoginScreenStatus? by loginScreenStatus.observeAsState()
+    var hideErrors by rememberSaveable { mutableStateOf(false) }
+    LoginForm(
+        schoolInfo?.name ?: "",
+        username,
+        password,
+        status == LOADING,
+        if (hideErrors) null else when (status){
+            NO_SCHOOL -> stringResource(R.string.no_school_selected)
+            SCHOOL_UNREACHABLE -> stringResource(R.string.school_unreachable)
+            MANUAL_URL_UNREACHABLE -> stringResource(R.string.unreachable)
+            else -> null
+        },
+        if (hideErrors) null else when (status){
+            NO_USERNAME -> stringResource(R.string.enter_username)
+            WRONG_LOGIN -> stringResource(R.string.invalid_login)
+            else -> null
+        },
+        if (hideErrors) null else when (status){
+            NO_PASSWORD -> stringResource(R.string.enter_password)
+            WRONG_LOGIN -> stringResource(R.string.invalid_login)
+            else -> null
+        },
+        if (hideErrors) null else when (status){
+            NO_INTERNET -> stringResource(R.string.no_internet)
+            UNEXPECTED_RESPONSE -> stringResource(R.string.unexpected_response)
+            else -> null
+        },
+        onSchoolChange = {/*todo*/ hideErrors = true},
+        onUsernameChange = {value->username = value; hideErrors = true},
+        onPasswordChange = {value -> password = value; hideErrors = true},
+        onLogin = {hideErrors = false; onSubmit(schoolInfo, username, password)}
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun LoginFormPreview(){
-    LoginForm(
-        school = "Škola čas a kouzel v Bradavicích",
-        username = "snapesev",
-        password = "jamesiscunt",
-        loading = false,
-        schoolError = null,
-        usernameError = null,
-        passwordError = null,
-        genericError = null,
-        onSchoolChange = {},
-        onUsernameChange = { _->},
-        onPasswordChange = { _->},
-        onLogin = {})
+    StatefulLoginForm(
+        MutableLiveData(UNKNOWN),
+        {_,_,_ ->}
+    )
 }
