@@ -37,6 +37,7 @@
     <string name="use_url">Enter URL address manually</string>
     <string name="use_url_dialog_title">Enter server URL address</string>
     <string name="use_url_dialog_hint">e.g.: https://bakalari.school.com/bakaweb</string>
+    <string name="use_url_invalid">This is not an URL address</string>
 
     <!-- Info messages -->
     <string name="info_last_week">Last week</string>

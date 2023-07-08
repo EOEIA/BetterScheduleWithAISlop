@@ -1,6 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.schoolsDatabase
 
 import android.app.Application
+import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -14,10 +15,16 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -134,10 +141,68 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
 }
 
 @Composable
-fun SchoolList2(){
-    val viewModel: SchoolPickerViewModel = viewModel()
+fun SchoolList(onSelect: (SchoolInfo) -> Unit, viewModel: SchoolPickerViewModel = viewModel()){
 
-    SchoolList(viewModel, {},{})
+    var showDialog by rememberSaveable{mutableStateOf(false)}
+    var manualText:String by rememberSaveable{ mutableStateOf("") }
+    var dialogError: Boolean by rememberSaveable{ mutableStateOf(false) }
+
+    if (showDialog){
+        AlertDialog(
+            onDismissRequest = {
+                showDialog = false
+            },
+            confirmButton = {TextButton({
+                if (!URLUtil.isValidUrl(manualText)){
+                    dialogError = true;
+                    return@TextButton
+                }
+                val si = SchoolInfo(
+                    id = "",
+                    name = "",
+                    url = manualText,
+                    isManual = true
+                )
+                onSelect(si)
+            }){ Text(stringResource(R.string.ok)) } },
+            dismissButton = {TextButton({
+                showDialog = false
+            }){ Text(stringResource(R.string.cancel)) } },
+            title = { Text(stringResource(R.string.use_url_dialog_title)) },
+            text = {
+                Column {
+                    Text(
+                        stringResource(R.string.use_url_dialog_hint),
+                        style = MaterialTheme.typography.body2
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    OutlinedTextField(
+                        value =  manualText,
+                        onValueChange = {
+                            manualText = it;
+                            dialogError = false
+                        },
+                        isError = dialogError
+                    )
+                    if (dialogError){
+                        Text(
+                            stringResource(R.string.use_url_invalid),
+                            color = MaterialTheme.colors.error.copy(alpha = ContentAlpha.medium),
+                            style = MaterialTheme.typography.caption,
+                            modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                        )
+                    }
+                }
+
+            }
+        )
+    }
+
+    SchoolList(viewModel, onSelect,{
+        manualText=it
+        dialogError = false
+        showDialog = true;
+    })
 }
 
 
@@ -154,7 +219,7 @@ fun SchoolList(viewModel: SchoolPickerViewModel, onSelect: (SchoolInfo) -> Unit,
     val scrollState = rememberLazyListState()
 
     Column {
-        TextField(
+        OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(all = 8.dp),
