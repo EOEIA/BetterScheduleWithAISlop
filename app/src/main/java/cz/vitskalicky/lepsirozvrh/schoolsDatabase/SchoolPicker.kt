@@ -11,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -45,11 +46,15 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
     private val displayedPagerLiveData = queryLD.distinctUntilChanged().map {query: String -> if (query.isBlank()) allSchoolsPager else getSearchPager(query)  }
 
     private val statusLD = MutableLiveData<StatusInfo>(StatusInfo.unknown())
+
+    /** The search query */
     var query: String
         get() = queryLD.value ?: ""
         set(value){ queryLD.value = value}
+    /** LiveData of what should be displayed */
     val pageLD: LiveData<Pager<Int, SchoolInfo>>
         get() = displayedPagerLiveData
+    /** Status of loading the data from the internet */
     val status: LiveData<StatusInfo>
         get() = statusLD
 
@@ -117,7 +122,13 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
 
     init {
         viewModelScope.launch {
-            refresh()
+            val lastUpdate: DateTime? = SharedPrefsKt(app).string(PrefsConsts.PREFS_LAST_SCHOOLS_LIST_UPDATE).takeUnless { it.isNullOrBlank() }?.let{ ISODateTimeFormat.dateTime().parseDateTime(it)}
+            if (lastUpdate == null || lastUpdate.isBefore(DateTime.now().withMillisOfDay(0)) || app.schoolsDb.schoolDAO().countAllSchools() == 0){
+                //refresh if never refreshed or not refreshed today yet or there are no schools in database for some reason
+                refresh()
+            }else{
+                statusLD.value = StatusInfo.success()
+            }
         }
     }
 }
@@ -126,12 +137,14 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
 fun SchoolList2(){
     val viewModel: SchoolPickerViewModel = viewModel()
 
-    SchoolList(viewModel)
+    SchoolList(viewModel, {},{})
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+
+/** List of schools with search box
+ * */
 @Composable
-fun SchoolList(viewModel: SchoolPickerViewModel){
+fun SchoolList(viewModel: SchoolPickerViewModel, onSelect: (SchoolInfo) -> Unit, onManual: (searchQuery: String) -> Unit){
     val pager by viewModel.pageLD.observeAsState();
     val status by viewModel.status.observeAsState()
     val scope = rememberCoroutineScope()
@@ -156,7 +169,28 @@ fun SchoolList(viewModel: SchoolPickerViewModel){
             }
         )
 
-        LazyColumn(
+//        Button(onClick = {
+//            scope.launch { viewModel.refresh()}}){ Text("Refresh")
+//        }
+
+        if (status?.status == StatusInfo.Status.ERROR){
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(Icons.Default.WifiOff, null)
+                Text(stringResource(status?.errMessage?: R.string.no_internet))
+                TextButton(onClick = {
+                    scope.launch {
+                        viewModel.refresh()
+                    }
+                }){
+                    Text(stringResource(R.string.schools_retry))
+                }
+                Spacer(modifier = Modifier.weight(3f))
+            }
+        }else LazyColumn(
             modifier = Modifier
                 .weight(1f),
             state = scrollState,
@@ -164,7 +198,7 @@ fun SchoolList(viewModel: SchoolPickerViewModel){
             if (status?.status == StatusInfo.Status.LOADING) {
                 item {
                     Column(
-                        modifier = Modifier.fillMaxWidth().height(30.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         CircularProgressIndicator()
@@ -178,11 +212,9 @@ fun SchoolList(viewModel: SchoolPickerViewModel){
                 ) { index: Int ->
                     val item = lazyPagingItems[index]
                     if (item != null){
-                        val context = LocalContext.current;
                         Column(
                             modifier = Modifier.clickable {
-                                //todo
-                                Toast.makeText(context, item.name, Toast.LENGTH_SHORT).show()
+                                onSelect(item)
                             }
                                 .fillMaxWidth()
                                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
@@ -200,11 +232,10 @@ fun SchoolList(viewModel: SchoolPickerViewModel){
                 }
                 if (lazyPagingItems.loadState.refresh is LoadState.NotLoading){
                     item {
-                        val context = LocalContext.current;
                         Row(
                             modifier = Modifier.fillMaxWidth()
                                 .clickable {
-                                    Toast.makeText(context, "Manual", Toast.LENGTH_SHORT).show()
+                                    onManual(viewModel.query)
                                 }
                                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                         ) {
