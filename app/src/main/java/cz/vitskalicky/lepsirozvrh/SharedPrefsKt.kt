@@ -45,4 +45,5 @@ val Context.prefs: SharedPrefsKt
 
 object PrefsConsts {
     const val ACTIVE_ACCOUNT_ID = "int_active_account_id"
+    const val PREFS_LAST_SCHOOLS_LIST_UPDATE = "prefs-last-schools-list-update"
 }
