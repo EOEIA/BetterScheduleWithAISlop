@@ -34,6 +34,7 @@
     <string name="schools_info_connection_failed">Downloading school list failed</string>
     <string name="loading_schools_info">Loading schools info…</string>
     <string name="schools_retry">Retry</string>
+    <string name="schools_dialog_title">Select a school</string>
     <string name="use_url">Enter URL address manually</string>
     <string name="use_url_dialog_title">Enter server URL address</string>
     <string name="use_url_dialog_hint">e.g.: https://bakalari.school.com/bakaweb</string>

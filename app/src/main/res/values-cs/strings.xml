@@ -35,6 +35,7 @@
     <string name="schools_info_connection_failed">Nepodařilo se stáhnout seznam škol</string>
     <string name="loading_schools_info">Načítání informací o školách…</string>
     <string name="schools_retry">Zkusit znovu</string>
+    <string name="schools_dialog_title">Zvolte školu</string>
     <string name="use_url">Zadat URL adresu ručně</string>
     <string name="use_url_dialog_title">Zadejte URL adresu serveru</string>
     <string name="use_url_dialog_hint">např.: https://bakalari.skola.cz/bakaweb</string>

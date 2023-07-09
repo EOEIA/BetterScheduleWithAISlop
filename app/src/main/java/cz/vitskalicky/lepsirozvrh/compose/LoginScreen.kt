@@ -2,12 +2,15 @@ package cz.vitskalicky.lepsirozvrh.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
@@ -25,6 +28,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import cz.vitskalicky.lepsirozvrh.R
@@ -40,8 +45,9 @@ import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SCHOOL_UNREACHABLE
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.MANUAL_URL_UNREACHABLE
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_INTERNET
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNEXPECTED_RESPONSE
+import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolList
 
-/** Does not implement all features of TextField*/
+/** Add a line for error text, but does not implement all features of TextField*/
 @Composable
 fun TextFieldWithError(
     value: String,
@@ -57,7 +63,8 @@ fun TextFieldWithError(
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
     errorMessage: String? = null,
-    columnModifier: Modifier = Modifier
+    columnModifier: Modifier = Modifier,
+    textFieldInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ){
     Column(modifier = columnModifier) {
         TextField(
@@ -73,7 +80,8 @@ fun TextFieldWithError(
             placeholder = placeholder,
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
-            isError = errorMessage != null
+            isError = errorMessage != null,
+            interactionSource = textFieldInteractionSource,
         )
         Text(
             text = errorMessage ?: "",
@@ -84,6 +92,7 @@ fun TextFieldWithError(
     }
 }
 
+/** The UI of login form, but it does not keep any data in state. Just the UI*/
 @Composable
 fun LoginForm(
     school: String, username: String, password: String,
@@ -96,6 +105,12 @@ fun LoginForm(
     onLogin: ()->Unit,){
     var showPassword: Boolean by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+
+    // detect click on school text field
+    val schoolTextFieldInteractionSource = remember { MutableInteractionSource() }
+    if (schoolTextFieldInteractionSource.collectIsPressedAsState().value && !loading){
+        onSchoolChange()
+    }
 
     Column(
         modifier = Modifier
@@ -133,7 +148,8 @@ fun LoginForm(
                 textFieldModifier = Modifier.semantics { if (schoolError != null) error(schoolError) },
                 columnModifier = Modifier.weight(1f),
                 errorMessage = if (!loading) schoolError else null,
-                enabled = !loading
+                enabled = !loading,
+                textFieldInteractionSource = schoolTextFieldInteractionSource,
             )
             Spacer(Modifier.size(8.dp))
             Button(
@@ -209,6 +225,7 @@ enum class LoginScreenStatus{
     UNEXPECTED_RESPONSE
 }
 
+/** Extends [LoginForm] and adds some data state handling.*/
 @Composable
 fun StatefulLoginForm(
     loginScreenStatus: LiveData<LoginScreenStatus>,
@@ -222,6 +239,36 @@ fun StatefulLoginForm(
     var password by rememberSaveable { mutableStateOf(defaultPassword) }
     val status: LoginScreenStatus? by loginScreenStatus.observeAsState()
     var hideErrors by rememberSaveable { mutableStateOf(false) }
+    var showSchoolPicker by rememberSaveable{ mutableStateOf(false) }
+
+    if (showSchoolPicker){
+        Dialog(
+            onDismissRequest = {showSchoolPicker = false},
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false
+            ), )
+        {
+            Surface(
+                color = MaterialTheme.colors.background
+            ) {
+                Column {
+                    TopAppBar(
+                        title = {
+                            Text(stringResource(R.string.schools_dialog_title))
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {showSchoolPicker = false}){
+                                Icon(Icons.Default.Close, stringResource(R.string.close))
+                            }
+                        } )
+                    SchoolList({ pickedSchoolInfo ->
+                        showSchoolPicker = false
+                        schoolInfo = pickedSchoolInfo
+                    })
+                }
+            }
+        }
+    }
     LoginForm(
         schoolInfo?.name ?: "",
         username,
@@ -248,7 +295,7 @@ fun StatefulLoginForm(
             UNEXPECTED_RESPONSE -> stringResource(R.string.unexpected_response)
             else -> null
         },
-        onSchoolChange = {/*todo*/ hideErrors = true},
+        onSchoolChange = {showSchoolPicker = true; hideErrors = true},
         onUsernameChange = {value->username = value; hideErrors = true},
         onPasswordChange = {value -> password = value; hideErrors = true},
         onLogin = {hideErrors = false; onSubmit(schoolInfo, username, password)}

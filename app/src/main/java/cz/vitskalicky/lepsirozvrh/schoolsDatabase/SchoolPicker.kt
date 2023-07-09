@@ -2,8 +2,6 @@ package cz.vitskalicky.lepsirozvrh.schoolsDatabase
 
 import android.app.Application
 import android.webkit.URLUtil
-import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,13 +16,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,7 +28,6 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -128,6 +119,7 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
     }
 
     init {
+        // initial refresh
         viewModelScope.launch {
             val lastUpdate: DateTime? = SharedPrefsKt(app).string(PrefsConsts.PREFS_LAST_SCHOOLS_LIST_UPDATE).takeUnless { it.isNullOrBlank() }?.let{ ISODateTimeFormat.dateTime().parseDateTime(it)}
             if (lastUpdate == null || lastUpdate.isBefore(DateTime.now().withMillisOfDay(0)) || app.schoolsDb.schoolDAO().countAllSchools() == 0){
@@ -140,6 +132,7 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
     }
 }
 
+/** Also handles entering custom url */
 @Composable
 fun SchoolList(onSelect: (SchoolInfo) -> Unit, viewModel: SchoolPickerViewModel = viewModel()){
 
@@ -198,7 +191,7 @@ fun SchoolList(onSelect: (SchoolInfo) -> Unit, viewModel: SchoolPickerViewModel 
         )
     }
 
-    SchoolList(viewModel, onSelect,{
+    SchoolList(viewModel, onSelect, onManual = {
         manualText=it
         dialogError = false
         showDialog = true;
