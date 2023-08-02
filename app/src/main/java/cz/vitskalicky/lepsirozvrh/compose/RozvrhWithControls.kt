@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -127,22 +128,21 @@ fun RozvrhWithControls(
             color = MaterialTheme.colors.primary,
             contentColor = MaterialTheme.colors.onPrimary,
         ) {
-            Row(
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 //todo tooltips
                 IconButton(onSettingsPress) {
                     Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                 }
-                Row {
+                Row(Modifier.align(Alignment.Center)) {
                     if (weekPosition != RozvrhViewModel.PERM)
                         IconButton(onPrevPress) {
                             Icon(Icons.Default.NavigateBefore, contentDescription = stringResource(R.string.prev_week))
                         }
                     if (weekPosition != 0){
                         IconButton(onCurrentPress) {
-                            Icon(Icons.Default.Today, contentDescription = stringResource(R.string.current_week))
+                            Icon(Icons.Default.Home, contentDescription = stringResource(R.string.current_week))
                         }
                     }else{
                         IconButton(onPermPress) {
@@ -154,16 +154,20 @@ fun RozvrhWithControls(
                             Icon(Icons.Default.NavigateNext, contentDescription = stringResource(R.string.next_week))
                         }
                 }
-                if(status == StatusInfo.Status.LOADING){
-                    CircularProgressIndicator()
-                }else{
-                    IconButton(onRefreshPress) {
-                        Icon(
-                            if (status == StatusInfo.Status.ERROR) Icons.Default.SyncProblem else Icons.Default.Sync,
-                            contentDescription = stringResource(R.string.prev_week)
-                        )
+
+                Box(Modifier.align(Alignment.CenterEnd)){
+                    if(status == StatusInfo.Status.LOADING){
+                        CircularProgressIndicator() // todo change color
+                    }else{
+                        IconButton(onRefreshPress) {
+                            Icon(
+                                if (status == StatusInfo.Status.ERROR) Icons.Default.SyncProblem else Icons.Default.Sync,
+                                contentDescription = stringResource(R.string.prev_week)
+                            )
+                        }
                     }
                 }
+
             }
         }
     }
