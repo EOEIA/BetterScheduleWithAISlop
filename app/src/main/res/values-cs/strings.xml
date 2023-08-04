@@ -68,6 +68,8 @@
     <string name="notification_detials">Stálé upozornění zobrazuje během školy právě probíhající nebo následující hodinu. První hodinu začne zobrazovat 1 hodinu před jejím začátkem a na další hodinu přepíná vždy 10 minut před koncem právě probíhající hodiny. Po skončení školy zmizí.\n\nTuto funkci lze vypnout v nastavení.</string>
     <string name="notification_no_permission_title">Upozornění jsou zakázána</string>
     <string name="notification_no_permission">Upozornění Lepšího Rozvrhu jsou blokována Androidem. Odblokujte je prosím v nastavení vašeho zařízení a poté zkuste stálé upozornění zapnout znovu.</string>
+    <string name="notification_off">Vypnuto</string>
+    <string name="notification_status">Zapnuto pro: %1$s</string>
     <string name="support_this_app">Podpořit vývojáře</string>
     <string name="support_this_app_desc">Přispějte na vývoj této aplikace</string>
     <string name="supporting_this_app">Již tuto aplikace podporujete</string>
@@ -247,14 +249,18 @@
     <string name="wtf_rozvrh_later">Teď ne</string>
     <string name="wtf_not_fot_month">Možná za měsíc</string>
 
+    <string name="website_link">https://vitskalicky.gitlab.io/lepsi-rozvrh</string>
+
     <plurals name="info_weeks_back">
         <item quantity="one">%d týden zpět</item>
         <item quantity="few">%d týdny zpět</item>
+        <item quantity="many">%d týdnů zpět</item>
         <item quantity="other">%d týdnů zpět</item>
     </plurals>
     <plurals name="info_weeks_forward">
         <item quantity="one">%d týden vpřed</item>
         <item quantity="few">%d týdny vpřed</item>
+        <item quantity="many">%d týdnů vpřed</item>
         <item quantity="other">%d týdnů vpřed</item>
     </plurals>
 </resources>

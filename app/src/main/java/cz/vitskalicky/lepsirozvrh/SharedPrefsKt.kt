@@ -45,5 +45,12 @@ val Context.prefs: SharedPrefsKt
 
 object PrefsConsts {
     const val ACTIVE_ACCOUNT_ID = "int_active_account_id"
-    const val PREFS_LAST_SCHOOLS_LIST_UPDATE = "prefs-last-schools-list-update"
+    const val LAST_SCHOOLS_LIST_UPDATE = "prefs-last-schools-list-update"
+    const val SHOW_INFO_LINE = "prefs-show-info-line"
+    const val SWITCH_TO_NEXT_WEEK = "prefs-switch-to-next-week"
+    const val CENTER_TO_CURRENT_LESSON = "prefs-center-to-current-lesson"
+    /**
+     * Account id for which persistent notification is active. Invalid id => persistent notification disabled
+     */
+    const val NOTIFICATION_ACCOUNT = "notification-account"
 }

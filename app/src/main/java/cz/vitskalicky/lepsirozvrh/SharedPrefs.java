@@ -48,10 +48,7 @@ public class SharedPrefs {
      */
     public static final String WIDGETS_SETTINGS = "widgets-settings";
 
-    /**
-     * Account id for which persistent notification is active. Invalid id => persistent notification disabled
-     */
-    public static final String NOTIFICATION_ACCOUNT = "notification-account";
+    
 
     public static String getString(Context context, String key) {
         return PreferenceManager

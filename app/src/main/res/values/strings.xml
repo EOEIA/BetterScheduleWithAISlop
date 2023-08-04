@@ -77,6 +77,8 @@
     <string name="notification_no_permission">This app\'s notifications are blocked by Android. Please unblock them in
         device settings and try again.
     </string>
+    <string name="notification_off">Disabled</string>
+    <string name="notification_status">Enabled for: %1$s</string>
     <string name="support_this_app">Support developer</string>
     <string name="support_this_app_desc">Donate to support development of this app</string>
     <string name="supporting_this_app">You are a sponsor</string>
@@ -276,6 +278,8 @@
     <string name="wtf_rozvrh_report">Report</string>
     <string name="wtf_rozvrh_later">Not now</string>
     <string name="wtf_not_fot_month">Not for a month</string>
+
+    <string name="website_link">https://vitskalicky.gitlab.io/lepsi-rozvrh/en</string>
 
     <plurals name="info_weeks_back">
         <item quantity="one">%d week back</item>

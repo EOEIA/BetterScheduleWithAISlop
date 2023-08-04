@@ -106,7 +106,7 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
             if (allSchools.size > 0) {
                 db.replaceSchools(allSchools)
                 SharedPrefsKt(app).putOne(
-                    PrefsConsts.PREFS_LAST_SCHOOLS_LIST_UPDATE,
+                    PrefsConsts.LAST_SCHOOLS_LIST_UPDATE,
                     DateTime.now().toString(ISODateTimeFormat.dateTime())
                 );
                 statusLD.value = StatusInfo.success()
@@ -121,7 +121,7 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
     init {
         // initial refresh
         viewModelScope.launch {
-            val lastUpdate: DateTime? = SharedPrefsKt(app).string(PrefsConsts.PREFS_LAST_SCHOOLS_LIST_UPDATE).takeUnless { it.isNullOrBlank() }?.let{ ISODateTimeFormat.dateTime().parseDateTime(it)}
+            val lastUpdate: DateTime? = SharedPrefsKt(app).string(PrefsConsts.LAST_SCHOOLS_LIST_UPDATE).takeUnless { it.isNullOrBlank() }?.let{ ISODateTimeFormat.dateTime().parseDateTime(it)}
             if (lastUpdate == null || lastUpdate.isBefore(DateTime.now().withMillisOfDay(0)) || app.schoolsDb.schoolDAO().countAllSchools() == 0){
                 //refresh if never refreshed or not refreshed today yet or there are no schools in database for some reason
                 refresh()
