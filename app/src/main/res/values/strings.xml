@@ -60,6 +60,7 @@
     <string name="teacher">Teacher</string>
     <string name="parent">Parent</string>
     <string name="logout">Logout</string>
+    <string name="switch_account">Switch account</string>
     <string name="look_and_behaviour">App look &amp; behavior</string>
     <string name="info_line">Info-line</string>
     <string name="info_line_desc">Show information line</string>
@@ -191,10 +192,11 @@
     <string name="no">No</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="back">Back</string>
 
     <string name="about">About</string>
-    <string name="source_code">Source code</string>
-    <string name="source_code_desc">Visit GitLab page</string>
+    <string name="website">Website</string>
+    <string name="website_desc">Visit the website of this app</string>
     <string name="feedback">Send feedback</string>
     <string name="feedback_desc">Report a bug, ask a question, etc.</string>
     <string name="send_crash">Send crash reports</string>
@@ -283,7 +285,5 @@
         <item quantity="one">%d week forward</item>
         <item quantity="other">%d weeks forward</item>
     </plurals>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_login">LoginActivity</string>
 
 </resources>

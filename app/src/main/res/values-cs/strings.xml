@@ -57,6 +57,7 @@
     <string name="teacher">Učitel</string>
     <string name="parent">Rodič</string>
     <string name="logout">Odhlásit se</string>
+    <string name="switch_account">Přepnout účet</string>
     <string name="look_and_behaviour">Vzhled a chování</string>
     <string name="info_line">Informační řádek</string>
     <string name="info_line_desc">Zobrazovat informační řádek</string>
@@ -174,10 +175,11 @@
     <string name="no">Ne</string>
     <string name="ok">OK</string>
     <string name="cancel">Zrušit</string>
+    <string name="back">Zpět</string>
 
     <string name="about">O aplikaci</string>
-    <string name="source_code">Zdrojový kód</string>
-    <string name="source_code_desc">Navštivte stránku aplikace na GitLabu</string>
+    <string name="website">Webová stránka</string>
+    <string name="website_desc">Navštivte webovou stránku aplikace</string>
     <string name="feedback">Napsat autorovi</string>
     <string name="feedback_desc">Nahlaste chybu, zeptejte se na něco, atd.</string>
     <string name="send_crash">Odesílat hlášení o chybách</string>

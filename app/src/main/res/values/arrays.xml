@@ -5,7 +5,7 @@
         <item>On Sunday</item>
         <item>On Saturday</item>
     </string-array>
-    <string-array name="switch_to_next_week_values">
+    <string-array name="switch_to_next_week_offsets">
         <item>0</item>
         <item>1</item>
         <item>2</item>
