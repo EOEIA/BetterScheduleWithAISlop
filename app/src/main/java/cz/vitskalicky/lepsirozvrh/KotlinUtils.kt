@@ -1,6 +1,7 @@
 package cz.vitskalicky.lepsirozvrh
 
 import android.app.PendingIntent
+import android.content.Context
 import android.os.Build
 import androidx.annotation.PluralsRes
 import androidx.annotation.RequiresApi
@@ -43,5 +44,12 @@ object KotlinUtils {
     @Composable
     fun quantityStringResource(@PluralsRes id: Int, quantity: Int, vararg formatArgs: Any): String {
         return LocalContext.current.resources.getQuantityString(id, quantity, *formatArgs)
+    }
+
+    fun calculateWeekSwitchOffset(context: Context, optionIndex: Int): Int{
+        return context.resources.getIntArray(R.array.switch_to_next_week_offsets)[optionIndex]
+    }
+    fun getWeekSwitchOffset(context: Context): Int {
+        return calculateWeekSwitchOffset(context, context.prefs.int(PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX) ?: 0)
     }
 }

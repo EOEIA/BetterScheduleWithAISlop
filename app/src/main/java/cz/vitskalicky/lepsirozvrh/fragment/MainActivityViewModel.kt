@@ -28,7 +28,7 @@ class MainActivityViewModel(
     private var currentlyUsedLD: LiveData<RozvrhRecord?>? = null
     private var currentlyUsedStatusLD: LiveData<StatusInfo>? = null
 
-    //to make switching instant
+    //"cache" to make switching instant
     private var nextLD: LiveData<RozvrhRecord?>? = null
     private var nextStatusLD: LiveData<StatusInfo>? = null
     private var prevLD: LiveData<RozvrhRecord?>? = null
@@ -37,6 +37,14 @@ class MainActivityViewModel(
     private var permStatusLD: LiveData<StatusInfo>? = null
     private var thisWeekLD: LiveData<RozvrhRecord?>? = null
     private var thisWeekStatusLD: LiveData<StatusInfo>? = null
+
+    private var invalidateCache = false
+
+    private val switchDayLD = SharedPrefsIntLiveData(application.prefs.sharedPreferences,PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX,0)
+    private val switchDayObserver: Observer<Int> = Observer { newOptionIndex->
+        invalidateCache = true
+        weekPosition = weekPosition
+    }
 
     /**
      * Tells if the last request was successful. If not, infoline should show "offline" on all weeks.
@@ -133,6 +141,20 @@ class MainActivityViewModel(
                 statusLD.removeSource(it)
                 statusLD.value = StatusInfo.loading()
             }
+            if (invalidateCache){
+                nextLD = null
+                nextStatusLD = null
+                prevLD = null
+                prevStatusLD = null
+                permLD = null
+                permStatusLD = null
+                thisWeekLD = null
+                thisWeekStatusLD = null
+                currentlyUsedLD = null
+                currentlyUsedStatusLD = null
+                initThisAndPermLD()
+                invalidateCache = false
+            }
 
             if (diff == 1){
                 //shift the livedata
@@ -198,15 +220,26 @@ class MainActivityViewModel(
         }
     }
 
-    init {
+    private fun initThisAndPermLD(){
         val thisWeekLDs = prepareLD( 0)
         thisWeekLD = thisWeekLDs.first
         thisWeekStatusLD = thisWeekLDs.second
         val permLDs = prepareLD( PERM)
         permLD = permLDs.first
         permStatusLD = permLDs.second
+    }
+
+    init {
+        initThisAndPermLD()
+
+        switchDayLD.observeForever(switchDayObserver)
 
         weekPosition = weekPosition
+    }
+
+    override fun onCleared() {
+        switchDayLD.removeObserver(switchDayObserver)
+        super.onCleared()
     }
 }
 

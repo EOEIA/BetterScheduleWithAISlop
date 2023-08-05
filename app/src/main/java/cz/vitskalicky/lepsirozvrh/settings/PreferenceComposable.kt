@@ -33,7 +33,7 @@ private fun PreferenceBase(
             icon?.invoke()
         }
         content()
-        Spacer(Modifier.fillMaxWidth().weight(0f))
+        Spacer(Modifier.fillMaxWidth().weight(1f))
         rightContent?.invoke()
     }
 }

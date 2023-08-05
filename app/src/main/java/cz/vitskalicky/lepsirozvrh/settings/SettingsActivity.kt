@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -45,7 +47,13 @@ class SettingsActivity : ComponentActivity() {
                     topBar = {
                         TopAppBar(
                             title = { Text(stringResource(R.string.settings)) },
-                            navigationIcon = { Icon(Icons.Default.ArrowBack, stringResource(R.string.back)) }
+                            navigationIcon = {
+                                IconButton({
+                                    finish()
+                                }) {
+                                    Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
+                                }
+                            }
                         )
                     },
                     content = {paddingValues: PaddingValues ->
@@ -114,12 +122,12 @@ class SettingsActivity : ComponentActivity() {
                             PreferenceGroupHeader(R.string.about.str)
                             Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){ TODO() }
                             Preference(R.string.website.str, R.string.website_desc.str,Icons.Default.Language.icon){
-                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(R.string.website_link.str))
+                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.website_link)))
                                 startActivity(browserIntent)
                             }
                             Preference(R.string.feedback.str, R.string.feedback_desc.str, Icons.Default.Feedback.icon){ TODO() }
                             Preference(R.string.privacy_policy.str, null){
-                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(R.string.PRIVACY_POLICY_LINK.str))
+                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.PRIVACY_POLICY_LINK)))
                                 startActivity(browserIntent)
                             }
                             Preference(R.string.oss_licences.str, R.string.oss_licences_desc.str){TODO()}
@@ -132,6 +140,7 @@ class SettingsActivity : ComponentActivity() {
                                 val clip = ClipData.newPlainText(versionText, versionText)
                                 clipboard.setPrimaryClip(clip)
                                 lifecycleScope.launch{
+                                    //todo this does not work
                                     scaffoldState.snackbarHostState.showSnackbar(R.string.copied_to_clipboard.str)
                                 }
                             }
@@ -150,18 +159,6 @@ class SettingsActivity : ComponentActivity() {
 }
 
 // shortcuts
-private inline val Int.str: String get() = stringResource(this)
-private inline val ImageVector.icon: () -> Unit get() = {Icon(this, null)}
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    LepsirozvrhTheme {
-        Greeting("Android")
-    }
-}
+private inline val Int.str: String
+    @Composable get() = stringResource(this)
+private inline val ImageVector.icon: @Composable () -> Unit get() = {Icon(this, null)}

@@ -28,9 +28,11 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
      * The index of the selected option. See [R.array.switch_to_next_week_entries]
      */
     var switchToNextWeekOptionIndex: Int
-        get() = sp.int(PrefsConsts.SWITCH_TO_NEXT_WEEK) ?: 0
-        set(value) = sp.edit { putInt(PrefsConsts.SWITCH_TO_NEXT_WEEK, value) }
-    val switchToNextWeekOptionIndexLD: LiveData<Int> = SharedPrefsIntLiveData(sp.sharedPreferences, PrefsConsts.SWITCH_TO_NEXT_WEEK, 0)
+        get() = sp.int(PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX) ?: 0
+        set(value) = sp.edit {
+            putInt(PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX, value)
+        }
+    val switchToNextWeekOptionIndexLD: LiveData<Int> = SharedPrefsIntLiveData(sp.sharedPreferences, PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX, 0)
 
     var centerToCurrentLesson: Boolean
         get() = sp.boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON) ?: false

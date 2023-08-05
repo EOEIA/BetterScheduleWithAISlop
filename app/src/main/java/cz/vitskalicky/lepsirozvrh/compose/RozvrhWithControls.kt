@@ -1,5 +1,6 @@
 package cz.vitskalicky.lepsirozvrh.compose
 
+import android.content.Intent
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,16 +19,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import cz.vitskalicky.lepsirozvrh.DebugUtils
+import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.quantityStringResource
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.fragment.RozvrhViewModel
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCycle
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhGroup
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
+import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
 import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhLayout
 
 @Composable
@@ -36,7 +37,13 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
     val status by viewModel.getStatusLD().observeAsState()
     val account by viewModel.getAccountLD().observeAsState()
 
-    var infotext = viewModel.weekPosition.let {
+    val context = LocalContext.current;
+    val infolineLD = remember {
+        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.SHOW_INFO_LINE, true)
+    }
+    val showInfoline by infolineLD.observeAsState()
+
+    var infotext: String? = viewModel.weekPosition.let {
         when{
             it == RozvrhViewModel.PERM -> stringResource(R.string.info_permanent)
             it == 0 -> stringResource(R.string.info_this_week)
@@ -51,9 +58,10 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         if ((viewModel.showError || viewModel.getDisplayLD().value == null) && status?.errMessage != null){
             infotext = status?.errMessage?.let{ stringResource(it) } ?: ""
         }else{
-            infotext = stringResource(R.string.info_offline, infotext)
+            infotext = stringResource(R.string.info_offline, infotext?:"")
         }
     }
+    if (showInfoline == false) infotext = null
 
     RozvrhWithControls(
         rozvrh = rozvrh?.data,
@@ -65,7 +73,10 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         onPrevPress = {viewModel.weekPosition--},
         onCurrentPress = {viewModel.weekPosition = 0},
         onPermPress = {viewModel.weekPosition = RozvrhViewModel.PERM},
-        onSettingsPress = {/*todo*/},
+        onSettingsPress = {
+            val intent = Intent(context, SettingsActivity::class.java)
+            context.startActivity(intent)
+        },
         onRefreshPress = {viewModel.forceRefresh()}
     )
 }

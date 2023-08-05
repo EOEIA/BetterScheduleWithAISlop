@@ -5,8 +5,10 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.HorizontalScrollView
+import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
+import cz.vitskalicky.lepsirozvrh.SharedPrefsKt
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.*
 import org.joda.time.LocalDate
 
@@ -378,7 +380,7 @@ class RozvrhLayout : ViewGroup {
     // we want to center when: the user opens the app, user taps current week
     // we don't want to center when: a fresh schedule with minor changes loads, user switches to the schedule using arrows.
     fun centerToCurrentLesson() {
-        if (!SharedPrefs.getBooleanPreference(context, R.string.PREFS_CENTER_TO_CURRENT_LESSON, true)) return
+        if (SharedPrefsKt(context).boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON) != true) return
         val parent = parent
         if (parent is HorizontalScrollView) {
             val hsvParent = parent

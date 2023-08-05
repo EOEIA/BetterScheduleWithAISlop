@@ -94,23 +94,16 @@ public class Utils {
     }
 
     public static LocalDate getDisplayWeekMonday(Context context) {
-        int offset = 2;
-        if (SharedPrefs.containsPreference(context, R.string.PREFS_SWITCH_TO_NEXT_WEEK)) {
-            try {
-                offset = Integer.parseInt(SharedPrefs.getString(context, context.getString(R.string.PREFS_SWITCH_TO_NEXT_WEEK)));
-            } catch (NumberFormatException e) {
-                Log.e(TAG, "Failed to cast 'Switch to the next week' setting value. Value: " + SharedPrefs.getString(context, context.getString(R.string.PREFS_SWITCH_TO_NEXT_WEEK)));
-            }
-        }
+        int offset = KotlinUtils.INSTANCE.getWeekSwitchOffset(context);
 
         return getWeekMonday(LocalDate.now().plusDays(offset));
     }
 
     public static @Nullable RozvrhRecord.Key getNotificationRozvrhKey(@NonNull Context context){
-        if (!SharedPrefs.contains(context, SharedPrefs.NOTIFICATION_ACCOUNT)){
+        if (!SharedPrefs.contains(context, PrefsConsts.NOTIFICATION_ACCOUNT)){
             return null;
         }
-        return new RozvrhRecord.Key(SharedPrefs.getInt(context, SharedPrefs.NOTIFICATION_ACCOUNT), getCurrentMonday());
+        return new RozvrhRecord.Key(SharedPrefs.getInt(context, PrefsConsts.NOTIFICATION_ACCOUNT), getCurrentMonday());
     }
 
     /**

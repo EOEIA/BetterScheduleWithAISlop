@@ -152,7 +152,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             notificationManager.createNotificationChannel(channel)
         }
 
-        notificationAccountLD = PreferenceManager.getDefaultSharedPreferences(this).longLiveData(SharedPrefs.NOTIFICATION_ACCOUNT, -1).map { it.takeUnless { it == -1L } }
+        notificationAccountLD = PreferenceManager.getDefaultSharedPreferences(this).longLiveData(PrefsConsts.NOTIFICATION_ACCOUNT, -1).map { it.takeUnless { it == -1L } }
         notificationRozvrhLD = notificationAccountLD.switchMap {
             if (it ==null){
                 return@switchMap null
