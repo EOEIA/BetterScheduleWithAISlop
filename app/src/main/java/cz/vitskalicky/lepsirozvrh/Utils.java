@@ -14,7 +14,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -22,7 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
-import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord;
@@ -35,8 +33,6 @@ import org.joda.time.format.DateTimeFormatter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,7 +41,6 @@ import java.util.Locale;
 import java.util.Scanner;
 
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh;
-import io.sentry.Sentry;
 
 public class Utils {
     public static final String TAG = Utils.class.getSimpleName();

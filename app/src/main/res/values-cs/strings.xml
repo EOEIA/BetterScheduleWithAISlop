@@ -194,10 +194,11 @@
     <string name="email_message">Zde jsou podrobnosti o verzi aplikace. Prosím, neodstraňujte je - jsou nezbytné k řešení většiny chyb a problémů.</string>
     <string name="send_email">Odeslat email…</string>
     <string name="no_email_client">Není nainstalován žádný emailový klient.</string>
-    <string name="copy_address">Zkopírovat adresu a zprávu</string>
+    <string name="copy_address">Zkopírovat e-mail</string>
     <string name="copied_to_clipboard">Zkopírováno do schránky</string>
     <string name="include_schedule">Přiložit rozvrh?</string>
     <string name="include_schedule_desc">Přejete si přiložit ke zprávě Váš rozvrh?\n\nRozhodně vyberte \"ano\" pokud chcete nahlásit chybu ve vzhledu.</string>
+    <string name="feedback_loading">Připravuji e-mail…</string>
 
     <string name="notification_channel_name">Trvalé upozornění</string>
 

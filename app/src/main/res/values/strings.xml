@@ -213,12 +213,13 @@
     </string>
     <string name="send_email">Send email…</string>
     <string name="no_email_client">There are no email clients installed.</string>
-    <string name="copy_address">Copy address and message</string>
+    <string name="copy_address">Copy e-mail</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
-    <string name="include_schedule">Include schedule?</string>
-    <string name="include_schedule_desc">Include your schedule in the message?\n\nDefinitely choose \'yes\' if reporting
+    <string name="include_schedule">Attach schedule?</string>
+    <string name="include_schedule_desc">Attach your schedule to the message?\n\nDefinitely choose \'yes\' if reporting
         a visual bug.
     </string>
+    <string name="feedback_loading">Preparing e-mail…</string>
 
     <string name="notification_channel_name">Permanent notification</string>
 

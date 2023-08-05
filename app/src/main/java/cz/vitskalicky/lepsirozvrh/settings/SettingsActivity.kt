@@ -18,10 +18,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -42,8 +41,12 @@ class SettingsActivity : ComponentActivity() {
             val scrollState:ScrollState = rememberScrollState()
             val scaffoldState = rememberScaffoldState()
             val viewModel: SettingsViewModel by viewModels()
+
+            var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
+
             LepsirozvrhTheme {
                 Scaffold(
+                    scaffoldState = scaffoldState,
                     topBar = {
                         TopAppBar(
                             title = { Text(stringResource(R.string.settings)) },
@@ -125,7 +128,9 @@ class SettingsActivity : ComponentActivity() {
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.website_link)))
                                 startActivity(browserIntent)
                             }
-                            Preference(R.string.feedback.str, R.string.feedback_desc.str, Icons.Default.Feedback.icon){ TODO() }
+
+                                if(showFeedbackDialog) FeedbackDialog(onDismissed = {showFeedbackDialog = false},scaffoldState)
+                            Preference(R.string.feedback.str, R.string.feedback_desc.str, Icons.Default.Feedback.icon){ showFeedbackDialog = true }
                             Preference(R.string.privacy_policy.str, null){
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.PRIVACY_POLICY_LINK)))
                                 startActivity(browserIntent)
@@ -140,8 +145,7 @@ class SettingsActivity : ComponentActivity() {
                                 val clip = ClipData.newPlainText(versionText, versionText)
                                 clipboard.setPrimaryClip(clip)
                                 lifecycleScope.launch{
-                                    //todo this does not work
-                                    scaffoldState.snackbarHostState.showSnackbar(R.string.copied_to_clipboard.str)
+                                    scaffoldState.snackbarHostState.showSnackbar(getString(R.string.copied_to_clipboard))
                                 }
                             }
 
