@@ -1,8 +1,11 @@
 package cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
 /**
  * Rozvrh of the Bakaláři API v3
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 data class Rozvrh3 (
     val hours: List<Hour3>,
     val days: List<Day3>,

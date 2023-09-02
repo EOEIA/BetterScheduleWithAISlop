@@ -1,5 +1,8 @@
 package cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 data class Change3 (
     val changeSubject: String?,
     val day: String?,
