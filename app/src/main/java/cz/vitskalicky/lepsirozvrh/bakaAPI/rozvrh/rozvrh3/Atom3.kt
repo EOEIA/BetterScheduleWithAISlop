@@ -1,5 +1,9 @@
 package cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown=true)
+
 data class Atom3 (
     val hourId: String,
     val groupIds: List<String>,
