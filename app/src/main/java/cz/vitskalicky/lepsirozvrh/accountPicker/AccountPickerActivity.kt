@@ -1,5 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.accountPicker
 
+import android.app.ActivityManager
+import android.app.ActivityManager.RunningTaskInfo
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,20 +13,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import cz.vitskalicky.lepsirozvrh.activity.LoginActivity
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
+import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
+
 
 class AccountPickerActivity : ComponentActivity() {
 
@@ -32,15 +35,37 @@ class AccountPickerActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val appTasks = (getSystemService(ACTIVITY_SERVICE) as ActivityManager).appTasks
+        val activitiesCount = appTasks.map { it.taskInfo.numActivities }.sum()
+        val isFirst = activitiesCount == 1
+
         setContent {
             val scrollState = rememberScrollState()
             val composableScope = rememberCoroutineScope()
             val accounts by viewModel.accountsLD.observeAsState();
             val currentAccount by viewModel.currentAccountIdLD.observeAsState()
+
+            //go to login, if there are no accounts available
+            if (accounts?.size == 0){
+                intent = Intent(this, LoginActivity::class.java);
+                finishAffinity()
+                startActivity(intent)
+            }
+
             LepsirozvrhTheme {
                 Scaffold(
                     topBar = {TopAppBar(
                         title = {Text(stringResource(R.string.account_picker_title))},
+                        navigationIcon = if (isFirst) {{}} else {
+                            {
+                                IconButton({
+                                    finish()
+                                }) {
+                                    Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
+                                }
+                            }
+                        }
                     ) }
                 ) { paddingValues: PaddingValues ->
                     Column(
@@ -119,11 +144,11 @@ class AccountPickerActivity : ComponentActivity() {
         if (oldId != newId) {
             viewModel.switchToAccount(newId);
             intent = Intent(this, MainActivity::class.java);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
+            finishAffinity()
+        }else{
+            finish()
         }
-        finish()
-
     }
 
     private fun addAccount(){

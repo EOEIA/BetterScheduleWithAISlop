@@ -44,4 +44,8 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         set(value) = sp.edit { if (value == null) remove(PrefsConsts.NOTIFICATION_ACCOUNT) else putLong(PrefsConsts.NOTIFICATION_ACCOUNT, value) }
     val notificationAccountIdLD: LiveData<Long?> = SharedPrefsLongLiveData(sp.sharedPreferences, PrefsConsts.NOTIFICATION_ACCOUNT, -1).map { if (it == -1L) null else it }
     val notificationAccountLD: LiveData<Account?> = notificationAccountIdLD.switchMap { it?.let { accountRepository.getAccountLD(it) } ?: MutableLiveData(null) }
+
+    suspend fun logout(accountId: Long){
+        accountRepository.logout(accountId)
+    }
 }

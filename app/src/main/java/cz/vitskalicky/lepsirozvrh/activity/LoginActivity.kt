@@ -1,18 +1,28 @@
 package cz.vitskalicky.lepsirozvrh.activity
 
+import android.app.ActivityManager
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import cz.vitskalicky.lepsirozvrh.KotlinUtils
-import cz.vitskalicky.lepsirozvrh.MainApplication
-import cz.vitskalicky.lepsirozvrh.PrefsConsts
+import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus
 import cz.vitskalicky.lepsirozvrh.compose.StatefulLoginForm
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
@@ -27,7 +37,6 @@ import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SCHOOL_UNREACHABLE
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.MANUAL_URL_UNREACHABLE
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_INTERNET
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNEXPECTED_RESPONSE
-import cz.vitskalicky.lepsirozvrh.prefs
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
 
@@ -96,23 +105,45 @@ class LoginActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val appTasks = (getSystemService(ACTIVITY_SERVICE) as ActivityManager).appTasks
+        val activitiesCount = appTasks.map { it.taskInfo.numActivities }.sum()
+        val isFirst = activitiesCount == 1
+
         setContent {
             val scope = rememberCoroutineScope()
             LepsirozvrhTheme {
-                StatefulLoginForm(
-                    viewModel.getLoginScreenStatusLD(),
-                    {schoolInfo, username, password ->
-                        scope.launch {
-                            val accountId: Long? = viewModel.login(schoolInfo, username, password)
-                            if (accountId != null){
-                                val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                startActivity(intent)
-                                finish()
-                            }
-                        }
+                Scaffold(
+                    topBar = if (isFirst) {{}} else {
+                        {
+                            TopAppBar(
+                            title = { Text(stringResource(R.string.login_add_title)) },
+                            navigationIcon = {
+                                    IconButton({
+                                        finish()
+                                    }) {
+                                        Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
+                                    }
+                                }
+                        ) }
                     }
-                )
+                ) {paddingValues->
+                    Box(Modifier.padding(paddingValues)) {
+                        StatefulLoginForm(
+                            viewModel.getLoginScreenStatusLD(),
+                            { schoolInfo, username, password ->
+                                scope.launch {
+                                    val accountId: Long? = viewModel.login(schoolInfo, username, password)
+                                    if (accountId != null) {
+                                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                        startActivity(intent)
+                                        finish()
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
             }
         }
 

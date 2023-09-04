@@ -9,6 +9,7 @@ import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResultStatus.*
+import cz.vitskalicky.lepsirozvrh.prefs
 import kotlinx.coroutines.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -321,6 +322,10 @@ class AccountRepository(val app: MainApplication) {
             tokenAuthenticators[accountId]?.account = null
             tokenAuthenticators.remove(accountId)
 
+            if (app.prefs.long(PrefsConsts.ACTIVE_ACCOUNT_ID) == accountId){
+                app.prefs.edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID) }
+            }
+
             //todo notification and widget cleanup
 //            app.notificationState.offset = 0
 //            PermanentNotification.update(null, 0, app)
@@ -330,9 +335,9 @@ class AccountRepository(val app: MainApplication) {
 
     suspend fun switchToAccount(accountId: Long){
         if (dao.accountExists(accountId)){
-            SharedPrefsKt(app).edit { putLong(PrefsConsts.ACTIVE_ACCOUNT_ID, accountId) }
+            app.prefs.edit { putLong(PrefsConsts.ACTIVE_ACCOUNT_ID, accountId) }
         }else{
-            SharedPrefsKt(app).edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID) }
+            app.prefs.edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID) }
         }
     }
 

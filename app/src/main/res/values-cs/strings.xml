@@ -256,6 +256,7 @@
     <string name="account_picker_subtitle">Dostupné účty:</string>
     <string name="account_picker_selected">Tento účet je právě zvolen</string>
     <string name="account_picker_add">Přidat účet</string>
+    <string name="login_add_title">Přidat účet</string>
 
     <plurals name="info_weeks_back">
         <item quantity="one">%d týden zpět</item>

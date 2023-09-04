@@ -38,13 +38,14 @@ import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
 import kotlinx.coroutines.launch
 
 class SettingsActivity : ComponentActivity() {
+    val viewModel: SettingsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             val scrollState:ScrollState = rememberScrollState()
             val scaffoldState = rememberScaffoldState()
-            val viewModel: SettingsViewModel by viewModels()
+            val coroutinScope = rememberCoroutineScope()
 
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
             var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
@@ -79,9 +80,14 @@ class SettingsActivity : ComponentActivity() {
                             PreferenceGroupHeader(R.string.user.str)
 
                                 val account by viewModel.accountLD.observeAsState()
+                                if (viewModel.accountLD.isInitialized && account == null){
+                                    intent = Intent(this@SettingsActivity, AccountPickerActivity::class.java)
+                                    startActivity(intent)
+                                    finishAffinity()
+                                }
                             Preference(account?.fullName,account?.userTypeText){switchAccount()}
                             Preference(R.string.switch_account.str, null, Icons.Default.SwitchAccount.icon){ switchAccount() }
-                            Preference(R.string.logout.str, null, Icons.Default.Logout.icon){ TODO() }
+                            Preference(R.string.logout.str, null, Icons.Default.Logout.icon){ coroutinScope.launch { account?.let { logOut(it.id)} } }
                             Divider()
                             PreferenceGroupHeader(R.string.pref_category_appearance.str)
                             Preference(R.string.app_theme_screen.str, R.string.app_theme_screen_desc.str, Icons.Default.Palette.icon){ TODO() }
@@ -174,6 +180,13 @@ class SettingsActivity : ComponentActivity() {
     private fun switchAccount(){
         intent = Intent(this, AccountPickerActivity::class.java)
         startActivity(intent)
+    }
+
+    private suspend fun logOut(accountId: Long){
+        viewModel.logout(accountId);
+        intent = Intent(this, AccountPickerActivity::class.java)
+        startActivity(intent)
+        finishAffinity()
     }
 }
 

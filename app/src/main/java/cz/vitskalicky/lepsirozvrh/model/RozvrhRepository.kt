@@ -198,6 +198,10 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                             }
                             throw newe
                         }
+                        is LoginException -> {
+                            accountRep.logout(rozvrhId.account)
+                            return@async null
+                        }
                         else -> throw e
                     }
                 }
