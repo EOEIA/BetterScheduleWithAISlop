@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 1.8.8 (2. 8. 2023)
+
+- Oprava drobné změny v API
+
+---
+
+- Fix API change
+
 ## 1.8.5 (12. 8. 2022)
 
 - Opraveno vysoké využití baterie pokud školní server soustavně neodpovídá
