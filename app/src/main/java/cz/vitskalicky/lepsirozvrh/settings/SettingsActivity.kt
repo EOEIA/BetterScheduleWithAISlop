@@ -31,6 +31,7 @@ import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
+import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
 import kotlinx.coroutines.launch
 
 class SettingsActivity : ComponentActivity() {
@@ -43,6 +44,7 @@ class SettingsActivity : ComponentActivity() {
             val viewModel: SettingsViewModel by viewModels()
 
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
+            var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
 
             LepsirozvrhTheme {
                 Scaffold(
@@ -123,7 +125,11 @@ class SettingsActivity : ComponentActivity() {
                             }
                             Divider()
                             PreferenceGroupHeader(R.string.about.str)
-                            Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){ TODO() }
+
+                                if (showWhatsNewDialog) WhatsNewDialog(onDismissed = {showWhatsNewDialog = false})
+                            Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){
+                                showWhatsNewDialog = true;
+                            }
                             Preference(R.string.website.str, R.string.website_desc.str,Icons.Default.Language.icon){
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.website_link)))
                                 startActivity(browserIntent)
