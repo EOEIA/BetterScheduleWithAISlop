@@ -27,4 +27,9 @@ abstract class AccountDao {
     @Query("SELECT * FROM account WHERE id = :id")
     abstract suspend fun loadAccount(id: Long): Account?
 
+    @Query("SELECT COUNT(*) FROM account WHERE id = :id")
+    abstract suspend fun countAccounts(id: Long): Int
+
+    suspend fun accountExists(id: Long) = countAccounts(id) == 1
+
 }

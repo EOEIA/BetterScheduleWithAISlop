@@ -3,6 +3,8 @@ package cz.vitskalicky.lepsirozvrh.model
 import androidx.lifecycle.LiveData
 import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
+import cz.vitskalicky.lepsirozvrh.PrefsConsts
+import cz.vitskalicky.lepsirozvrh.SharedPrefsKt
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
@@ -323,6 +325,14 @@ class AccountRepository(val app: MainApplication) {
 //            app.notificationState.offset = 0
 //            PermanentNotification.update(null, 0, app)
 //            WidgetProvider.updateAll(null, app)
+        }
+    }
+
+    suspend fun switchToAccount(accountId: Long){
+        if (dao.accountExists(accountId)){
+            SharedPrefsKt(app).edit { putLong(PrefsConsts.ACTIVE_ACCOUNT_ID, accountId) }
+        }else{
+            SharedPrefsKt(app).edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID) }
         }
     }
 

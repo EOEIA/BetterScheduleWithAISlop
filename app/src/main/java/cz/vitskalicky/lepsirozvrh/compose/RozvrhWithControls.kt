@@ -168,7 +168,7 @@ fun RozvrhWithControls(
 
                 Box(Modifier.align(Alignment.CenterEnd)){
                     if(status == StatusInfo.Status.LOADING){
-                        CircularProgressIndicator() // todo change color
+                        CircularProgressIndicator(color = MaterialTheme.colors.secondary) // todo change color
                     }else{
                         IconButton(onRefreshPress) {
                             Icon(

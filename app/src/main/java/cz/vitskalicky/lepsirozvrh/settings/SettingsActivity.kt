@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
 import cz.vitskalicky.lepsirozvrh.activity.LicencesActivity
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
@@ -171,7 +172,8 @@ class SettingsActivity : ComponentActivity() {
     }
 
     private fun switchAccount(){
-        //todo
+        intent = Intent(this, AccountPickerActivity::class.java)
+        startActivity(intent)
     }
 }
 

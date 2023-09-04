@@ -83,7 +83,7 @@ class LoginViewModel(
             }
             AccountRepository.LoginResultStatus.SUCCESS -> {
                 //set active account and start main activity
-                app.prefs.putOne(PrefsConsts.ACTIVE_ACCOUNT_ID, result.account!!.id)
+                accountRepository.switchToAccount(result.account!!.id)
                 loginScreenStatusLD.value = SUCCESS
                 return result.account.id //the activity must start the main activity
             }
@@ -106,6 +106,7 @@ class LoginActivity : ComponentActivity() {
                             val accountId: Long? = viewModel.login(schoolInfo, username, password)
                             if (accountId != null){
                                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                                 startActivity(intent)
                                 finish()
                             }

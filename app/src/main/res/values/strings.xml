@@ -282,6 +282,11 @@
 
     <string name="website_link">https://vitskalicky.gitlab.io/lepsi-rozvrh/en</string>
 
+    <string name="account_picker_title">Choose account</string>
+    <string name="account_picker_subtitle">Available accounts:</string>
+    <string name="account_picker_selected">This account is active</string>
+    <string name="account_picker_add">Add new account</string>
+
     <plurals name="info_weeks_back">
         <item quantity="one">%d week back</item>
         <item quantity="other">%d weeks back</item>
