@@ -4,15 +4,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cz.vitskalicky.lepsirozvrh.R
 
@@ -28,13 +32,17 @@ private fun PreferenceBase(
     Row(Modifier
         .alpha(if (enabled) {1f} else {ContentAlpha.disabled})
         .clickable(enabled,null, null, if (enabled) onClicked else {{}})
+        .defaultMinSize(minHeight = 56.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(Modifier.width(88.dp)){
+        Box(Modifier.width(72.dp), contentAlignment = Alignment.Center){
             icon?.invoke()
         }
         content()
         Spacer(Modifier.fillMaxWidth().weight(1f))
+        Spacer(Modifier.size(16.dp))
         rightContent?.invoke()
+        Spacer(Modifier.size(16.dp))
     }
 }
 
@@ -49,10 +57,20 @@ fun Preference(
 ){
     PreferenceBase(icon = icon, rightContent = rightContent, onClicked = onClicked, enabled = enabled, content = {
         Column {
-            if (!title.isNullOrBlank()) Text(title)
-            if (!description.isNullOrBlank()) Text(description)
+            if (!title.isNullOrBlank()) Text(title, style = MaterialTheme.typography.subtitle1)
+            if (!description.isNullOrBlank()) Text(description, style = MaterialTheme.typography.caption)
         }
     })
+}
+
+@Preview
+@Composable
+fun PreferencePreview(){
+    Surface(
+        color = MaterialTheme.colors.surface
+    ) {
+        Preference("Appearence", "Customize app's look", { Icon(Icons.Default.Palette, "Palette icon") }) {}
+    }
 }
 
 @Composable
@@ -70,6 +88,61 @@ fun SwitchPreference(
 }
 
 @Composable
+private fun RadioPreferenceStateless(
+    title: String?,
+    description: String?,
+    options: List<String>,
+    selectedOptionIndex: Int?, // null for none
+    dialogTitle: (@Composable () -> Unit)?,
+    icon: (@Composable () -> Unit)? = null,
+    rightContent: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true,
+    isDialogOpen: Boolean,
+    onDismissDialog: () -> Unit,
+    onOpenDialog: () -> Unit,
+    onSelected: (optionIndex: Int) -> Unit,
+){
+    Preference(title, description, icon, rightContent, enabled, onClicked = onOpenDialog)
+    if (isDialogOpen){
+        AlertDialog(
+            onDismissRequest = onDismissDialog,
+            confirmButton = {},
+            dismissButton = { TextButton(onDismissDialog){Text(stringResource(R.string.cancel))} },
+            title = dialogTitle,
+            text = {
+                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
+                    Column(Modifier.padding(top = 35.dp)) {
+                        for (item in options.withIndex()) {
+                            val index = item.index
+                            val option = item.value
+
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .defaultMinSize(minHeight = 48.dp)
+                                    .selectable(
+                                        selected = index == selectedOptionIndex,
+                                        onClick = {
+                                            onDismissDialog()
+                                            onSelected(index)
+                                        },
+                                        role = Role.RadioButton,
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(index == selectedOptionIndex, onClick = null)
+                                Spacer(Modifier.size(32.dp))
+                                Text(option, style = MaterialTheme.typography.subtitle1)
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
 fun RadioPreference(
     title: String?,
     description: String?,
@@ -82,41 +155,77 @@ fun RadioPreference(
     onSelected: (optionIndex: Int) -> Unit,
 ){
     var isDialogOpen by rememberSaveable { mutableStateOf(false) }
-    Preference(title, description, icon, rightContent, enabled, onClicked = {isDialogOpen = true})
-    if (isDialogOpen){
-        AlertDialog(
-            onDismissRequest = {isDialogOpen = false},
-            confirmButton = {},
-            dismissButton = { TextButton({isDialogOpen = false}){Text(stringResource(R.string.cancel))} },
-            title = dialogTitle,
-            text = {
-                Column {
-                    for (item in options.withIndex()){
-                        val index = item.index
-                        val option = item.value
+    RadioPreferenceStateless(
+        title,
+        description,
+        options,
+        selectedOptionIndex,
+        dialogTitle,
+        icon,
+        rightContent,
+        enabled,
+        isDialogOpen,
+        { isDialogOpen = false },
+        { isDialogOpen = true },
+        onSelected
+    )
+}
 
-                        Row (Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = index == selectedOptionIndex,
-                                onClick = {
-                                    isDialogOpen = false
-                                    onSelected(index)
-                                },
-                                role = Role.RadioButton,
-                            )
-                        ) {
-                            RadioButton(index == selectedOptionIndex, onClick = null)
-                            Text(option)
-                        }
-                    }
-                }
-            }
-        )
+@Preview
+@Composable
+fun RadioPreferencePreview(){
+    Surface(
+        color = MaterialTheme.colors.surface
+    ) {
+        RadioPreferenceStateless(
+            title = "Persistent notification",
+            description = "Disabled",
+            options = listOf("one","two"),
+            selectedOptionIndex = 0,
+            dialogTitle = {Text("Select best option")},
+            icon = {Icon(Icons.Default.Notifications,null)},
+            isDialogOpen = false,
+            onDismissDialog = {},
+            onOpenDialog = {},
+            rightContent = { Icon(Icons.Default.NavigateNext, null) },
+        ){}
+    }
+}
+
+@Preview
+@Composable
+fun RadioPreferenceDialogPreview(){
+    Surface(
+        color = MaterialTheme.colors.surface
+    ) {
+        RadioPreferenceStateless(
+            title = "Persistent notification",
+            description = "Disabled",
+            options = listOf("one","two"),
+            selectedOptionIndex = 0,
+            dialogTitle = {Text("Select best option")},
+            icon = {Icon(Icons.Default.Notifications,null)},
+            isDialogOpen = true,
+            onDismissDialog = {},
+            onOpenDialog = {},
+            rightContent = { Icon(Icons.Default.NavigateNext, null) },
+        ){}
     }
 }
 
 @Composable
 fun PreferenceGroupHeader(title: String){
-    Text(title, modifier = Modifier.padding(start = 88.dp))
+    Text(title,
+        style = MaterialTheme.typography.subtitle2,
+        modifier = Modifier
+            .padding(start = 72.dp)
+            .height(34.dp)
+            .paddingFrom(FirstBaseline, before = 28.dp),
+        color = MaterialTheme.colors.secondary)
+}
+
+@Preview
+@Composable
+private fun GrouHEaderPreview(){
+    PreferenceGroupHeader("Appearance")
 }

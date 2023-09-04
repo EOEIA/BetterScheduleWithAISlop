@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -64,10 +65,12 @@ class SettingsActivity : ComponentActivity() {
                     },
                     content = {paddingValues: PaddingValues ->
                         Column(
-                            Modifier.scrollable(scrollState, Orientation.Vertical)
+                            Modifier.verticalScroll(scrollState)
                                 .padding(
                                     start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current)
+                                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                                    top = paddingValues.calculateTopPadding(),
+                                    bottom = paddingValues.calculateBottomPadding()
                                 )
                         ) {
                             Spacer(Modifier.size(paddingValues.calculateTopPadding()))
@@ -117,7 +120,7 @@ class SettingsActivity : ComponentActivity() {
                                 optionIndex,
                                 { Column {
                                     Text(R.string.notification.str)
-                                    Text(R.string.notification_detials.str) //todo better details and styling
+                                    Text(R.string.notification_detials.str, style = MaterialTheme.typography.caption) //todo better details and styling
                                 } },
                                 Icons.Default.Notifications.icon
                             ){newOptionIndex ->
@@ -168,7 +171,7 @@ class SettingsActivity : ComponentActivity() {
     }
 
     private fun switchAccount(){
-
+        //todo
     }
 }
 
