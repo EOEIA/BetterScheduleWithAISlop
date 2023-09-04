@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.activity.LicencesActivity
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
@@ -141,7 +142,10 @@ class SettingsActivity : ComponentActivity() {
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.PRIVACY_POLICY_LINK)))
                                 startActivity(browserIntent)
                             }
-                            Preference(R.string.oss_licences.str, R.string.oss_licences_desc.str){TODO()}
+                            Preference(R.string.oss_licences.str, R.string.oss_licences_desc.str){
+                                val intent = Intent(this@SettingsActivity, LicencesActivity::class.java);
+                                startActivity(intent)
+                            }
 
                                 val versionText = BuildConfig.FLAVOR + "-" + BuildConfig.BUILD_TYPE + " " + BuildConfig.VERSION_NAME + " (" + BuildConfig.GitHash + ")"
                             Preference(R.string.app_version.str,
