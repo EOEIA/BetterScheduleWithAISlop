@@ -98,7 +98,7 @@ public class Utils {
         if (!SharedPrefs.contains(context, PrefsConsts.NOTIFICATION_ACCOUNT)){
             return null;
         }
-        return new RozvrhRecord.Key(SharedPrefs.getInt(context, PrefsConsts.NOTIFICATION_ACCOUNT), getCurrentMonday());
+        return new RozvrhRecord.Key(SharedPrefs.getLong(context, PrefsConsts.NOTIFICATION_ACCOUNT), getCurrentMonday());
     }
 
     /**
