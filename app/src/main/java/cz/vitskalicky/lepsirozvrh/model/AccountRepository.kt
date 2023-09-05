@@ -9,6 +9,7 @@ import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResultStatus.*
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.prefs
 import kotlinx.coroutines.*
 import okhttp3.*
@@ -323,7 +324,11 @@ class AccountRepository(val app: MainApplication) {
             tokenAuthenticators.remove(accountId)
 
             if (app.prefs.long(PrefsConsts.ACTIVE_ACCOUNT_ID) == accountId){
-                app.prefs.edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID) }
+                app.prefs.edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID)}
+            }
+            if (app.prefs.long(PrefsConsts.NOTIFICATION_ACCOUNT) == accountId) {
+                app.prefs.edit { remove(PrefsConsts.NOTIFICATION_ACCOUNT) }
+                PermanentNotification.update(app, null, false, null,0)
             }
 
             //todo notification and widget cleanup

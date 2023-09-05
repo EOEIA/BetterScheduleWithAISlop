@@ -117,7 +117,7 @@ fun LoginForm(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxHeight()
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Row(
             modifier = Modifier

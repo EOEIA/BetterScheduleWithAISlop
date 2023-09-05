@@ -37,38 +37,38 @@ object PermanentNotification {
         else null;
         val account = accountId?.let{ app.accountRepository.getAccount(it) }
         if (account == null){
-            update(app, null as Rozvrh?, false)
+            update(app, null as Rozvrh?, false, null)
             return
         }
         val key = RozvrhRecord.Key(accountId, Utils.getCurrentMonday());
         val rozvrh = app.repository.getRozvrh(key, false)
-        update(app, rozvrh, account.isTeacher())
+        update(app, rozvrh, account.isTeacher(), accountId)
     }
 
     /**
      * Same as [update], but gets the RozvrhHodina for you.
      */
-    fun update(application: MainApplication, rozvrh: Rozvrh?, isTeacher: Boolean) {
+    fun update(application: MainApplication, rozvrh: Rozvrh?, isTeacher: Boolean, accountId: Long?) {
         val context: Context = application
         if (rozvrh != null) {
             val blockIndexes = rozvrh.getHighlightBlockIndexes(true)
 
             val offset = application.notificationState.offset
             if (blockIndexes == null) {
-                update(context, null, isTeacher)
+                update(context, null, isTeacher, accountId)
             } else {
                 val offsetBlock: RozvrhBlock? = rozvrh.getAsRozvrhBlock(blockIndexes.first, blockIndexes.second + offset)
-                update(context, offsetBlock, isTeacher, offset)
+                update(context, offsetBlock, isTeacher, accountId, offset)
             }
         } else {
-            update(context, null, isTeacher)
+            update(context, null, isTeacher, accountId)
         }
     }
 
     /**
      * Updates the notification with the data of the first lesson of supplied [BlockRelated]. If there are no lesson "no lesson" text in notification is showed. If [block] is `null` and offset is 0, the notification is hidden.
      */
-    fun update(context: Context, block: RozvrhBlock?, isTeacher: Boolean, offset: Int = 0) {
+    fun update(context: Context, block: RozvrhBlock?, isTeacher: Boolean, accountId: Long?, offset: Int = 0) {
         val notificationManager = NotificationManagerCompat.from(context)
         if (block == null && offset == 0) {
             notificationManager.cancel(PERMANENT_NOTIFICATION_ID)
@@ -162,6 +162,7 @@ object PermanentNotification {
         val intent = Intent(context, MainActivity::class.java)
         intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
         intent.putExtra(EXTRA_NOTIFICATION, true)
+        intent.putExtra(MainActivity.EXTRA_SWITCH_TO_ACCOUNT, accountId)
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntentWithParentStack(intent)
         val pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)

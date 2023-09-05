@@ -37,18 +37,18 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
                     // So we display the cached one immediately.
                     val cachedRozvrh = application.repository.getCachedRozvrh(rozvrhKey);
                     if (cachedRozvrh != null){
-                        PermanentNotification.update(application, cachedRozvrh,isTeacher)
+                        PermanentNotification.update(application, cachedRozvrh,isTeacher, account.id)
                     }
                 }
                 //todo move widget updating elsewhere
                 if (account == null){
-                    PermanentNotification.update(application, null, false, 0)
+                    PermanentNotification.update(application, null, false,null, 0)
                     if (rozvrhKey != null) {
                         WidgetProvider.updateAccountLoggedOut(context, rozvrhKey.account)
                     }
                 }else {
                     val rozvrh: Rozvrh? = application.repository.getRozvrh(rozvrhKey, false)
-                    PermanentNotification.update(application, rozvrh, isTeacher)
+                    PermanentNotification.update(application, rozvrh, isTeacher, account.id)
                     WidgetProvider.updateAllForAccount(account, rozvrh, context)
                 }
                 application.updateUpdateTime()
