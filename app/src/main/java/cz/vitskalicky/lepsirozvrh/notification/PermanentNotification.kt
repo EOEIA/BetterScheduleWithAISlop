@@ -18,6 +18,7 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
+import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
@@ -158,11 +159,11 @@ object PermanentNotification {
         prevIntent.putExtra(UpdateBroadcastReciever.EXTRA_NEXT_PREV, -1)
         val prevPendingIntent = PendingIntent.getBroadcast(context, 4586, prevIntent, FLAG_IMMUTABLE)
         //todo launch main activity
-//        val intent = Intent(context, MainActivity::class.java)
-//        intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
-//        intent.putExtra(EXTRA_NOTIFICATION, true)
+        val intent = Intent(context, MainActivity::class.java)
+        intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
+        intent.putExtra(EXTRA_NOTIFICATION, true)
         val stackBuilder = TaskStackBuilder.create(context)
-//        stackBuilder.addNextIntentWithParentStack(intent)
+        stackBuilder.addNextIntentWithParentStack(intent)
         val pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
 
         //create notification
