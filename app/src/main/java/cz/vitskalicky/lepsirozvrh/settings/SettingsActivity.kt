@@ -33,6 +33,7 @@ import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
 import cz.vitskalicky.lepsirozvrh.activity.LicencesActivity
+import cz.vitskalicky.lepsirozvrh.donations.Donations
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
@@ -51,6 +52,14 @@ class SettingsActivity : ComponentActivity() {
 
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
             var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
+
+            //donations (handled stupidly)
+            var helper by remember { mutableStateOf(false) }
+            val donations = Donations(this@SettingsActivity, this@SettingsActivity){
+                //on purchase change
+                //todo refresh
+                helper = !helper
+            }
 
             LepsirozvrhTheme {
                 Scaffold(
@@ -146,6 +155,15 @@ class SettingsActivity : ComponentActivity() {
                             Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){
                                 showWhatsNewDialog = true;
                             }
+                                if (donations.isEnabled){
+                            Preference(
+                                    title = if (donations.isSponsor) R.string.donate_title_ok.str else R.string.donate_title.str,
+                                    description = if (donations.isEnabled) R.string.donate_text1.str else R.string.donate_text1_ok.str,
+                                    icon = {Icon(Icons.Default.AttachMoney, null)},
+                                ){
+                                    donations.showDialog()
+                                }
+                                }
                             Preference(R.string.website.str, R.string.website_desc.str,Icons.Default.Language.icon){
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.website_link)))
                                 startActivity(browserIntent)
@@ -157,6 +175,9 @@ class SettingsActivity : ComponentActivity() {
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.PRIVACY_POLICY_LINK)))
                                 startActivity(browserIntent)
                             }
+                                if (donations.isEnabled){
+                            Preference(R.string.restore_purchases.str, R.string.restore_purchases_desc.str){donations.restorePurchases()}
+                                }
                             Preference(R.string.oss_licences.str, R.string.oss_licences_desc.str){
                                 val intent = Intent(this@SettingsActivity, LicencesActivity::class.java);
                                 startActivity(intent)

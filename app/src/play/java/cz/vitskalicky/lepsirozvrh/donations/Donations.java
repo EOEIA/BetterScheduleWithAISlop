@@ -1,5 +1,6 @@
 package cz.vitskalicky.lepsirozvrh.donations;
 
+import android.app.Activity;
 import android.content.Context;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,11 +11,11 @@ import cz.vitskalicky.lepsirozvrh.Utils;
 public class Donations {
     private Context context;
     private Billing billing;
-    private AppCompatActivity activity;
+    private Activity activity;
 
     private DonateDialogFragment donateDF;
 
-    public Donations(Context context, AppCompatActivity activity, Utils.Listener onPurchaseChangesListener) {
+    public Donations(Context context, Activity activity, Utils.Listener onPurchaseChangesListener) {
         this.context = context;
         this.activity = activity;
         billing = new Billing(context);
