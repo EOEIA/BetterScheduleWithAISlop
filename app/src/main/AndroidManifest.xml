@@ -41,6 +41,7 @@
             android:exported="false"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize"
             android:launchMode="singleTask"/>
         <activity
             android:name=".activity.MainActivity"

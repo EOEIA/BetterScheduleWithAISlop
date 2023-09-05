@@ -192,7 +192,8 @@ fun LoginForm(
         Spacer(Modifier.size(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             if (!loading && genericError != null){
                 Text(genericError, color = MaterialTheme.colors.error)
@@ -200,6 +201,7 @@ fun LoginForm(
             if(loading){
                 CircularProgressIndicator()
             }
+            Spacer(Modifier.size(16.dp))
             Button(
                 onClick = onLogin,
                 modifier = Modifier.padding(vertical = 8.dp),
