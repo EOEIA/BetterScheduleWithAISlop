@@ -12,13 +12,16 @@ import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        const val EXTRA_JUMP_TO_TODAY = "MainActivity.jump_to_today"
+    }
+
     private val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.getAccountIdLD().observe(this@MainActivity){
             if (it == null){
-                // todo start account picker activity
                 val intent = Intent(this@MainActivity, AccountPickerActivity::class.java)
                 startActivity(intent)
                 finish()

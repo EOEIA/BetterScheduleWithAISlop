@@ -49,8 +49,8 @@ class AccountPickerActivity : ComponentActivity() {
             //go to login, if there are no accounts available
             if (accounts?.size == 0){
                 intent = Intent(this, LoginActivity::class.java);
-                finishAffinity()
                 startActivity(intent)
+                finishAffinity()
             }
 
             LepsirozvrhTheme {
@@ -144,6 +144,7 @@ class AccountPickerActivity : ComponentActivity() {
         if (oldId != newId) {
             viewModel.switchToAccount(newId);
             intent = Intent(this, MainActivity::class.java);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
             finishAffinity()
         }else{

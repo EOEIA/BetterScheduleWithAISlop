@@ -137,7 +137,7 @@ class LoginActivity : ComponentActivity() {
                                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                                         startActivity(intent)
-                                        finish()
+                                        finishAffinity()
                                     }
                                 }
                             }
