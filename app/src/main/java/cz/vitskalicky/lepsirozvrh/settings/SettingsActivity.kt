@@ -29,10 +29,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.BuildConfig
+import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
 import cz.vitskalicky.lepsirozvrh.activity.LicencesActivity
 import cz.vitskalicky.lepsirozvrh.model.Account
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
 import kotlinx.coroutines.launch
@@ -133,6 +135,9 @@ class SettingsActivity : ComponentActivity() {
                             ){newOptionIndex ->
                                 val optIndex: Int? = (newOptionIndex -1).takeUnless { it == -1 }
                                 viewModel.notificationAccountId = optIndex?.let { accounts[it].id }
+                                lifecycleScope.launch {
+                                    PermanentNotification.update(application as MainApplication)
+                                }
                             }
                             Divider()
                             PreferenceGroupHeader(R.string.about.str)
