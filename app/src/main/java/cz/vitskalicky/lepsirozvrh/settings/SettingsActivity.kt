@@ -6,13 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.MainApplication
@@ -42,9 +39,19 @@ import kotlinx.coroutines.launch
 
 class SettingsActivity : ComponentActivity() {
     val viewModel: SettingsViewModel by viewModels()
+    var donations: Donations? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Donations - quite stupid
+        val donationsEnabledLD = MutableLiveData<Boolean>(false);
+        val isSponsorLD = MutableLiveData<Boolean>(false);
+        donations = Donations(this@SettingsActivity, onPurchaseChangesListener = {
+            donationsEnabledLD.value = donations?.isEnabled;
+            isSponsorLD.value = donations?.isSponsor;
+        })
+        donationsEnabledLD.value = donations?.isEnabled;
+        isSponsorLD.value = donations?.isSponsor;
         setContent {
             val scrollState:ScrollState = rememberScrollState()
             val scaffoldState = rememberScaffoldState()
@@ -53,13 +60,6 @@ class SettingsActivity : ComponentActivity() {
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
             var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
 
-            //donations (handled stupidly)
-            var helper by remember { mutableStateOf(false) }
-            val donations = Donations(this@SettingsActivity, this@SettingsActivity){
-                //on purchase change
-                //todo refresh
-                helper = !helper
-            }
 
             LepsirozvrhTheme {
                 Scaffold(
@@ -155,13 +155,19 @@ class SettingsActivity : ComponentActivity() {
                             Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){
                                 showWhatsNewDialog = true;
                             }
-                                if (donations.isEnabled){
+                                val donationsEnabled by donationsEnabledLD.observeAsState()
+                                val isSponsor by isSponsorLD.observeAsState()
+                                if (donationsEnabled ?: false){
+                                    var displayDonationDialog by rememberSaveable{mutableStateOf(false)}
+                                    if (displayDonationDialog){
+                                        donations?.ShowDialog(onDismiss = {displayDonationDialog = false})
+                                    }
                             Preference(
-                                    title = if (donations.isSponsor) R.string.donate_title_ok.str else R.string.donate_title.str,
-                                    description = if (donations.isEnabled) R.string.donate_text1.str else R.string.donate_text1_ok.str,
+                                    title = if (isSponsor ?: false) R.string.donate_title_ok.str else R.string.donate_title.str,
+                                    description = if (isSponsor ?: false) R.string.donate_text1.str else R.string.donate_text1_ok.str,
                                     icon = {Icon(Icons.Default.AttachMoney, null)},
                                 ){
-                                    donations.showDialog()
+                                    displayDonationDialog = true;
                                 }
                                 }
                             Preference(R.string.website.str, R.string.website_desc.str,Icons.Default.Language.icon){
@@ -175,8 +181,8 @@ class SettingsActivity : ComponentActivity() {
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.PRIVACY_POLICY_LINK)))
                                 startActivity(browserIntent)
                             }
-                                if (donations.isEnabled){
-                            Preference(R.string.restore_purchases.str, R.string.restore_purchases_desc.str){donations.restorePurchases()}
+                                if (donationsEnabled ?: false){
+                            Preference(R.string.restore_purchases.str, R.string.restore_purchases_desc.str){donations?.restorePurchases()}
                                 }
                             Preference(R.string.oss_licences.str, R.string.oss_licences_desc.str){
                                 val intent = Intent(this@SettingsActivity, LicencesActivity::class.java);
@@ -213,6 +219,11 @@ class SettingsActivity : ComponentActivity() {
         intent = Intent(this, AccountPickerActivity::class.java)
         startActivity(intent)
         finishAffinity()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        donations?.release()
     }
 }
 

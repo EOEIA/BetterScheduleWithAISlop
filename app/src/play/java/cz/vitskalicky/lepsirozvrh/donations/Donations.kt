@@ -1,56 +1,32 @@
-package cz.vitskalicky.lepsirozvrh.donations;
+package cz.vitskalicky.lepsirozvrh.donations
 
-import android.app.Activity;
-import android.content.Context;
+import android.app.Activity
+import androidx.compose.runtime.Composable
+import cz.vitskalicky.lepsirozvrh.Utils
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
+class Donations(private val activity: Activity, onPurchaseChangesListener: Utils.Listener?) {
+    private val billing: Billing
 
-import cz.vitskalicky.lepsirozvrh.Utils;
-
-public class Donations {
-    private Context context;
-    private Billing billing;
-    private Activity activity;
-
-    private DonateDialogFragment donateDF;
-
-    public Donations(Context context, Activity activity, Utils.Listener onPurchaseChangesListener) {
-        this.context = context;
-        this.activity = activity;
-        billing = new Billing(context);
-        billing.addOnPurchaseChangeListener(onPurchaseChangesListener);
-        FragmentManager fm = activity.getSupportFragmentManager();
-        donateDF = (DonateDialogFragment) fm.findFragmentByTag("donateDF");
-        if (donateDF != null){
-            donateDF.init(billing);
-        }
+    init {
+        billing = Billing(activity)
+        billing.addOnPurchaseChangeListener(onPurchaseChangesListener)
     }
 
-    public boolean isEnabled() {
-        return true;
+    val isEnabled: Boolean
+        get() = true
+    val isSponsor: Boolean
+        get() = billing.isSponsor
+
+    fun restorePurchases() {
+        billing.restorePurchases()
     }
 
-    public boolean isSponsor() {
-        return billing.isSponsor();
+    @Composable
+    fun ShowDialog(onDismiss: ()-> Unit) {
+        DonateDialog(billing, activity, onDismiss)
     }
 
-    public void restorePurchases() {
-        billing.restorePurchases();
-    }
-
-    public void showDialog() {
-        FragmentManager fm = activity.getSupportFragmentManager();
-        if (fm.findFragmentByTag("donateDF") == null) {
-            if (donateDF == null) {
-                donateDF = new DonateDialogFragment();
-            }
-            donateDF.init(billing);
-            donateDF.show(fm, "donateDF");
-        }
-    }
-
-    public void release(){
-        billing.release();
+    fun release() {
+        billing.release()
     }
 }

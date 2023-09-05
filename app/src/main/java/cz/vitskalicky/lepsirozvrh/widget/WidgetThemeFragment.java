@@ -100,14 +100,14 @@ public class WidgetThemeFragment extends PreferenceFragmentCompat {
             }
             updateTheme();
             if (theme == 2 && !donations.isSponsor()){
-                donations.showDialog();
+                //donations.showDialog(); //todo
             }
             return true;
         });
         themeP.setSummaryProvider(preference -> ((DropDownPreference) preference).getEntry());
 
         donateP.setOnPreferenceClickListener(preference -> {
-            donations.showDialog();
+            //donations.showDialog(); //todo
             return true;
         });
         backgroundP.setOnPreferenceChangeListener((preference, newValue) -> {

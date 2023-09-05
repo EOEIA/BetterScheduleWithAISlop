@@ -175,7 +175,7 @@ public class Billing implements PurchasesUpdatedListener {
 
     public void buyBig(Activity activity) {
         if (!isInitialized()) return;
-        if (smallDetails == null) {
+        if (bigDetails == null) {
             Toast.makeText(activity, activity.getString( R.string.purchase_error, "null"), Toast.LENGTH_LONG ).show();
             return;
         };
