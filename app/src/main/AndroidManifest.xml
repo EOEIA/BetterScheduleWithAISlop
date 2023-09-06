@@ -19,30 +19,34 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".widget.WidgetConfigActivityComp"
+            android:exported="false"
+            android:theme="@style/AppTheme.Transparent"/>
+        <activity
             android:name=".accountPicker.AccountPickerActivity"
             android:exported="false"
+            android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
-            android:theme="@style/AppTheme"
-            android:launchMode="singleTask"/>
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".activity.LicencesActivity"
             android:exported="false"
+            android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
-            android:theme="@style/AppTheme"
-            android:launchMode="singleTask"/>
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
+            android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
-            android:theme="@style/AppTheme"
-            android:launchMode="singleTask"/>
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".activity.LoginActivity"
             android:exported="false"
+            android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize"
-            android:launchMode="singleTask"/>
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
