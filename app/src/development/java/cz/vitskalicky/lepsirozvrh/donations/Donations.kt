@@ -1,37 +1,35 @@
-package cz.vitskalicky.lepsirozvrh.donations;
+package cz.vitskalicky.lepsirozvrh.donations
 
-import android.content.Context;
-import android.widget.Toast;
+import android.app.Activity
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
+import cz.vitskalicky.lepsirozvrh.BuildConfig
+import cz.vitskalicky.lepsirozvrh.Utils
 
-import androidx.appcompat.app.AppCompatActivity;
+class Donations(
+    private val activity: Activity,
+    onPurchaseChangesListener: Utils.Listener?
+) {
+    val isEnabled: Boolean
+        get() = false
+    val isSponsor: Boolean
+        get() = true
 
-import cz.vitskalicky.lepsirozvrh.BuildConfig;
-import cz.vitskalicky.lepsirozvrh.Utils;
-
-public class Donations {
-    private Context context;
-
-    public Donations(Context context, AppCompatActivity activity, Utils.Listener onPurchaseChangesListener) {
-        this.context = context;
+    fun restorePurchases() {
+        Toast.makeText(
+            activity,
+            "Error (in-app purchases not enabled in " + BuildConfig.FLAVOR + " flavour)",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
-    public boolean isEnabled() {
-        return false;
+    @Composable
+    fun ShowDialog(onDismiss: ()-> Unit) {
+        Log.e(Donations::class.qualifiedName, "Error (no donate dialog in " + BuildConfig.FLAVOR + " flavour)")
     }
 
-    public boolean isSponsor() {
-        return true;
-    }
-
-    public void restorePurchases() {
-        Toast.makeText(context, "Error (in-app purchases not enabled in " + BuildConfig.FLAVOR + " flavour)", Toast.LENGTH_SHORT).show();
-    }
-
-    public void showDialog() {
-        Toast.makeText(context, "Error (no donate dialog in " + BuildConfig.FLAVOR + " flavour)", Toast.LENGTH_SHORT).show();
-    }
-
-    public void release(){
-
-    }
+    fun release() {}
 }
