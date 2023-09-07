@@ -19,7 +19,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".widget.WidgetConfigActivityComp"
+            android:name=".widget.SmallWidgetConfigActivity"
             android:exported="false"
             android:theme="@style/AppTheme.Transparent"/>
         <activity
