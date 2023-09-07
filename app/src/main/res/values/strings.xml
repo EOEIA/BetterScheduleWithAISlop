@@ -288,6 +288,9 @@
     <string name="account_picker_add">Add new account</string>
     <string name="login_add_title">Add new account</string>
 
+    <string name="widget_account">Account</string>
+    <string name="widget_account_none">Not selected</string>
+
     <plurals name="info_weeks_back">
         <item quantity="one">%d week back</item>
         <item quantity="other">%d weeks back</item>

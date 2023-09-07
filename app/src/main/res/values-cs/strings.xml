@@ -258,6 +258,9 @@
     <string name="account_picker_add">Přidat účet</string>
     <string name="login_add_title">Přidat účet</string>
 
+    <string name="widget_account">Účet</string>
+    <string name="widget_account_none">Zatím nezvoleno</string>
+
     <plurals name="info_weeks_back">
         <item quantity="one">%d týden zpět</item>
         <item quantity="few">%d týdny zpět</item>

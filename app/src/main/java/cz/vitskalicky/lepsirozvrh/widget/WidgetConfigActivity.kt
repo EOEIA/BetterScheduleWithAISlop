@@ -4,15 +4,18 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +26,6 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import cz.vitskalicky.lepsirozvrh.AppSingleton
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.Account
@@ -48,21 +50,32 @@ abstract class WidgetConfigActivity : ComponentActivity() {
         private const val CUSTOM = 2
     }
 
-    private var widgetID: Int? = null
+    private val viewModel: WidgetConfigActivityViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val intent = intent
-        val extras = intent.extras
-        if (extras != null) {
-            widgetID = extras.getInt(
-                    AppWidgetManager.EXTRA_APPWIDGET_ID,
-                    AppWidgetManager.INVALID_APPWIDGET_ID)
-        }
+
 
         setContent {
             val lightBgColor = colorResource(R.color.widgetLightBackground).toArgb()
             val darkBgColor = colorResource(R.color.widgetDarkBackground).toArgb()
+
+            val widgetID: Int? by rememberSaveable{
+                val intent = intent
+                val extras = intent.extras
+                val widgetID: Int? = extras?.getInt(
+                        AppWidgetManager.EXTRA_APPWIDGET_ID,
+                        AppWidgetManager.INVALID_APPWIDGET_ID)
+                mutableStateOf(widgetID)
+            }
+            BackHandler {
+                if (widgetID != null) {
+                    val resultValue = Intent()
+                    resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID)
+                    setResult(RESULT_CANCELED, resultValue)
+                }
+                finish()
+            }
 
             var widgetStyle: Int by rememberSaveable{mutableStateOf(LIGHT)}
 
@@ -77,6 +90,9 @@ abstract class WidgetConfigActivity : ComponentActivity() {
                 }
             }
 
+            var selectedAccount: Account? by rememberSaveable{mutableStateOf(null)}
+
+
             LepsirozvrhTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
                     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
@@ -88,9 +104,31 @@ abstract class WidgetConfigActivity : ComponentActivity() {
                             Column(Modifier.verticalScroll(scrollState)) {
                                 Spacer(Modifier.size(16.dp))
 
+                                val accounts: List<Account> = (viewModel.accountsLD.observeAsState().value?.sortedBy { it.username + it.serverUrl } ?: emptyList())
+                                if (accounts.size == 1 && selectedAccount == null){
+                                    selectedAccount = accounts[0]
+                                }
+                                val accountNames = accounts.map { it.fullName }
+                                val optionIndex = accounts.indexOfFirst { it.id == selectedAccount?.id }.takeUnless { it == -1 }
+                                val descText = selectedAccount?.fullName ?: stringResource(R.string.widget_account_none)
+                                RadioPreference(stringResource(R.string.widget_account), descText,
+                                    accountNames,
+                                    optionIndex,
+                                    { },
+                                    { Icon(Icons.Default.Person, null) }
+                                ){newOptionIndex ->
+                                    selectedAccount = accounts[newOptionIndex]
+                                }
+
                                     val styleOptions = stringArrayResource(R.array.widget_style_entries)
                                     val styleText = styleOptions[widgetStyle]
-                                RadioPreference(stringResource(R.string.widget_style), styleText, styleOptions.toList(),widgetStyle, {}){
+                                RadioPreference(
+                                    title = stringResource(R.string.widget_style),
+                                    description = styleText,
+                                    options = styleOptions.toList(),
+                                    selectedOptionIndex = widgetStyle,
+                                    dialogTitle = { },
+                                    icon = {Icon(Icons.Default.Palette, null) }){
                                     widgetStyle = it
                                     when (widgetStyle){
                                         LIGHT -> {
@@ -145,6 +183,8 @@ abstract class WidgetConfigActivity : ComponentActivity() {
 
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                                     Button({
+                                        @Suppress("NAME_SHADOWING")
+                                        val selectedAccount = selectedAccount ?: return@Button;
                                         if (widgetID != null){
                                             saveConfig(widgetID!!, bgColor, bgTransparency, textColor)
                                         }
@@ -154,14 +194,15 @@ abstract class WidgetConfigActivity : ComponentActivity() {
 
                                         widgetID?.let { widgetID ->
                                             lifecycleScope.launch{
-                                                val rozvrh: Rozvrh? = (application as? MainApplication)?.repository?.getRozvrh(RozvrhRecord.Key(1/*todo account picker*/,cz.vitskalicky.lepsirozvrh.Utils.getCurrentMonday()),true)
+                                                val rozvrh: Rozvrh? = (application as? MainApplication)?.repository?.getRozvrh(RozvrhRecord.Key(selectedAccount.id,cz.vitskalicky.lepsirozvrh.Utils.getCurrentMonday()),true)
                                                 val tmp = rozvrh?.getWidgetDisplayBlocks(5)
-                                                WidgetProvider.update(this@WidgetConfigActivity,widgetID,tmp?.first,false/*todo is account teacher?*/, tmp?.second )
+                                                WidgetProvider.update(this@WidgetConfigActivity,widgetID,tmp?.first,selectedAccount.isTeacher(), tmp?.second )
                                                 finish()
                                             }
-                                        }
+                                        }?:finish()
                                     },
-                                        Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                                        Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                                        enabled = selectedAccount != null,
                                     ){ Text(stringResource(R.string.ok)) }
                                 }
                             }
@@ -182,24 +223,10 @@ abstract class WidgetConfigActivity : ComponentActivity() {
         ws.secondaryTextColor = calculateSecondaryTextColor(textColor)
         ws.backgroundColor = (bgColor and 0x00ffffff) or (((1f - transparency)*255f).roundToInt() shl 24);
 
-        val appSingleton: AppSingleton = AppSingleton.getInstance(this);
-
-        appSingleton.getWidgetsSettings().widgetIds.add(widgetID);
-        appSingleton.getWidgetsSettings().widgets.put(widgetID, ws);
-
-        appSingleton.saveWidgetsSettings();
+        viewModel.saveWidgetConfig(widgetID, ws)
     }
 
     protected fun calculateSecondaryTextColor(primaryTextColor: Int): Int = (primaryTextColor and 0x00ffffff) or 0x99000000.toInt()
-
-    override fun onBackPressed() {
-        if (widgetID != null) {
-            val resultValue = Intent()
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID)
-            setResult(RESULT_CANCELED, resultValue)
-        }
-        finish()
-    }
 
     @Composable
     abstract fun WidgetView(bgColor: Int, transparency: Float, textColor: Int)
