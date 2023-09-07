@@ -27,19 +27,26 @@ import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
+import cz.vitskalicky.lepsirozvrh.view.preferences.ColorPreference
 
 class WidgetConfigActivityComp : ComponentActivity() {
+    companion object {
+        private const val LIGHT = 0
+        private const val DARK = 1
+        private const val CUSTOM = 2
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var widgetStyle: Int by rememberSaveable{mutableStateOf(0)}
-            var bgColor: Color by rememberSaveable{mutableStateOf(MaterialTheme.colors.surface)}
-            var textPrimaryColor: Color by rememberSaveable{ mutableStateOf(MaterialTheme.colors.onSurface) } //todo colors
-            var textSecondaryColor: Color by rememberSaveable{ mutableStateOf(MaterialTheme.colors.onSurface.copy(alpha = 0.7f)) }
+            var widgetStyle: Int by rememberSaveable{mutableStateOf(LIGHT)}
+            val defaultSurface = MaterialTheme.colors.surface;
+            val defaultOnSurface = MaterialTheme.colors.onSurface
+            var bgColor: Int by rememberSaveable{mutableStateOf(defaultSurface.toArgb())}
+            var textPrimaryColor: Int by rememberSaveable{ mutableStateOf(defaultOnSurface.toArgb()) } //todo colors
+            var textSecondaryColor: Int by rememberSaveable{ mutableStateOf(defaultOnSurface.copy(alpha = 0.7f).toArgb()) }
             var autoTextColor: Boolean by rememberSaveable{ mutableStateOf(true) }
 
             LepsirozvrhTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
                     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
                         Box(Modifier.weight(1f, fill = false).fillMaxSize(), contentAlignment = Alignment.Center){
@@ -54,11 +61,11 @@ class WidgetConfigActivityComp : ComponentActivity() {
                                 val textViewSecondary: TextView = view.findViewById(R.id.textViewSecondary)
                                 val background: ImageView = view.findViewById(R.id.bgcolor)
 
-                                background.imageAlpha = (bgColor.alpha *255).roundToInt()
-                                background.setColorFilter(bgColor.toArgb() or 0xff000000.toInt())
+                                background.imageAlpha = ((bgColor and 0xff000000.toInt()) shr 24)
+                                background.setColorFilter(bgColor or 0xff000000.toInt())
                                 //todo auto text color
-                                textViewPrimary.setTextColor(textPrimaryColor.toArgb())
-                                textViewSecondary.setTextColor(textSecondaryColor.toArgb())
+                                textViewPrimary.setTextColor(textPrimaryColor)
+                                textViewSecondary.setTextColor(textSecondaryColor)
                             })
                         }
                         Surface(Modifier.weight(2f, fill = false).fillMaxWidth(), color = MaterialTheme.colors.surface, elevation = 8.dp ) {
@@ -70,6 +77,16 @@ class WidgetConfigActivityComp : ComponentActivity() {
                                     val styleText = styleOptions[widgetStyle]
                                 RadioPreference(stringResource(R.string.widget_style), styleText, styleOptions.toList(),widgetStyle, {}){
                                     widgetStyle = it
+                                }
+                                if (widgetStyle == CUSTOM){
+                                    ColorPreference(
+                                        title = stringResource(R.string.widget_background),
+                                        description = null,
+                                        icon = null,
+                                        enabled = true,
+                                        color = Color(bgColor),
+                                        onColorSelected = {bgColor = it.toArgb()}
+                                    )
                                 }
 
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {

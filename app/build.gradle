@@ -179,6 +179,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
+    implementation 'com.godaddy.android.colorpicker:compose-color-picker-android:0.7.0'
 
     def room_version = "2.5.1"
 
