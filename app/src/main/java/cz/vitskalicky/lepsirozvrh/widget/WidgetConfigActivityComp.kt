@@ -20,30 +20,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.theme.Theme.Utils
 import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.preferences.ColorPreference
+import cz.vitskalicky.lepsirozvrh.view.preferences.SliderPreference
+import cz.vitskalicky.lepsirozvrh.view.preferences.SwitchPreference
+import kotlin.math.roundToInt
 
 class WidgetConfigActivityComp : ComponentActivity() {
     companion object {
+        /** Must match R.array.widget_style_entries*/
         private const val LIGHT = 0
+        /** Must match R.array.widget_style_entries*/
         private const val DARK = 1
+        /** Must match R.array.widget_style_entries*/
         private const val CUSTOM = 2
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val lightBgColor = colorResource(R.color.widgetLightBackground).toArgb()
+            val darkBgColor = colorResource(R.color.widgetDarkBackground).toArgb()
+
             var widgetStyle: Int by rememberSaveable{mutableStateOf(LIGHT)}
-            val defaultSurface = MaterialTheme.colors.surface;
-            val defaultOnSurface = MaterialTheme.colors.onSurface
-            var bgColor: Int by rememberSaveable{mutableStateOf(defaultSurface.toArgb())}
-            var textPrimaryColor: Int by rememberSaveable{ mutableStateOf(defaultOnSurface.toArgb()) } //todo colors
-            var textSecondaryColor: Int by rememberSaveable{ mutableStateOf(defaultOnSurface.copy(alpha = 0.7f).toArgb()) }
+
+            var bgColor: Int by rememberSaveable{mutableStateOf(lightBgColor)}
+            var bgTransparency: Float by rememberSaveable{ mutableStateOf(0f) }
+            var textColor: Int by rememberSaveable{ mutableStateOf(Utils.textColorFor(lightBgColor)) }
             var autoTextColor: Boolean by rememberSaveable{ mutableStateOf(true) }
 
             LepsirozvrhTheme {
@@ -61,11 +71,11 @@ class WidgetConfigActivityComp : ComponentActivity() {
                                 val textViewSecondary: TextView = view.findViewById(R.id.textViewSecondary)
                                 val background: ImageView = view.findViewById(R.id.bgcolor)
 
-                                background.imageAlpha = ((bgColor and 0xff000000.toInt()) shr 24)
+                                background.imageAlpha = ((1f-bgTransparency) * 255).roundToInt()
                                 background.setColorFilter(bgColor or 0xff000000.toInt())
-                                //todo auto text color
-                                textViewPrimary.setTextColor(textPrimaryColor)
-                                textViewSecondary.setTextColor(textSecondaryColor)
+                                val finalTextColor = if (autoTextColor) Utils.textColorFor(bgColor) else textColor
+                                textViewPrimary.setTextColor(finalTextColor)
+                                textViewSecondary.setTextColor((finalTextColor and 0x00ffffff) or 0x99000000.toInt())
                             })
                         }
                         Surface(Modifier.weight(2f, fill = false).fillMaxWidth(), color = MaterialTheme.colors.surface, elevation = 8.dp ) {
@@ -77,6 +87,18 @@ class WidgetConfigActivityComp : ComponentActivity() {
                                     val styleText = styleOptions[widgetStyle]
                                 RadioPreference(stringResource(R.string.widget_style), styleText, styleOptions.toList(),widgetStyle, {}){
                                     widgetStyle = it
+                                    when (widgetStyle){
+                                        LIGHT -> {
+                                            bgColor = lightBgColor
+                                            textColor = Utils.textColorFor(bgColor)
+                                            bgTransparency = 0f
+                                        }
+                                        DARK -> {
+                                            bgColor = darkBgColor
+                                            textColor = Utils.textColorFor(bgColor)
+                                            bgTransparency = 0f
+                                        }
+                                    }
                                 }
                                 if (widgetStyle == CUSTOM){
                                     ColorPreference(
@@ -87,6 +109,29 @@ class WidgetConfigActivityComp : ComponentActivity() {
                                         color = Color(bgColor),
                                         onColorSelected = {bgColor = it.toArgb()}
                                     )
+                                    SliderPreference(
+                                        title = stringResource(R.string.widget_transparency),
+                                        icon = null,
+                                        enabled = true,
+                                        onChanged = {bgTransparency = it},
+                                        onValueChangeFinished = null,
+                                        value = bgTransparency,
+                                    )
+                                    SwitchPreference(
+                                        stringResource(R.string.widget_autotext),
+                                        null,
+                                        autoTextColor,
+                                    ){autoTextColor = it}
+                                    if (!autoTextColor){
+                                        ColorPreference(
+                                            title = stringResource(R.string.widget_text_color),
+                                            description = null,
+                                            icon = null,
+                                            enabled = true,
+                                            color = Color(textColor),
+                                            onColorSelected = {textColor = it.toArgb()}
+                                        )
+                                    }
                                 }
 
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {

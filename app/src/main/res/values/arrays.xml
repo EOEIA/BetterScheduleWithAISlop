@@ -10,6 +10,7 @@
         <item>1</item>
         <item>2</item>
     </integer-array>
+    <!-- must match WidgetConfigActivity.LIGHT, DARK, CUSTOM-->
     <string-array name="widget_style_entries">
         <item>Light</item>
         <item>Dark</item>
