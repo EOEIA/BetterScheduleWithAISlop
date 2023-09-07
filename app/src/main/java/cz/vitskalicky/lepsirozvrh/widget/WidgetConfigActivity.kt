@@ -186,7 +186,7 @@ abstract class WidgetConfigActivity : ComponentActivity() {
                                         @Suppress("NAME_SHADOWING")
                                         val selectedAccount = selectedAccount ?: return@Button;
                                         if (widgetID != null){
-                                            saveConfig(widgetID!!, bgColor, bgTransparency, textColor)
+                                            saveConfig(widgetID!!, selectedAccount.id, bgColor, bgTransparency, textColor)
                                         }
                                         val resultValue = Intent()
                                         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID)
@@ -213,7 +213,7 @@ abstract class WidgetConfigActivity : ComponentActivity() {
         }
     }
 
-    fun saveConfig(widgetID: Int, bgColor: Int, transparency: Float, textColor: Int) {
+    fun saveConfig(widgetID: Int, accountId: Long, bgColor: Int, transparency: Float, textColor: Int) {
         val ws: WidgetsSettings.Widget = WidgetsSettings.Widget();
 
         ws.primaryTextSize = resources.getDimension(R.dimen.widgetTextPrimary) / resources.displayMetrics.scaledDensity;
@@ -222,6 +222,8 @@ abstract class WidgetConfigActivity : ComponentActivity() {
         ws.primaryTextColor = textColor;
         ws.secondaryTextColor = calculateSecondaryTextColor(textColor)
         ws.backgroundColor = (bgColor and 0x00ffffff) or (((1f - transparency)*255f).roundToInt() shl 24);
+
+        ws.accountId = accountId
 
         viewModel.saveWidgetConfig(widgetID, ws)
     }

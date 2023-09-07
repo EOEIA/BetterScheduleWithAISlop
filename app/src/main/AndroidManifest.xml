@@ -21,6 +21,7 @@
         <activity
             android:name=".widget.SmallWidgetConfigActivity"
             android:exported="false"
+            android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme.Transparent"/>
         <activity
             android:name=".accountPicker.AccountPickerActivity"

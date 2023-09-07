@@ -158,11 +158,11 @@ object PermanentNotification {
         prevIntent.action = UpdateBroadcastReciever.ACTION_NEXT_PREV
         prevIntent.putExtra(UpdateBroadcastReciever.EXTRA_NEXT_PREV, -1)
         val prevPendingIntent = PendingIntent.getBroadcast(context, 4586, prevIntent, FLAG_IMMUTABLE)
-        //todo launch main activity
         val intent = Intent(context, MainActivity::class.java)
         intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
         intent.putExtra(EXTRA_NOTIFICATION, true)
         intent.putExtra(MainActivity.EXTRA_SWITCH_TO_ACCOUNT, accountId)
+        //todo is this the correct way to do it?
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntentWithParentStack(intent)
         val pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)

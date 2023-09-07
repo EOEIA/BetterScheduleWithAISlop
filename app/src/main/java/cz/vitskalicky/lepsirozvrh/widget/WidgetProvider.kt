@@ -9,10 +9,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.*
+import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
@@ -190,13 +192,16 @@ open class WidgetProvider : AppWidgetProvider() {
             }
             views.setInt(R.id.bgcolor, "setImageAlpha", widgetSettings.backgroundColor and -0x1000000 shr 24)
             views.setInt(R.id.bgcolor, "setColorFilter", widgetSettings.backgroundColor or -0x1000000)
-            //todo launch activity on click
-//            val intent = Intent(context, MainActivity::class.java)
-//            intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
-//            val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_REQUEST_CODE, intent,
-//                KotlinUtils.FLAG_IMMUTABLE
-//            )
-//            views.setOnClickPendingIntent(R.id.root, pendingIntent)
+
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
+            //todo for some reason the system keeps delivering pending intent from the notification instead of this one
+            intent.putExtra(MainActivity.EXTRA_SWITCH_TO_ACCOUNT, widgetSettings.accountId)
+            val stackBuilder = TaskStackBuilder.create(context)
+            stackBuilder.addNextIntentWithParentStack(intent)
+            val pendingIntent = stackBuilder.getPendingIntent(0, KotlinUtils.FLAG_IMMUTABLE)
+
+            views.setOnClickPendingIntent(R.id.root, pendingIntent)
             appWidgetManager.updateAppWidget(widgetID, views)
         }
 
