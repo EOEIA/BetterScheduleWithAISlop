@@ -86,7 +86,7 @@ open class WidgetProvider : AppWidgetProvider() {
 
     companion object {
         val TAG = WidgetProvider::class.java.simpleName
-        const val PENDING_INTENT_REQUEST_CODE = 85321
+        const val PENDING_INTENT_REQUEST_CODE = 802000
         const val WIDGET_LENGTH = 5
         suspend fun updateAll(app: MainApplication){
             val widgetsSettings = AppSingleton.getInstance(app).widgetsSettings
@@ -129,6 +129,7 @@ open class WidgetProvider : AppWidgetProvider() {
 
         /** The account for the widget has logged out - show a message and configure another account on tap */
         fun updateLoggedOut(context: Context, widgetID: Int){
+
             val appWidgetManager = AppWidgetManager.getInstance(context)
             var widgetSettings:Widget = AppSingleton.getInstance(context).widgetsSettings.widgets[widgetID] ?: /*fail-safe*/run {
                 // fail-safe
@@ -146,14 +147,15 @@ open class WidgetProvider : AppWidgetProvider() {
             views.setInt(R.id.bgcolor, "setImageAlpha", widgetSettings.backgroundColor and -0x1000000 shr 24)
             views.setInt(R.id.bgcolor, "setColorFilter", widgetSettings.backgroundColor or -0x1000000)
 
-            //todo account picker UI
-//            val intent = Intent(context, MainActivity::class.java)
-//            intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
-//            val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_REQUEST_CODE, intent,
-//                KotlinUtils.FLAG_IMMUTABLE
-//            )
-//            views.setOnClickPendingIntent(R.id.root, pendingIntent)
+            val intent = Intent(context, WidgetChangeAccountActivity::class.java)
+            intent.putExtra(WidgetChangeAccountActivity.EXTRA_WIDGET_ID, widgetID)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_REQUEST_CODE + widgetID /*must be unique for each widget*/, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.root, pendingIntent)
             appWidgetManager.updateAppWidget(widgetID, views)
+
         }
 
         /**
@@ -195,13 +197,12 @@ open class WidgetProvider : AppWidgetProvider() {
 
             val intent = Intent(context, MainActivity::class.java)
             intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
-            //todo for some reason the system keeps delivering pending intent from the notification instead of this one
             intent.putExtra(MainActivity.EXTRA_SWITCH_TO_ACCOUNT, widgetSettings.accountId)
-            val stackBuilder = TaskStackBuilder.create(context)
-            stackBuilder.addNextIntentWithParentStack(intent)
-            val pendingIntent = stackBuilder.getPendingIntent(0, KotlinUtils.FLAG_IMMUTABLE)
-
+            val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_REQUEST_CODE + widgetID /*must be unique for each widget*/, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
             views.setOnClickPendingIntent(R.id.root, pendingIntent)
+
             appWidgetManager.updateAppWidget(widgetID, views)
         }
 

@@ -290,6 +290,7 @@
 
     <string name="widget_account">Account</string>
     <string name="widget_account_none">Not selected</string>
+    <string name="widget_select_new_account">Select account</string>
 
     <plurals name="info_weeks_back">
         <item quantity="one">%d week back</item>

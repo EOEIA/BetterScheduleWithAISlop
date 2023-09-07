@@ -260,6 +260,7 @@
 
     <string name="widget_account">Účet</string>
     <string name="widget_account_none">Zatím nezvoleno</string>
+    <string name="widget_select_new_account">Vyberte účet</string>
 
     <plurals name="info_weeks_back">
         <item quantity="one">%d týden zpět</item>

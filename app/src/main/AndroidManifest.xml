@@ -19,10 +19,15 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".widget.WidgetChangeAccountActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.Transparent"/>
+        <activity
             android:name=".widget.SmallWidgetConfigActivity"
             android:exported="false"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
-            android:theme="@style/AppTheme.Transparent"/>
+            android:theme="@style/AppTheme.WallpaperBg"/>
         <activity
             android:name=".accountPicker.AccountPickerActivity"
             android:exported="false"
