@@ -25,9 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.settings.RadioPreference
+import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
-import kotlin.math.roundToInt
 
 class WidgetConfigActivityComp : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

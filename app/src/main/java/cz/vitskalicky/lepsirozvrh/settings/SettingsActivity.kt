@@ -34,6 +34,10 @@ import cz.vitskalicky.lepsirozvrh.donations.Donations
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
+import cz.vitskalicky.lepsirozvrh.view.preferences.Preference
+import cz.vitskalicky.lepsirozvrh.view.preferences.PreferenceGroupHeader
+import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
+import cz.vitskalicky.lepsirozvrh.view.preferences.SwitchPreference
 import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
 import kotlinx.coroutines.launch
 
@@ -193,7 +197,7 @@ class SettingsActivity : ComponentActivity() {
                             Preference(R.string.app_version.str,
                                 versionText
                             ){
-                                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                                 val clip = ClipData.newPlainText(versionText, versionText)
                                 clipboard.setPrimaryClip(clip)
                                 lifecycleScope.launch{
