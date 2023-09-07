@@ -13,6 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -29,20 +30,22 @@ private fun PreferenceBase(
     enabled: Boolean = true,
 ){
 
-    Row(Modifier
-        .alpha(if (enabled) {1f} else {ContentAlpha.disabled})
-        .clickable(enabled,null, null, if (enabled) onClicked else {{}})
-        .defaultMinSize(minHeight = 56.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(Modifier.width(72.dp), contentAlignment = Alignment.Center){
-            icon?.invoke()
+    Surface(color = MaterialTheme.colors.surface) {
+        Row(Modifier
+            .alpha(if (enabled) {1f} else {ContentAlpha.disabled})
+            .clickable(enabled,null, null, if (enabled) onClicked else {{}})
+            .defaultMinSize(minHeight = 56.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(Modifier.width(72.dp), contentAlignment = Alignment.Center){
+                icon?.invoke()
+            }
+            content()
+            Spacer(Modifier.fillMaxWidth().weight(1f))
+            Spacer(Modifier.size(16.dp))
+            rightContent?.invoke()
+            Spacer(Modifier.size(16.dp))
         }
-        content()
-        Spacer(Modifier.fillMaxWidth().weight(1f))
-        Spacer(Modifier.size(16.dp))
-        rightContent?.invoke()
-        Spacer(Modifier.size(16.dp))
     }
 }
 
@@ -169,6 +172,47 @@ fun RadioPreference(
         { isDialogOpen = true },
         onSelected
     )
+}
+
+@Composable
+fun SliderPreference(
+    title: String?,
+    icon: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
+    onChanged: (value: Float) -> Unit = {},
+    onValueChangeFinished: (() -> Unit)? = null,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float> = 0f .. 1f,
+    steps: Int = 0,
+    sliderColors: SliderColors = SliderDefaults.colors()
+){
+    PreferenceBase(
+        icon = icon,
+        enabled = enabled,
+        content = {
+            Column {
+                if (title != null) {
+                    Text(title, style = MaterialTheme.typography.subtitle1, modifier = Modifier.paddingFromBaseline(32.dp))
+                }
+                Slider(
+                    modifier = Modifier.padding(end = 8.dp),
+                    value = value,
+                    onValueChange = onChanged,
+                    enabled = enabled,
+                    valueRange = valueRange,
+                    onValueChangeFinished = onValueChangeFinished,
+                    steps = steps,
+                    colors = sliderColors
+                )
+            }
+        },
+    )
+}
+
+@Preview
+@Composable
+private fun SliderPreferencePriview(){
+    SliderPreference("Transparency", value = 0.5f)
 }
 
 @Preview
