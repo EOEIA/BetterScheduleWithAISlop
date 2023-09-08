@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.Utils
 
+/** In flavor "official", diantions are turned off*/
 class Donations(
     private val activity: Activity,
     onPurchaseChangesListener: Utils.Listener?

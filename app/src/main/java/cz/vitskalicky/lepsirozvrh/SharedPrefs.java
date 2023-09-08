@@ -12,7 +12,7 @@ import org.joda.time.format.ISODateTimeFormat;
  */
 public class SharedPrefs {
 
-    //key constants (do not change in future)
+    //old constants
     public static final String URL = "url";
     public static final String SCHOOL_NAME = "school_name";
     public static final String SCHOOL_ID = "school_id";

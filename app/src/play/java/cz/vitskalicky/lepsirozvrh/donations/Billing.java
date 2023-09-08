@@ -24,6 +24,7 @@ import java.util.List;
 import cz.vitskalicky.lepsirozvrh.R;
 import cz.vitskalicky.lepsirozvrh.Utils;
 
+/** Implement slogic of in-app purchases*/
 public class Billing implements PurchasesUpdatedListener {
 
     public static final String SKU_SMALL_DONATION = "small_donation";

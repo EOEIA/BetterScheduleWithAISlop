@@ -31,22 +31,6 @@ public class AppSingleton {
         return instance;
     }
 
-    /*public RequestQueue getRequestQueue() {
-        if (requestQueue == null) {
-            // getApplicationContext() is key, it keeps you from leaking the
-            // Activity or BroadcastReceiver if someone passes one in.
-            requestQueue = Volley.newRequestQueue(ctx);
-        }
-        return requestQueue;
-    }
-
-    public RozvrhAPI getRozvrhAPI() {
-        if (rozvrhAPI == null) {
-            rozvrhAPI = new RozvrhAPI(getRequestQueue(), ctx.getApplicationContext());
-        }
-        return rozvrhAPI;
-    }*/
-
     /**
      * Update these widget settings and don't forget to {@link #saveWidgetsSettings()} afterwards.
      */

@@ -4,7 +4,6 @@
 */
 package cz.vitskalicky.lepsirozvrh;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -33,38 +32,12 @@ import org.joda.time.format.DateTimeFormatter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
 
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh;
 
 public class Utils {
     public static final String TAG = Utils.class.getSimpleName();
-
-    public static String parseDate(String rawDate, String inputFormat, String outputFormat) {
-        SimpleDateFormat sdf = new SimpleDateFormat(inputFormat, Locale.US);
-        SimpleDateFormat readable = new SimpleDateFormat(outputFormat, Locale.US);
-
-        try {
-            Date date = sdf.parse(rawDate);
-            if (date == null) return null;
-            return readable.format(date);
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
-    public static int minutesOfDay(String t) {
-        String[] time = t.split(":");
-        int hours = Integer.valueOf(time[0]);
-        int minutes = Integer.valueOf(time[1]);
-        return minutes + hours * 60;
-    }
 
     public static LocalDate getWeekMonday(LocalDate date) {
         if (date == null) return null;
@@ -136,19 +109,6 @@ public class Utils {
 
     public static interface Listener{
         public void method();
-    }
-    public static String join(List<Object> list, String separator){
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-
-        for (Object item :list) {
-            if (!first){
-                sb.append(separator);
-            }
-            first = false;
-            sb.append(item);
-        }
-        return sb.toString();
     }
 
     /**
@@ -246,20 +206,5 @@ public class Utils {
                 })
                 .create();
         ad.show();
-    }
-
-    /*public static void somethingWrong(Exception e, View forToast, Context context){
-        Snackbar.make(forToast, R.string.something_went_wrong, BaseTransientBottomBar.LENGTH_LONG)
-                .setAction(R.string.report,v -> {
-                    sendFeedback(false, e, context, forToast);
-                })
-                .show();
-    }*/
-
-    public static interface RecreateWithAnimationActivity{
-        /**
-         * Use this to recreate an activity with some nice animation instead of just "blink", which is what {@link Activity#recreate()} does.
-         */
-        public void recreateWithAnimation();
     }
 }

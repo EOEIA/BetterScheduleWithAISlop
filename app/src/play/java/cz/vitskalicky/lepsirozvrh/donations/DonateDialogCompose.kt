@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cz.vitskalicky.lepsirozvrh.R
+/** see [DonateDialog]*/
  @Composable
 private fun DonateDialogStateless(smallDonated: Boolean, bigDonated: Boolean, smallPrice: String?, bigPrice: String?, isInitialized: Boolean, onDonateSmall: () -> Unit, onDonateBig: () -> Unit, onUseCode: () -> Unit, onDismissed: ()->Unit ){
     val isSponsor = smallDonated || bigDonated
@@ -98,6 +99,7 @@ private fun DonateDialogStateless(smallDonated: Boolean, bigDonated: Boolean, sm
     )
 }
 
+/** UI for the dialog with donate buttons*/
 @Composable
 fun DonateDialog(billing: Billing, activity: Activity, onDismissed: () -> Unit){
     var smallDonated: Boolean = false

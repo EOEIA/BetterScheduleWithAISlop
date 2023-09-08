@@ -212,19 +212,6 @@ object PermanentNotification {
         }
     }
 
-    fun showInfoDialog(context: Context?, ignoreSetting: Boolean) {
-        if (!ignoreSetting && SharedPrefs.getBoolean(context, PREF_DONT_SHOW_INFO_DIALOG)) {
-            return
-        }
-        val builder = AlertDialog.Builder(context!!)
-        builder.setTitle(R.string.notification)
-        val contentView = LayoutInflater.from(context).inflate(R.layout.notification_dialog, null)
-        val checkBox = contentView.findViewById<CheckBox>(R.id.checkBox)
-        builder.setView(contentView)
-        builder.setPositiveButton(android.R.string.ok) { dialog: DialogInterface?, which: Int -> SharedPrefs.setBoolean(context, PREF_DONT_SHOW_INFO_DIALOG, checkBox.isChecked) }
-        builder.show()
-    }
-
     @Composable
     fun ShowNoPermissionDialog(onDismissed: () -> Unit){
         AlertDialog(

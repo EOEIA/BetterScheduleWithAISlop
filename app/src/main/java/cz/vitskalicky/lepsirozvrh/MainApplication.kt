@@ -188,23 +188,6 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             } catch (ignored: NumberFormatException) {
             } catch (ignored: NullPointerException) {
             }
-            /*
-            val theme = OldTheme.of(this)
-            when (themeNumber) {
-                0 -> {
-                    val systemIsDark = SystemTheme.isDarkTheme(this)
-                    if (systemIsDark) {
-                        theme.themeData = DefaultThemes.getDarkTheme()
-                    } else {
-                        theme.themeData = DefaultThemes.getLightTheme()
-                    }
-                    SharedPrefs.setBooleanPreference(this, R.string.PREFS_IS_DARK_THEME_FOR_SYSTEM_APPLIED, systemIsDark)
-                }
-                1 -> theme.themeData = DefaultThemes.getLightTheme()
-                2 -> theme.themeData = DefaultThemes.getDarkTheme()
-                3 -> theme.themeData = DefaultThemes.getBlackTheme()
-            }
-            */
         }
 
         // "start up" the lifecycle

@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.runtime.Composable
 import cz.vitskalicky.lepsirozvrh.Utils
 
+/** In flavor "play", diantions are turned on. This class is only like a inteface to other classes implementing the logic.*/
 class Donations(private val activity: Activity, onPurchaseChangesListener: Utils.Listener?) {
     private val billing: Billing
 
