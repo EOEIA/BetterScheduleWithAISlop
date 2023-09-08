@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 
+/** Data class for passing around status about data with optional error message and specification*/
 data class StatusInfo(
     val status: Status,
     @StringRes

@@ -42,6 +42,7 @@ import cz.vitskalicky.lepsirozvrh.view.preferences.SwitchPreference
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+/** Base activity for both small and wide widget that provides the shared logic */
 abstract class WidgetConfigActivity : ComponentActivity() {
     companion object {
         /** Must match R.array.widget_style_entries*/

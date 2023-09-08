@@ -10,6 +10,7 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.LocalDate
+//todo is this still needed?
 
 class MainActivityViewModel(
     application: Application,

@@ -101,6 +101,7 @@ class LoginViewModel(
     }
 }
 
+/** Activity with the login form */
 class LoginActivity : ComponentActivity() {
     val viewModel: LoginViewModel by viewModels()
 

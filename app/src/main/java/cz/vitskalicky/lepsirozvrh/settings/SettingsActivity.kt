@@ -134,7 +134,6 @@ class SettingsActivity : ComponentActivity() {
                             Preference(R.string.logout.str, null, Icons.Default.Logout.icon){ coroutinScope.launch { account?.let { logOut(it.id)} } }
                             Divider()
                             PreferenceGroupHeader(R.string.pref_category_appearance.str)
-                            Preference(R.string.app_theme_screen.str, R.string.app_theme_screen_desc.str, Icons.Default.Palette.icon){ TODO() }
                             SwitchPreference(R.string.info_line.str, R.string.info_line_desc.str,
                                 viewModel.showInfolineLD.observeAsState().value ?: false
                             ){

@@ -29,7 +29,7 @@ import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
 
-
+/** Activity for switching accounts */
 class AccountPickerActivity : ComponentActivity() {
 
     val viewModel: AccountPickerViewModel by viewModels()

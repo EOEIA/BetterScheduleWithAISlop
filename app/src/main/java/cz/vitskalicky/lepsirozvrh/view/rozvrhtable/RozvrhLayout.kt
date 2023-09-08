@@ -13,6 +13,7 @@ import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
 import org.joda.time.LocalDate
 
+/** Custom layout for the schedule table */
 class RozvrhLayout : ViewGroup {
     private var t: RozvrhTheme = DefaultRozvrhThemes.UNSPECIFIED
     /**

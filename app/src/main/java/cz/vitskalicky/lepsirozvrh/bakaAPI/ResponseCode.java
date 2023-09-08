@@ -1,5 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.bakaAPI;
 
+
+//todo cleanup
 public class ResponseCode {
     public static final int SUCCESS = 0;
     public static final int LOGIN_FAILED = 1;

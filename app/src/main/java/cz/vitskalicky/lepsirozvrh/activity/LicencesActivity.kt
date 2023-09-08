@@ -18,6 +18,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 
+/** Activity with licenses of use open source libraries*/
 class LicencesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

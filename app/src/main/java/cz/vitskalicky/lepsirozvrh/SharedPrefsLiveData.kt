@@ -2,12 +2,13 @@
  * Copied from Stack overflow: https://stackoverflow.com/a/53028546
  *
  * CC BY-SA 4.0 Abhishek Luthra, modified by Vít Skalický
+ *
+ * These classes provide convenient way to observe shared preferences.
  */
 package cz.vitskalicky.lepsirozvrh
 
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
-
 
 abstract class SharedPrefsLiveData<T>(val sharedPrefs: SharedPreferences,
                                            val key: String,

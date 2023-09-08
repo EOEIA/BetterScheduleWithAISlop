@@ -35,6 +35,8 @@ import retrofit2.HttpException
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
+// UI for picking school from list of available schools
+
 class SchoolPickerViewModel(application: Application): AndroidViewModel(application){
     private val app = application as MainApplication
     private val db = app.schoolsDb
@@ -132,7 +134,7 @@ class SchoolPickerViewModel(application: Application): AndroidViewModel(applicat
     }
 }
 
-/** Also handles entering custom url */
+/** Dialog for selecting school from list of available schools. Also handles entering custom url */
 @Composable
 fun SchoolList(onSelect: (SchoolInfo) -> Unit, viewModel: SchoolPickerViewModel = viewModel()){
 
@@ -199,7 +201,7 @@ fun SchoolList(onSelect: (SchoolInfo) -> Unit, viewModel: SchoolPickerViewModel 
 }
 
 
-/** List of schools with search box
+/** List of schools with search box. Does not handle entering custom URL
  * */
 @Composable
 fun SchoolList(viewModel: SchoolPickerViewModel, onSelect: (SchoolInfo) -> Unit, onManual: (searchQuery: String) -> Unit){

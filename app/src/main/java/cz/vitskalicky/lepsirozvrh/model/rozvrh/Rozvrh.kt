@@ -12,6 +12,7 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
 
+/** data class for rozvrh used by the app. The API uses [Rozvrh3] which needs to be converted into this.*/
 @Serializable
 data class Rozvrh(
     /**

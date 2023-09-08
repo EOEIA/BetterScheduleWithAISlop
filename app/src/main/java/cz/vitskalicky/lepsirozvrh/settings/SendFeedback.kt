@@ -16,6 +16,8 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import kotlinx.coroutines.*
 
+// UI and logic for "send feedback" button. Asks the user whether to include their current schedule in the feedback and then send an email.
+
 @Composable
 fun FeedbackDialog(onDismissed: () -> Unit, scaffoldState: ScaffoldState){
     val context = LocalContext.current;

@@ -21,6 +21,7 @@ import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
 
+/** Account picker for widgets whose account has been logged out. Launched on tap on such a widget*/
 class WidgetChangeAccountActivity : ComponentActivity() {
 
     companion object {

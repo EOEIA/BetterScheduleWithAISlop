@@ -12,6 +12,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhDay;
 
+/** Custom view for cell with day */
 public class DenView extends CellView {
     private RozvrhDay rozvrhDay = null;
     private String denText = "";

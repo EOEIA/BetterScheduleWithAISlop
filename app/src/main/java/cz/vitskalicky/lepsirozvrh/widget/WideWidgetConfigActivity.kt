@@ -12,6 +12,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.R
 import kotlin.math.roundToInt
 
+/** Configuration activity for wide widget. Most logic is in [WidgetConfigActivity]. This only proved wide widget specific view and stuff */
 class WideWidgetConfigActivity: WidgetConfigActivity() {
     @Composable
     override fun WidgetView(bgColor: Int, transparency: Float, textColor: Int) {

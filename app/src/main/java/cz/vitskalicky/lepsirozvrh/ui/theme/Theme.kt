@@ -12,29 +12,7 @@ import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.darker
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.textColorFor
 
-private val DarkColorPalette = darkColors(
-    primary = Yellow800,
-    primaryVariant = Yellow900,
-    secondary = BlueGrey700,
-    onPrimary = Color.Black,
-    onSecondary = Color.White
-)
-
-private val LightColorPalette = lightColors(
-    primary = Yellow800,
-    primaryVariant = Yellow900,
-    secondary = BlueGrey700,
-    onPrimary = Color.Black,
-    onSecondary = Color.White
-
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
-)
+//Here is the theme for Jetpack Compose
 
 private fun RozvrhTheme.colors(isLight: Boolean = this.isLight) = Colors(
     surface = cSurface,

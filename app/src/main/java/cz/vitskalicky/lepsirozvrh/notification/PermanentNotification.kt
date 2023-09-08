@@ -34,6 +34,7 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import org.joda.time.format.DateTimeFormat
 
+/** Logic and stuff for the persistent notification */
 object PermanentNotification {
     const val PERMANENT_NOTIFICATION_ID = 7055713
     const val PERMANENT_CHANNEL_ID = BuildConfig.APPLICATION_ID + ".permanentNotificationChannel"

@@ -47,7 +47,7 @@ import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_INTERNET
 import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNEXPECTED_RESPONSE
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolList
 
-/** Add a line for error text, but does not implement all features of TextField*/
+/** Adds a line for error text, but does not implement all features of TextField*/
 @Composable
 fun TextFieldWithError(
     value: String,

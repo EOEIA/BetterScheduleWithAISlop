@@ -19,6 +19,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
+/** Shows a dialog with new features in the app */
 @Composable
 fun WhatsNewDialog(onDismissed: () -> Unit){
     val scrollState = rememberScrollState()
@@ -51,7 +52,7 @@ fun WhatsNewDialog(onDismissed: () -> Unit){
                                     line = br.readLine()
                                 }
                             } catch (e: IOException) {
-                                Log.e(WhatsNewFragment.TAG, "Failed to load changelog")
+                                Log.e("WhatsNewDialog", "Failed to load changelog")
                                 sb.append("ERROR")
                             }
 

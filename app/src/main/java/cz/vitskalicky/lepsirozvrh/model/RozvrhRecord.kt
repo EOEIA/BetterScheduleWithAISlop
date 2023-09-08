@@ -5,6 +5,7 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
+/** Rozvrh and it key */
 @Entity(foreignKeys = [ForeignKey(
     entity = Account::class,
     parentColumns = ["id"],

@@ -11,6 +11,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.R
 import kotlin.math.roundToInt
 
+/** Configuration activity for small widget. Most logic is in [WidgetConfigActivity]. This only proved small widget specific view and stuff */
+
 class SmallWidgetConfigActivity: WidgetConfigActivity() {
     @Composable
     override fun WidgetView(bgColor: Int, transparency: Float, textColor: Int) {

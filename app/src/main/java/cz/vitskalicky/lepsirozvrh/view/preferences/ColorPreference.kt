@@ -75,6 +75,7 @@ fun ColorPreferenceStateless(
     )
 }
 
+/** Color picker preference */
 @Composable
 fun ColorPreference(
     title: String?,

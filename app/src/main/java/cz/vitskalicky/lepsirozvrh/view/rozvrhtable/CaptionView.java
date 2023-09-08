@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCaption;
 
+/** Custom view for lesson captions */
 public class CaptionView extends CellView {
     private RozvrhCaption caption = null;
     private String startTime = "";

@@ -16,6 +16,7 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.theme.OldTheme
 import kotlin.math.max
 
+/** Custom view for cell with lesson */
 class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, attrs) {
     private var hodina: RozvrhLesson? = null
     var event: String? = null

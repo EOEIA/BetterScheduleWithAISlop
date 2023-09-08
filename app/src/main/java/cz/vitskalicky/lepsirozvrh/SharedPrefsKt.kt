@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 
+/** Shortcuts for working with shared preferences */
 class SharedPrefsKt(context: Context){
     val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -51,6 +52,7 @@ class SharedPrefsKt(context: Context){
 val Context.prefs: SharedPrefsKt
     get() = SharedPrefsKt(this)
 
+/** Keys for various settings */
 object PrefsConsts {
     const val ACTIVE_ACCOUNT_ID = "int_active_account_id"
     const val LAST_SCHOOLS_LIST_UPDATE = "prefs-last-schools-list-update"

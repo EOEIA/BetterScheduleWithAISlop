@@ -52,7 +52,8 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
 
     companion object {
         private val TAG = MainApplication::class.java.simpleName
-        //private var _jacksonObjectMapper: ObjectMapper? = null
+
+        /** Object mapper for (de)serialization of objects with app-wide settings*/
         public val objectMapper: ObjectMapper by lazy {
             val objectMapper = ObjectMapper()
             objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
@@ -66,10 +67,11 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     public val mainScope = MainScope()
     lateinit var notificationState: NotificationState
         private set
+    /** Time of the next scheduled notification and widget update */
     private var updateTime: LocalDateTime? = null
     private lateinit var notificationAccountLD: LiveData<Long?>
     private lateinit var notificationRozvrhLD: LiveData<RozvrhRecord?>
-    private lateinit var allCurrentWeekLivedata: LiveData<List<RozvrhRecord>>
+    private lateinit var allCurrentWeekLiveData: LiveData<List<RozvrhRecord>>
     //private lateinit var currentWeekObserver: Observer<RozvrhRelated?>
 
     val rozvrhDb: RozvrhDatabase by lazy {
@@ -95,7 +97,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         DebugUtils(this)
     }
 
-    //region SCHOOLS DATABASE
+    /** Database of all schools and their URLs */
     val schoolsDb: SchoolsDatabase by lazy {
         Room.databaseBuilder(
                 applicationContext,
@@ -103,6 +105,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         ).build()
     }
 
+    /** Retrofit client for loading list of schools. Does not have any authentication */
     val schoolsRetrofit: Retrofit by lazy {
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -148,6 +151,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             notificationManager.createNotificationChannel(channel)
         }
 
+        // initialize live data
         notificationAccountLD = PreferenceManager.getDefaultSharedPreferences(this).longLiveData(PrefsConsts.NOTIFICATION_ACCOUNT, -1).map { it.takeUnless { it == -1L } }
         notificationRozvrhLD = notificationAccountLD.switchMap {
             if (it ==null){
@@ -156,8 +160,8 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             repository.getCurrentWeekLD(it)
         }
 
-        allCurrentWeekLivedata = repository.allCurrentWeekLD
-        allCurrentWeekLivedata.observe(this) {
+        allCurrentWeekLiveData = repository.allCurrentWeekLD
+        allCurrentWeekLiveData.observe(this) {
             mainScope.launch {
                 WidgetProvider.updateAll(tohle)
                 updateUpdateTime()
@@ -168,18 +172,11 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
                 PermanentNotification.update(tohle)
             }
         }
-        /* todo this used to handle theme. is anything of it still needed?
-        if (!SharedPrefs.containsPreference(this, R.string.PREFS_THEME_cHBg)) {
-            //theme not initialized yet (first start or after update from pre-themes version)
-            SharedPrefs.setStringPreference(this, R.string.PREFS_APP_THEME, "0")
-            SharedPrefs.setBooleanPreference(this, R.string.PREFS_FOLLOW_SYSTEM_THEME, true)
-            SharedPrefs.setBooleanPreference(this, R.string.PREFS_IS_DARK_THEME_FOR_SYSTEM_APPLIED, false)
-            OldTheme.of(this).themeData = DefaultThemes.getLightTheme()
-            OldTheme.of(this).checkSystemTheme()
-        }
-        */
+
+        // more initializations
         notificationState = NotificationState(this)
 
+        // handles app update data migration
         if (SharedPrefs.getInt(this, SharedPrefs.LAST_VERSION_SEEN) < BuildConfig.VERSION_CODE) {
             //a new version is here
             // LAST_VERSION_SEEN is set by MainActivity
@@ -223,6 +220,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         }
     }
 
+    /** Schedules notification and widget update */
     fun scheduleUpdate(triggerTime: LocalDateTime?) {
         var triggerTime: LocalDateTime? = triggerTime
 
@@ -259,6 +257,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         return true
     }
 
+    /** Update time on which notification and widgets should be updated*/
     suspend fun updateUpdateTime() {
         val accounts = HashSet<Long>()
         notificationAccountLD.value?.let { accounts.add(it) }

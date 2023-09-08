@@ -6,6 +6,7 @@ import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme;
 import java.util.LinkedList;
 import java.util.List;
 
+/** Recycles instances of HodinaView */
 public class HodinaViewRecycler {
     private Context context;
     public RozvrhTheme theme;

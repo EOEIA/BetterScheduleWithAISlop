@@ -10,34 +10,4 @@ abstract class RozvrhDatabase : RoomDatabase() {
     abstract fun rozvrhDao(): RozvrhDao
 
     abstract fun accountDao(): AccountDao
-
-
-
-//    suspend fun insertRozvrhRelated(vararg rozvrhs: RozvrhRelated){
-//        val captions = ArrayList<RozvrhCaption>()
-//        val days = ArrayList<RozvrhDay>()
-//        val blocks = ArrayList<RozvrhBlock>()
-//        val lessons = ArrayList<RozvrhLesson>()
-//
-//        rozvrhs.forEach {
-//            captions.addAll(it.captions);
-//            days.addAll(it.days.map { it.day })
-//            it.days.forEach{
-//                blocks.addAll(it.blocks.map { it.block })
-//                it.blocks.forEach{
-//                    lessons.addAll(it.lessons)
-//                }
-//            }
-//        }
-//
-//        withTransaction {
-//            rozvrhDao().deleteRozvrh(*rozvrhs.map{ it.rozvrh }.toTypedArray())
-//            rozvrhDao().insertRozvrh(*rozvrhs.map{ it.rozvrh }.toTypedArray())
-//
-//            captionDao().insertCaption(*captions.toTypedArray())
-//            dayDao().insertRozvrhDay(*days.toTypedArray())
-//            blockDao().insertRozvrhBlock(*blocks.toTypedArray())
-//            lessonDao().insertRozvrhLesson(*lessons.toTypedArray())
-//        }
-//    }
 }

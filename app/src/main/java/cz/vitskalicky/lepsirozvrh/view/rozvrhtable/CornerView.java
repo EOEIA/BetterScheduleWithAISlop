@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 
 import androidx.annotation.Nullable;
 
+/** Custom view for corner cell */
 public class CornerView extends CellView {
     private String text = "";
     private final TextPaint myTextPaint = new TextPaint();

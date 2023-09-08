@@ -8,7 +8,7 @@ import androidx.preference.PreferenceManager;
 import org.joda.time.format.ISODateTimeFormat;
 
 /**
- * Utilities for shared preferences
+ * Old utilities for shared preferences. Slowly being moved to {@link SharedPrefsKt}
  */
 public class SharedPrefs {
 

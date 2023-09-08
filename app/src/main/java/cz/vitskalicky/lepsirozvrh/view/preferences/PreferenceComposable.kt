@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cz.vitskalicky.lepsirozvrh.R
 
+// Composables for preferences UI
 @Composable
 private fun PreferenceBase(
     icon: (@Composable () -> Unit)? = null,

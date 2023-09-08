@@ -20,6 +20,7 @@ import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
 
+/** The main activity with schedule table*/
 class MainActivity : ComponentActivity() {
 
     companion object {

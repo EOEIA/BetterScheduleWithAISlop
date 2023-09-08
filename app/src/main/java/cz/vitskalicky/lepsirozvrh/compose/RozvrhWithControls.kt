@@ -12,7 +12,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +33,7 @@ import cz.vitskalicky.lepsirozvrh.ui.theme.LocalRozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhLayout
 import kotlinx.coroutines.launch
 
+/** UI for schedule table with buttons for changing weeks etc.*/
 @Composable
 fun RozvrhWithControls(viewModel: RozvrhViewModel){
     val rozvrh by viewModel.getDisplayLD().observeAsState()
@@ -70,7 +70,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
     var centerToCurrentLesson: Boolean by rememberSaveable{
         mutableStateOf(isCenterToCurrentLessonEnabled())
     }
-    RozvrhWithControls(
+    RozvrhWithControlsStateless(
         rozvrh = rozvrh?.data,
         isTeacher = account?.isTeacher() ?: false,
         weekPosition = viewModel.weekPosition,
@@ -90,8 +90,9 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
     )
 }
 
+/** Stateless versioin of [RozvrhWithControls]*/
 @Composable
-fun RozvrhWithControls(
+fun RozvrhWithControlsStateless(
     rozvrh: Rozvrh?,
     isTeacher: Boolean,
     weekPosition: Int,
@@ -277,7 +278,7 @@ fun LessonPreview(){
 
 @Composable
 fun Rozvrhpreview(){
-    RozvrhWithControls(
+    RozvrhWithControlsStateless(
         DebugUtils.getDemoRozvrh(Utils.getCurrentMonday(), LocalContext.current),
         false,
         0,
