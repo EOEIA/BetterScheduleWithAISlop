@@ -85,11 +85,9 @@ public class CellView extends View {
         textPadding = dp(t.dpTextPadding());
     }
     public void setTheme(RozvrhTheme t){
-        if (!t.equals(this.t)) {
-            this.t = t;
-            updateTheme();
-            invalidate();
-        }
+        this.t = t;
+        updateTheme();
+        invalidate();
     }
 
     /**
