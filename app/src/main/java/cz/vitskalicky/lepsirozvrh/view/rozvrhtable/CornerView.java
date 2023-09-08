@@ -11,13 +11,17 @@ import androidx.annotation.Nullable;
 
 public class CornerView extends CellView {
     private String text = "";
-    private TextPaint myTextPaint;
+    private final TextPaint myTextPaint = new TextPaint();
 
     public CornerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setDrawDividers(false, false, false);
+    }
+
+    @Override
+    protected void updateTheme() {
+        super.updateTheme();
         backgroundPaint.setColor(clr(t.cHeaderBg()));
-        myTextPaint = new TextPaint();
         myTextPaint.setAntiAlias(true);
         myTextPaint.setTextSize(secondaryTextSize);
         myTextPaint.setColor(clr(t.cHeaderSecondaryText()));

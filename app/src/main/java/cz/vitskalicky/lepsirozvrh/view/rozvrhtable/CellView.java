@@ -7,6 +7,7 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
 
 import cz.vitskalicky.lepsirozvrh.KotlinUtils;
@@ -20,13 +21,13 @@ import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme;
 public class CellView extends View {
     protected RozvrhTheme t;
 
-    protected Paint backgroundPaint;
-    protected Paint dividerPaint;
+    protected final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);;
+    protected final Paint dividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected int dividerWidth;
 
-    protected Paint primaryTextPaint;
+    protected final Paint primaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected int primaryTextSize;
-    protected Paint secondaryTextPaint;
+    protected final Paint secondaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected int secondaryTextSize;
 
     protected int paddingTop, paddingRight, paddingBottom, paddingLeft, textPadding;
@@ -55,21 +56,23 @@ public class CellView extends View {
 
         t = DefaultRozvrhThemes.INSTANCE.getUNSPECIFIED();
 
-        backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        setDrawDividers(true, true, true);
+    }
+
+    /** This is called when the theme object has changed and the view should update all its paints and so on*/
+    @CallSuper
+    protected void updateTheme(){
         backgroundPaint.setColor(clr(t.cEmptyBg()));
 
-        dividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         dividerPaint.setColor(clr(t.cDivider()));
         dividerWidth = dp(t.dpDividerWidth());
         dividerPaint.setStrokeWidth(dividerWidth);
 
-        primaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         primaryTextPaint.setColor(OldTheme.FALLBACK_COLOR);
         primaryTextSize = sp(t.spPrimaryText());
         primaryTextPaint.setTextSize(primaryTextSize);
         primaryTextPaint.setTypeface(Typeface.DEFAULT);
 
-        secondaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         secondaryTextPaint.setColor(OldTheme.FALLBACK_COLOR);
         secondaryTextSize = sp(t.spSecondaryText());
         secondaryTextPaint.setTextSize(secondaryTextSize);
@@ -80,8 +83,13 @@ public class CellView extends View {
         paddingRight = dp(t.dpPaddingRight());
         paddingBottom = dp(t.dpPaddingBottom());
         textPadding = dp(t.dpTextPadding());
-
-        setDrawDividers(true, true, true);
+    }
+    public void setTheme(RozvrhTheme t){
+        if (!t.equals(this.t)) {
+            this.t = t;
+            updateTheme();
+            invalidate();
+        }
     }
 
     /**

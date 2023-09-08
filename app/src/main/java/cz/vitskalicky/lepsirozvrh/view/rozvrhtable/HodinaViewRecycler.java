@@ -1,15 +1,18 @@
 package cz.vitskalicky.lepsirozvrh.view.rozvrhtable;
 
 import android.content.Context;
+import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class HodinaViewRecycler {
     private Context context;
+    public RozvrhTheme theme;
     private List<HodinaView> buffer = new LinkedList<>();
 
-    public HodinaViewRecycler(Context context) {
+    public HodinaViewRecycler(Context context, RozvrhTheme theme) {
+        this.theme = theme;
         this.context = context;
     }
 
@@ -22,10 +25,13 @@ public class HodinaViewRecycler {
     }
 
     public HodinaView retrieve(){
+        HodinaView item;
         if (buffer.size() > 0){
-            return buffer.remove(0);
+            item = buffer.remove(0);
         }else {
-            return new HodinaView(context, null);
+            item = new HodinaView(context, null);
         }
+        item.setTheme(theme);
+        return item;
     }
 }

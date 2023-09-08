@@ -20,6 +20,11 @@ public class DenView extends CellView {
     public DenView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setDrawDividers(true, true, false);
+    }
+
+    @Override
+    protected void updateTheme() {
+        super.updateTheme();
         backgroundPaint.setColor(clr(t.cHeaderBg()));
         primaryTextPaint.setColor(clr(t.cHeaderPrimaryText()));
         secondaryTextPaint.setColor(clr(t.cHeaderSecondaryText()));

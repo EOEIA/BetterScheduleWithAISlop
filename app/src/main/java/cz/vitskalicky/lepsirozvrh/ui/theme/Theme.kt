@@ -65,18 +65,18 @@ fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compo
     val colors = rozvrhTheme.colors()
 
     CompositionLocalProvider(LocalRozvrhTheme provides rozvrhTheme){
-
+        MaterialTheme(
+            colors = colors,
+            typography = Typography,
+            shapes = Shapes,
+            content = {
+                val suiController = rememberSystemUiController()
+                suiController.setStatusBarColor(
+                    MaterialTheme.colors.primarySurface.darker()
+                )
+                content()
+            }
+        )
     }
-    MaterialTheme(
-        colors = colors,
-        typography = Typography,
-        shapes = Shapes,
-        content = {
-            val suiController = rememberSystemUiController()
-            suiController.setStatusBarColor(
-                MaterialTheme.colors.primarySurface.darker()
-            )
-            content()
-        }
-    )
+
 }

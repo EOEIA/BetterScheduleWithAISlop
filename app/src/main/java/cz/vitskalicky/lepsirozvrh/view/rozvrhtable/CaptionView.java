@@ -19,7 +19,11 @@ public class CaptionView extends CellView {
     public CaptionView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setDrawDividers(false, true, true);
+    }
 
+    @Override
+    public void updateTheme() {
+        super.updateTheme();
         backgroundPaint.setColor(clr(t.cHeaderBg()));
         primaryTextPaint.setColor(clr(t.cHeaderPrimaryText()));
         secondaryTextPaint.setColor(clr(t.cHeaderSecondaryText()));

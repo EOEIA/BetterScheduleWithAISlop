@@ -6,13 +6,15 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.HorizontalScrollView
 import cz.vitskalicky.lepsirozvrh.PrefsConsts
-import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.SharedPrefsKt
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.*
+import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
+import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
 import org.joda.time.LocalDate
 
 class RozvrhLayout : ViewGroup {
+    private var t: RozvrhTheme = DefaultRozvrhThemes.UNSPECIFIED
     /**
      * Creates a cell with reasonably long data and calculates its minimum width
      */
@@ -42,7 +44,7 @@ class RozvrhLayout : ViewGroup {
     private var nextHodinaViewCorner: HodinaView? = null //the corner one from the highlighted one (it has its corner highlighted)
     private var hodinasByCaptions: Array<Array<ArrayList<HodinaView>>> = Array(0) { Array(0){ ArrayList() } } //the first paramemter is caption index, second day and the list contains all lessons in that block
     private var hodinaViewRecycler: HodinaViewRecycler =
-        HodinaViewRecycler(context)
+        HodinaViewRecycler(context, t)
     private var columnSizes = IntArray(1) // includes days column
 
     private var onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit = {_,_,_,_ ->}
@@ -208,15 +210,18 @@ class RozvrhLayout : ViewGroup {
 
         if (cornerView == null) {
             cornerView = CornerView(context, null)
+            cornerView!!.setTheme(t)
         }
         addView(cornerView)
         for (i in 0 until columns) {
             val item = CaptionView(context, null)
+            item.setTheme(t)
             captionViews.add(item)
             addView(item)
         }
         for (i in 0 until rows) {
             val denCell = DenView(context, null)
+            denCell.setTheme(t)
             denViews.add(denCell)
             addView(denCell)
         }
@@ -422,6 +427,16 @@ class RozvrhLayout : ViewGroup {
         invalidate()
         requestLayout()
         //debug timing: Log.d(TAG_TIMER, "populate end " + Utils.getDebugTime());
+    }
+
+    fun setTheme(theme: RozvrhTheme){
+        this.t = theme
+
+        cornerView?.setTheme(t)
+        captionViews.forEach{it.setTheme(t)}
+        denViews.forEach{it.setTheme(t)}
+        hodinaViewRecycler.theme = t
+        hodinasByCaptions.forEach { it.forEach { it.forEach { it.setTheme(t) } } }
     }
 
     companion object {

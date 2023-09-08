@@ -29,6 +29,7 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCycle
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhGroup
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
+import cz.vitskalicky.lepsirozvrh.ui.theme.LocalRozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhLayout
 
 @Composable
@@ -102,14 +103,16 @@ fun RozvrhWithControls(
     dialogLesson?.let{
         LessonDialog(it, rozvrh?.permanent?:false, onDismiss = {dialogLesson = null})
     }
-    Column(
-        verticalArrangement = Arrangement.Top
-    ) {
-
-        Box(
-            modifier = Modifier.horizontalScroll(scroolState).weight(1F)
+    Surface(color = MaterialTheme.colors.surface) {
+        Column(
+            verticalArrangement = Arrangement.Top
         ) {
-            Row{
+
+
+            Box(
+                modifier = Modifier.horizontalScroll(scroolState).weight(1F)
+            ) {
+                val rozvrhTheme = LocalRozvrhTheme.current
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),
                     factory = { context ->
@@ -119,66 +122,76 @@ fun RozvrhWithControls(
                         }
                     },
                     update = { rozvrhLayout ->
+                        rozvrhLayout.setTheme(rozvrhTheme)
                         rozvrhLayout.setRozvrh(rozvrh, isTeacher, false)
                     }
                 )
             }
-        }
-        //todo shadow
+            //todo shadow
 
-        if (statusLineText != null) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colors.secondary,
-                contentColor = MaterialTheme.colors.onSecondary
-            ) {
-                Text(statusLineText, textAlign = TextAlign.Center)
+            if (statusLineText != null) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = LocalRozvrhTheme.current.cInfolineBg,
+                    contentColor = LocalRozvrhTheme.current.cInfolineText
+                ) {
+                    Text(statusLineText, textAlign = TextAlign.Center)
+                }
             }
-        }
-        Surface(
-            color = MaterialTheme.colors.primary,
-            contentColor = MaterialTheme.colors.onPrimary,
-        ) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
+            Surface(
+                color = MaterialTheme.colors.primary,
+                contentColor = MaterialTheme.colors.onPrimary,
             ) {
-                //todo tooltips
-                IconButton(onSettingsPress) {
-                    Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
-                }
-                Row(Modifier.align(Alignment.Center)) {
-                    if (weekPosition != RozvrhViewModel.PERM)
-                        IconButton(onPrevPress) {
-                            Icon(Icons.Default.NavigateBefore, contentDescription = stringResource(R.string.prev_week))
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    //todo tooltips
+                    IconButton(onSettingsPress) {
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                    }
+                    Row(Modifier.align(Alignment.Center)) {
+                        if (weekPosition != RozvrhViewModel.PERM)
+                            IconButton(onPrevPress) {
+                                Icon(
+                                    Icons.Default.NavigateBefore,
+                                    contentDescription = stringResource(R.string.prev_week)
+                                )
+                            }
+                        if (weekPosition != 0) {
+                            IconButton(onCurrentPress) {
+                                Icon(Icons.Default.Home, contentDescription = stringResource(R.string.current_week))
+                            }
+                        } else {
+                            IconButton(onPermPress) {
+                                Icon(
+                                    Icons.Default.CalendarMonth,
+                                    contentDescription = stringResource(R.string.permanent_schedule)
+                                )
+                            }
                         }
-                    if (weekPosition != 0){
-                        IconButton(onCurrentPress) {
-                            Icon(Icons.Default.Home, contentDescription = stringResource(R.string.current_week))
-                        }
-                    }else{
-                        IconButton(onPermPress) {
-                            Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.permanent_schedule))
+                        if (weekPosition != RozvrhViewModel.PERM)
+                            IconButton(onNextPress) {
+                                Icon(
+                                    Icons.Default.NavigateNext,
+                                    contentDescription = stringResource(R.string.next_week)
+                                )
+                            }
+                    }
+
+                    Box(Modifier.align(Alignment.CenterEnd)) {
+                        if (status == StatusInfo.Status.LOADING) {
+                            CircularProgressIndicator(color = MaterialTheme.colors.secondary) // todo change color
+                        } else {
+                            IconButton(onRefreshPress) {
+                                Icon(
+                                    if (status == StatusInfo.Status.ERROR) Icons.Default.SyncProblem else Icons.Default.Sync,
+                                    contentDescription = stringResource(R.string.prev_week)
+                                )
+                            }
                         }
                     }
-                    if (weekPosition != RozvrhViewModel.PERM)
-                        IconButton(onNextPress) {
-                            Icon(Icons.Default.NavigateNext, contentDescription = stringResource(R.string.next_week))
-                        }
-                }
 
-                Box(Modifier.align(Alignment.CenterEnd)){
-                    if(status == StatusInfo.Status.LOADING){
-                        CircularProgressIndicator(color = MaterialTheme.colors.secondary) // todo change color
-                    }else{
-                        IconButton(onRefreshPress) {
-                            Icon(
-                                if (status == StatusInfo.Status.ERROR) Icons.Default.SyncProblem else Icons.Default.Sync,
-                                contentDescription = stringResource(R.string.prev_week)
-                            )
-                        }
-                    }
                 }
-
             }
         }
     }

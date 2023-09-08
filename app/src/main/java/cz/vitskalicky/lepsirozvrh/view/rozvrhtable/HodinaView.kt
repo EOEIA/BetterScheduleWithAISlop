@@ -26,12 +26,12 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     var eventStart: Int = 0
     private var perm = false
     private var isTeacher = false
-    private val mistPaint: Paint
-    private val highlightPaint: Paint
-    private val highlightedDividerPaint: Paint
-    private val homeworkPaint: Paint
-    private val highlightWidth: Int
-    private val homeworkSize: Int
+    private val mistPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val highlightPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val highlightedDividerPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val homeworkPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var highlightWidth: Int = 0
+    private var homeworkSize: Int = 0
     private var topHighlighted = false
     private var leftHighlighted = false
     private var cornerHighlighted = false
@@ -335,22 +335,22 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         dialog.show()
     }*/
 
-    init {
-        mistPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    override fun updateTheme() {
+        super.updateTheme()
         mistPaint.color = t.cHRoomText.toArgb()
         mistPaint.textSize = secondaryTextSize.toFloat()
         mistPaint.typeface = Typeface.DEFAULT
         mistPaint.textAlign = Paint.Align.LEFT
-        highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         highlightPaint.color = t.cHighlight.toArgb()
         highlightWidth = dp(t.dpHighlightWidth)
         highlightPaint.strokeWidth = highlightWidth.toFloat()
-        highlightedDividerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         highlightedDividerPaint.color = t.cHighlight.toArgb()
         highlightedDividerPaint.strokeWidth = dividerWidth.toFloat()
-        homeworkPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         homeworkPaint.color = t.cHomework.toArgb()
         homeworkSize = dp(t.dpHomework)
+    }
+
+    init {
         setDrawDividers(true, true, true)
     }
 }
