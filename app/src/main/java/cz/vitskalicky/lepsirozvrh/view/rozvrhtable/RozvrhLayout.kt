@@ -246,7 +246,7 @@ class RozvrhLayout : ViewGroup {
         SharedPrefs.setInt(context, SharedPrefs.REMEMBERED_COLUMNS, columns)
     }
 
-    fun setRozvrh(rozvrh: Rozvrh?, isTeacher: Boolean, centerToCurrentlesson: Boolean) {
+    fun setRozvrh(rozvrh: Rozvrh?, isTeacher: Boolean) {
         //debug timing: Log.d(TAG_TIMER, "populate start " + Utils.getDebugTime());
         //todo sentry extra
         /*if (rozvrh != null) {
@@ -312,7 +312,6 @@ class RozvrhLayout : ViewGroup {
             }
         }
         highlightCurrentLesson()
-        if (centerToCurrentlesson) centerToCurrentLesson()
         invalidate()
         requestLayout()
 
@@ -384,23 +383,9 @@ class RozvrhLayout : ViewGroup {
 
     // we want to center when: the user opens the app, user taps current week
     // we don't want to center when: a fresh schedule with minor changes loads, user switches to the schedule using arrows.
-    fun centerToCurrentLesson() {
-        if (SharedPrefsKt(context).boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON) != true) return
-        val parent = parent
-        if (parent is HorizontalScrollView) {
-            val hsvParent = parent
-            val viewTreeObserver = hsvParent.viewTreeObserver
-            viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    if (viewTreeObserver.isAlive)
-                        viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    if (nextHodinaView != null) {
-                        val parentWidth = hsvParent.width
-                        hsvParent.smoothScrollTo(nextHodinaView!!.x.toInt() - parentWidth / 2 + nextHodinaView!!.width / 2, 0)
-                    }
-                }
-            })
-        }
+    fun currentLessonPosition(): Int? {
+        if (nextHodinaView == null) return null
+        return nextHodinaView!!.x.toInt() + nextHodinaView!!.width / 2
     }
 
     /**

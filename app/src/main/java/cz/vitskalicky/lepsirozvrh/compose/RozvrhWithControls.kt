@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
 import cz.vitskalicky.lepsirozvrh.ui.theme.LocalRozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhLayout
+import kotlinx.coroutines.launch
 
 @Composable
 fun RozvrhWithControls(viewModel: RozvrhViewModel){
@@ -64,6 +66,10 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
     }
     if (showInfoline == false) infotext = null
 
+    val isCenterToCurrentLessonEnabled: () -> Boolean = {SharedPrefsKt(context).boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON)?:false}
+    var centerToCurrentLesson: Boolean by rememberSaveable{
+        mutableStateOf(isCenterToCurrentLessonEnabled())
+    }
     RozvrhWithControls(
         rozvrh = rozvrh?.data,
         isTeacher = account?.isTeacher() ?: false,
@@ -72,13 +78,15 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         statusLineText = infotext, //todo theme hide infoline
         onNextPress = {viewModel.weekPosition++},
         onPrevPress = {viewModel.weekPosition--},
-        onCurrentPress = {viewModel.weekPosition = 0},
+        onCurrentPress = {viewModel.weekPosition = 0; centerToCurrentLesson = isCenterToCurrentLessonEnabled()},
         onPermPress = {viewModel.weekPosition = RozvrhViewModel.PERM},
         onSettingsPress = {
             val intent = Intent(context, SettingsActivity::class.java)
             context.startActivity(intent)
         },
-        onRefreshPress = {viewModel.forceRefresh()}
+        onRefreshPress = {viewModel.forceRefresh()},
+        centerToCurrentLesson = centerToCurrentLesson,
+        onCenterCompleted = {centerToCurrentLesson = false}
     )
 }
 
@@ -90,6 +98,8 @@ fun RozvrhWithControls(
     status: StatusInfo.Status,
     /** null to hide the statusline */
     statusLineText: String?,
+    centerToCurrentLesson: Boolean = false,
+    onCenterCompleted: () -> Unit = {},
     onNextPress: () -> Unit,
     onPrevPress: () -> Unit,
     onCurrentPress: () -> Unit,
@@ -98,6 +108,7 @@ fun RozvrhWithControls(
     onRefreshPress: () -> Unit,
 ){
     val scroolState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
     // the lesson which is shown in dialog or null
     var dialogLesson by remember { mutableStateOf(null as RozvrhLesson?) }
     dialogLesson?.let{
@@ -107,12 +118,11 @@ fun RozvrhWithControls(
         Column(
             verticalArrangement = Arrangement.Top
         ) {
-
-
             Box(
                 modifier = Modifier.horizontalScroll(scroolState).weight(1F)
             ) {
                 val rozvrhTheme = LocalRozvrhTheme.current
+                val screenWidth = LocalContext.current.resources.displayMetrics?.widthPixels ?: 0 // todo not optimal - assumes the view take up entire screen width, but proper solution is currently unnecessarily complicated
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),
                     factory = { context ->
@@ -123,7 +133,14 @@ fun RozvrhWithControls(
                     },
                     update = { rozvrhLayout ->
                         rozvrhLayout.setTheme(rozvrhTheme)
-                        rozvrhLayout.setRozvrh(rozvrh, isTeacher, false)
+                        rozvrhLayout.setRozvrh(rozvrh, isTeacher)
+                        if (centerToCurrentLesson) {
+                            coroutineScope.launch {
+                                scroolState.animateScrollTo(
+                                    rozvrhLayout.currentLessonPosition()?.let { it - screenWidth / 2 } ?: 0)
+                                onCenterCompleted()
+                            }
+                        }
                     }
                 )
             }
@@ -266,11 +283,14 @@ fun Rozvrhpreview(){
         0,
         StatusInfo.Status.SUCCESS,
         "Aktuální týden",
+        false,
         {},
         {},
         {},
         {},
         {},
-        {}
+        {},
+        {},
+
     )
 }
