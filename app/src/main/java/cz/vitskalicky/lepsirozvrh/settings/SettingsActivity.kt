@@ -32,7 +32,7 @@ import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
-import cz.vitskalicky.lepsirozvrh.activity.LicencesActivity
+import cz.vitskalicky.lepsirozvrh.LicencesActivity
 import cz.vitskalicky.lepsirozvrh.donations.Donations
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification

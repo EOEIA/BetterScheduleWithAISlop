@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.compose
+package cz.vitskalicky.lepsirozvrh.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -33,19 +33,18 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolInfo
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNKNOWN
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.LOADING
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SUCCESS
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_SCHOOL
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_USERNAME
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_PASSWORD
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.WRONG_LOGIN
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SCHOOL_UNREACHABLE
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.MANUAL_URL_UNREACHABLE
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_INTERNET
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNEXPECTED_RESPONSE
-import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolList
+import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolInfo
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.UNKNOWN
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.LOADING
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.NO_SCHOOL
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.NO_USERNAME
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.NO_PASSWORD
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.WRONG_LOGIN
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.SCHOOL_UNREACHABLE
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.MANUAL_URL_UNREACHABLE
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.NO_INTERNET
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.UNEXPECTED_RESPONSE
+import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolList
 
 /** Adds a line for error text, but does not implement all features of TextField*/
 @Composable

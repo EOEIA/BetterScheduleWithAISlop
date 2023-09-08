@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.activity
+package cz.vitskalicky.lepsirozvrh
 
 import android.os.Bundle
 import android.webkit.WebView

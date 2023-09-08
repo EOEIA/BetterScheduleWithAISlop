@@ -1,10 +1,9 @@
-package cz.vitskalicky.lepsirozvrh.fragment
+package cz.vitskalicky.lepsirozvrh.mainActivity
 
 import androidx.lifecycle.LiveData
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
-import cz.vitskalicky.lepsirozvrh.compose.RozvrhWithControlsStateless
 
 /** Interface for [RozvrhWithControls] so that it is not tied to MainActivity*/
 interface RozvrhViewModel {

@@ -1,9 +1,9 @@
-package cz.vitskalicky.lepsirozvrh.fragment
+package cz.vitskalicky.lepsirozvrh.mainActivity
 
 import android.app.Application
 import androidx.lifecycle.*
 import cz.vitskalicky.lepsirozvrh.*
-import cz.vitskalicky.lepsirozvrh.fragment.RozvrhViewModel.Companion.PERM
+import cz.vitskalicky.lepsirozvrh.mainActivity.RozvrhViewModel.Companion.PERM
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key

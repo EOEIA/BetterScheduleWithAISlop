@@ -40,7 +40,7 @@
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme"/>
         <activity
-            android:name=".activity.LicencesActivity"
+            android:name=".LicencesActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
@@ -52,14 +52,14 @@
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme"/>
         <activity
-            android:name=".activity.LoginActivity"
+            android:name=".login.LoginActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"/>
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".mainActivity.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"

@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.schoolsDatabase
+package cz.vitskalicky.lepsirozvrh.schoolPicker
 
 import android.app.Application
 import android.webkit.URLUtil

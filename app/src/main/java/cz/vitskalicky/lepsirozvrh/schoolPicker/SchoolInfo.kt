@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.schoolsDatabase
+package cz.vitskalicky.lepsirozvrh.schoolPicker
 
 import androidx.room.Entity
 import androidx.room.Fts4

@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.activity
+package cz.vitskalicky.lepsirozvrh.login
 
 import android.app.ActivityManager
 import android.app.Application
@@ -24,20 +24,19 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import cz.vitskalicky.lepsirozvrh.*
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus
-import cz.vitskalicky.lepsirozvrh.compose.StatefulLoginForm
+import cz.vitskalicky.lepsirozvrh.mainActivity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
-import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolInfo
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.LOADING
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SUCCESS
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_SCHOOL
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_USERNAME
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_PASSWORD
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.WRONG_LOGIN
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.SCHOOL_UNREACHABLE
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.MANUAL_URL_UNREACHABLE
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.NO_INTERNET
-import cz.vitskalicky.lepsirozvrh.compose.LoginScreenStatus.UNEXPECTED_RESPONSE
+import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolInfo
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.LOADING
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.SUCCESS
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.NO_SCHOOL
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.NO_USERNAME
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.NO_PASSWORD
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.WRONG_LOGIN
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.SCHOOL_UNREACHABLE
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.MANUAL_URL_UNREACHABLE
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.NO_INTERNET
+import cz.vitskalicky.lepsirozvrh.login.LoginScreenStatus.UNEXPECTED_RESPONSE
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
 

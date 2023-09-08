@@ -24,8 +24,8 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.notification.NotificationState
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
-import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsDatabase
-import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsWebservice
+import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolsDatabase
+import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolsWebservice
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid

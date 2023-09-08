@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.activity
+package cz.vitskalicky.lepsirozvrh.mainActivity
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,8 +14,6 @@ import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.SharedPrefsKt
 import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
-import cz.vitskalicky.lepsirozvrh.compose.RozvrhWithControls
-import cz.vitskalicky.lepsirozvrh.fragment.MainActivityViewModel
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch

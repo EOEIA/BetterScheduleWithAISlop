@@ -1,7 +1,6 @@
 package cz.vitskalicky.lepsirozvrh.accountPicker
 
 import android.app.ActivityManager
-import android.app.ActivityManager.RunningTaskInfo
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -24,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.activity.LoginActivity
-import cz.vitskalicky.lepsirozvrh.activity.MainActivity
+import cz.vitskalicky.lepsirozvrh.login.LoginActivity
+import cz.vitskalicky.lepsirozvrh.mainActivity.MainActivity
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
 

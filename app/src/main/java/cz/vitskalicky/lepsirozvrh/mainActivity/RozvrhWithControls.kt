@@ -1,4 +1,4 @@
-package cz.vitskalicky.lepsirozvrh.compose
+package cz.vitskalicky.lepsirozvrh.mainActivity
 
 import android.content.Intent
 import androidx.compose.foundation.horizontalScroll
@@ -22,7 +22,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.quantityStringResource
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.fragment.RozvrhViewModel
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCycle
