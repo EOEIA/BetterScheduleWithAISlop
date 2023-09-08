@@ -198,6 +198,7 @@ open class WidgetProvider : AppWidgetProvider() {
             val intent = Intent(context, MainActivity::class.java)
             intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
             intent.putExtra(MainActivity.EXTRA_SWITCH_TO_ACCOUNT, widgetSettings.accountId)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_REQUEST_CODE + widgetID /*must be unique for each widget*/, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )

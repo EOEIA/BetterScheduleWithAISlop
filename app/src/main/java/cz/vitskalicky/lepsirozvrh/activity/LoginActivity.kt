@@ -143,8 +143,8 @@ class LoginActivity : ComponentActivity() {
                                     if (accountId != null) {
                                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                        startActivity(intent)
                                         finishAffinity()
+                                        startActivity(intent)
                                     }
                                 }
                             }

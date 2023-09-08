@@ -61,6 +61,7 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme">
             <intent-filter>
