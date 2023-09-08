@@ -1,5 +1,5 @@
 # https://github.com/mingchen/docker-android-build-box
-FROM openjdk:17-jdk
+FROM eclipse-temurin:17-jdk-jammy
 
 # ANDROID_COMPILE_SDK is the version of Android you're compiling with.
 # It should match compileSdkVersion.
