@@ -1,5 +1,6 @@
 package cz.vitskalicky.lepsirozvrh.theme
 
+import android.os.Parcelable
 import androidx.annotation.FloatRange
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
@@ -7,11 +8,17 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
 import com.jaredrummler.cyanea.Cyanea
+import cz.vitskalicky.lepsirozvrh.ColorParceler
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 
 /**
  * Color data for all the UI including the schedule table
  * */
+@Parcelize
+@TypeParceler<Color, ColorParceler>()
 data class RozvrhTheme (
+    val isLight: Boolean,
     val cPrimary: Color,
     val cSecondary: Color,
     val cSurface: Color,
@@ -58,12 +65,12 @@ data class RozvrhTheme (
 
     val cHomework: Color,
     val dpHomework: Float,
-){
+) : Parcelable {
+
 }
 
 object ThemeGenerator{
 
-    //@formatter:on
     /**
      * Generates part of the color so that user can specify only primary and accent (or more) and the rest will be generated in a half-decent-looking way.
      *
@@ -154,6 +161,7 @@ object ThemeGenerator{
             (rgba.alpha *255).toInt())
     }
 
+    @JvmName("extensionDarker")
     fun Color.darker(@FloatRange(from = 0.0, to = 1.0) factor: Float = 0.85f): Color = ThemeGenerator.darker(this, factor)
 
     fun lighter(color: Color, @FloatRange(from = 0.0, to = 1.0) factor: Float = 0.15f): Color {
@@ -165,6 +173,7 @@ object ThemeGenerator{
         return Color(red, green, blue,alpha)
     }
 
+    @JvmName("extensionLighter")
     fun Color.lighter( @FloatRange(from = 0.0, to = 1.0) factor: Float = 0.15f): Color = ThemeGenerator.lighter(this, factor)
 
     fun generateHodinaColor(primaryColor: Color, accentColor: Color, backgroundColor: Color): Color {

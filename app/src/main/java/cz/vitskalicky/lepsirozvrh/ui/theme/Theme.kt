@@ -1,13 +1,16 @@
 package cz.vitskalicky.lepsirozvrh.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
-import androidx.compose.material.primarySurface
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
+import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.darker
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.textColorFor
 
 private val DarkColorPalette = darkColors(
     primary = Yellow800,
@@ -33,14 +36,37 @@ private val LightColorPalette = lightColors(
     */
 )
 
+private fun RozvrhTheme.colors(isLight: Boolean = this.isLight) = Colors(
+    surface = cSurface,
+    primary = cPrimary,
+    primaryVariant = cPrimary.darker(),
+    secondary = cSecondary,
+    secondaryVariant = cSecondary.darker(),
+    background = cSurface,
+    error = cError,
+    onPrimary = textColorFor(cPrimary),
+    onSecondary = textColorFor(cSecondary),
+    onBackground = textColorFor(cSurface),
+    onSurface = textColorFor(cSurface),
+    onError = textColorFor(cError),
+    isLight = isLight
+)
+
+
+val LocalRozvrhTheme = compositionLocalOf { DefaultRozvrhThemes.LIGHT }
+
 @Composable
 fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+    val rozvrhTheme = if (darkTheme){
+        DefaultRozvrhThemes.DARK
+    }else{
+        DefaultRozvrhThemes.LIGHT
     }
+    val colors = rozvrhTheme.colors()
 
+    CompositionLocalProvider(LocalRozvrhTheme provides rozvrhTheme){
+
+    }
     MaterialTheme(
         colors = colors,
         typography = Typography,
@@ -48,7 +74,7 @@ fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compo
         content = {
             val suiController = rememberSystemUiController()
             suiController.setStatusBarColor(
-                if (darkTheme) MaterialTheme.colors.primarySurface else colors.primaryVariant
+                MaterialTheme.colors.primarySurface.darker()
             )
             content()
         }

@@ -27,9 +27,6 @@ import cz.vitskalicky.lepsirozvrh.notification.NotificationState
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsDatabase
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsWebservice
-import cz.vitskalicky.lepsirozvrh.theme.DefaultThemes
-import cz.vitskalicky.lepsirozvrh.theme.SystemTheme
-import cz.vitskalicky.lepsirozvrh.theme.OldTheme
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid
@@ -171,6 +168,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
                 PermanentNotification.update(tohle)
             }
         }
+        /* todo this used to handle theme. is anything of it still needed?
         if (!SharedPrefs.containsPreference(this, R.string.PREFS_THEME_cHBg)) {
             //theme not initialized yet (first start or after update from pre-themes version)
             SharedPrefs.setStringPreference(this, R.string.PREFS_APP_THEME, "0")
@@ -179,6 +177,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             OldTheme.of(this).themeData = DefaultThemes.getLightTheme()
             OldTheme.of(this).checkSystemTheme()
         }
+        */
         notificationState = NotificationState(this)
 
         if (SharedPrefs.getInt(this, SharedPrefs.LAST_VERSION_SEEN) < BuildConfig.VERSION_CODE) {
@@ -192,6 +191,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             } catch (ignored: NumberFormatException) {
             } catch (ignored: NullPointerException) {
             }
+            /*
             val theme = OldTheme.of(this)
             when (themeNumber) {
                 0 -> {
@@ -207,7 +207,9 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
                 2 -> theme.themeData = DefaultThemes.getDarkTheme()
                 3 -> theme.themeData = DefaultThemes.getBlackTheme()
             }
+            */
         }
+
         // "start up" the lifecycle
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)

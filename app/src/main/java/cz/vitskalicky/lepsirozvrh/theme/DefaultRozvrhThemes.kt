@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 object DefaultRozvrhThemes {
     final val LIGHT = RozvrhTheme(
+        isLight = true,
         cABg = Color(0xffFFD54F),
         cAPrimaryText = Color(0xff000000),
         cARoomText = Color(0xff2D3A41),
@@ -43,6 +44,7 @@ object DefaultRozvrhThemes {
     )
 
     final val DARK = RozvrhTheme(
+        isLight = false,
         cABg = Color(0xFF8b4d00),
         cAPrimaryText = Color(0xFFFFFFFF),
         cARoomText = Color(0xFFD2D7D9),

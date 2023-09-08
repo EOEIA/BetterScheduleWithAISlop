@@ -3,12 +3,16 @@ package cz.vitskalicky.lepsirozvrh
 import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
+import android.os.Parcel
 import androidx.annotation.PluralsRes
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parceler
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -51,5 +55,14 @@ object KotlinUtils {
     }
     fun getWeekSwitchOffset(context: Context): Int {
         return calculateWeekSwitchOffset(context, context.prefs.int(PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX) ?: 0)
+    }
+}
+
+/** Parceler for saving [Color] into bundles */
+object ColorParceler : Parceler<Color> {
+    override fun create(parcel: Parcel) = Color(parcel.readInt())
+
+    override fun Color.write(parcel: Parcel, flags: Int) {
+        parcel.writeInt(toArgb())
     }
 }

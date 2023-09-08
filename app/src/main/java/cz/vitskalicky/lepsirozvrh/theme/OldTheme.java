@@ -178,26 +178,26 @@ public class OldTheme {
      * if theme is set to follow system theme (R.string.PREF_FOLLOW_SYSTEM_THEME is set to true in
      * shared preferences) this switches to the right theme and returns {@code true} if a change has been made.
      */
-    public boolean checkSystemTheme(){
-        if (SharedPrefs.getBooleanPreference(context, R.string.PREFS_FOLLOW_SYSTEM_THEME, false)){
-            boolean systemIsDark = SystemTheme.isDarkTheme(context);
-            boolean currentIsDark = SharedPrefs.getBooleanPreference(context, R.string.PREFS_IS_DARK_THEME_FOR_SYSTEM_APPLIED, false);
-            if (systemIsDark != currentIsDark){
-                if (systemIsDark){
-                    setThemeData(DefaultThemes.getDarkTheme());
-                }else {
-                    setThemeData(DefaultThemes.getLightTheme());
-                }
-                SharedPrefs.setBooleanPreference(context, R.string.PREFS_IS_DARK_THEME_FOR_SYSTEM_APPLIED, systemIsDark);
-                return true;
-            }
-        }
-        return false;
-    }
+//    public boolean checkSystemTheme(){
+//        if (SharedPrefs.getBooleanPreference(context, R.string.PREFS_FOLLOW_SYSTEM_THEME, false)){
+//            boolean systemIsDark = SystemTheme.isDarkTheme(context);
+//            boolean currentIsDark = SharedPrefs.getBooleanPreference(context, R.string.PREFS_IS_DARK_THEME_FOR_SYSTEM_APPLIED, false);
+//            if (systemIsDark != currentIsDark){
+//                if (systemIsDark){
+//                    setThemeData(OldDefaultThemes.getDarkTheme());
+//                }else {
+//                    setThemeData(OldDefaultThemes.getLightTheme());
+//                }
+//                SharedPrefs.setBooleanPreference(context, R.string.PREFS_IS_DARK_THEME_FOR_SYSTEM_APPLIED, systemIsDark);
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     public void applyDefaultTheme() {
         AsyncTask.execute(() -> {
-            OldThemeData td = DefaultThemes.getLightTheme();
+            OldThemeData td = OldDefaultThemes.getLightTheme();
             final OldThemeData ftd = td;
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (ftd != null) {
