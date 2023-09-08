@@ -21,7 +21,7 @@ ENV ANDROID_HOME="${PWD}/android-home"
 # Android
 RUN bash -c ' \
     apt-get --quiet update --yes && \
-    apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1 && \
+    apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1 git && \
   # Create a new directory at specified location \
     install -d $ANDROID_HOME && \
   # Here we are installing androidSDK tools from official source, \
