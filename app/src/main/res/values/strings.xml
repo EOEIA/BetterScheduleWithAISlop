@@ -73,9 +73,9 @@
         minutes before the current lesson ends. After the school finishes the notification disappears.\n\nThis feature
         can be disabled in the settings.
     </string>
-    <string name="notification_no_permission_title">Notifications are disabled</string>
-    <string name="notification_no_permission">This app\'s notifications are blocked by Android. Please unblock them in
-        device settings and try again.
+    <string name="notification_no_permission_title">Notifications have been disabled</string>
+    <string name="notification_no_permission">This app\'s notifications are blocked by Android. Persistent notification
+        will not work until you give this app permission to post notifications in the system settings.
     </string>
     <string name="notification_off">Disabled</string>
     <string name="notification_status">Enabled for: %1$s</string>

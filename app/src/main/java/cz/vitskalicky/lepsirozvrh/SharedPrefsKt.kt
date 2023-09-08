@@ -61,4 +61,5 @@ object PrefsConsts {
      * Account id for which persistent notification is active. Invalid id => persistent notification disabled
      */
     const val NOTIFICATION_ACCOUNT = "notification-account"
+    const val NOTIFICATION_PLEASE_GRANT_PERMISSION = "notification-please-grant-permission"
 }

@@ -1,12 +1,16 @@
 package cz.vitskalicky.lepsirozvrh.settings
 
+import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
@@ -22,10 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
-import cz.vitskalicky.lepsirozvrh.BuildConfig
-import cz.vitskalicky.lepsirozvrh.MainApplication
+import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
 import cz.vitskalicky.lepsirozvrh.activity.LicencesActivity
@@ -46,6 +50,31 @@ class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // handles permission for notification
+        // if the user denies, reset the setting. If allows, set it to the pending account
+        var pendingNotificationAccountId: Long? = null
+        val showNotiPermissionDialogLD: MutableLiveData<Boolean> = MutableLiveData(false)
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    viewModel.notificationAccountId = pendingNotificationAccountId
+                    pendingNotificationAccountId = null
+                } else {
+                    // Explain to the user that the feature is unavailable because the
+                    // feature requires a permission that the user has denied. At the
+                    // same time, respect the user's decision. Don't link to system
+                    // settings in an effort to convince the user to change their
+                    // decision.
+                    viewModel.notificationAccountId = null
+                    showNotiPermissionDialogLD.value = true
+                }
+                lifecycleScope.launch {
+                    PermanentNotification.update(application as MainApplication)
+                }
+            }
+
         // Donations - quite stupid
         val donationsEnabledLD = MutableLiveData<Boolean>(false);
         val isSponsorLD = MutableLiveData<Boolean>(false);
@@ -62,6 +91,7 @@ class SettingsActivity : ComponentActivity() {
 
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
             var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
+            val showNotiPermissionDialog: Boolean by showNotiPermissionDialogLD.observeAsState(false)
 
 
             LepsirozvrhTheme {
@@ -128,6 +158,9 @@ class SettingsActivity : ComponentActivity() {
                                 viewModel.centerToCurrentLesson = newValue
                             }
 
+                                if (showNotiPermissionDialog){
+                                    PermanentNotification.ShowNoPermissionDialog { showNotiPermissionDialogLD.value = false }
+                                }
                                 val notificationAccount by viewModel.notificationAccountLD.observeAsState()
                                 val accounts: List<Account> = (viewModel.accounts.observeAsState().value?.sortedBy { it.username + it.serverUrl } ?: emptyList())
                                 val accountNames = accounts.map { it.fullName }
@@ -146,7 +179,27 @@ class SettingsActivity : ComponentActivity() {
                                 Icons.Default.Notifications.icon
                             ){newOptionIndex ->
                                 val optIndex: Int? = (newOptionIndex -1).takeUnless { it == -1 }
-                                viewModel.notificationAccountId = optIndex?.let { accounts[it].id }
+                                val selectedAccount = optIndex?.let { accounts[it].id }
+
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                                    //lower api - no need for notification permission
+                                    viewModel.notificationAccountId = selectedAccount
+                                }else{
+                                    //higher api - need to check and request permission
+                                    //check for notification permission
+                                    if (ActivityCompat.checkSelfPermission(this@SettingsActivity,
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        ) == PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        //already granted - no more action needed
+                                        viewModel.notificationAccountId = selectedAccount
+                                    }else{
+                                        //not granted - request it
+                                        pendingNotificationAccountId = selectedAccount
+                                        requestPermissionLauncher.launch(
+                                            Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                }
                                 lifecycleScope.launch {
                                     PermanentNotification.update(application as MainApplication)
                                 }
@@ -208,6 +261,20 @@ class SettingsActivity : ComponentActivity() {
                         }
                     }
                 )
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // check for notification permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this@SettingsActivity,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_DENIED
+            ) {
+                //reset notification settings
+                viewModel.notificationAccountId = null
             }
         }
     }

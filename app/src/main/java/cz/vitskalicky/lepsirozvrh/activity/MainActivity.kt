@@ -5,6 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.PrefsConsts
@@ -12,6 +16,7 @@ import cz.vitskalicky.lepsirozvrh.SharedPrefsKt
 import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
 import cz.vitskalicky.lepsirozvrh.compose.RozvrhWithControls
 import cz.vitskalicky.lepsirozvrh.fragment.MainActivityViewModel
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.launch
 
@@ -47,6 +52,19 @@ class MainActivity : ComponentActivity() {
             setContent {
                 LepsirozvrhTheme(hasAppBar = false) {
                     RozvrhWithControls(viewModel)
+
+                    //if notifications have been suddenly disabled
+                    var showNotiPermissionDialog: Boolean by rememberSaveable{
+                        //if there is this key in shared preferences, show the dialog and delete the key
+                        val prefs = SharedPrefsKt(this@MainActivity)
+                        mutableStateOf(
+                            prefs.boolean(PrefsConsts.NOTIFICATION_PLEASE_GRANT_PERMISSION)
+                                .also { if (it == true) prefs.edit { remove(PrefsConsts.NOTIFICATION_PLEASE_GRANT_PERMISSION) } }
+                                ?:false)
+                    }
+                    if (showNotiPermissionDialog){
+                        PermanentNotification.ShowNoPermissionDialog { showNotiPermissionDialog = false }
+                    }
                 }
             }
         }

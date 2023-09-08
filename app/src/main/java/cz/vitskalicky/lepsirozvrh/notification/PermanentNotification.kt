@@ -10,6 +10,15 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.widget.CheckBox
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -190,10 +199,16 @@ object PermanentNotification {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_DENIED
         ) {
+            SharedPrefsKt(context).edit {
+                remove(PrefsConsts.NOTIFICATION_ACCOUNT)
+                putBoolean(PrefsConsts.NOTIFICATION_PLEASE_GRANT_PERMISSION, true)
+            }
+            notificationManager.cancel(PERMANENT_NOTIFICATION_ID)
+        }else{
+            notificationManager.notify(PERMANENT_NOTIFICATION_ID, ntf)
         }
-        notificationManager.notify(PERMANENT_NOTIFICATION_ID, ntf)
     }
 
     fun showInfoDialog(context: Context?, ignoreSetting: Boolean) {
@@ -209,11 +224,17 @@ object PermanentNotification {
         builder.show()
     }
 
-    fun showNoPermissionDialog(context: Context?){
-        val builder = AlertDialog.Builder(context!!)
-        builder.setTitle(R.string.notification_no_permission_title)
-        builder.setMessage(R.string.notification_no_permission)
-        builder.setPositiveButton(android.R.string.ok){_,_ ->}
-        builder.show()
+    @Composable
+    fun ShowNoPermissionDialog(onDismissed: () -> Unit){
+        AlertDialog(
+            onDismissed,
+            { Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.End, ) {
+                TextButton(onDismissed){
+                    Text(stringResource(R.string.ok))
+                }
+            } },
+            title = { Text(stringResource(R.string.notification_no_permission_title)) },
+            text = { Text(stringResource(R.string.notification_no_permission)) }
+        )
     }
 }
