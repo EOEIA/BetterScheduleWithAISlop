@@ -20,9 +20,9 @@ public class CaptionView extends CellView {
         super(context, attrs);
         setDrawDividers(false, true, true);
 
-        backgroundPaint.setColor(t.getCHeaderBg());
-        primaryTextPaint.setColor(t.getCHeaderPrimaryText());
-        secondaryTextPaint.setColor(t.getCHeaderSecondaryText());
+        backgroundPaint.setColor(clr(t.cHeaderBg()));
+        primaryTextPaint.setColor(clr(t.cHeaderPrimaryText()));
+        secondaryTextPaint.setColor(clr(t.cHeaderSecondaryText()));
     }
 
     public RozvrhCaption getCaption() {

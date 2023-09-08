@@ -18,53 +18,53 @@ import kotlinx.parcelize.TypeParceler
 @Parcelize
 @TypeParceler<Color, ColorParceler>()
 data class RozvrhTheme (
-    val isLight: Boolean,
-    val cPrimary: Color,
-    val cSecondary: Color,
-    val cSurface: Color,
+    @get:JvmName("isLight") val isLight: Boolean,
+    @get:JvmName("cPrimary") val cPrimary: Color,
+    @get:JvmName("cSecondary") val cSecondary: Color,
+    @get:JvmName("cSurface") val cSurface: Color,
     // my addition values
     // most of them, are for cell views
-    val cEmptyBg: Color,
-    val cABg: Color,
-    val cHBg: Color,
-    val cChngBg: Color,
-    val cHeaderBg: Color,
+    @get:JvmName("cEmptyBg") val cEmptyBg: Color,
+    @get:JvmName("cABg") val cABg: Color,
+    @get:JvmName("cHBg") val cHBg: Color,
+    @get:JvmName("cChngBg") val cChngBg: Color,
+    @get:JvmName("cHeaderBg") val cHeaderBg: Color,
 
-    val cDivider: Color,
-    val dpDividerWidth: Float,
-    val cHighlight: Color, //for current lesson
+    @get:JvmName("cDivider") val cDivider: Color,
+    @get:JvmName("dpDividerWidth") val dpDividerWidth: Float,
+    @get:JvmName("cHighlight") val cHighlight: Color, //for current lesson
 
-    val dpHighlightWidth: Float,
+    @get:JvmName("dpHighlightWidth") val dpHighlightWidth: Float,
 
-    val cHPrimaryText: Color,
-    val cHRoomText: Color,
-    val cHSecondaryText: Color,
-    val cChngPrimaryText: Color,
-    val cChngRoomText: Color,
-    val cChngSecondaryText: Color,
-    val cAPrimaryText: Color,
-    val cARoomText: Color,
-    val cASecondaryText: Color,
-    val cHeaderPrimaryText: Color,
-    val cHeaderSecondaryText: Color,
-    val spPrimaryText: Float,
-    val spSecondaryText: Float,
+    @get:JvmName("cHPrimaryText") val cHPrimaryText: Color,
+    @get:JvmName("cHRoomText") val cHRoomText: Color,
+    @get:JvmName("cHSecondaryText") val cHSecondaryText: Color,
+    @get:JvmName("cChngPrimaryText") val cChngPrimaryText: Color,
+    @get:JvmName("cChngRoomText") val cChngRoomText: Color,
+    @get:JvmName("cChngSecondaryText") val cChngSecondaryText: Color,
+    @get:JvmName("cAPrimaryText") val cAPrimaryText: Color,
+    @get:JvmName("cARoomText") val cARoomText: Color,
+    @get:JvmName("cASecondaryText") val cASecondaryText: Color,
+    @get:JvmName("cHeaderPrimaryText") val cHeaderPrimaryText: Color,
+    @get:JvmName("cHeaderSecondaryText") val cHeaderSecondaryText: Color,
+    @get:JvmName("spPrimaryText") val spPrimaryText: Float,
+    @get:JvmName("spSecondaryText") val spSecondaryText: Float,
 
-    val dpPaddingLeft: Float,
-    val dpPaddingTop: Float,
-    val dpPaddingRight: Float,
-    val dpPaddingBottom: Float,
-    val dpTextPadding: Float,
+    @get:JvmName("dpPaddingLeft") val dpPaddingLeft: Float,
+    @get:JvmName("dpPaddingTop") val dpPaddingTop: Float,
+    @get:JvmName("dpPaddingRight") val dpPaddingRight: Float,
+    @get:JvmName("dpPaddingBottom") val dpPaddingBottom: Float,
+    @get:JvmName("dpTextPadding") val dpTextPadding: Float,
 
     // info line
-    val cInfolineBg: Color,
-    val cInfolineText: Color,
-    val spInfolineTextSize: Float,
+    @get:JvmName("cInfolineBg") val cInfolineBg: Color,
+    @get:JvmName("cInfolineText") val cInfolineText: Color,
+    @get:JvmName("spInfolineTextSize") val spInfolineTextSize: Float,
 
-    val cError: Color,
+    @get:JvmName("cError") val cError: Color,
 
-    val cHomework: Color,
-    val dpHomework: Float,
+    @get:JvmName("cHomework") val cHomework: Color,
+    @get:JvmName("dpHomework") val dpHomework: Float,
 ) : Parcelable {
 
 }

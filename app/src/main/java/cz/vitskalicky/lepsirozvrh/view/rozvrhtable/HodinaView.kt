@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
+import androidx.compose.ui.graphics.toArgb
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.theme.OldTheme
@@ -95,25 +96,25 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         eventStart = 0
         eventWidth = 0
         if (hodina == null) {
-            backgroundPaint.color = t.cEmptyBg
-            primaryTextPaint.color = t.chPrimaryText
-            secondaryTextPaint.color = t.chSecondaryText
-            mistPaint.color = t.chRoomText
+            backgroundPaint.color = t.cEmptyBg.toArgb()
+            primaryTextPaint.color = t.cHPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cHSecondaryText.toArgb()
+            mistPaint.color = t.cHRoomText.toArgb()
         } else if (hodina.changeType == RozvrhLesson.CHANGED) {
-            backgroundPaint.color = t.cChngBg
-            primaryTextPaint.color = t.cChngPrimaryText
-            secondaryTextPaint.color = t.cChngSecondaryText
-            mistPaint.color = t.cChngRoomText
+            backgroundPaint.color = t.cChngBg.toArgb()
+            primaryTextPaint.color = t.cChngPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cChngSecondaryText.toArgb()
+            mistPaint.color = t.cChngRoomText.toArgb()
         } else if (hodina.changeType == RozvrhLesson.CANCELLED) {
-            backgroundPaint.color = t.caBg
-            primaryTextPaint.color = t.caPrimaryText
-            secondaryTextPaint.color = t.caSecondaryText
-            mistPaint.color = t.caRoomText
+            backgroundPaint.color = t.cABg.toArgb()
+            primaryTextPaint.color = t.cAPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cASecondaryText.toArgb()
+            mistPaint.color = t.cARoomText.toArgb()
         } else if (hodina.changeType == RozvrhLesson.NO_CHANGE) {
-            backgroundPaint.color = t.chBg
-            primaryTextPaint.color = t.chPrimaryText
-            secondaryTextPaint.color = t.chSecondaryText
-            mistPaint.color = t.chRoomText
+            backgroundPaint.color = t.cHBg.toArgb()
+            primaryTextPaint.color = t.cHPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cHSecondaryText.toArgb()
+            mistPaint.color = t.cHRoomText.toArgb()
         }
         invalidate()
         requestLayout()
@@ -130,16 +131,16 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
 
         if (event != null) {
             //same as RozvrhLesson.CANCELLED
-            backgroundPaint.color = t.caBg
-            primaryTextPaint.color = t.caPrimaryText
-            secondaryTextPaint.color = t.caSecondaryText
-            mistPaint.color = t.caRoomText
+            backgroundPaint.color = t.cABg.toArgb()
+            primaryTextPaint.color = t.cAPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cASecondaryText.toArgb()
+            mistPaint.color = t.cARoomText.toArgb()
         }else{
             //same as hodina == null
-            backgroundPaint.color = t.cEmptyBg
-            primaryTextPaint.color = t.chPrimaryText
-            secondaryTextPaint.color = t.chSecondaryText
-            mistPaint.color = t.chRoomText
+            backgroundPaint.color = t.cEmptyBg.toArgb()
+            primaryTextPaint.color = t.cHPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cHSecondaryText.toArgb()
+            mistPaint.color = t.cHRoomText.toArgb()
         }
         invalidate()
         requestLayout()
@@ -336,20 +337,20 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
 
     init {
         mistPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        mistPaint.color = t.chRoomText
+        mistPaint.color = t.cHRoomText.toArgb()
         mistPaint.textSize = secondaryTextSize.toFloat()
         mistPaint.typeface = Typeface.DEFAULT
         mistPaint.textAlign = Paint.Align.LEFT
         highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        highlightPaint.color = t.cHighlight
-        highlightWidth = t.pxHighlightWidth
+        highlightPaint.color = t.cHighlight.toArgb()
+        highlightWidth = dp(t.dpHighlightWidth)
         highlightPaint.strokeWidth = highlightWidth.toFloat()
         highlightedDividerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        highlightedDividerPaint.color = t.cHighlight
+        highlightedDividerPaint.color = t.cHighlight.toArgb()
         highlightedDividerPaint.strokeWidth = dividerWidth.toFloat()
         homeworkPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        homeworkPaint.color = t.cHomework
-        homeworkSize = t.pxHomework
+        homeworkPaint.color = t.cHomework.toArgb()
+        homeworkSize = dp(t.dpHomework)
         setDrawDividers(true, true, true)
     }
 }

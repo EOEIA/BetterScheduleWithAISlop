@@ -9,13 +9,16 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import cz.vitskalicky.lepsirozvrh.KotlinUtils;
+import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes;
 import cz.vitskalicky.lepsirozvrh.theme.OldTheme;
+import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme;
 
 /**
  * A superclass for views in Rozvrh, taking care of the background, dividers and padding
  */
 public class CellView extends View {
-    protected OldTheme t;
+    protected RozvrhTheme t;
 
     protected Paint backgroundPaint;
     protected Paint dividerPaint;
@@ -34,36 +37,49 @@ public class CellView extends View {
         this(context, null);
     }
 
+    /** Shortcut */
+    protected static int clr(long longColorValue){
+        return KotlinUtils.composeColorLongToARGB(longColorValue);
+    }
+    /** Shortcut */
+    protected int dp(float dpValue){
+        return KotlinUtils.dpToPx(dpValue, getContext());
+    }
+    /** Shortcut */
+    protected int sp(float spValue){
+        return KotlinUtils.spToPx(spValue, getContext());
+    }
+
     public CellView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
-        t = new OldTheme(context);
+        t = DefaultRozvrhThemes.INSTANCE.getUNSPECIFIED();
 
         backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        backgroundPaint.setColor(t.getCEmptyBg());
+        backgroundPaint.setColor(clr(t.cEmptyBg()));
 
         dividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        dividerPaint.setColor(t.getCDivider());
-        dividerWidth = t.getPxDividerWidth();
+        dividerPaint.setColor(clr(t.cDivider()));
+        dividerWidth = dp(t.dpDividerWidth());
         dividerPaint.setStrokeWidth(dividerWidth);
 
         primaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         primaryTextPaint.setColor(OldTheme.FALLBACK_COLOR);
-        primaryTextSize = t.getPxPrimaryText();
+        primaryTextSize = sp(t.spPrimaryText());
         primaryTextPaint.setTextSize(primaryTextSize);
         primaryTextPaint.setTypeface(Typeface.DEFAULT);
 
         secondaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         secondaryTextPaint.setColor(OldTheme.FALLBACK_COLOR);
-        secondaryTextSize = t.getPxSecondaryText();
+        secondaryTextSize = sp(t.spSecondaryText());
         secondaryTextPaint.setTextSize(secondaryTextSize);
         secondaryTextPaint.setTypeface(Typeface.DEFAULT);
 
-        paddingLeft = t.getPxPaddingLeft();
-        paddingTop = t.getPxPaddingTop();
-        paddingRight = t.getPxPaddingRight();
-        paddingBottom = t.getPxPaddingBottom();
-        textPadding = t.getPxTextPadding();
+        paddingLeft = dp(t.dpPaddingLeft());
+        paddingTop = dp(t.dpPaddingTop());
+        paddingRight = dp(t.dpPaddingRight());
+        paddingBottom = dp(t.dpPaddingBottom());
+        textPadding = dp(t.dpTextPadding());
 
         setDrawDividers(true, true, true);
     }

@@ -17,6 +17,7 @@ import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketAddress
+import kotlin.math.roundToInt
 
 /** TODO refactor [Utils] to kotlin */
 object KotlinUtils {
@@ -56,6 +57,17 @@ object KotlinUtils {
     fun getWeekSwitchOffset(context: Context): Int {
         return calculateWeekSwitchOffset(context, context.prefs.int(PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX) ?: 0)
     }
+
+    /** Converts [Color] represented as its value (may be in various color spaced etc.) to ARGB int.*/
+    @JvmStatic
+    fun composeColorLongToARGB(value: Long): Int = Color(value = value.toULong()).toArgb()
+
+    /** Converts DP into pixels*/
+    @JvmStatic
+    fun dpToPx(dpValue: Float, context: Context): Int = (dpValue * context.resources.displayMetrics.density).roundToInt()
+    /** Converts SP into pixels*/
+    @JvmStatic
+    fun spToPx(spValue: Float, context: Context): Int = (spValue * context.resources.displayMetrics.scaledDensity).roundToInt()
 }
 
 /** Parceler for saving [Color] into bundles */

@@ -1,6 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.theme
 
 import androidx.compose.ui.graphics.Color
+import cz.vitskalicky.lepsirozvrh.BuildConfig
 
 object DefaultRozvrhThemes {
     final val LIGHT = RozvrhTheme(
@@ -82,4 +83,46 @@ object DefaultRozvrhThemes {
         spPrimaryText = 18.0f,
         spSecondaryText = 12.0f,
     )
+
+    // as visible as possible if debug, hope it is unnoticed in production
+    final val UNSPECIFIED = if (BuildConfig.DEBUG)
+        RozvrhTheme(
+            isLight = false,
+            cABg = Color.Magenta,
+            cAPrimaryText = Color.Cyan,
+            cARoomText = Color.Cyan,
+            cASecondaryText = Color.Cyan,
+            cChngBg = Color.Magenta,
+            cChngPrimaryText = Color.Cyan,
+            cChngRoomText = Color.Cyan,
+            cChngSecondaryText = Color.Cyan,
+            cDivider = Color.Magenta,
+            cEmptyBg = Color.Magenta,
+            cError = Color.Magenta,
+            cHBg = Color.Magenta,
+            cHPrimaryText = Color.Cyan,
+            cHRoomText = Color.Cyan,
+            cHSecondaryText = Color.Cyan,
+            cHeaderBg = Color.Magenta,
+            cHeaderPrimaryText = Color.Cyan,
+            cHeaderSecondaryText = Color.Cyan,
+            cHighlight = Color.Magenta,
+            cHomework = Color.Magenta,
+            cInfolineBg = Color.Magenta,
+            cInfolineText = Color.Cyan,
+            cPrimary = Color.Magenta,
+            cSecondary = Color.Magenta,
+            cSurface = Color.Magenta,
+            dpDividerWidth = 1.0f,
+            dpHighlightWidth = 1.0f,
+            dpHomework = 5.0f,
+            dpPaddingBottom = 3.0f,
+            dpPaddingLeft = 3.0f,
+            dpPaddingRight = 3.0f,
+            dpPaddingTop = 3.0f,
+            dpTextPadding = 2.0f,
+            spInfolineTextSize = 12.0f,
+            spPrimaryText = 18.0f,
+            spSecondaryText = 12.0f,
+        ) else LIGHT
 }
