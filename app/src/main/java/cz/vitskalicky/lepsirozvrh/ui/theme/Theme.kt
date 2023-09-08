@@ -56,7 +56,7 @@ private fun RozvrhTheme.colors(isLight: Boolean = this.isLight) = Colors(
 val LocalRozvrhTheme = compositionLocalOf { DefaultRozvrhThemes.LIGHT }
 
 @Composable
-fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), hasAppBar: Boolean = true, tintStatusBar: Boolean = true, content: @Composable () -> Unit) {
     val rozvrhTheme = if (darkTheme){
         DefaultRozvrhThemes.DARK
     }else{
@@ -70,10 +70,12 @@ fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compo
             typography = Typography,
             shapes = Shapes,
             content = {
-                val suiController = rememberSystemUiController()
-                suiController.setStatusBarColor(
-                    MaterialTheme.colors.primarySurface.darker()
-                )
+                if (tintStatusBar) {
+                    val suiController = rememberSystemUiController()
+                    suiController.setStatusBarColor(
+                        if (hasAppBar) MaterialTheme.colors.primarySurface.darker() else MaterialTheme.colors.surface.darker()
+                    )
+                }
                 content()
             }
         )

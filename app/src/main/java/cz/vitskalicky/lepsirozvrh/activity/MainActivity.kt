@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             setContent {
-                LepsirozvrhTheme {
+                LepsirozvrhTheme(hasAppBar = false) {
                     RozvrhWithControls(viewModel)
                 }
             }

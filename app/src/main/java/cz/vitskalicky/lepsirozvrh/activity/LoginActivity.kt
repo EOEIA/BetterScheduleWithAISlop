@@ -107,13 +107,13 @@ class LoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val appTasks = (getSystemService(ACTIVITY_SERVICE) as ActivityManager).appTasks
         val activitiesCount = appTasks.map { it.taskInfo.numActivities }.sum()
-        val isFirst = activitiesCount == 1
+        val showAppBar = activitiesCount != 1
 
         setContent {
             val scope = rememberCoroutineScope()
-            LepsirozvrhTheme {
+            LepsirozvrhTheme(hasAppBar = showAppBar) {
                 Scaffold(
-                    topBar = if (isFirst) {{}} else {
+                    topBar = if (!showAppBar) {{}} else {
                         {
                             TopAppBar(
                             title = { Text(stringResource(R.string.login_add_title)) },

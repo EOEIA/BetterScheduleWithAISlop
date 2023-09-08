@@ -26,12 +26,14 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.theme.OldTheme.Utils
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.darker
 import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.preferences.ColorPreference
@@ -95,7 +97,7 @@ abstract class WidgetConfigActivity : ComponentActivity() {
             var selectedAccount: Account? by rememberSaveable{mutableStateOf(null)}
 
 
-            LepsirozvrhTheme {
+            LepsirozvrhTheme(tintStatusBar = false) {
                 Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
                     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
                         Box(Modifier.weight(1f, fill = false).fillMaxSize(), contentAlignment = Alignment.Center){
