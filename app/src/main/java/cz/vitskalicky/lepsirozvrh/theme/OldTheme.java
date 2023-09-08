@@ -23,29 +23,29 @@ import cz.vitskalicky.lepsirozvrh.SharedPrefs;
  * 'H' for normal lesson (stands for 'Hodina'), 'Chng' for changed, 'A' for no school (stands for 'A0bsence', probably. The Bakláři API just calls it so).
  * Example: cHBg = color of normal lesson background
  */
-public class Theme {
+public class OldTheme {
     /**
      * Fallback color, deep purple in debug (to be noticeable), grey for release (to be hopefully unnoticed)
      */
     public final static int FALLBACK_COLOR = BuildConfig.DEBUG ? 0xFFFF00FF : 0xFF2C2C2C;
     private Context context;
 
-    public Theme(Context context) {
+    public OldTheme(Context context) {
         this.context = context.getApplicationContext();
     }
 
     /**
      * Just a shortcut for {@code new Theme(context)}
      */
-    public static Theme of(Context context) {
-        return new Theme(context);
+    public static OldTheme of(Context context) {
+        return new OldTheme(context);
     }
 
     /**
-     * Returns a {@link ThemeData} with values of current theme.
+     * Returns a {@link OldThemeData} with values of current theme.
      */
-    public ThemeData getThemeData() {
-        ThemeData td = new ThemeData();
+    public OldThemeData getThemeData() {
+        OldThemeData td = new OldThemeData();
 
         td.cyaneaTheme = new CyaneaTheme("", getCyanea());
 
@@ -87,9 +87,9 @@ public class Theme {
     }
 
     /**
-     * Apply the values from given {@link ThemeData}.
+     * Apply the values from given {@link OldThemeData}.
      */
-    public void setThemeData(ThemeData td) {
+    public void setThemeData(OldThemeData td) {
 
         td.cyaneaTheme.apply(getCyanea());
 
@@ -197,8 +197,8 @@ public class Theme {
 
     public void applyDefaultTheme() {
         AsyncTask.execute(() -> {
-            ThemeData td = DefaultThemes.getLightTheme();
-            final ThemeData ftd = td;
+            OldThemeData td = DefaultThemes.getLightTheme();
+            final OldThemeData ftd = td;
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (ftd != null) {
                     setThemeData(ftd);

@@ -129,8 +129,8 @@ fun RozvrhWithControls(
         if (statusLineText != null) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color(0xff757575),//todo theming
-                //contentColor = Color(0xffffffff)
+                color = MaterialTheme.colors.secondary,
+                contentColor = MaterialTheme.colors.onSecondary
             ) {
                 Text(statusLineText, textAlign = TextAlign.Center)
             }

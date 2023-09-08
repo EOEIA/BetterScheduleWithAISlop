@@ -7,25 +7,25 @@ public class DefaultThemes {
     public static final String DARK = "{\"cABg\":\"8b4d00\",\"cAPrimaryText\":\"FFFFFF\",\"cARoomText\":\"D2D7D9\",\"cASecondaryText\":\"FFFFFF\",\"cChngBg\":\"8b4d00\",\"cChngPrimaryText\":\"FFFFFF\",\"cChngRoomText\":\"D2D7D9\",\"cChngSecondaryText\":\"FFFFFF\",\"cDivider\":\"121212\",\"cEmptyBg\":\"121212\",\"cError\":\"CF6679\",\"cHBg\":\"1F1F1F\",\"cHPrimaryText\":\"FFFFFF\",\"cHRoomText\":\"D2D7D9\",\"cHSecondaryText\":\"FFFFFF\",\"cHeaderBg\":\"393939\",\"cHeaderPrimaryText\":\"FFFFFF\",\"cHeaderSecondaryText\":\"FFFFFF\",\"cHighlight\":\"F9A825\",\"cHomework\":\"F9A825\",\"cInfolineBg\":\"424242\",\"cInfolineText\":\"FFFFFF\",\"cyaneaTheme\":{\"primary\":\"F9A825\",\"accent\":\"CFD8DC\",\"background\":\"121212\"},\"dpDividerWidth\":1.0,\"dpHighlightWidth\":1.0,\"dpHomework\":5.0,\"dpPaddingBottom\":3.0,\"dpPaddingLeft\":3.0,\"dpPaddingRight\":3.0,\"dpPaddingTop\":3.0,\"dpTextPadding\":2.0,\"spInfolineTextSize\":12.0,\"spPrimaryText\":18.0,\"spSecondaryText\":12.0}";
     public static final String BLACK = "{\"cABg\":\"464C4F\",\"cAPrimaryText\":\"FFFFFF\",\"cARoomText\":\"E3E8EB\",\"cASecondaryText\":\"FFFFFF\",\"cChngBg\":\"464C4F\",\"cChngPrimaryText\":\"FFFFFF\",\"cChngRoomText\":\"E3E8EB\",\"cChngSecondaryText\":\"FFFFFF\",\"cDivider\":\"121212\",\"cEmptyBg\":\"121212\",\"cError\":\"CF6679\",\"cHBg\":\"000000\",\"cHPrimaryText\":\"FFFFFF\",\"cHRoomText\":\"E3E8EB\",\"cHSecondaryText\":\"FFFFFF\",\"cHeaderBg\":\"242424\",\"cHeaderPrimaryText\":\"FFFFFF\",\"cHeaderSecondaryText\":\"FFFFFF\",\"cHighlight\":\"F9A825\",\"cHomework\":\"F9A825\",\"cInfolineBg\":\"424242\",\"cInfolineText\":\"FFFFFF\",\"cyaneaTheme\":{\"primary\":\"F9A825\",\"accent\":\"CFD8DC\",\"background\":\"000000\"},\"dpDividerWidth\":1.5,\"dpHighlightWidth\":1.0,\"dpHomework\":5.0,\"dpPaddingBottom\":3.0,\"dpPaddingLeft\":3.0,\"dpPaddingRight\":3.0,\"dpPaddingTop\":3.0,\"dpTextPadding\":2.0,\"spInfolineTextSize\":12.0,\"spPrimaryText\":18.0,\"spSecondaryText\":12.0}";
 
-    public static ThemeData getLightTheme(){
+    public static OldThemeData getLightTheme(){
         try {
-            return ThemeData.parseJson(LIGHT);
+            return OldThemeData.parseJson(LIGHT);
         } catch (IOException e) {
             //this should never happen
             return null;
         }
     }
-    public static ThemeData getDarkTheme(){
+    public static OldThemeData getDarkTheme(){
         try {
-            return ThemeData.parseJson(DARK);
+            return OldThemeData.parseJson(DARK);
         } catch (IOException e) {
             //this should never happen
             return null;
         }
     }
-    public static ThemeData getBlackTheme(){
+    public static OldThemeData getBlackTheme(){
         try {
-            return ThemeData.parseJson(BLACK);
+            return OldThemeData.parseJson(BLACK);
         } catch (IOException e) {
             //this should never happen
             return null;

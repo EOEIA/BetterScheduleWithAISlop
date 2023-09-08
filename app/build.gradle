@@ -181,6 +181,7 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
     implementation 'com.godaddy.android.colorpicker:compose-color-picker-android:0.7.0'
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.30.1"
 
     def room_version = "2.5.1"
 

@@ -6,15 +6,13 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
-import cz.vitskalicky.lepsirozvrh.theme.Theme
+import cz.vitskalicky.lepsirozvrh.theme.OldTheme
 import kotlin.math.max
 
 class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, attrs) {
@@ -253,7 +251,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
             //draw little dot if there is a homework
             if (lesson.homeworkIds.isNotEmpty()) {
                 var use: Paint? = homeworkPaint
-                if (!Theme.Utils.isLegible(homeworkPaint.color, backgroundPaint.color, 1.5)) {
+                if (!OldTheme.Utils.isLegible(homeworkPaint.color, backgroundPaint.color, 1.5)) {
                     use = primaryTextPaint
                 }
                 canvas.drawCircle((xEnd - homeworkSize).toFloat(), (yStart + homeworkSize).toFloat(), homeworkSize.toFloat(), use!!)

@@ -40,7 +40,7 @@ import java.util.zip.GZIPOutputStream;
  * 'H' for normal lesson (stands for 'Hodina'), 'Chng' for changed, 'A' for no school (stands for 'Absence', probably. The Bakláři API just calls it so).
  * Example: cHBg = color of normal lesson background
  */
-public class ThemeData {
+public class OldThemeData {
     /**
      * the basic values such as primary, accent acolors, etc. are stored here.
      */
@@ -265,7 +265,7 @@ public class ThemeData {
                 TreeNode tn = p.readValueAsTree();
                 Cyanea temp = Cyanea.getInstance("temp446");
 
-                Theme.Utils.setPrimaryCorrectly(temp.edit(), colorHexToInt(tn.get("primary").toString().replace("\"", "")))
+                OldTheme.Utils.setPrimaryCorrectly(temp.edit(), colorHexToInt(tn.get("primary").toString().replace("\"", "")))
                         .accent(colorHexToInt(tn.get("accent").toString().replace("\"", "")))
                         .background(colorHexToInt(tn.get("background").toString().replace("\"", "")));
                 return new CyaneaTheme("", temp);
@@ -357,54 +357,54 @@ public class ThemeData {
     }
 
     /**
-     * Deserializes a {@link ThemeData} from JSON
+     * Deserializes a {@link OldThemeData} from JSON
      * @param is Input stream to read from.
      * @throws IOException if anything fails
      * @return Deserialized ThemeData
      */
-    public static ThemeData parseJson(InputStream is) throws IOException{
+    public static OldThemeData parseJson(InputStream is) throws IOException{
         ObjectMapper mapper = new ObjectMapper();
         try{
-            return mapper.readValue(is, ThemeData.class);
+            return mapper.readValue(is, OldThemeData.class);
         } catch (IOException e) {
             throw new IOException("Failed to parse theme",e);
         }
     }
 
     /**
-     * Deserializes a {@link ThemeData} from JSON
+     * Deserializes a {@link OldThemeData} from JSON
      * @param s Json string
      * @throws IOException if parsing fails
      * @return Deserialized ThemeData
      */
-    public static ThemeData parseJson(String s) throws IOException{
+    public static OldThemeData parseJson(String s) throws IOException{
         ObjectMapper mapper = new ObjectMapper();
         try{
-            return mapper.readValue(s, ThemeData.class);
+            return mapper.readValue(s, OldThemeData.class);
         } catch (IOException e) {
             throw new IOException("Failed to parse theme from this string:" + s,e);
         }
     }
 
     /**
-     * Deserializes a {@link ThemeData} from base64 encoded (no wrap), gzipped, JSON.
+     * Deserializes a {@link OldThemeData} from base64 encoded (no wrap), gzipped, JSON.
      * @param is Input stream to read from.
      * @throws IOException if anything fails
      * @return Deserialized ThemeData
      */
-    public static ThemeData parseZipped(InputStream is) throws IOException{
+    public static OldThemeData parseZipped(InputStream is) throws IOException{
         Base64InputStream bis = new Base64InputStream(is, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
         GZIPInputStream gzis = new GZIPInputStream(bis);
         return parseJson(gzis);
     }
 
     /**
-     * Deserializes a {@link ThemeData} from base64 encoded (no wrap), gzipped, JSON.
+     * Deserializes a {@link OldThemeData} from base64 encoded (no wrap), gzipped, JSON.
      * @param s base64 encoded (no wrap), gzipped, JSON
      * @throws IOException if anything fails
      * @return Deserialized ThemeData
      */
-    public static ThemeData parseZipped(String s) throws IOException{
+    public static OldThemeData parseZipped(String s) throws IOException{
         ByteArrayInputStream bais = new ByteArrayInputStream(s.getBytes());
         return parseZipped(bais);
     }

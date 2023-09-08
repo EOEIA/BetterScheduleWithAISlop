@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.*
-import androidx.lifecycle.Observer
 import androidx.multidex.MultiDexApplication
 import androidx.preference.PreferenceManager
 import androidx.room.Room
@@ -30,7 +29,7 @@ import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsDatabase
 import cz.vitskalicky.lepsirozvrh.schoolsDatabase.SchoolsWebservice
 import cz.vitskalicky.lepsirozvrh.theme.DefaultThemes
 import cz.vitskalicky.lepsirozvrh.theme.SystemTheme
-import cz.vitskalicky.lepsirozvrh.theme.Theme
+import cz.vitskalicky.lepsirozvrh.theme.OldTheme
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid
@@ -177,8 +176,8 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             SharedPrefs.setStringPreference(this, R.string.PREFS_APP_THEME, "0")
             SharedPrefs.setBooleanPreference(this, R.string.PREFS_FOLLOW_SYSTEM_THEME, true)
             SharedPrefs.setBooleanPreference(this, R.string.PREFS_IS_DARK_THEME_FOR_SYSTEM_APPLIED, false)
-            Theme.of(this).themeData = DefaultThemes.getLightTheme()
-            Theme.of(this).checkSystemTheme()
+            OldTheme.of(this).themeData = DefaultThemes.getLightTheme()
+            OldTheme.of(this).checkSystemTheme()
         }
         notificationState = NotificationState(this)
 
@@ -193,7 +192,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             } catch (ignored: NumberFormatException) {
             } catch (ignored: NullPointerException) {
             }
-            val theme = Theme.of(this)
+            val theme = OldTheme.of(this)
             when (themeNumber) {
                 0 -> {
                     val systemIsDark = SystemTheme.isDarkTheme(this)

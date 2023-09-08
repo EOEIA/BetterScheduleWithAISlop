@@ -9,13 +9,13 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import cz.vitskalicky.lepsirozvrh.theme.Theme;
+import cz.vitskalicky.lepsirozvrh.theme.OldTheme;
 
 /**
  * A superclass for views in Rozvrh, taking care of the background, dividers and padding
  */
 public class CellView extends View {
-    protected Theme t;
+    protected OldTheme t;
 
     protected Paint backgroundPaint;
     protected Paint dividerPaint;
@@ -37,7 +37,7 @@ public class CellView extends View {
     public CellView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
-        t = new Theme(context);
+        t = new OldTheme(context);
 
         backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         backgroundPaint.setColor(t.getCEmptyBg());
@@ -48,13 +48,13 @@ public class CellView extends View {
         dividerPaint.setStrokeWidth(dividerWidth);
 
         primaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        primaryTextPaint.setColor(Theme.FALLBACK_COLOR);
+        primaryTextPaint.setColor(OldTheme.FALLBACK_COLOR);
         primaryTextSize = t.getPxPrimaryText();
         primaryTextPaint.setTextSize(primaryTextSize);
         primaryTextPaint.setTypeface(Typeface.DEFAULT);
 
         secondaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        secondaryTextPaint.setColor(Theme.FALLBACK_COLOR);
+        secondaryTextPaint.setColor(OldTheme.FALLBACK_COLOR);
         secondaryTextSize = t.getPxSecondaryText();
         secondaryTextPaint.setTextSize(secondaryTextSize);
         secondaryTextPaint.setTypeface(Typeface.DEFAULT);

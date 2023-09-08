@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/cyanea_primary_reference</item>
+<!--        <item name="android:statusBarColor">#f57f17</item>-->
     </style>
 
     <style name="AppTheme.WallpaperBg" parent="android:Theme.Material.Light.NoActionBar">

@@ -31,7 +31,7 @@ import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
-import cz.vitskalicky.lepsirozvrh.theme.Theme.Utils
+import cz.vitskalicky.lepsirozvrh.theme.OldTheme.Utils
 import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.preferences.ColorPreference
