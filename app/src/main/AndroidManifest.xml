@@ -29,6 +29,11 @@
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme.WallpaperBg"/>
         <activity
+            android:name=".widget.WideWidgetConfigActivity"
+            android:exported="false"
+            android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
+            android:theme="@style/AppTheme.WallpaperBg"/>
+        <activity
             android:name=".accountPicker.AccountPickerActivity"
             android:exported="false"
             android:launchMode="singleTask"

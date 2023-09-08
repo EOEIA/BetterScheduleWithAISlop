@@ -22,7 +22,7 @@
             android:gravity="center"
             android:text="Ma"
             android:textAlignment="center"
-            android:textColor="@color/widgetLightPrimaryText"
+            android:textColor="@color/widgetLightText"
             android:textSize="@dimen/widgetTextPrimary" />
 
         <TextView
@@ -31,7 +31,8 @@
             android:layout_height="wrap_content"
             android:text="Tch 105"
             android:textAlignment="center"
-            android:textColor="@color/widgetLightSecondaryText"
+            android:textColor="@color/widgetLightText"
+            android:alpha="0.8"
             android:textSize="@dimen/widgetTextSecondary" />
 
     </LinearLayout>

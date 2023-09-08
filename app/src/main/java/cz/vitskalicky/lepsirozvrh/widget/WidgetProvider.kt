@@ -39,8 +39,8 @@ open class WidgetProvider : AppWidgetProvider() {
             if (widgetsSettings.widgetIds.add(id)) {
                 somethingAdded = true
                 val settings = Widget()
-                settings.primaryTextColor = ContextCompat.getColor(context, R.color.widgetLightPrimaryText)
-                settings.secondaryTextColor = ContextCompat.getColor(context, R.color.widgetLightSecondaryText)
+                settings.primaryTextColor = ContextCompat.getColor(context, R.color.widgetLightText)
+                settings.secondaryTextColor = WidgetConfigActivity.calculateSecondaryTextColor(settings.primaryTextColor)
                 settings.primaryTextSize = context.resources.getDimensionPixelSize(R.dimen.widgetTextPrimary) / context.resources.displayMetrics.scaledDensity
                 settings.secondaryTextSize = context.resources.getDimensionPixelSize(R.dimen.widgetTextSecondary) / context.resources.displayMetrics.scaledDensity
                 settings.backgroundColor = ContextCompat.getColor(context, R.color.widgetLightBackground)
@@ -72,8 +72,8 @@ open class WidgetProvider : AppWidgetProvider() {
         val widgetsSettings = AppSingleton.getInstance(context).widgetsSettings
         if (widgetsSettings.widgetIds.add(appWidgetId)) {
             val settings = Widget()
-            settings.primaryTextColor = ContextCompat.getColor(context, R.color.widgetLightPrimaryText)
-            settings.secondaryTextColor = ContextCompat.getColor(context, R.color.widgetLightSecondaryText)
+            settings.primaryTextColor = ContextCompat.getColor(context, R.color.widgetLightText)
+            settings.secondaryTextColor = WidgetConfigActivity.calculateSecondaryTextColor(settings.primaryTextColor)
             settings.primaryTextSize = context.resources.getDimensionPixelSize(R.dimen.widgetTextPrimary) / context.resources.displayMetrics.scaledDensity
             settings.secondaryTextSize = context.resources.getDimensionPixelSize(R.dimen.widgetTextSecondary) / context.resources.displayMetrics.scaledDensity
             settings.backgroundColor = ContextCompat.getColor(context, R.color.widgetLightBackground)

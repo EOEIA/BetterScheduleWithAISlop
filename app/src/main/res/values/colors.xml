@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="cyanea_primary_reference">#f9a825</color>
-    <color name="cyanea_accent_reference">#455a64</color>
-
-
-    <color name="widgetLightPrimaryText">#000000</color>
-    <color name="widgetLightSecondaryText">#607D8B</color>
+    <color name="widgetLightText">#000000</color>
     <color name="widgetLightBackground">#FFFFFFFF</color>
-    <color name="widgetDarkPrimaryText">#dedede</color>
-    <color name="widgetDarkSecondaryText">#a0a0a0</color>
+    <color name="widgetDarkText">#dedede</color>
     <color name="widgetDarkBackground">#FF000000</color>
-
-    <color name="purple_700">#7B1FA2</color>
 </resources>

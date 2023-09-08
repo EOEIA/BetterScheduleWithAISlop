@@ -38,7 +38,7 @@
                     android:gravity="center"
                     android:text="Ma"
                     android:textAlignment="center"
-                    android:textColor="@color/widgetLightPrimaryText"
+                    android:textColor="@color/widgetLightText"
                     android:textSize="@dimen/widgetTextPrimary" />
 
                 <TextView
@@ -47,7 +47,8 @@
                     android:layout_height="wrap_content"
                     android:text="Hm 119"
                     android:textAlignment="center"
-                    android:textColor="@color/widgetLightSecondaryText"
+                    android:textColor="@color/widgetLightText"
+                    android:alpha="0.8"
                     android:textSize="@dimen/widgetTextSecondary" />
 
             </LinearLayout>
@@ -56,8 +57,8 @@
                 android:id="@+id/imageViewDivider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
                 android:layout_marginBottom="5dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/rounded_corner_black" />
@@ -80,7 +81,7 @@
                 android:gravity="center"
                 android:text="Bio"
                 android:textAlignment="center"
-                android:textColor="@color/widgetLightPrimaryText"
+                android:textColor="@color/widgetLightText"
                 android:textSize="@dimen/widgetTextPrimary" />
 
             <TextView
@@ -89,7 +90,8 @@
                 android:layout_height="wrap_content"
                 android:text="Di 223"
                 android:textAlignment="center"
-                android:textColor="@color/widgetLightSecondaryText"
+                android:textColor="@color/widgetLightText"
+                android:alpha="0.8"
                 android:textSize="@dimen/widgetTextSecondary" />
 
         </LinearLayout>
@@ -110,7 +112,7 @@
                 android:gravity="center"
                 android:text="G"
                 android:textAlignment="center"
-                android:textColor="@color/widgetLightPrimaryText"
+                android:textColor="@color/widgetLightText"
                 android:textSize="@dimen/widgetTextPrimary" />
 
             <TextView
@@ -119,7 +121,8 @@
                 android:layout_height="wrap_content"
                 android:text="Ex 110"
                 android:textAlignment="center"
-                android:textColor="@color/widgetLightSecondaryText"
+                android:textColor="@color/widgetLightText"
+                android:alpha="0.8"
                 android:textSize="@dimen/widgetTextSecondary" />
 
         </LinearLayout>
@@ -139,7 +142,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textAlignment="center"
-                android:textColor="@color/widgetLightPrimaryText"
+                android:textColor="@color/widgetLightText"
                 android:textSize="@dimen/widgetTextPrimary"
                 android:visibility="gone" />
 
@@ -149,7 +152,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/lesson_cancelled"
                 android:textAlignment="center"
-                android:textColor="@color/widgetLightSecondaryText"
+                android:textColor="@color/widgetLightText"
+                android:alpha="0.8"
                 android:textSize="@dimen/widgetTextSecondary" />
 
         </LinearLayout>
@@ -170,7 +174,7 @@
                 android:gravity="center"
                 android:text="En"
                 android:textAlignment="center"
-                android:textColor="@color/widgetLightPrimaryText"
+                android:textColor="@color/widgetLightText"
                 android:textSize="@dimen/widgetTextPrimary" />
 
             <TextView
@@ -179,7 +183,8 @@
                 android:layout_height="wrap_content"
                 android:text="Ce 302"
                 android:textAlignment="center"
-                android:textColor="@color/widgetLightSecondaryText"
+                android:textColor="@color/widgetLightText"
+                android:alpha="0.8"
                 android:textSize="@dimen/widgetTextSecondary" />
 
         </LinearLayout>

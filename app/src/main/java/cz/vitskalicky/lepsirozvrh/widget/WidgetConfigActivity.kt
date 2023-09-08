@@ -48,6 +48,8 @@ abstract class WidgetConfigActivity : ComponentActivity() {
         private const val DARK = 1
         /** Must match R.array.widget_style_entries*/
         private const val CUSTOM = 2
+
+        fun calculateSecondaryTextColor(primaryTextColor: Int): Int = (primaryTextColor and 0x00ffffff) or 0xCC000000.toInt()
     }
 
     private val viewModel: WidgetConfigActivityViewModel by viewModels()
@@ -227,8 +229,6 @@ abstract class WidgetConfigActivity : ComponentActivity() {
 
         viewModel.saveWidgetConfig(widgetID, ws)
     }
-
-    protected fun calculateSecondaryTextColor(primaryTextColor: Int): Int = (primaryTextColor and 0x00ffffff) or 0x99000000.toInt()
 
     @Composable
     abstract fun WidgetView(bgColor: Int, transparency: Float, textColor: Int)
