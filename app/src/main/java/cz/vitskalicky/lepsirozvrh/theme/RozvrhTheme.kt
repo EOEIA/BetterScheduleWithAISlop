@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
-import com.jaredrummler.cyanea.Cyanea
+import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.ColorParceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
@@ -272,4 +272,8 @@ object ThemeGenerator{
     }
 
     fun calculateContrast(a: Color, b: Color) = ColorUtils.calculateContrast(a.toArgb(), b.toArgb())
+
+    @JvmStatic
+    @get:JvmName("FALLBACK_COLOR")
+    public val FALLBACK_COLOR = if (BuildConfig.DEBUG) Color.Magenta else Color.Gray
 }

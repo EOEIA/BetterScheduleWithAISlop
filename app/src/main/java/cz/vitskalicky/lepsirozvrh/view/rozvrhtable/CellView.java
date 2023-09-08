@@ -12,8 +12,8 @@ import androidx.annotation.Nullable;
 
 import cz.vitskalicky.lepsirozvrh.KotlinUtils;
 import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes;
-import cz.vitskalicky.lepsirozvrh.theme.OldTheme;
 import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme;
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator;
 
 /**
  * A superclass for views in Rozvrh, taking care of the background, dividers and padding
@@ -68,12 +68,12 @@ public class CellView extends View {
         dividerWidth = dp(t.dpDividerWidth());
         dividerPaint.setStrokeWidth(dividerWidth);
 
-        primaryTextPaint.setColor(OldTheme.FALLBACK_COLOR);
+        primaryTextPaint.setColor(clr(ThemeGenerator.FALLBACK_COLOR()));
         primaryTextSize = sp(t.spPrimaryText());
         primaryTextPaint.setTextSize(primaryTextSize);
         primaryTextPaint.setTypeface(Typeface.DEFAULT);
 
-        secondaryTextPaint.setColor(OldTheme.FALLBACK_COLOR);
+        secondaryTextPaint.setColor(clr(ThemeGenerator.FALLBACK_COLOR()));
         secondaryTextSize = sp(t.spSecondaryText());
         secondaryTextPaint.setTextSize(secondaryTextSize);
         secondaryTextPaint.setTypeface(Typeface.DEFAULT);

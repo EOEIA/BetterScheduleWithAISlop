@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.jaredrummler.cyanea.Cyanea
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
@@ -124,9 +123,6 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
 
     override fun onCreate() {
         super.onCreate()
-
-        // Initialize Cyanea theme engine
-        Cyanea.init(this, resources)
 
         // Initialize the Sentry (crash report) client
         if (SharedPrefs.getBooleanPreference(this, R.string.PREFS_SEND_CRASH_REPORTS)) {

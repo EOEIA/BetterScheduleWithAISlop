@@ -32,8 +32,8 @@ import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
-import cz.vitskalicky.lepsirozvrh.theme.OldTheme.Utils
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.darker
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.textColorFor
 import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.preferences.ColorPreference
@@ -87,9 +87,9 @@ abstract class WidgetConfigActivity : ComponentActivity() {
             var bgColor: Int by rememberSaveable{mutableStateOf(lightBgColor)}
             var bgTransparency: Float by rememberSaveable{ mutableStateOf(0f) }
             var autoTextColor: Boolean by rememberSaveable{ mutableStateOf(true) }
-            var textColor: Int by rememberSaveable{mutableStateOf(Utils.textColorFor(bgColor))}
+            var textColor: Int by rememberSaveable{mutableStateOf(textColorFor(Color(bgColor)).toArgb())}
             if (autoTextColor){
-                val newColor = Utils.textColorFor(bgColor)
+                val newColor = textColorFor(Color(bgColor)).toArgb()
                 if (newColor != textColor){
                     textColor = newColor
                 }
@@ -138,13 +138,13 @@ abstract class WidgetConfigActivity : ComponentActivity() {
                                     when (widgetStyle){
                                         LIGHT -> {
                                             bgColor = lightBgColor
-                                            textColor = Utils.textColorFor(bgColor)
+                                            textColor = textColorFor(Color(bgColor)).toArgb()
                                             bgTransparency = 0f
                                             autoTextColor = true
                                         }
                                         DARK -> {
                                             bgColor = darkBgColor
-                                            textColor = Utils.textColorFor(bgColor)
+                                            textColor = textColorFor(Color(bgColor)).toArgb()
                                             bgTransparency = 0f
                                             autoTextColor = true
                                         }

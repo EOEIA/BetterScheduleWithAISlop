@@ -133,7 +133,7 @@ class SettingsActivity : ComponentActivity() {
                             Preference(R.string.switch_account.str, null, Icons.Default.SwitchAccount.icon){ switchAccount() }
                             Preference(R.string.logout.str, null, Icons.Default.Logout.icon){ coroutinScope.launch { account?.let { logOut(it.id)} } }
                             Divider()
-                            PreferenceGroupHeader(R.string.pref_category_appearance.str)
+                            PreferenceGroupHeader(R.string.look_and_behaviour.str)
                             SwitchPreference(R.string.info_line.str, R.string.info_line_desc.str,
                                 viewModel.showInfolineLD.observeAsState().value ?: false
                             ){

@@ -10,10 +10,12 @@ import android.view.ViewGroup
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
-import cz.vitskalicky.lepsirozvrh.theme.OldTheme
+import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.isLegible
 import kotlin.math.max
 
 /** Custom view for cell with lesson */
@@ -253,7 +255,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
             //draw little dot if there is a homework
             if (lesson.homeworkIds.isNotEmpty()) {
                 var use: Paint? = homeworkPaint
-                if (!OldTheme.Utils.isLegible(homeworkPaint.color, backgroundPaint.color, 1.5)) {
+                if (!isLegible(Color(homeworkPaint.color), Color(backgroundPaint.color), 1.5)) {
                     use = primaryTextPaint
                 }
                 canvas.drawCircle((xEnd - homeworkSize).toFloat(), (yStart + homeworkSize).toFloat(), homeworkSize.toFloat(), use!!)

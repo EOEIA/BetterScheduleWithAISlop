@@ -18,8 +18,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.jaredrummler.cyanea.Cyanea;
-import com.jaredrummler.cyanea.prefs.CyaneaTheme;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,9 +42,9 @@ public class OldThemeData {
     /**
      * the basic values such as primary, accent acolors, etc. are stored here.
      */
-    @JsonSerialize(using = CyaneaThemeSerializer.class)
-    @JsonDeserialize(using = CyaneaThemeDeserializer.class)
-    public CyaneaTheme cyaneaTheme;
+    //@JsonSerialize(using = CyaneaThemeSerializer.class)
+    //@JsonDeserialize(using = CyaneaThemeDeserializer.class)
+    //public CyaneaTheme cyaneaTheme;
 
     // my addition values
     // most of them, are for cell views
@@ -232,48 +230,48 @@ public class OldThemeData {
         return hex;
     }
 
-    public static class CyaneaThemeSerializer extends StdSerializer<CyaneaTheme> {
-
-        protected CyaneaThemeSerializer() {
-            super(CyaneaTheme.class);
-        }
-
-        @Override
-        public void serialize(CyaneaTheme value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            JSONObject jo = new JSONObject();
-            try {
-                jo.put("primary", colorIntToHex(value.getPrimary(), false));
-                jo.put("accent", colorIntToHex(value.getAccent(), false));
-                jo.put("background", colorIntToHex(value.getBackground(), false));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            gen.writeRawValue(jo.toString());
-        }
-    }
-
-    public static class CyaneaThemeDeserializer extends StdDeserializer<CyaneaTheme> {
-
-        protected CyaneaThemeDeserializer() {
-            super(CyaneaTheme.class);
-        }
-
-        @Override
-        public CyaneaTheme deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            p.getText();
-            try {
-                TreeNode tn = p.readValueAsTree();
-                Cyanea temp = Cyanea.getInstance("temp446");
-
-                OldTheme.Utils.setPrimaryCorrectly(temp.edit(), colorHexToInt(tn.get("primary").toString().replace("\"", "")))
-                        .accent(colorHexToInt(tn.get("accent").toString().replace("\"", "")))
-                        .background(colorHexToInt(tn.get("background").toString().replace("\"", "")));
-                return new CyaneaTheme("", temp);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-    }
+//    public static class CyaneaThemeSerializer extends StdSerializer<CyaneaTheme> {
+//
+//        protected CyaneaThemeSerializer() {
+//            super(CyaneaTheme.class);
+//        }
+//
+//        @Override
+//        public void serialize(CyaneaTheme value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+//            JSONObject jo = new JSONObject();
+//            try {
+//                jo.put("primary", colorIntToHex(value.getPrimary(), false));
+//                jo.put("accent", colorIntToHex(value.getAccent(), false));
+//                jo.put("background", colorIntToHex(value.getBackground(), false));
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//            gen.writeRawValue(jo.toString());
+//        }
+//    }
+//
+//    public static class CyaneaThemeDeserializer extends StdDeserializer<CyaneaTheme> {
+//
+//        protected CyaneaThemeDeserializer() {
+//            super(CyaneaTheme.class);
+//        }
+//
+//        @Override
+//        public CyaneaTheme deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+//            p.getText();
+//            try {
+//                TreeNode tn = p.readValueAsTree();
+//                Cyanea temp = Cyanea.getInstance("temp446");
+//
+//                OldTheme.Utils.setPrimaryCorrectly(temp.edit(), colorHexToInt(tn.get("primary").toString().replace("\"", "")))
+//                        .accent(colorHexToInt(tn.get("accent").toString().replace("\"", "")))
+//                        .background(colorHexToInt(tn.get("background").toString().replace("\"", "")));
+//                return new CyaneaTheme("", temp);
+//            } catch (Exception e) {
+//                throw new IOException(e);
+//            }
+//        }
+//    }
 
     public static class ColorSerializer extends StdSerializer<Integer> {
 
