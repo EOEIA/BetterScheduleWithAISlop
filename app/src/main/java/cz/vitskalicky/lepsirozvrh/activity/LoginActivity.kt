@@ -3,6 +3,7 @@ package cz.vitskalicky.lepsirozvrh.activity
 import android.app.ActivityManager
 import android.app.Application
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -106,7 +107,13 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val appTasks = (getSystemService(ACTIVITY_SERVICE) as ActivityManager).appTasks
-        val activitiesCount = appTasks.map { it.taskInfo.numActivities }.sum()
+        val activitiesCount: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            appTasks.map { it.taskInfo.numActivities}.sum()
+        } else {
+            // did not find a reliable way to count previous activities on older API.
+            // the few people with old phones will have to cope with missing back arrow
+            1
+        }
         val showAppBar = activitiesCount != 1
 
         setContent {
