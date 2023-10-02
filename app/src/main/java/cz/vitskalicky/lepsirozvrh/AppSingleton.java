@@ -36,11 +36,11 @@ public class AppSingleton {
      */
     public WidgetsSettings getWidgetsSettings() {
         if (widgetsSettings == null) {
-            if (SharedPrefs.contains(ctx, SharedPrefs.WIDGETS_SETTINGS)) {
+            if (SharedPrefs.contains(ctx, PrefsConsts.WIDGETS_SETTINGS)) {
                 ObjectMapper mapper = new ObjectMapper();
 
                 try {
-                    widgetsSettings = mapper.readValue(SharedPrefs.getString(ctx, SharedPrefs.WIDGETS_SETTINGS), WidgetsSettings.class);
+                    widgetsSettings = mapper.readValue(SharedPrefs.getString(ctx, PrefsConsts.WIDGETS_SETTINGS), WidgetsSettings.class);
                 } catch (JsonProcessingException e) {
                     widgetsSettings = new WidgetsSettings();
                 }
@@ -53,12 +53,13 @@ public class AppSingleton {
     }
 
     public void saveWidgetsSettings() {
+        // if you ever change this logic, don't forget to change in migration code too
         if (widgetsSettings != null){
             ObjectMapper mapper = new ObjectMapper();
 
             try {
                 String json = mapper.writeValueAsString(widgetsSettings);
-                SharedPrefs.setString(ctx, SharedPrefs.WIDGETS_SETTINGS, json);
+                SharedPrefs.setString(ctx, PrefsConsts.WIDGETS_SETTINGS, json);
             } catch (JsonProcessingException e) {
                 Log.e(TAG, "Failed to save widgets settings (widgets count: " + widgetsSettings.widgetIds.size() + ")");
             }

@@ -52,9 +52,9 @@ class SharedPrefsKt(context: Context){
 val Context.prefs: SharedPrefsKt
     get() = SharedPrefsKt(this)
 
-/** Keys for various settings */
+/** Keys for various settings more are in the old [SharedPrefs]*/
 object PrefsConsts {
-    const val ACTIVE_ACCOUNT_ID = "int_active_account_id"
+    const val ACTIVE_ACCOUNT_ID = "long_active_account_id"
     const val LAST_SCHOOLS_LIST_UPDATE = "prefs-last-schools-list-update"
     const val SHOW_INFO_LINE = "prefs-show-info-line"
     const val SWITCH_TO_NEXT_WEEK_OPTION_INDEX = "prefs-switch-to-next-week"
@@ -64,4 +64,6 @@ object PrefsConsts {
      */
     const val NOTIFICATION_ACCOUNT = "notification-account"
     const val NOTIFICATION_PLEASE_GRANT_PERMISSION = "notification-please-grant-permission"
+    /** this is where [AppSingleton] stores widgets settings */
+    const val WIDGETS_SETTINGS = "widgets-settings-v2"
 }

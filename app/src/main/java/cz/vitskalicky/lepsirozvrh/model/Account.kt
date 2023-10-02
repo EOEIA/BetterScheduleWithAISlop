@@ -27,6 +27,8 @@ data class Account(
     val userUID: String,
     @Embedded(prefix = "class_")
     val clazz: Class,
+    /** If true, user's details may be outdated or incomplete and should be refreshed as soon as possible */
+    val requireRefresh: Boolean,
     /** > Insert methods treat 0 as not-set while inserting the item.*/
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

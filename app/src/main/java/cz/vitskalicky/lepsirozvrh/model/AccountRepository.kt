@@ -176,7 +176,7 @@ class AccountRepository(val app: MainApplication) {
     /** Token will also be updated in database */
     suspend fun refreshToken(id: Long, force: Boolean = true): LoginResult {
         val account = dao.loadAccount(id) ?: return WRONG_LOGIN.fail();
-        if (!force && !account.isAccessExpired()){
+        if (!force && !account.isAccessExpired() && !account.requireRefresh){
             return SUCCESS.ok(account);
         }
 //        val refreshToken: String = sprefs.getString(SharedPrefs.REFRESH_TOKEN, null)?.takeUnless { it.isBlank() } ?: return WRONG_LOGIN
@@ -197,12 +197,12 @@ class AccountRepository(val app: MainApplication) {
                 accessToken = response.access_token,
                 accessExpires = DateTime.now().plusSeconds(response.expires_in)
             )
-            dao.updateAccount(updatedAccount)
 
             //check if user info should be refreshed
-            if (account.semesterEnd == null || account.semesterEnd.isBeforeNow){
+            if (account.semesterEnd == null || account.semesterEnd.isBeforeNow || account.requireRefresh){
                 updatedAccount = refreshUserInfo(account).account ?: updatedAccount
             }
+            dao.updateAccount(updatedAccount)
 
             return SUCCESS.ok(updatedAccount)
         }catch (e: HttpException){
@@ -228,8 +228,10 @@ class AccountRepository(val app: MainApplication) {
                 userTypeText = "",
                 semesterEnd = null,
                 userUID = "",
-                clazz = Class("","","")
+                clazz = Class("","",""),
+                requireRefresh = true
             )
+            // if you ever change this logic, don't forget to change in migration code too
             val userWebservice = createRetrofit(partialAccount, connectDb = false)?.create(UserWebservice::class.java)
             val userResponse = userWebservice?.getUser()
             if (userResponse == null) {
@@ -252,7 +254,8 @@ class AccountRepository(val app: MainApplication) {
                 userTypeText = userResponse.userTypeText ?: "",
                 semesterEnd = semesterEnd,
                 userUID = userResponse.userUID ?: "",
-                clazz = userResponse.clazz?.run { Class(id?:"", abbrev?:"", name?:"") } ?: Class("","","")
+                clazz = userResponse.clazz?.run { Class(id?:"", abbrev?:"", name?:"") } ?: Class("","",""),
+                requireRefresh = false,
             )
             val accountId = dao.insertAccount(partialAccount2)
             val account = dao.loadAccount(accountId) //todo test if the id from insert account matches account's id
@@ -299,7 +302,8 @@ class AccountRepository(val app: MainApplication) {
                         abbrev ?: "",
                         name ?: ""
                     )
-                } ?: Class("", "", "")
+                } ?: Class("", "", ""),
+                requireRefresh = false
             )
             return SUCCESS.ok(modifiedAccount)
         }catch (e: HttpException){
