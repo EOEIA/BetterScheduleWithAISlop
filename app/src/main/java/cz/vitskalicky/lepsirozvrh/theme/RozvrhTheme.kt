@@ -65,6 +65,9 @@ data class RozvrhTheme (
 
     @get:JvmName("cHomework") val cHomework: Color,
     @get:JvmName("dpHomework") val dpHomework: Float,
+
+    /** How much customization did the user specify when creating the theme. does not affect any colors, only the theme customization UI */
+    @get:JvmName("customizationLevel") val customizationLevel: Int,
 ) : Parcelable {
 
 }

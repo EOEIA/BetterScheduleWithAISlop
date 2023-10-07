@@ -41,7 +41,8 @@ object DefaultRozvrhThemes {
         dpTextPadding = 2.0f,
         spInfolineTextSize = 12.0f,
         spPrimaryText = 18.0f,
-        spSecondaryText = 12.0f
+        spSecondaryText = 12.0f,
+        customizationLevel = 0, //todo
     )
 
     final val DARK = RozvrhTheme(
@@ -82,6 +83,7 @@ object DefaultRozvrhThemes {
         spInfolineTextSize = 12.0f,
         spPrimaryText = 18.0f,
         spSecondaryText = 12.0f,
+        customizationLevel = 0, //todo
     )
 
     // as visible as possible if debug, hope it is unnoticed in production
@@ -124,5 +126,6 @@ object DefaultRozvrhThemes {
             spInfolineTextSize = 12.0f,
             spPrimaryText = 18.0f,
             spSecondaryText = 12.0f,
+            customizationLevel = 0, //todo
         ) else LIGHT
 }

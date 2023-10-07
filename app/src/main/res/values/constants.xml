@@ -6,7 +6,7 @@
     <string name="PRIVACY_POLICY_LINK" translatable="false">https://gitlab.com/vitSkalicky/lepsi-rozvrh/-/blob/master/Z%C3%A1sady%20ochrany%20soukrom%C3%AD.md</string>
     <string name="MORE_THEMES_LINK" translatable="false">https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/</string>
 
-    <!-- See OldThemeData.java -->
+    <!-- See ThemeExchangeData.kt -->
     <string name="PREFS_THEME_cEmptyBg" translatable="false">PREFS-THEME-cEmptyBg</string>
     <string name="PREFS_THEME_cABg" translatable="false">PREFS-THEME-cABg</string>
     <string name="PREFS_THEME_cHBg" translatable="false">PREFS-THEME-cHBg</string>
