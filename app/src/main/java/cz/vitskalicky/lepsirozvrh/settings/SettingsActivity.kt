@@ -119,6 +119,8 @@ class SettingsActivity : ComponentActivity() {
                                     bottom = paddingValues.calculateBottomPadding()
                                 )
                         ) {
+                            /** for better readability, composable functions have 0 indent and everything else has at least 1*/
+
                             Spacer(Modifier.size(paddingValues.calculateTopPadding()))
 
                             PreferenceGroupHeader(R.string.user.str)
@@ -232,6 +234,9 @@ class SettingsActivity : ComponentActivity() {
 
                                 if(showFeedbackDialog) FeedbackDialog(onDismissed = {showFeedbackDialog = false},scaffoldState)
                             Preference(R.string.feedback.str, R.string.feedback_desc.str, Icons.Default.Feedback.icon){ showFeedbackDialog = true }
+                                if (BuildConfig.ALLOW_SENTRY) {
+                            SwitchPreference(R.string.send_crash.str, R.string.send_crash_desc.str, viewModel.sendCrashReportsLD.observeAsState().value ?: false, Icons.Default.BugReport.icon) { viewModel.sendCrashReports = it }
+                                }
                             Preference(R.string.privacy_policy.str, null){
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.PRIVACY_POLICY_LINK)))
                                 startActivity(browserIntent)

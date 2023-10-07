@@ -39,6 +39,11 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         set(value) = sp.edit { putBoolean(PrefsConsts.CENTER_TO_CURRENT_LESSON, value) }
     val centerToCurrentLessonLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.CENTER_TO_CURRENT_LESSON, false)
 
+    var sendCrashReports: Boolean
+        get() = sp.boolean(PrefsConsts.ENABLE_SENTRY) ?: false
+        set(value) = sp.edit { putBoolean(PrefsConsts.ENABLE_SENTRY, value) }
+    val sendCrashReportsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ENABLE_SENTRY, false)
+
     var notificationAccountId: Long?
         get() = sp.long(PrefsConsts.NOTIFICATION_ACCOUNT)
         set(value) = sp.edit { if (value == null) remove(PrefsConsts.NOTIFICATION_ACCOUNT) else putLong(PrefsConsts.NOTIFICATION_ACCOUNT, value) }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
@@ -40,8 +41,9 @@ private fun PreferenceBase(
             Box(Modifier.width(72.dp), contentAlignment = Alignment.Center){
                 icon?.invoke()
             }
-            content()
-            Spacer(Modifier.fillMaxWidth().weight(1f))
+            Box(Modifier.weight(1f).fillMaxWidth()){
+                content()
+            }
             Spacer(Modifier.size(16.dp))
             rightContent?.invoke()
             Spacer(Modifier.size(16.dp))
@@ -88,6 +90,12 @@ fun SwitchPreference(
     Preference(title, description, onClicked = {onChanged(!checked)}, icon = icon, enabled = enabled, rightContent = {
         Switch(checked, onCheckedChange = {onChanged(it)})
     })
+}
+
+@Preview
+@Composable
+private fun SwitchPreview(){
+    SwitchPreference("Odesílat hlášení o chybách", "když v aplikaci nastane chyba, tka se automaticky nahlásí vývojářům, aby mohla být opravena",false, {Icon(Icons.Default.BugReport,null)}) { println() }
 }
 
 @Composable
