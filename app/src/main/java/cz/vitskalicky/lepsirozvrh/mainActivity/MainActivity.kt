@@ -15,7 +15,9 @@ import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.SharedPrefsKt
 import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
+import cz.vitskalicky.lepsirozvrh.prefs
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
+import cz.vitskalicky.lepsirozvrh.welcome.WelcomeActivity
 import kotlinx.coroutines.launch
 
 /** The main activity with schedule table*/
@@ -33,6 +35,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
+            // show welcome activity if the user hasn't seen it yet
+            if (prefs.boolean(PrefsConsts.SEEN_WELCOME) != true){
+                val intent = Intent(this@MainActivity, WelcomeActivity::class.java)
+                startActivity(intent)
+                finish()
+                return@launch
+            }
             // if coming from notification, switch to the account used in the notification
             if (intent.hasExtra(EXTRA_SWITCH_TO_ACCOUNT)){
                 val newAccount = intent.getLongExtra(EXTRA_SWITCH_TO_ACCOUNT, -1)

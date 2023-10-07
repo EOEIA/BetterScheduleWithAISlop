@@ -125,10 +125,10 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         super.onCreate()
 
         // Initialize the Sentry (crash report) client
-        if (SharedPrefs.getBooleanPreference(this, R.string.PREFS_SEND_CRASH_REPORTS)) {
+        if (prefs.boolean(PrefsConsts.ENABLE_SENTRY) == true) {
             enableSentry()
         } else {
-            diableSentry()
+            disableSentry()
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Register notification channel for the permanent notification
@@ -254,6 +254,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
          * Only enable sentry on the official release build
          */
         if (BuildConfig.ALLOW_SENTRY) {
+            prefs.edit { putBoolean(PrefsConsts.ENABLE_SENTRY, true) }
             SentryAndroid.init(this) { options ->
                 options.dsn = "https://d13d732d380444f5bed7487cfea65814@o322743.ingest.sentry.io/1820627"
             }
@@ -265,12 +266,12 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             Sentry.setExtra("build variant", BuildConfig.FLAVOR + " " + BuildConfig.BUILD_TYPE)
             Sentry.setUser(User().also { it.id = SharedPrefs.getString(this, SharedPrefs.SENTRY_ID)})
         } else {
-            diableSentry()
-            SharedPrefs.setBooleanPreference(this, R.string.PREFS_SEND_CRASH_REPORTS, false)
+            disableSentry()
         }
     }
 
-    fun diableSentry() {
+    fun disableSentry() {
+        prefs.edit { putBoolean(PrefsConsts.ENABLE_SENTRY, false) }
         Sentry.close()
     }
 

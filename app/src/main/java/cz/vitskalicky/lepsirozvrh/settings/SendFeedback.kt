@@ -136,7 +136,7 @@ ${context.getString(R.string.email_message)}
     ?.let {"Sentry client id: $it" } 
     ?: "Sentry client id not available"
  }
- Sentry enabled: ${SharedPrefs.getBooleanPreference(context, R.string.PREFS_SEND_CRASH_REPORTS)}
+ Sentry enabled: ${context.prefs.boolean(PrefsConsts.ENABLE_SENTRY)}
  """
     }catch (e: Exception){
         if (e is CancellationException) throw e

@@ -5,7 +5,6 @@
     <string name="CONTACT_MAIL" translatable="false">lepsi-rozvrh@email.cz</string>
     <string name="PRIVACY_POLICY_LINK" translatable="false">https://gitlab.com/vitSkalicky/lepsi-rozvrh/-/blob/master/Z%C3%A1sady%20ochrany%20soukrom%C3%AD.md</string>
     <string name="MORE_THEMES_LINK" translatable="false">https://vitskalicky.gitlab.io/lepsi-rozvrh/motivy/</string>
-    <string name="PREFS_SEND_CRASH_REPORTS" translatable="false">prefs-send-crash-reports</string>
 
     <!-- See OldThemeData.java -->
     <string name="PREFS_THEME_cEmptyBg" translatable="false">PREFS-THEME-cEmptyBg</string>

@@ -148,7 +148,7 @@ public class Utils {
                         }else {
                             body += "\n Sentry client id not available";
                         }
-                        body += "\n Sentry enabled: " + SharedPrefs.getBooleanPreference(context, R.string.PREFS_SEND_CRASH_REPORTS);
+                        body += "\n Sentry enabled: " + (new SharedPrefsKt(context)).getBoolean(PrefsConsts.ENABLE_SENTRY);
                         final String finBody = body;
                         new Thread(() -> {
                             String fileName;
