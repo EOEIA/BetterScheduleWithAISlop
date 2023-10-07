@@ -1,10 +1,12 @@
 package cz.vitskalicky.lepsirozvrh.migration
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
 import com.fasterxml.jackson.databind.ObjectMapper
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.Class
+import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings.Widget
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -17,7 +19,7 @@ object v1_9 {
     suspend fun migrate(context: Context){
         account(context)
         switchToNextWeek(context)
-        theme()
+        theme(context)
     }
 
     /**
@@ -121,8 +123,45 @@ object v1_9 {
         }
     }
 
-    private fun theme(){
-        //todo
+    private fun theme(context: Context){
+        val sp = context.prefs;
+        var theme = DefaultRozvrhThemes.LIGHT
+        theme = theme.copy(
+            cEmptyBg = sp.int("PREFS-THEME-cEmptyBg")?.let { Color(it) } ?: theme.cEmptyBg,
+            cABg = sp.int("PREFS-THEME-cABg")?.let { Color(it) } ?: theme.cABg,
+            cHBg = sp.int("PREFS-THEME-cHBg")?.let { Color(it) } ?: theme.cHBg,
+            cChngBg = sp.int("PREFS-THEME-cChngBg")?.let { Color(it) } ?: theme.cChngBg,
+            cHeaderBg = sp.int("PREFS-THEME-cHeaderBg")?.let { Color(it) } ?: theme.cHeaderBg,
+            cDivider = sp.int("PREFS-THEME-cDivider")?.let { Color(it) } ?: theme.cDivider,
+            dpDividerWidth = sp.float("PREFS-THEME-dpDividerWidth") ?: theme.dpDividerWidth,
+            cHighlight = sp.int("PREFS-THEME-cHighlight")?.let { Color(it) } ?: theme.cHighlight,
+            dpHighlightWidth = sp.float("PREFS-THEME-dpHighlightWidth") ?: theme.dpHighlightWidth,
+            cHPrimaryText = sp.int("PREFS-THEME-cHPrimaryText")?.let { Color(it) } ?: theme.cHPrimaryText,
+            cHRoomText = sp.int("PREFS-THEME-cHRoomText")?.let { Color(it) } ?: theme.cHRoomText,
+            cHSecondaryText = sp.int("PREFS-THEME-cHSecondaryText")?.let { Color(it) } ?: theme.cHSecondaryText,
+            cChngPrimaryText = sp.int("PREFS-THEME-cChngPrimaryText")?.let { Color(it) } ?: theme.cChngPrimaryText,
+            cChngRoomText = sp.int("PREFS-THEME-cChngRoomText")?.let { Color(it) } ?: theme.cChngRoomText,
+            cChngSecondaryText = sp.int("PREFS-THEME-cChngSecondaryText")?.let { Color(it) } ?: theme.cChngSecondaryText,
+            cAPrimaryText = sp.int("PREFS-THEME-cAPrimaryText")?.let { Color(it) } ?: theme.cAPrimaryText,
+            cARoomText = sp.int("PREFS-THEME-cARoomText")?.let { Color(it) } ?: theme.cARoomText,
+            cASecondaryText = sp.int("PREFS-THEME-cASecondaryText")?.let { Color(it) } ?: theme.cASecondaryText,
+            cHeaderPrimaryText = sp.int("PREFS-THEME-cHeaderPrimaryText")?.let { Color(it) } ?: theme.cHeaderPrimaryText,
+            cHeaderSecondaryText = sp.int("PREFS-THEME-cHeaderSecondaryText")?.let { Color(it) } ?: theme.cHeaderSecondaryText,
+            spPrimaryText = sp.float("PREFS-THEME-spPrimaryText") ?: theme.spPrimaryText,
+            spSecondaryText = sp.float("PREFS-THEME-spSecondaryText") ?: theme.spSecondaryText,
+            dpPaddingLeft = sp.float("PREFS-THEME-dpPaddingLeft") ?: theme.dpPaddingLeft,
+            dpPaddingTop = sp.float("PREFS-THEME-dpPaddingTop") ?: theme.dpPaddingTop,
+            dpPaddingRight = sp.float("PREFS-THEME-dpPaddingRight") ?: theme.dpPaddingRight,
+            dpPaddingBottom = sp.float("PREFS-THEME-dpPaddingBottom") ?: theme.dpPaddingBottom,
+            dpTextPadding = sp.float("PREFS-THEME-dpTextPadding") ?: theme.dpTextPadding,
+            cInfolineBg = sp.int("PREFS-THEME-cInfolineBg")?.let { Color(it) } ?: theme.cInfolineBg,
+            cInfolineText = sp.int("PREFS-THEME-cInfolineText")?.let { Color(it) } ?: theme.cInfolineText,
+            spInfolineTextSize = sp.float("PREFS-THEME-spInfolineTextSize") ?: theme.spInfolineTextSize,
+            cError = sp.int("PREFS-THEME-cError")?.let { Color(it) } ?: theme.cError,
+            cHomework = sp.int("PREFS-THEME-cHomework")?.let { Color(it) } ?: theme.cHomework,
+            dpHomework = sp.float("PREFS-THEME-dpHomework") ?: theme.dpHomework,
+        )
+        //todo save theme
     }
 
     // constants used for keys in old versions
@@ -166,5 +205,7 @@ object v1_9 {
         val primaryTextSize: Float,
         val secondaryTextSize: Float,
     )
+
+    // theme keys
 
 }
