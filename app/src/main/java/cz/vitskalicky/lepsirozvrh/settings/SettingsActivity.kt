@@ -137,7 +137,7 @@ class SettingsActivity : ComponentActivity() {
                             Divider()
                             PreferenceGroupHeader(R.string.look_and_behaviour.str)
                             SwitchPreference(R.string.info_line.str, R.string.info_line_desc.str,
-                                viewModel.showInfolineLD.observeAsState().value ?: false
+                                viewModel.showInfolineLD.observeAsState().value ?: true
                             ){
                                 newValue: Boolean -> viewModel.showInfoline = newValue
                             }
@@ -153,7 +153,7 @@ class SettingsActivity : ComponentActivity() {
                                 newOptionIndex -> viewModel.switchToNextWeekOptionIndex = newOptionIndex
                             }
                             SwitchPreference(R.string.center_to_current_lesson.str, null,
-                                viewModel.centerToCurrentLessonLD.observeAsState().value ?: false,
+                                viewModel.centerToCurrentLessonLD.observeAsState().value ?: true,
                                 Icons.Default.CenterFocusWeak.icon
                             ) {newValue ->
                                 viewModel.centerToCurrentLesson = newValue

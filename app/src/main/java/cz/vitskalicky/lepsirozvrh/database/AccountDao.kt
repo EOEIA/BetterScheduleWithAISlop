@@ -30,6 +30,9 @@ abstract class AccountDao {
     @Query("SELECT COUNT(*) FROM account WHERE id = :id")
     abstract suspend fun countAccounts(id: Long): Int
 
+    @Query("SELECT requireRefresh == 1 FROM account WHERE id = :id")
+    abstract suspend fun refreshRequired(id: Long): Boolean?
+
     suspend fun accountExists(id: Long) = countAccounts(id) == 1
 
 }

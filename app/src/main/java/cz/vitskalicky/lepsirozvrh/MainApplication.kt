@@ -18,6 +18,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.database.Migrations
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
+import cz.vitskalicky.lepsirozvrh.migration.v1_9
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRepository
@@ -31,10 +32,7 @@ import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid
 import io.sentry.protocol.User
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.joda.time.LocalDateTime
@@ -127,6 +125,12 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     override fun onCreate() {
         super.onCreate()
 
+        runBlocking {
+            doMigrations()
+        }
+        // set defaults for some settings if they are unset
+        PrefsConsts.setupDefaults(this)
+
         // Initialize the Sentry (crash report) client
         if (prefs.boolean(PrefsConsts.ENABLE_SENTRY) == true) {
             enableSentry()
@@ -175,20 +179,6 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         // more initializations
         notificationState = NotificationState(this)
 
-        // handles app update data migration
-        if (SharedPrefs.getInt(this, SharedPrefs.LAST_VERSION_SEEN) < BuildConfig.VERSION_CODE) {
-            //a new version is here
-            // LAST_VERSION_SEEN is set by MainActivity
-
-            //reapply default theme in case it changed
-            var themeNumber = 4
-            try {
-                themeNumber = SharedPrefs.getStringPreference(this, R.string.PREFS_APP_THEME).toInt()
-            } catch (ignored: NumberFormatException) {
-            } catch (ignored: NullPointerException) {
-            }
-        }
-
         // "start up" the lifecycle
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
@@ -201,6 +191,21 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             pruneDatabase()
         }
     }
+
+    /** Performs data migrations, except for database. Database data is migrated in [rozvrhDb] -> addMigrations()*/
+    private suspend fun doMigrations(){
+        val prefs = SharedPrefsKt(this);
+        val lastCode = prefs.int(PrefsConsts.LAST_VERSION_SEEN) ?: Int.MAX_VALUE // if first launch, do not do any migration
+
+        if (lastCode < 37 /* v1.9*/){
+            // multi-account and jetpack compose
+            v1_9.migrate(this)
+        }
+
+        prefs.edit { putInt(PrefsConsts.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE) }
+    }
+
+
 
     /** Schedules notification and widget update */
     fun scheduleUpdate(triggerTime: LocalDateTime?) {

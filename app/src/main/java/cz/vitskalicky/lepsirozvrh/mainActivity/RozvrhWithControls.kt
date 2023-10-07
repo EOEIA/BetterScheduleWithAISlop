@@ -65,7 +65,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
     }
     if (showInfoline == false) infotext = null
 
-    val isCenterToCurrentLessonEnabled: () -> Boolean = {SharedPrefsKt(context).boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON)?:false}
+    val isCenterToCurrentLessonEnabled: () -> Boolean = {SharedPrefsKt(context).boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON)?:true}
     var centerToCurrentLesson: Boolean by rememberSaveable{
         mutableStateOf(isCenterToCurrentLessonEnabled())
     }

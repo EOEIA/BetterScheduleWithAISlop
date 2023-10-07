@@ -104,7 +104,7 @@ class AccountRepository(val app: MainApplication) {
      * If [refreshTokens] is `true`, [Account.accessToken] and [Account.refreshToken] will be refreshed if expired (and
      * if internet connection available) */
     suspend fun getAccount(id: Long, refreshTokens: Boolean = false): Account?{
-        if (refreshTokens){
+        if (refreshTokens || dao.refreshRequired(id) == true){
             refreshToken(id, force = false)
         }
         return dao.loadAccount(id);

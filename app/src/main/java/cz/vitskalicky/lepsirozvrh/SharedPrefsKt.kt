@@ -23,18 +23,18 @@ class SharedPrefsKt(context: Context){
     fun stringSet(key: String): Set<String>? = if (sharedPreferences.contains(key)) sharedPreferences.getStringSet(key,null) else null
 
     /** Use only to save single values. For batch operations, use [edit].*/
-    fun putOne(key:String, value: String) = sharedPreferences.edit().apply { putString(key, value);apply() }
+    fun putOne(key:String, value: String) = sharedPreferences.edit().let { it.putString(key, value);it.apply() }
     /** Use only to save single values. For batch operations, use [edit].*/
 
-    fun putOne(key:String, value: Int) = sharedPreferences.edit().apply { putInt(key, value);apply() }
+    fun putOne(key:String, value: Int) = sharedPreferences.edit().let { it.putInt(key, value);it.apply() }
     /** Use only to save single values. For batch operations, use [edit].*/
-    fun putOne(key:String, value: Boolean) = sharedPreferences.edit().apply { putBoolean(key, value);apply() }
+    fun putOne(key:String, value: Boolean) = sharedPreferences.edit().let { it.putBoolean(key, value);it.apply() }
     /** Use only to save single values. For batch operations, use [edit].*/
-    fun putOne(key:String, value: Float) = sharedPreferences.edit().apply { putFloat(key, value);apply() }
+    fun putOne(key:String, value: Float) = sharedPreferences.edit().let { it.putFloat(key, value);it.apply() }
     /** Use only to save single values. For batch operations, use [edit].*/
-    fun putOne(key:String, value: Long) = sharedPreferences.edit().apply { putLong(key, value);apply() }
+    fun putOne(key:String, value: Long) = sharedPreferences.edit().let { it.putLong(key, value);it.apply() }
     /** Use only to save single values. For batch operations, use [edit].*/
-    fun putOne(key:String, value: Set<String>) = sharedPreferences.edit().apply { putStringSet(key, value);apply() }
+    fun putOne(key:String, value: Set<String>) = sharedPreferences.edit().let { it.putStringSet(key, value);it.apply() }
 
     /** Use only to save single values. For batch operations, use [edit].*/
     fun deleteOne(key: String) = sharedPreferences.edit().apply { remove(key) }
@@ -53,11 +53,13 @@ val Context.prefs: SharedPrefsKt
     get() = SharedPrefsKt(this)
 
 /** Keys for various settings more are in the old [SharedPrefs]*/
-object PrefsConsts {
+object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val ACTIVE_ACCOUNT_ID = "long_active_account_id"
     const val LAST_SCHOOLS_LIST_UPDATE = "prefs-last-schools-list-update"
+    /** non-set is treated as true */
     const val SHOW_INFO_LINE = "prefs-show-info-line"
-    const val SWITCH_TO_NEXT_WEEK_OPTION_INDEX = "prefs-switch-to-next-week"
+    const val SWITCH_TO_NEXT_WEEK_OPTION_INDEX = "int_switch_to_next_week_option_index"
+    /** non-set is treated as true */
     const val CENTER_TO_CURRENT_LESSON = "prefs-center-to-current-lesson"
     /**
      * Account id for which persistent notification is active. Invalid id => persistent notification disabled
@@ -70,4 +72,57 @@ object PrefsConsts {
     const val ENABLE_SENTRY = "prefs-send-crash-reports"
     /** If the user has seen the welcome screen */
     const val SEEN_WELCOME = "boolean_seen_welcome"
+    /** The version code of the app when it was last launched*/
+    const val LAST_VERSION_SEEN = "last_version_seen";
+    /** The version code of the app when MainActivity was last launched. useful for showing "what's new" toast*/
+    const val LAST_VERSION_SEEN_MAIN_ACTIVITY = "int_last_version_seen_main_activity";
+
+    /** Sets up some defaults. Do not rely on this however */
+    fun setupDefaults(context: Context){
+        with(context.prefs){ edit {
+            if (!contains(SHOW_INFO_LINE)) putBoolean(SHOW_INFO_LINE, true)
+            if (!contains(CENTER_TO_CURRENT_LESSON)) putBoolean(CENTER_TO_CURRENT_LESSON, true)
+            if (!contains(SWITCH_TO_NEXT_WEEK_OPTION_INDEX)) putInt(SWITCH_TO_NEXT_WEEK_OPTION_INDEX, 2)
+        } }
+    }
 }
+
+// <editor-fold summary="experiment">
+// todo experiment - this would make it even more safe
+//class Prefs(context: Context) {
+//    private val sp: SharedPrefsKt = SharedPrefsKt(context);
+//
+//    inner class StringPreference(val key: String, val defaultValue: String){
+//        var walue: String
+//            get() { return sp.string(key) ?: defaultValue }
+//            set(value) = sp.putOne(key, value);
+//        val liveData: SharedPrefsStringLiveData by lazy { SharedPrefsStringLiveData(sp.sharedPreferences, key, defaultValue) }
+//    }
+//    inner class IntPreference(val key: String, val defaultValue: Int){
+//        var walue: Int
+//            get() { return sp.int(key) ?: defaultValue }
+//            set(value) = sp.putOne(key, value);
+//        val liveData: SharedPrefsIntLiveData by lazy { SharedPrefsIntLiveData(sp.sharedPreferences, key, defaultValue) }
+//    }
+//    inner class BooleanPreference(val key: String, val defaultValue: Boolean){
+//        var walue: Boolean
+//            get() { return sp.boolean(key) ?: defaultValue }
+//            set(value) = sp.putOne(key, value);
+//        val liveData: SharedPrefsBooleanLiveData by lazy { SharedPrefsBooleanLiveData(sp.sharedPreferences, key, defaultValue) }
+//    }
+//    inner class FloatPreference(val key: String, val defaultValue: Float){
+//        var walue: Float
+//            get() { return sp.float(key) ?: defaultValue }
+//            set(value) = sp.putOne(key, value);
+//        val liveData: SharedPrefsFloatLiveData by lazy { SharedPrefsFloatLiveData(sp.sharedPreferences, key, defaultValue) }
+//    }
+//    inner class LongPreference(val key: String, val defaultValue: Long){
+//        var walue: Long
+//            get() { return sp.long(key) ?: defaultValue }
+//            set(value) = sp.putOne(key, value);
+//        val liveData: SharedPrefsLongLiveData by lazy { SharedPrefsLongLiveData(sp.sharedPreferences, key, defaultValue) }
+//    }
+//
+//    val activeAccount = IntPreference("long_active_account_id", null)
+//}
+// </editor-fold>

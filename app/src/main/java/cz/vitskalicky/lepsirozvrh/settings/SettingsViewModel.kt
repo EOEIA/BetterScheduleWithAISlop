@@ -35,9 +35,9 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
     val switchToNextWeekOptionIndexLD: LiveData<Int> = SharedPrefsIntLiveData(sp.sharedPreferences, PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX, 0)
 
     var centerToCurrentLesson: Boolean
-        get() = sp.boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON) ?: false
+        get() = sp.boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON) ?: true
         set(value) = sp.edit { putBoolean(PrefsConsts.CENTER_TO_CURRENT_LESSON, value) }
-    val centerToCurrentLessonLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.CENTER_TO_CURRENT_LESSON, false)
+    val centerToCurrentLessonLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.CENTER_TO_CURRENT_LESSON, true)
 
     var sendCrashReports: Boolean
         get() = sp.boolean(PrefsConsts.ENABLE_SENTRY) ?: false

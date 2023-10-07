@@ -2,12 +2,9 @@ package cz.vitskalicky.lepsirozvrh.migration
 
 import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
-import cz.vitskalicky.lepsirozvrh.AppSingleton
-import cz.vitskalicky.lepsirozvrh.MainApplication
-import cz.vitskalicky.lepsirozvrh.PrefsConsts
+import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.Class
-import cz.vitskalicky.lepsirozvrh.prefs
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings.Widget
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -17,6 +14,12 @@ import org.joda.time.format.ISODateTimeFormat
 
 /** Handles migration from pre- 1.9 to 1.9 */
 object v1_9 {
+    suspend fun migrate(context: Context){
+        account(context)
+        switchToNextWeek(context)
+        theme()
+    }
+
     /**
      * Migrates account into the database. Also migrates persistent notification setting and widgets settings, since they
      * depend on account id. suspends for writing to disk, but no slow network things.
@@ -28,7 +31,7 @@ object v1_9 {
             try {
                 Account(
                     serverUrl = string(URL)!!,
-                    username = string(USERNAME)!!,
+                    username = string(USERNAME)?:"",
                     accessToken = string(ACCEESS_TOKEN)!!,
                     refreshToken = string(REFRESH_TOKEN)!!,
                     accessExpires = DateTime.parse(string(ACCESS_EXPIRES)),
@@ -105,7 +108,20 @@ object v1_9 {
         }
     }
 
-    fun theme(){
+    /** migrates the switch to next week setting */
+    private fun switchToNextWeek(context: Context){
+        val prefs = context.prefs
+        val oldValue: String? = prefs.string(PREFS_WEEK_SWITCH);
+        val parsed: Int? = oldValue?.let { try {it.toInt() } catch (_:NumberFormatException) { null } }
+        prefs.edit {
+            if (parsed != null){
+                putInt(PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX, parsed)
+            }
+            remove(PREFS_WEEK_SWITCH)
+        }
+    }
+
+    private fun theme(){
         //todo
     }
 
@@ -133,6 +149,8 @@ object v1_9 {
     private const val SEMESTER_END = "semester_end"
 
     private const val PREFS_NOTIFICATION = "prefs-notification"
+    /** String indication the option index */
+    private const val PREFS_WEEK_SWITCH = "prefs-switch-to-next-week"
 
     /**
      * Access this one only using [AppSingleton.getWidgetsSettings].
