@@ -13,6 +13,7 @@ import org.joda.time.format.DateTimeFormat
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
+/** Converts [Rozvrh3] (what API uses) into [Rozvrh] (what this app uses).*/
 object RozvrhConverter {
     /**
      * backup text to day description in case it is empty, but it is holiday.
@@ -30,6 +31,11 @@ object RozvrhConverter {
      */
     var sendUnknownDayTypeReport = true
 
+    /** Converts [Rozvrh3] (what API uses) into [Rozvrh] (what this app uses).
+     *  - [rozvrh3]: the data to cenvert
+     *  - [date]: monday of the rozvrh or `null` if permanent
+     *  - [context]: android context (used for translated strings)
+     * */
     @Throws(RozvrhConversionException::class)
     fun convert(rozvrh3: Rozvrh3, date: LocalDate?, context: Context): Rozvrh{
         //todo perform further testing after creating a testing server
@@ -61,15 +67,16 @@ object RozvrhConverter {
 
         //to be extra sure, we sort the caption ascending by begin time to make sure it has the right index
         captionsUnsorted.sortWith( compareBy { it.second.beginTime } )
-        //here we have the RozvrhCaptions. Key is the hourId, first in the pair is the index and second is th caption
+        //here we have the RozvrhCaptions. Key is the hourId, first in the pair is the index and second is the caption
         val captionsMap = HashMap<String, Pair<Int,RozvrhCaption>>()
         captionsUnsorted.forEachIndexed { index, pair -> captionsMap[pair.first] = Pair(index, pair.second) }
         //and here they are sorted by index
         val captions: List<RozvrhCaption> = captionsUnsorted.mapIndexed { index, pair -> pair.second }
 
+        // save each type of objects into a map with their id as keys
         val hours = HashMap<String, Hour3>()
         for (item in rozvrh3.hours) {
-            hours[item.id.toString() + ""] = item
+            hours[item.id.toString()] = item
         }
         val classes = HashMap<String, Class3>()
         for (item in rozvrh3.classes) {
@@ -96,15 +103,17 @@ object RozvrhConverter {
             cycles[item.id] = item
         }
 
-        val days = ArrayList<RozvrhDay>()
+        val days = ArrayList<RozvrhDay>() //days for the filan Rozvrh
 
         for (item in rozvrh3.days) {
 
+            // determine day date
             var dayDate : LocalDate = if (monday != Rozvrh.PERM) {
                 DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZZ").parseLocalDate(item.date)
             }else{
                 Rozvrh.PERM.plusDays(item.dayOfWeek - 1)
             }
+            // determine if there is an event on that day (such as holiday)
             var event: String? = null
             if (monday != Rozvrh.PERM){ //events in permanent schedule are ignored to "fix" a bug in Bakaláři API which puts celebration events into permanent schedule. You cannot have holiday in permanent schedule.
                 if (item.dayDescription.isNotBlank()){

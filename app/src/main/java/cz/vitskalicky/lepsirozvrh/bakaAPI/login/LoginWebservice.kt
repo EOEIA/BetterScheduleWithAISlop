@@ -7,10 +7,12 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface LoginWebservice {
+    /** Obtain tokens using a username and password */
     @FormUrlEncoded
     @POST("api/login")
     suspend fun firstLogin(@Field("username") username: String, @Field("password") password: String, @Field("client_id") clientId: String = "ANDR", @Field("grant_type") grantType: String = "password"): LoginResponse
 
+    /** Obtain tokens using a refresh token */
     @FormUrlEncoded
     @POST("api/login")
     suspend fun refreshLogin(@Field("refresh_token") refreshToken: String, @Field("client_id") clientId: String = "ANDR", @Field("grant_type") grantType: String = "refresh_token"): LoginResponse

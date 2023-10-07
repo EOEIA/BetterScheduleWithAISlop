@@ -36,6 +36,7 @@ class AccountPickerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // determine, whether this activity is the only one on back stack - used for showing or hiding the back arrow
         val appTasks = (getSystemService(ACTIVITY_SERVICE) as ActivityManager).appTasks
         val activitiesCount: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             appTasks.map { it.taskInfo.numActivities}.sum()
@@ -52,7 +53,7 @@ class AccountPickerActivity : ComponentActivity() {
             val accounts by viewModel.accountsLD.observeAsState();
             val currentAccount by viewModel.currentAccountIdLD.observeAsState()
 
-            //go to login, if there are no accounts available
+            //go to login if there are no accounts available
             if (accounts?.size == 0){
                 intent = Intent(this, LoginActivity::class.java);
                 finishAffinity()
@@ -63,7 +64,7 @@ class AccountPickerActivity : ComponentActivity() {
                 Scaffold(
                     topBar = {TopAppBar(
                         title = {Text(stringResource(R.string.account_picker_title))},
-                        navigationIcon = if (isFirst) {{}} else {
+                        navigationIcon = if (isFirst) {{}} else { //hide back arrow if this is the only activity on back stack
                             {
                                 IconButton({
                                     finish()
@@ -102,7 +103,7 @@ class AccountPickerActivity : ComponentActivity() {
                                     text = { Text(item.fullName) },
                                     secondaryText = { Text(item.schoolName) },
                                     trailing = { Text(item.userTypeText) },
-                                    icon = if (isSelected) {
+                                    icon = if (isSelected) { //highlight current account
                                         {
                                             Box(Modifier.size(40.dp), contentAlignment = Alignment.Center){
                                                 Icon(
