@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
+import cz.vitskalicky.lepsirozvrh.database.Migrations
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
@@ -77,7 +78,9 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         Room.databaseBuilder(
                 applicationContext,
                 RozvrhDatabase::class.java, "rozvrh-database"
-        ).build()
+        )
+            .addMigrations(Migrations.MIGRATION_1_2)
+            .build()
     }
 
     val repository: RozvrhRepository by lazy {
