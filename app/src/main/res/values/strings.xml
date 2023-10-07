@@ -205,6 +205,7 @@
     <string name="send_crash_desc">Automatically report crashes to the developers so that they can be fixed</string>
     <string name="welcome_send_crash">Automatically report crashes to the developers so that they can be fixed</string>
     <string name="privacy_policy">Privacy policy</string>
+    <string name="alt_icon">App icon</string>
     <string name="oss_licences">Open source licenses</string>
     <string name="oss_licences_desc">Show licenses of open source libraries</string>
     <string name="app_version">App version</string>

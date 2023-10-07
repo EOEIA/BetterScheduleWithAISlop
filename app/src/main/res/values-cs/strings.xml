@@ -189,6 +189,7 @@
     <string name="send_crash_desc">Když v aplikaci nastane chyba, tak se automaticky nahlásí vývojářům, aby mohla být opravena</string>
     <string name="welcome_send_crash">Automaticky hlásit chyby v aplikaci vývojářům, aby mohly být opraveny</string>
     <string name="privacy_policy">Zásady ochrany soukromí</string>
+    <string name="alt_icon">Ikona aplikace</string>
     <string name="oss_licences">Open source licence</string>
     <string name="oss_licences_desc">Zobrazit licence open source knihoven</string>
     <string name="app_version">Verze aplikace</string>
