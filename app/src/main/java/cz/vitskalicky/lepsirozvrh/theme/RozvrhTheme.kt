@@ -66,7 +66,13 @@ data class RozvrhTheme (
     @get:JvmName("cHomework") val cHomework: Color,
     @get:JvmName("dpHomework") val dpHomework: Float,
 
-    /** How much customization did the user specify when creating the theme. does not affect any colors, only the theme customization UI */
+    /** How much customization did the user specify when creating the theme. does not affect any colors, only the theme customization UI.
+     *
+     * * 0 - one of the preset themes is used
+     * * 1 - user specifies primary, secondary and surface colors
+     * * 2 - user also specifies colors of cells, etc. Only text color and size is generated
+     * * 3 - everything is specified by the user
+     */
     @get:JvmName("customizationLevel") val customizationLevel: Int,
 ) : Parcelable {
 

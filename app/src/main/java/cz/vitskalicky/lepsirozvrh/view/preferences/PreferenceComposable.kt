@@ -3,6 +3,7 @@ package cz.vitskalicky.lepsirozvrh.view.preferences
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
@@ -17,9 +18,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
 import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.view.TextFieldWithError
 
 // Composables for preferences UI
 @Composable
@@ -281,3 +285,74 @@ fun PreferenceGroupHeader(title: String){
 private fun GrouHEaderPreview(){
     PreferenceGroupHeader("Appearance")
 }
+
+@Composable
+fun FloatPreference(
+    title: String?,
+    icon: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
+    value: Float,
+    /** returns null if ok, error message if not. */
+    validator: (value: Float) -> String? = {_->null},
+    onChanged: (value: Float) -> Unit = {},
+){
+    var dialogOpen by rememberSaveable{ mutableStateOf(false) }
+
+    if(dialogOpen){
+        FloatPreferenceDialog(
+            title = title,
+            value = value,
+            onDismissDialog = {dialogOpen = false},
+            validator = validator,
+            onSubmit = {newValue: Float -> onChanged(value) }
+        )
+    }
+
+    Preference(
+        title = title,
+        description = value.toString(),
+        icon = icon,
+        rightContent = null,
+        enabled = enabled,
+        onClicked = { dialogOpen = true }
+    )
+}
+
+@Composable
+private fun FloatPreferenceDialog(
+    title: String?,
+    value: Float,
+    /** returns null if ok, error message if not */
+    validator: (value: Float) -> String?,
+    onDismissDialog: () -> Unit,
+    onSubmit: (newValue: Float) -> Unit
+){
+
+    var editedValue by rememberSaveable{ mutableStateOf(value.toString()) }
+    var errorMessage: String? by rememberSaveable{ mutableStateOf(null) }
+    val submit = {
+        val parsed = editedValue.toFloatOrNull();
+        if (parsed == null || !parsed.isFinite()){
+            errorMessage = R.string.not_a_float_error.str
+        }else{
+            errorMessage = validator(parsed)
+            if (errorMessage == null) {
+                onSubmit(parsed)
+            }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismissDialog,
+        confirmButton = { TextButton(submit){ Text(R.string.ok.str) } },
+        dismissButton = { TextButton(onDismissDialog){Text(R.string.cancel.str)} },
+        title = { Text(title ?: R.string.float_preference_fallback_title.str) },
+        text = {
+            TextFieldWithError(
+                value = editedValue,
+                onValueChange = { editedValue = it; errorMessage = null },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                errorMessage = errorMessage
+            )
+        }
+    )}

@@ -16,6 +16,7 @@
         <item>Dark</item>
         <item>Custom</item>
     </string-array>
+    <!-- must match ThemeSettingsActivity.SelectedTheme -->
     <string-array name="themes_entries">
         <item>Follow system theme</item>
         <item>Light</item>

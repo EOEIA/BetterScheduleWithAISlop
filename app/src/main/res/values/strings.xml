@@ -86,6 +86,7 @@
     <string name="dont_show_again">Don\'t show again</string>
     <string name="something_went_wrong">Something went wrong :(</string>
     <string name="report">Report</string>
+    <string name="float_preference_fallback_title">Enter a number</string>
 
     <string name="monday">Mon</string>
     <string name="tuesday">Tue</string>
@@ -163,6 +164,7 @@
     <string name="customize_more">Customize more details</string>
     <string name="customize_more_desc">You choose everything</string>
     <string name="not_a_float_error">Enter a decimal number like 4.2</string>
+    <string name="float_cannot_be_negative">May not be smaller than 0</string>
     <string name="homework_color">Homework dot color</string>
     <string name="homework_color_desc">Color of the little dot which marks that there is a homework for the lesson
     </string>

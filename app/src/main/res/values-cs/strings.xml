@@ -78,6 +78,7 @@
     <string name="dont_show_again">Znovu nezobrazovat</string>
     <string name="something_went_wrong">Něco se nepovedlo :(</string>
     <string name="report">Nahlásit</string>
+    <string name="float_preference_fallback_title">Zadejte číslo</string>
 
     <string name="monday">Po</string>
     <string name="tuesday">Út</string>
@@ -148,6 +149,7 @@
     <string name="customize_more">Více podrobností</string>
     <string name="customize_more_desc">Vše bude podle vás</string>
     <string name="not_a_float_error">Zadejte číslo, třeba 4.2</string>
+    <string name="float_cannot_be_negative">Nesmí být méně než 0</string>
     <string name="homework_color">Barva tečky domácího úkolu</string>
     <string name="homework_color_desc">Barva té malé tečky, která značí, že na danou hodinu má být hotový nějaký domácí úkol</string>
     <string name="homework_size">Velikost tečky domácího úkolu</string>

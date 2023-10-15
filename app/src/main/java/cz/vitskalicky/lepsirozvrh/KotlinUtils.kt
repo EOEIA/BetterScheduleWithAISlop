@@ -5,11 +5,13 @@ import android.content.Context
 import android.os.Build
 import android.os.Parcel
 import androidx.annotation.PluralsRes
-import androidx.annotation.RequiresApi
+import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parceler
@@ -68,6 +70,11 @@ object KotlinUtils {
     /** Converts SP into pixels*/
     @JvmStatic
     fun spToPx(spValue: Float, context: Context): Int = (spValue * context.resources.displayMetrics.scaledDensity).roundToInt()
+
+    // composable shortcuts
+    inline val Int.str: String
+        @Composable get() = stringResource(this)
+    inline val ImageVector.icon: @Composable () -> Unit get() = { Icon(this, null) }
 }
 
 /** Parceler for saving [Color] into bundles */

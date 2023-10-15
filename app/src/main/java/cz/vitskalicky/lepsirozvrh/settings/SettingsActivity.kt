@@ -43,6 +43,8 @@ import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
 import cz.vitskalicky.lepsirozvrh.view.preferences.SwitchPreference
 import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
 import kotlinx.coroutines.launch
+import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
+import cz.vitskalicky.lepsirozvrh.KotlinUtils.icon
 
 class SettingsActivity : ComponentActivity() {
     val viewModel: SettingsViewModel by viewModels()
@@ -300,8 +302,3 @@ class SettingsActivity : ComponentActivity() {
         donations?.release()
     }
 }
-
-// shortcuts
-private inline val Int.str: String
-    @Composable get() = stringResource(this)
-private inline val ImageVector.icon: @Composable () -> Unit get() = {Icon(this, null)}
