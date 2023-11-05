@@ -31,4 +31,8 @@
         <item>3</item>
         <item>4</item>
     </string-array>
+    <string-array name="theme_url_bases">
+        <item>https://vitskalicky.github.io/lepsi-rozvrh/motiv-info</item>
+        <item>https://vitskalicky.gitlab.io/lepsi-rozvrh/motiv-info</item>
+    </string-array>
 </resources>

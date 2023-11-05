@@ -84,11 +84,14 @@ class ThemeSettingsActivity: ComponentActivity() {
                                     }
                                 },
                                 onSupportClicked = {showindDonationDialog = true},
-                                onImportClicked = {}, //todo
+                                onImportClicked = {
+                                    val intent = Intent(this@ThemeSettingsActivity, ImportThemeActivity::class.java)
+                                    startActivity(intent)
+                                },
                                 onExportClicked = {
                                     val intent = Intent(this@ThemeSettingsActivity, ExportThemeActivity::class.java)
                                     startActivity(intent)
-                                }, //todo
+                                },
                                 onGetMoreThemesClicked = {
                                     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.MORE_THEMES_LINK)))
                                     startActivity(browserIntent)
