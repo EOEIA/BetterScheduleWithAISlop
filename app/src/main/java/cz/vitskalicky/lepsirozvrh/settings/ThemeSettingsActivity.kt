@@ -7,6 +7,8 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -62,7 +64,8 @@ class ThemeSettingsActivity: ComponentActivity() {
                         if (showindDonationDialog){
                             donHelper.donations?.ShowDialog { showindDonationDialog = false }
                         }
-                        Column(Modifier.padding(paddingValues)) {
+                        val scrollState = rememberScrollState()
+                        Column(Modifier.padding(paddingValues).verticalScroll(scrollState),) {
                             GeneralStateless(
                                 selectedTheme ?: SelectedTheme.FOLLOW_SYSTEM_THEME,
                                 (isSponsor?:false) || !(isDonationsEnabled?:false),
@@ -72,8 +75,10 @@ class ThemeSettingsActivity: ComponentActivity() {
                                         SelectedTheme.LIGHT -> viewModel.theme = DefaultRozvrhThemes.LIGHT
                                         SelectedTheme.DARK -> viewModel.theme = DefaultRozvrhThemes.DARK
                                         SelectedTheme.BLACK -> viewModel.theme = DefaultRozvrhThemes.DARK //todo
-                                        SelectedTheme.FOLLOW_SYSTEM_THEME -> viewModel.theme = DefaultRozvrhThemes.UNSPECIFIED //todo
-                                        else -> {} //todo solve cutom
+                                        SelectedTheme.FOLLOW_SYSTEM_THEME -> viewModel.theme = DefaultRozvrhThemes.LIGHT
+                                        else -> {
+                                            viewModel.theme = viewModel.theme.copy(customizationLevel = 1);
+                                        }
                                     }
                                 },
                                 {showindDonationDialog = true},
@@ -222,12 +227,12 @@ fun CustomizationsStateless(
     }
 
     if (t.customizationLevel > 1){
-        Preference(R.string.customize_less.str, R.string.customize_less_desc.str, { Icons.Default.UnfoldLess.icon }){
+        Preference(R.string.customize_less.str, R.string.customize_less_desc.str, Icons.Default.ExpandLess.icon ){
             chng(t.copy(customizationLevel = t.customizationLevel-1))
         }
     }
     if (t.customizationLevel < 3){
-        Preference(R.string.customize_more.str, R.string.customize_more_desc.str, { Icons.Default.ExpandMore.icon }){
+        Preference(R.string.customize_more.str, R.string.customize_more_desc.str, Icons.Default.ExpandMore.icon){
             chng(t.copy(customizationLevel = t.customizationLevel+1))
         }
     }
