@@ -3,6 +3,8 @@ package cz.vitskalicky.lepsirozvrh
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
+import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 
 /** Shortcuts for working with shared preferences */
 class SharedPrefsKt(context: Context){
@@ -76,6 +78,10 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val LAST_VERSION_SEEN = "last_version_seen";
     /** The version code of the app when MainActivity was last launched. useful for showing "what's new" toast*/
     const val LAST_VERSION_SEEN_MAIN_ACTIVITY = "int_last_version_seen_main_activity";
+    /** Which theme the user selected. Save [SelectedTheme] into this.*/
+    const val SELECTED_THEME = "selected_theme"
+    /** The data of the current theme */
+    const val CUSTOM_THEME = "rozvrh_theme"
 
     /** Sets up some defaults. Do not rely on this however */
     fun setupDefaults(context: Context){
@@ -83,6 +89,10 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
             if (!contains(SHOW_INFO_LINE)) putBoolean(SHOW_INFO_LINE, true)
             if (!contains(CENTER_TO_CURRENT_LESSON)) putBoolean(CENTER_TO_CURRENT_LESSON, true)
             if (!contains(SWITCH_TO_NEXT_WEEK_OPTION_INDEX)) putInt(SWITCH_TO_NEXT_WEEK_OPTION_INDEX, 2)
+            if (!contains(SELECTED_THEME)) putInt(SELECTED_THEME, SelectedTheme.FOLLOW_SYSTEM_THEME.index)
+            DefaultRozvrhThemes.LIGHT
+
+            if (!contains(CUSTOM_THEME)) sharedPreferences.edit().apply { }
         } }
     }
 }

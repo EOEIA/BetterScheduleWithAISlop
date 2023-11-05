@@ -23,7 +23,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
@@ -33,7 +32,6 @@ import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
 import cz.vitskalicky.lepsirozvrh.LicencesActivity
-import cz.vitskalicky.lepsirozvrh.donations.Donations
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
@@ -45,12 +43,14 @@ import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
 import kotlinx.coroutines.launch
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.icon
+import cz.vitskalicky.lepsirozvrh.donations.DonationHelper
 
 class SettingsActivity : ComponentActivity() {
     val viewModel: SettingsViewModel by viewModels()
-    var donations: Donations? = null
+    var donHelper = DonationHelper(this);
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        donHelper.onCreate()
 
         // handles permission for notification
         // if the user denies, reset the setting. If allows, set it to the pending account
@@ -77,15 +77,6 @@ class SettingsActivity : ComponentActivity() {
                 }
             }
 
-        // Donations - quite stupid
-        val donationsEnabledLD = MutableLiveData<Boolean>(false);
-        val isSponsorLD = MutableLiveData<Boolean>(false);
-        donations = Donations(this@SettingsActivity, onPurchaseChangesListener = {
-            donationsEnabledLD.value = donations?.isEnabled;
-            isSponsorLD.value = donations?.isSponsor;
-        })
-        donationsEnabledLD.value = donations?.isEnabled;
-        isSponsorLD.value = donations?.isSponsor;
         setContent {
             val scrollState:ScrollState = rememberScrollState()
             val scaffoldState = rememberScaffoldState()
@@ -138,6 +129,10 @@ class SettingsActivity : ComponentActivity() {
                             Preference(R.string.logout.str, null, Icons.Default.Logout.icon){ coroutinScope.launch { account?.let { logOut(it.id)} } }
                             Divider()
                             PreferenceGroupHeader(R.string.look_and_behaviour.str)
+                            Preference(R.string.app_theme_screen.str, R.string.app_theme_screen_desc.str, Icons.Default.Palette.icon) {
+                                val intent = Intent(this@SettingsActivity, ThemeSettingsActivity::class.java);
+                                startActivity(intent)
+                            }
                             SwitchPreference(R.string.info_line.str, R.string.info_line_desc.str,
                                 viewModel.showInfolineLD.observeAsState().value ?: true
                             ){
@@ -214,12 +209,12 @@ class SettingsActivity : ComponentActivity() {
                             Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){
                                 showWhatsNewDialog = true;
                             }
-                                val donationsEnabled by donationsEnabledLD.observeAsState()
-                                val isSponsor by isSponsorLD.observeAsState()
+                                val donationsEnabled by donHelper.donationsEnabledLD.observeAsState()
+                                val isSponsor by donHelper.isSponsorLD.observeAsState()
                                 if (donationsEnabled ?: false){
                                     var displayDonationDialog by rememberSaveable{mutableStateOf(false)}
                                     if (displayDonationDialog){
-                                        donations?.ShowDialog(onDismiss = {displayDonationDialog = false})
+                                        donHelper.donations?.ShowDialog(onDismiss = {displayDonationDialog = false})
                                     }
                             Preference(
                                     title = if (isSponsor ?: false) R.string.donate_title_ok.str else R.string.donate_title.str,
@@ -244,7 +239,7 @@ class SettingsActivity : ComponentActivity() {
                                 startActivity(browserIntent)
                             }
                                 if (donationsEnabled ?: false){
-                            Preference(R.string.restore_purchases.str, R.string.restore_purchases_desc.str){donations?.restorePurchases()}
+                            Preference(R.string.restore_purchases.str, R.string.restore_purchases_desc.str){donHelper.donations?.restorePurchases()}
                                 }
                             Preference(R.string.oss_licences.str, R.string.oss_licences_desc.str){
                                 val intent = Intent(this@SettingsActivity, LicencesActivity::class.java);
@@ -299,6 +294,6 @@ class SettingsActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        donations?.release()
+        donHelper.release()
     }
 }

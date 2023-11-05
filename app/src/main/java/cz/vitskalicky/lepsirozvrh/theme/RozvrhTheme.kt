@@ -1,3 +1,5 @@
+@file:UseSerializers(ColorSerializer::class)
+@file:OptIn(ExperimentalSerializationApi::class, ExperimentalSerializationApi::class)
 package cz.vitskalicky.lepsirozvrh.theme
 
 import android.os.Parcelable
@@ -9,14 +11,20 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
 import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.ColorParceler
+import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.database.ColorSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 
 /**
  * Color data for all the UI including the schedule table
  * */
 @Parcelize
 @TypeParceler<Color, ColorParceler>()
+@Serializable
 data class RozvrhTheme (
     @get:JvmName("isLight") val isLight: Boolean,
     @get:JvmName("cPrimary") val cPrimary: Color,
@@ -76,6 +84,15 @@ data class RozvrhTheme (
     @get:JvmName("customizationLevel") val customizationLevel: Int,
 ) : Parcelable {
 
+}
+
+/** Must match [R.array.themes_entries] and [R.array.themes_values] */
+enum class SelectedTheme(val index: Int){
+    FOLLOW_SYSTEM_THEME(0),
+    LIGHT(1),
+    DARK(2),
+    BLACK(3),
+    CUSTOM(4),
 }
 
 object ThemeGenerator{

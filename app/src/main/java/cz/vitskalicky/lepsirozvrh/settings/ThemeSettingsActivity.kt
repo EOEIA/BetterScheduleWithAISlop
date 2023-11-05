@@ -1,32 +1,109 @@
 package cz.vitskalicky.lepsirozvrh.settings
 
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.icon
+import cz.vitskalicky.lepsirozvrh.donations.DonationHelper
+import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
+import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator
+import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.preferences.*
 
-class ThemeSettingsActivity {
-}
+class ThemeSettingsActivity: ComponentActivity() {
+    val viewModel: ThemeViewModel by viewModels()
+    var donHelper = DonationHelper(this);
 
-/** Must match [R.array.themes_entries] and [R.array.themes_values] */
-enum class SelectedTheme(val index: Int){
-    FOLLOW_SYSTEM_THEME(0),
-    LIGHT(1),
-    DARK(2),
-    BLACK(3),
-    CUSTOM(4),
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        donHelper.onCreate()
+
+        setContent {
+            val scaffoldState = rememberScaffoldState()
+            val selectedTheme by viewModel.selectedThemeLD.observeAsState()
+            val theme by viewModel.themeLD.observeAsState()
+            val isSponsor by donHelper.isSponsorLD.observeAsState()
+            val isDonationsEnabled by donHelper.donationsEnabledLD.observeAsState()
+            var showindDonationDialog = false;
+
+            LepsirozvrhTheme {
+                Scaffold(
+                    scaffoldState = scaffoldState,
+                    topBar = {
+                        TopAppBar(
+                            title = { Text(stringResource(R.string.settings)) },
+                            navigationIcon = {
+                                IconButton({
+                                    finish()
+                                }) {
+                                    Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
+                                }
+                            }
+                        )
+                    },
+                    content = {paddingValues: PaddingValues ->
+                        if (showindDonationDialog){
+                            donHelper.donations?.ShowDialog { showindDonationDialog = false }
+                        }
+                        Column(Modifier.padding(paddingValues)) {
+                            GeneralStateless(
+                                selectedTheme ?: SelectedTheme.FOLLOW_SYSTEM_THEME,
+                                (isSponsor?:false) || !(isDonationsEnabled?:false),
+                                {
+                                    viewModel.selectedTheme = it
+                                    when(it){
+                                        SelectedTheme.LIGHT -> viewModel.theme = DefaultRozvrhThemes.LIGHT
+                                        SelectedTheme.DARK -> viewModel.theme = DefaultRozvrhThemes.DARK
+                                        SelectedTheme.BLACK -> viewModel.theme = DefaultRozvrhThemes.DARK //todo
+                                        SelectedTheme.FOLLOW_SYSTEM_THEME -> viewModel.theme = DefaultRozvrhThemes.UNSPECIFIED //todo
+                                        else -> {} //todo solve cutom
+                                    }
+                                },
+                                {showindDonationDialog = true},
+                                {},
+                                {},
+                                {}
+                            )
+                            val t = theme;
+                            if (selectedTheme == SelectedTheme.CUSTOM && t!=null){
+                                CustomizationsStateless(
+                                    t,
+                                    (isSponsor?:false) || !(isDonationsEnabled?:false),
+                                    {viewModel.theme = it}
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        donHelper.release()
+    }
 }
 
 @Composable
-private fun generalStateless(
+private fun GeneralStateless(
     selectedTheme: SelectedTheme,
     isSupporter: Boolean,
     onThemeChange: (newValue: SelectedTheme) -> Unit,
@@ -77,14 +154,14 @@ private fun generalStateless(
 }
 
 @Composable
-fun customizationsStateless(
+fun CustomizationsStateless(
     theme: RozvrhTheme,
     isSupporter: Boolean,
     onChange: (newValues: RozvrhTheme) -> Unit
 ){
     val t = theme
     val chng = { newTheme: RozvrhTheme ->
-        val regen = ThemeGenerator.regenerateColors(newTheme, theme.customizationLevel);
+        val regen = ThemeGenerator.regenerateColors(newTheme, newTheme.customizationLevel);
         onChange(regen)
     }
 

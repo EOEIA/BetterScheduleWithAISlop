@@ -1,5 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.database
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -30,5 +32,16 @@ object LocalTimeSerializer: KSerializer<LocalTime> {
 
     override fun serialize(encoder: Encoder, value: LocalTime) {
         encoder.encodeString(value.toString())
+    }
+}
+object ColorSerializer : KSerializer<Color> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Color", PrimitiveKind.LONG)
+
+    override fun serialize(encoder: Encoder, value: Color) {
+        encoder.encodeLong(value.value.toLong())
+    }
+
+    override fun deserialize(decoder: Decoder): Color {
+        return Color(decoder.decodeLong().toULong())
     }
 }
