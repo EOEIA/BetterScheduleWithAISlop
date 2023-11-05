@@ -1,34 +1,26 @@
 package cz.vitskalicky.lepsirozvrh.settings
 
-import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentPaste
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -37,35 +29,32 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.SharedPrefs
 import cz.vitskalicky.lepsirozvrh.donations.DonationHelper
-import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
 import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 import cz.vitskalicky.lepsirozvrh.theme.ThemeExchangeData
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import java.io.IOException
-import java.lang.RuntimeException
-import kotlin.coroutines.coroutineContext
 
-//todo open links
 class ImportThemeActivity : ComponentActivity(){
-    val viewModel: ThemeViewModel by viewModels()
-    val donHelper = DonationHelper(this)
+    private val themeViewModel: ThemeViewModel by viewModels()
+    private val viewModel: ImportThemeViewModel by viewModels()
+    private val donHelper = DonationHelper(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         donHelper.onCreate()
+        handleIntent(intent)
 
         setContent {
             val scaffoldState = rememberScaffoldState()
             var showDonateDialog by rememberSaveable{mutableStateOf(donHelper.donations?.let { !it.isSponsor && it.isEnabled} ?: false)}
-            var textFieldText by rememberSaveable{mutableStateOf("")}
+            val textFieldText by viewModel.textFieldTextLD.observeAsState()
 
             val paste: () -> Unit = {
                 val clipboard = this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 if (clipboard.primaryClip != null && clipboard.primaryClip!!.itemCount > 0) {
-                    textFieldText = clipboard.primaryClip!!.getItemAt(0).text.toString()
+                    viewModel.textFieldText = clipboard.primaryClip!!.getItemAt(0).text.toString()
                 }
             }
 
@@ -144,14 +133,14 @@ class ImportThemeActivity : ComponentActivity(){
                             }
                             Spacer(Modifier.size(16.dp))
                             //text field
-                            TextField(textFieldText, {textFieldText = it }, modifier = Modifier.fillMaxSize().weight(1f))
+                            TextField(textFieldText ?: "", {viewModel.textFieldText = it }, modifier = Modifier.fillMaxSize().weight(1f))
                             //buttons
                             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                TextButton(onClick = {textFieldText = ""}){
+                                TextButton(onClick = {viewModel.textFieldText = ""}){
                                     Text(R.string.import_clear.str)
                                 }
                                 Button(onClick = {
-                                    val success = import(textFieldText)
+                                    val success = import(textFieldText ?: "")
                                     if (!success){
                                         lifecycleScope.launch {
                                             scaffoldState.snackbarHostState.showSnackbar(
@@ -174,21 +163,7 @@ class ImportThemeActivity : ComponentActivity(){
 
     private fun import(data:String):Boolean {
         var td: ThemeExchangeData? = null
-        val original = data.replace("\\s".toRegex(), "") //remove all whitespaces
-        var input = original
-        val possibleUrlBases = resources.getStringArray(R.array.theme_url_bases);
-        for (base in possibleUrlBases ){
-            if (input.startsWith(base)){
-                val uri = Uri.parse(input)
-                input = uri.getQueryParameter("data") ?: ""
-            }
-        }
-        if (input.startsWith("lepsi-rozvrh:motiv/")) {
-            input = input.substring("lepsi-rozvrh:motiv/".length)
-        }
-        if (input.isBlank()) {
-            input = original
-        }
+        var input = cleanInput(data)
         try {
             td = ThemeExchangeData.parseZipped(input)
         } catch (e: Exception) {
@@ -218,11 +193,51 @@ class ImportThemeActivity : ComponentActivity(){
         }
 
         if (td != null) {
-            viewModel.selectedTheme = SelectedTheme.CUSTOM
-            viewModel.theme = td.toRozvrhTheme()
+            themeViewModel.selectedTheme = SelectedTheme.CUSTOM
+            themeViewModel.theme = td.toRozvrhTheme()
             return true
         } else {
             return false
+        }
+    }
+
+    /** Takes theme data encoded in various forms of URL and tries to strip the url and leave only data */
+    private fun cleanInput(data: String):String{
+        val original = data.replace("\\s".toRegex(), "") //remove all whitespaces
+        var input = original
+        val possibleUrlBases = resources.getStringArray(R.array.theme_url_bases);
+        for (base in possibleUrlBases ){
+            if (input.startsWith(base)){
+                val uri = Uri.parse(input)
+                input = uri.getQueryParameter("data") ?: ""
+            }
+        }
+        if (input.startsWith("lepsi-rozvrh:motiv/")) {
+            input = input.substring("lepsi-rozvrh:motiv/".length)
+        }
+        if (input.isBlank()) {
+            input = original
+        }
+        return input
+    }
+
+    private fun handleIntent(intent: Intent) {
+        if (intent.getBooleanExtra("ignore", false)) {
+            return
+        }
+        val dataString = intent.dataString
+        val input = dataString?.let { cleanInput(it) }
+        if (input != null) {
+            viewModel.textFieldText = input;
+        }
+        intent.putExtra("ignore", true)
+
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent != null) {
+            handleIntent(intent)
         }
     }
 

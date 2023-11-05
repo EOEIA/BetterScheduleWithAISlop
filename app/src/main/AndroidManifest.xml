@@ -62,10 +62,29 @@
             android:theme="@style/AppTheme"/>
         <activity
             android:name=".settings.ImportThemeActivity"
-            android:exported="false"
+            android:exported="true"
             android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="vitskalicky.github.io" android:scheme="https" android:pathPrefix="/lepsi-rozvrh/motiv-info"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="vitskalicky.gitlab.io" android:scheme="https" android:pathPrefix="/lepsi-rozvrh/motiv-info"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="lepsi-rozvrh"/>
+            </intent-filter>
+        </activity>
         <activity
             android:name=".settings.ThemeSettingsActivity"
             android:exported="false"
