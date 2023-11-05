@@ -290,6 +290,7 @@ data class ThemeExchangeData(
         val gzos = GZIPOutputStream(bos)
         toJsonString(gzos)
         gzos.finish()
+        gzos.close()
     }
 
     /**
