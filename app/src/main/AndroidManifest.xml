@@ -55,6 +55,12 @@
                 android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
                 android:theme="@style/AppTheme"/>
         <activity
+            android:name=".settings.ExportThemeActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
+            android:theme="@style/AppTheme"/>
+        <activity
             android:name=".settings.ThemeSettingsActivity"
             android:exported="false"
             android:launchMode="singleTask"

@@ -1,5 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.settings
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -67,9 +69,9 @@ class ThemeSettingsActivity: ComponentActivity() {
                         val scrollState = rememberScrollState()
                         Column(Modifier.padding(paddingValues).verticalScroll(scrollState),) {
                             GeneralStateless(
-                                selectedTheme ?: SelectedTheme.FOLLOW_SYSTEM_THEME,
-                                (isSponsor?:false) || !(isDonationsEnabled?:false),
-                                {
+                                selectedTheme = selectedTheme ?: SelectedTheme.FOLLOW_SYSTEM_THEME,
+                                isSupporter = (isSponsor?:false) || !(isDonationsEnabled?:false),
+                                onThemeChange = {
                                     viewModel.selectedTheme = it
                                     when(it){
                                         SelectedTheme.LIGHT -> viewModel.theme = DefaultRozvrhThemes.LIGHT
@@ -81,10 +83,16 @@ class ThemeSettingsActivity: ComponentActivity() {
                                         }
                                     }
                                 },
-                                {showindDonationDialog = true},
-                                {},
-                                {},
-                                {}
+                                onSupportClicked = {showindDonationDialog = true},
+                                onImportClicked = {}, //todo
+                                onExportClicked = {
+                                    val intent = Intent(this@ThemeSettingsActivity, ExportThemeActivity::class.java)
+                                    startActivity(intent)
+                                }, //todo
+                                onGetMoreThemesClicked = {
+                                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.MORE_THEMES_LINK)))
+                                    startActivity(browserIntent)
+                                }
                             )
                             val t = theme;
                             if (selectedTheme == SelectedTheme.CUSTOM && t!=null){

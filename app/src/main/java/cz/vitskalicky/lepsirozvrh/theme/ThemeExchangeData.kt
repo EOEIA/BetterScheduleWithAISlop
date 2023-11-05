@@ -256,6 +256,7 @@ data class ThemeExchangeData(
      * Serializes this object using JSON and writes it to the given output stream.
      * @throws IOException if it fails
      */
+    @OptIn(ExperimentalSerializationApi::class)
     @Throws(IOException::class)
     fun toJsonString(os: OutputStream) {
         try {
@@ -288,6 +289,7 @@ data class ThemeExchangeData(
         val bos = Base64OutputStream(os, Base64.NO_WRAP or Base64.NO_PADDING or Base64.URL_SAFE)
         val gzos = GZIPOutputStream(bos)
         toJsonString(gzos)
+        gzos.finish()
     }
 
     /**
