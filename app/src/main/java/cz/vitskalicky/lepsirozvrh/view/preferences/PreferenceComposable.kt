@@ -270,20 +270,36 @@ fun RadioPreferenceDialogPreview(){
 }
 
 @Composable
-fun PreferenceGroupHeader(title: String){
-    Text(title,
-        style = MaterialTheme.typography.subtitle2,
+fun PreferenceGroupHeader(title: String, description: String? = null){
+    Column(
         modifier = Modifier
             .padding(start = 72.dp)
             .height(34.dp)
             .paddingFrom(FirstBaseline, before = 28.dp),
-        color = MaterialTheme.colors.secondary)
+    ) {
+        Text(title,
+            style = MaterialTheme.typography.subtitle2,
+
+            color = MaterialTheme.colors.secondary)
+        if (!description.isNullOrBlank()) Text(description, style = MaterialTheme.typography.caption)
+    }
 }
 
 @Preview
 @Composable
-private fun GrouHEaderPreview(){
-    PreferenceGroupHeader("Appearance")
+private fun PreferenceGroupHeaderPreview(){
+    Surface {
+        PreferenceGroupHeader("Název", "popis")
+    }
+}
+
+
+@Preview
+@Composable
+private fun GrouHeaderPreview(){
+    Surface {
+        PreferenceGroupHeader("Appearance")
+    }
 }
 
 @Composable
@@ -330,10 +346,11 @@ private fun FloatPreferenceDialog(
 
     var editedValue by rememberSaveable{ mutableStateOf(value.toString()) }
     var errorMessage: String? by rememberSaveable{ mutableStateOf(null) }
+    val floatError = R.string.not_a_float_error.str;
     val submit = {
         val parsed = editedValue.toFloatOrNull();
         if (parsed == null || !parsed.isFinite()){
-            errorMessage = R.string.not_a_float_error.str
+            errorMessage = floatError
         }else{
             errorMessage = validator(parsed)
             if (errorMessage == null) {

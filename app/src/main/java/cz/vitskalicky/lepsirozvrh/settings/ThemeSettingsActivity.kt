@@ -88,6 +88,8 @@ fun customizationsStateless(
         onChange(regen)
     }
 
+    val float_error_text = R.string.float_cannot_be_negative.str;
+
     PreferenceGroupHeader(R.string.theme_custom_settings.str)
     ColorPreference(R.string.primary_color.str, null, enabled = isSupporter, color = t.cPrimary){chng(t.copy(cPrimary = it))}
     ColorPreference(R.string.accent_color.str, null, enabled = isSupporter, color = t.cSecondary){chng(t.copy(cSecondary = it))}
@@ -101,11 +103,55 @@ fun customizationsStateless(
         ColorPreference(R.string.type_empty.str, null, color = t.cEmptyBg){chng(t.copy(cEmptyBg = it))}
         ColorPreference(R.string.type_header.str, R.string.type_header_desc.str, color = t.cHeaderBg){chng(t.copy(cHeaderBg = it))}
 
-        PreferenceGroupHeader(R.string.other.str)
-        ColorPreference(R.string.divider_color.str, null, color = t.cDivider){chng(t.copy(cDivider = it))}
-        FloatPreference(R.string.divider_width.str, value = t.dpDividerWidth, validator = { if (it<0) R.string.float_cannot_be_negative.str else null}){chng(t.copy(dpDividerWidth = it))}
         //todo went for lunch, continue here...
         // finish field for this level of detail, do the closest level of detail and add detail adjustment buttons
+    }else if (t.customizationLevel == 3){
+        PreferenceGroupHeader(R.string.type_normal_lesson.str)
+        ColorPreference(R.string.cell_primary_t.str, R.string.cell_primary_t_desc.str, color = t.cHPrimaryText){chng(t.copy(cHPrimaryText = it))}
+        ColorPreference(R.string.cells_background.str, null, color = t.cHBg){chng(t.copy(cHBg = it))}
+        ColorPreference(R.string.cell_secondary_t.str, R.string.cell_secondary_t_desc.str, color = t.cHSecondaryText){chng(t.copy(cHSecondaryText = it))}
+        ColorPreference(R.string.cell_room_t.str, R.string.cell_room_t_desc.str, color = t.cHRoomText){chng(t.copy(cHRoomText = it))}
+
+        PreferenceGroupHeader(R.string.type_change.str, R.string.type_change_desc.str)
+        ColorPreference(R.string.cell_primary_t.str, R.string.cell_primary_t_desc.str, color = t.cChngPrimaryText){chng(t.copy(cChngPrimaryText = it))}
+        ColorPreference(R.string.cells_background.str, null, color = t.cChngBg){chng(t.copy(cChngBg = it))}
+        ColorPreference(R.string.cell_secondary_t.str, R.string.cell_secondary_t_desc.str, color = t.cChngSecondaryText){chng(t.copy(cChngSecondaryText = it))}
+        ColorPreference(R.string.cell_room_t.str, R.string.cell_room_t_desc.str, color = t.cChngRoomText){chng(t.copy(cChngRoomText = it))}
+
+
+        PreferenceGroupHeader(R.string.type_no_school.str, R.string.type_no_school_desc.str)
+        ColorPreference(R.string.cell_primary_t.str, R.string.cell_primary_t_desc.str, color = t.cAPrimaryText){chng(t.copy(cAPrimaryText = it))}
+        ColorPreference(R.string.cells_background.str, null, color = t.cABg){chng(t.copy(cABg = it))}
+        ColorPreference(R.string.cell_secondary_t.str, R.string.cell_secondary_t_desc.str, color = t.cASecondaryText){chng(t.copy(cASecondaryText = it))}
+        ColorPreference(R.string.cell_room_t.str, R.string.cell_room_t_desc.str, color = t.cARoomText){chng(t.copy(cARoomText = it))}
+
+        PreferenceGroupHeader(R.string.type_empty.str)
+        ColorPreference(R.string.cells_background.str, null, color = t.cEmptyBg){chng(t.copy(cEmptyBg = it))}
+
+        PreferenceGroupHeader(R.string.type_header.str, R.string.type_header_desc.str)
+        ColorPreference(R.string.cell_primary_t.str, R.string.cell_primary_t_desc.str, color = t.cHeaderPrimaryText){chng(t.copy(cHeaderPrimaryText = it))}
+        ColorPreference(R.string.cells_background.str, null, color = t.cHeaderBg){chng(t.copy(cHeaderBg = it))}
+        ColorPreference(R.string.cell_secondary_t.str, R.string.cell_secondary_t_desc.str, color = t.cHeaderSecondaryText){chng(t.copy(cHeaderSecondaryText = it))}
+    }
+    if (t.customizationLevel >= 2){
+        PreferenceGroupHeader(R.string.other.str)
+        ColorPreference(R.string.divider_color.str, null, color = t.cDivider){chng(t.copy(cDivider = it))}
+        FloatPreference(R.string.divider_width.str, value = t.dpDividerWidth, validator = { if (it<0) float_error_text else null}){chng(t.copy(dpDividerWidth = it))}
+        ColorPreference(R.string.highlight_color.str, R.string.highlight_color_desc.str, color = t.cHighlight){chng(t.copy(cHighlight = it))}
+        FloatPreference(R.string.highlight_width.str, value = t.dpHighlightWidth, validator = { if (it<0) float_error_text else null}){chng(t.copy(dpHighlightWidth = it))}
+        ColorPreference(R.string.homework_color.str, R.string.homework_color_desc.str, color = t.cHomework){chng(t.copy(cHomework = it))}
+        FloatPreference(R.string.homework_size.str, value = t.dpHomework, validator = { if (it<0) float_error_text else null}){chng(t.copy(dpHomework = it))}
+        ColorPreference(R.string.infoline_fill.str, R.string.infoline_fill_desc.str, color = t.cInfolineBg){chng(t.copy(cInfolineBg = it))}
     }
 
+    if (t.customizationLevel > 1){
+        Preference(R.string.customize_less.str, R.string.customize_less_desc.str, { Icons.Default.UnfoldLess.icon }){
+            chng(t.copy(customizationLevel = t.customizationLevel-1))
+        }
+    }
+    if (t.customizationLevel < 3){
+        Preference(R.string.customize_more.str, R.string.customize_more_desc.str, { Icons.Default.ExpandMore.icon }){
+            chng(t.copy(customizationLevel = t.customizationLevel+1))
+        }
+    }
 }
