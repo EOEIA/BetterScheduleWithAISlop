@@ -102,7 +102,9 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         Room.databaseBuilder(
                 applicationContext,
                 SchoolsDatabase::class.java, "schools-database"
-        ).build()
+        )
+            .addMigrations(cz.vitskalicky.lepsirozvrh.schoolPicker.Migrations.MIGRATION_1_2)
+            .build()
     }
 
     /** Retrofit client for loading list of schools. Does not have any authentication */
