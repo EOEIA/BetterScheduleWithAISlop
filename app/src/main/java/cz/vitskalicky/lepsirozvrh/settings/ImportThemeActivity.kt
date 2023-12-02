@@ -48,7 +48,8 @@ class ImportThemeActivity : ComponentActivity(){
 
         setContent {
             val scaffoldState = rememberScaffoldState()
-            var showDonateDialog by rememberSaveable{mutableStateOf(donHelper.donations?.let { !it.isSponsor && it.isEnabled} ?: false)}
+            val isSupporter = donHelper.donations?.let { it.isSponsor || !it.isEnabled} ?: true;
+            var showDonateDialog by rememberSaveable{mutableStateOf(isSupporter)}
             val textFieldText by viewModel.textFieldTextLD.observeAsState()
 
             val paste: () -> Unit = {
@@ -140,6 +141,10 @@ class ImportThemeActivity : ComponentActivity(){
                                     Text(R.string.import_clear.str)
                                 }
                                 Button(onClick = {
+                                    if (!isSupporter){
+                                        showDonateDialog = true;
+                                        return@Button
+                                    }
                                     val success = import(textFieldText ?: "")
                                     if (!success){
                                         lifecycleScope.launch {
