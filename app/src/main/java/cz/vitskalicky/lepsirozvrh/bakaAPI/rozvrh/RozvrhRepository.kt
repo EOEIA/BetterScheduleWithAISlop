@@ -258,6 +258,7 @@ withContext(NonCancellable) {
                 StatusInfo.Rozvrh.loginFailed()
             }
             is HttpException -> {
+                application.sendReport(e);
                 StatusInfo.Rozvrh.unexpectedResponse()
             }
             else -> {
