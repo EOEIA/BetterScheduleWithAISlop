@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 1.8.10 (11. 1. 2024)
+
+- Aktualizováno pro Android 14
+
+---
+
+- Updated for Android 14
+
 ## 1.8.9 (11. 1. 2024)
 
 - Opravena chyba, kvůli které aplikace nefungovala s nejnovější verzí serveru.
