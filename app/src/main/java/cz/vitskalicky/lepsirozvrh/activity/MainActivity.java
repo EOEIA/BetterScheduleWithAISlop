@@ -4,15 +4,11 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
-import com.google.android.material.snackbar.Snackbar;
-import com.jaredrummler.cyanea.Cyanea;
 import com.jaredrummler.cyanea.utils.ColorUtils;
 
 import cz.vitskalicky.lepsirozvrh.BuildConfig;
@@ -23,7 +19,6 @@ import cz.vitskalicky.lepsirozvrh.bakaAPI.login.Login;
 import cz.vitskalicky.lepsirozvrh.fragment.RozvrhFragment;
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification;
 import cz.vitskalicky.lepsirozvrh.theme.Theme;
-import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewFragment;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -44,21 +39,6 @@ public class MainActivity extends BaseActivity {
         checkLogin();
 
         rFragment = (RozvrhFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
-
-        int lastInterestingFeatureVersion = 37;
-        String lastInterestingFeatureMessage = getString(R.string.interesting_works_again_37);
-
-        if (!SharedPrefs.contains(this, SharedPrefs.LAST_VERSION_SEEN) || (SharedPrefs.getInt(this, SharedPrefs.LAST_VERSION_SEEN) < lastInterestingFeatureVersion)) {
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.root), lastInterestingFeatureMessage, 300000);
-            snackbar.setAction(R.string.whats_new, view1 -> {
-                WhatsNewFragment whatsNewFragment = new WhatsNewFragment();
-                whatsNewFragment.show(getSupportFragmentManager(), "dialog");
-            });
-            snackbar.setActionTextColor(Cyanea.getInstance().getMenuIconColor());
-            snackbar.show();
-
-            SharedPrefs.setInt(this, SharedPrefs.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE);
-        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(ColorUtils.darker(Theme.of(this).getCHeaderBg()));

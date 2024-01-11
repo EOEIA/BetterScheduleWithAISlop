@@ -16,15 +16,16 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.distinctUntilChanged
+import com.google.android.material.snackbar.Snackbar
 import com.jaredrummler.cyanea.Cyanea
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.activity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
+import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
 import cz.vitskalicky.lepsirozvrh.theme.Theme
 import cz.vitskalicky.lepsirozvrh.view.RozvrhLayout
-import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
-import org.joda.time.LocalDateTime
+import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewFragment
 
 class RozvrhFragment : Fragment() {
 
@@ -196,6 +197,24 @@ class RozvrhFragment : Fragment() {
         }
         viewModel.isOfflineLD.observe(viewLifecycleOwner) {
             updateInfoLine()
+        }
+
+        // What's new snackbar
+        val lastInterestingFeatureVersion = 37
+        val lastInterestingFeatureMessage = getString(R.string.interesting_works_again_37)
+        val coordinatorLayout: View = view.findViewById<View>(R.id.snackbarHere)
+
+
+        if (!SharedPrefs.contains(requireContext(), SharedPrefs.LAST_VERSION_SEEN) || (SharedPrefs.getInt(requireContext(), SharedPrefs.LAST_VERSION_SEEN) < lastInterestingFeatureVersion)) {
+            val snackbar = Snackbar.make(coordinatorLayout, lastInterestingFeatureMessage, 300000)
+            snackbar.setAction(R.string.whats_new) { view1 ->
+                val whatsNewFragment = WhatsNewFragment()
+                whatsNewFragment.show(parentFragmentManager, "dialog")
+            }
+            snackbar.setActionTextColor(Cyanea.instance.menuIconColor)
+            snackbar.show()
+
+            SharedPrefs.setInt(requireContext(), SharedPrefs.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE)
         }
     }
 

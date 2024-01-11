@@ -40,6 +40,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@+id/snackbarHere"
+                                                         android:layout_width="match_parent"
+                                                         android:layout_height="300dp"
+                                                         android:layout_marginBottom="16dp"
+                                                         app:layout_constraintBottom_toTopOf="@+id/toolbar"
+                                                         app:layout_constraintEnd_toEndOf="parent"
+                                                         app:layout_constraintStart_toStartOf="parent">
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
