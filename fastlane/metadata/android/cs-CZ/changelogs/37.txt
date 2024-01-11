@@ -1,0 +1,1 @@
+Opravena chyba, kvůli které aplikace nefungovala s nejnovější verzí serveru.

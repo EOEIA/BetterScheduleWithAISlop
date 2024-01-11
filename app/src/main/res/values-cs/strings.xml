@@ -234,6 +234,7 @@
     <string name="whats_new">Co je nového</string>
     <!-- Interesting feature messages-->
     <string name="interesting_themes">Upravte si barvy aplikace pomocí motivů!</string>
+    <string name="interesting_works_again_37">Lepší rozvrh opět funguje!</string>
 
     <string name="wtf_rozvrh_title">Nastala chyba</string>
     <string name="wtf_rozvrh_message">Váš rozvrh nemohl být správně vykreslen! Přejete si tento problém nyní nahlásit prostřednictví emailu? Problémový rozvrh bude přiložen.</string>

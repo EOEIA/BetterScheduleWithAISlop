@@ -1,0 +1,1 @@
+Fixed a bug which caused the app to not work with the newest server version.

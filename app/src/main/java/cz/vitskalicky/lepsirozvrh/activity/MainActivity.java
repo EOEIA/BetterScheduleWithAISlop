@@ -45,18 +45,16 @@ public class MainActivity extends BaseActivity {
 
         rFragment = (RozvrhFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
 
-        int lastInterestingFeatureVersion = 16;
-        String lastInterestingFeatureMessage = getString(R.string.interesting_themes);
+        int lastInterestingFeatureVersion = 37;
+        String lastInterestingFeatureMessage = getString(R.string.interesting_works_again_37);
 
         if (!SharedPrefs.contains(this, SharedPrefs.LAST_VERSION_SEEN) || (SharedPrefs.getInt(this, SharedPrefs.LAST_VERSION_SEEN) < lastInterestingFeatureVersion)) {
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.root), lastInterestingFeatureMessage, Snackbar.LENGTH_INDEFINITE);
+            Snackbar snackbar = Snackbar.make(findViewById(R.id.root), lastInterestingFeatureMessage, 300000);
             snackbar.setAction(R.string.whats_new, view1 -> {
                 WhatsNewFragment whatsNewFragment = new WhatsNewFragment();
                 whatsNewFragment.show(getSupportFragmentManager(), "dialog");
             });
-            snackbar.setActionTextColor(Cyanea.getInstance().getPrimary());
-            snackbar.setDuration(5000);
-
+            snackbar.setActionTextColor(Cyanea.getInstance().getMenuIconColor());
             snackbar.show();
 
             SharedPrefs.setInt(this, SharedPrefs.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE);

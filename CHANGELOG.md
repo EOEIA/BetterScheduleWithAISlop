@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 1.8.9 (11. 1. 2024)
+
+- Opravena chyba, kvůli které aplikace nefungovala s nejnovější verzí serveru.
+
+---
+
+- Fixed a bug which caused the app to not work with the newest server version.
+
 ## 1.8.8 (2. 8. 2023)
 
 - Oprava drobné změny v API
