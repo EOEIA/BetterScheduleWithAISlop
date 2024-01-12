@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 1.8.11 (13. 1. 2024)
+
+- Aktualizována Billing library
+
+---
+
+- Also updated Billing library
+
 ## 1.8.10 (11. 1. 2024)
 
 - Aktualizováno pro Android 14
