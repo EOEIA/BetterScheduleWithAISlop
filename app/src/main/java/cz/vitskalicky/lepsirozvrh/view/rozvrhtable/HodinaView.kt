@@ -211,7 +211,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
             if (isTeacher) {
                 // to teacher's we want to show the class, not the teacher
                 // the class name is saved in zkrskup and skup
-                zkruc = lesson.groups.joinToString(", ") { if (it.abbrev.isBlank()) {it.abbrev} else {it.name} }
+                zkruc = lesson.groups.joinToString(", ") { it.abbrev.ifBlank { it.name } }
             }
 
             var actualSecondaryTextSize: Float = if ((zkrmist + zkruc).isEmpty()) 0.0f else secondaryTextSize.toFloat()

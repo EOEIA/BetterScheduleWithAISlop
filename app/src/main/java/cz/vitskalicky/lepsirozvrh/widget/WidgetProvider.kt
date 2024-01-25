@@ -231,7 +231,7 @@ open class WidgetProvider : AppWidgetProvider() {
                     if (isTeacher) {
                         // to teacher's we want to show the class, not the teacher
                         // the class name is saved in zkrskup and skup
-                        tchr = hodina.groups.joinToString(", ") { it.abbrev }
+                        tchr = hodina.groups.joinToString(", ") { it.abbrev.ifBlank { it.name } }
                     }
                     if (hodina.subjectAbbrev.isBlank() && hodina.teacherAbbrev.isBlank() && hodina.changeType != RozvrhLesson.NO_CHANGE) {
                         views.setTextViewText(primaryTextId, "")

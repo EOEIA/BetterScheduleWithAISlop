@@ -1,5 +1,29 @@
 # Seznam změn / Changelog
 
+## 1.8.11 (13. 1. 2024)
+
+- Aktualizována Billing library
+
+---
+
+- Also updated Billing library
+
+## 1.8.10 (11. 1. 2024)
+
+- Aktualizováno pro Android 14
+
+---
+
+- Updated for Android 14
+
+## 1.8.9 (11. 1. 2024)
+
+- Opravena chyba, kvůli které aplikace nefungovala s nejnovější verzí serveru.
+
+---
+
+- Fixed a bug which caused the app to not work with the newest server version.
+
 ## 1.8.8 (2. 8. 2023)
 
 - Oprava drobné změny v API

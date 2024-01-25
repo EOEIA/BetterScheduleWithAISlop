@@ -28,7 +28,7 @@ interface RozvrhWebservice {
         }
     }
 
-    @GET("api/3/timetable/actual?")
+    @GET("api/3/timetable/actual")
     suspend fun getActualSchedule(@Query("date") date: String?): Rozvrh3
 
     @GET("api/3/timetable/permanent")
