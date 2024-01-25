@@ -251,7 +251,7 @@
     <plurals name="info_weeks_forward">
         <item quantity="one">%d týden vpřed</item>
         <item quantity="few">%d týdny vpřed</item>
-        <item quantity="many">%d týdnů zpět</item>
+        <item quantity="many">%d týdnů vpřed</item>
         <item quantity="other">%d týdnů vpřed</item>
     </plurals>
 </resources>
