@@ -12,6 +12,7 @@ import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
+import com.fasterxml.jackson.databind.ObjectMapper
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.mainActivity.MainActivity
 import cz.vitskalicky.lepsirozvrh.model.Account
@@ -131,9 +132,12 @@ open class WidgetProvider : AppWidgetProvider() {
         fun updateLoggedOut(context: Context, widgetID: Int){
 
             val appWidgetManager = AppWidgetManager.getInstance(context)
-            var widgetSettings:Widget = AppSingleton.getInstance(context).widgetsSettings.widgets[widgetID] ?: /*fail-safe*/run {
-                // fail-safe
+            val widgetsSettings = AppSingleton.getInstance(context).widgetsSettings;
+            var widgetSettings:Widget = widgetsSettings.widgets[widgetID] ?: /*fail-safe*/run {
+                // reports error and fails safe
+                val mapper = ObjectMapper()
                 Log.e(TAG, "There are widget settings missing for widget with id $widgetID")
+                (context.applicationContext as MainApplication).sendReport(RuntimeException("There are widget settings missing for widget with id $widgetID. Widget settings: ${mapper.writeValueAsString(widgetsSettings)}"))
                 Widget()
             }
             val views: RemoteViews = RemoteViews(context.packageName, R.layout.small_widget)
@@ -168,6 +172,7 @@ open class WidgetProvider : AppWidgetProvider() {
             // failsafe
             if (widgetSettings == null) {
                 widgetSettings = Widget()
+                //todo report
                 Log.e(TAG, "There are widget settings missing for widget with id $widgetID")
             }
             val allEmpty:Boolean = hodiny.isNullOrEmpty()
