@@ -7,7 +7,9 @@ import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.Class
 import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
+import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings.Widget
+import io.sentry.Sentry
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -15,8 +17,11 @@ import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 
 /** Handles migration from pre- 1.9 to 1.9 */
-object v1_9 {
-    suspend fun migrate(context: Context){
+object v1_9 : MigrationInterface {
+    const val TAG: String = "v1_9";
+    override val versionCode: Int
+        get() = 40;
+    override suspend fun migrate(context: Context){
         account(context)
         switchToNextWeek(context)
         theme(context)
@@ -29,12 +34,19 @@ object v1_9 {
     private suspend fun account(context: Context){
         val prefs = context.prefs;
         // extract required data from old storage
+        val oldData = mapOf(
+            "serverUrl" to prefs.string(URL),
+            "username" to prefs.string(USERNAME),
+            "accessToken" to prefs.string(ACCESS_TOKEN),
+            "refreshToken" to prefs.string(REFRESH_TOKEN),
+            "accessExpires" to prefs.string(ACCESS_EXPIRES)
+            )
         val acc: Account? = with(prefs) {
             try {
                 Account(
                     serverUrl = string(URL)!!,
                     username = string(USERNAME)?:"",
-                    accessToken = string(ACCEESS_TOKEN)!!,
+                    accessToken = string(ACCESS_TOKEN)!!,
                     refreshToken = string(REFRESH_TOKEN)!!,
                     accessExpires = DateTime.parse(string(ACCESS_EXPIRES)),
                     schoolName = "",
@@ -47,6 +59,10 @@ object v1_9 {
                     requireRefresh = true
                 )
             }catch (e: NullPointerException){
+                if (!string(ACCESS_TOKEN).isNullOrBlank()){
+                    //todo check what if the user has logged in and out
+                    Sentry.captureException(RuntimeException("Exception while migrating account: Could not get info about old account, but there seems to be some account present. Old data from shared preferences: $oldData", e));
+                }
                 null
             }
         }
@@ -56,7 +72,7 @@ object v1_9 {
             remove(SCHOOL_NAME)
             remove(SCHOOL_ID)
             remove(USERNAME)
-            remove(ACCEESS_TOKEN)
+            remove(ACCESS_TOKEN)
             remove(REFRESH_TOKEN)
             remove(ACCESS_EXPIRES)
             remove(NAME)
@@ -64,25 +80,26 @@ object v1_9 {
             remove(TYPE_TEXT)
             remove(SEMESTER_END)
         }
-        if (acc == null){
-            // account could not be migrated
-            //todo report
-            //todo full logout and cleanup
-            return
-        }
-        // add account to database
-        val app = context.applicationContext as MainApplication;
-        val id = app.rozvrhDb.accountDao().insertAccount(acc);
-        val account = app.rozvrhDb.accountDao().loadAccount(id);
-        if (account == null){
-            //todo something went terribly wrong
-            return
-        }
-        app.accountRepository.switchToAccount(account.id)
+        var accountvar: Account? = null;
+        if (acc != null) {
+            // if there was an account present
 
+            // add account to database
+            val app = context.applicationContext as MainApplication;
+            val id = app.rozvrhDb.accountDao().insertAccount(acc);
+            accountvar = app.rozvrhDb.accountDao().loadAccount(id);
+            if (accountvar == null) {
+                Sentry.captureException(IllegalStateException("Account not found after migration. User has been logged out. Old data from shared preferences: $oldData"))
+                //something went terribly wrong
+            }else {
+                app.accountRepository.switchToAccount(accountvar.id)
+            }
+        }
+
+        val account: Account? = accountvar;
         // update persistent notification setting
         prefs.edit {
-            if (prefs.boolean(PREFS_NOTIFICATION) ?: false) {
+            if (account != null && (prefs.boolean(PREFS_NOTIFICATION) ?: false)) {
                 putLong(PrefsConsts.NOTIFICATION_ACCOUNT, account.id)
             }else{
                 remove(PrefsConsts.NOTIFICATION_ACCOUNT)
@@ -92,20 +109,29 @@ object v1_9 {
         // update widgets
         if (!prefs.string(WIDGETS_SETTINGS).isNullOrBlank()) {
             try {
-                val oldWidgets: List<OldWidget> = Json.decodeFromString(prefs.string(WIDGETS_SETTINGS)!!)
-                val newWidgets = oldWidgets.map {
+                val oldWidgetSettings: OldWidgetSettings = Json.decodeFromString(prefs.string(WIDGETS_SETTINGS)!!)
+                val oldWidgets = oldWidgetSettings.widgets
+                val newWidgets = oldWidgets.mapValues {
                     Widget().apply {
-                        this.accountId = account.id;
-                        this.backgroundColor = it.backgroundColor
-                        this.primaryTextColor = it.primaryTextColor
-                        this.primaryTextSize = it.primaryTextSize
-                        this.secondaryTextColor = it.secondaryTextColor
-                        this.secondaryTextSize = it.secondaryTextSize
+                        this.accountId = account?.id ?: 0;
+                        this.backgroundColor = it.value.backgroundColor
+                        this.primaryTextColor = it.value.primaryTextColor
+                        this.primaryTextSize = it.value.primaryTextSize
+                        this.secondaryTextColor = it.value.secondaryTextColor
+                        this.secondaryTextSize = it.value.secondaryTextSize
                     }
                 }
-                val json = ObjectMapper().writeValueAsString(newWidgets);
+                val newWidgetSettings = WidgetsSettings().apply {
+                    widgetIds = oldWidgetSettings.widgetIds;
+                    widgets = HashMap(newWidgets);
+                }
+                val json = ObjectMapper().writeValueAsString(newWidgetSettings);
                 prefs.edit { putString(PrefsConsts.WIDGETS_SETTINGS, json) }
-            } catch (_: IllegalArgumentException){} catch (_: SerializationException){}
+            } catch (e: IllegalArgumentException){
+                Sentry.captureException(RuntimeException("Exception while converting widget settings", e))
+            } catch (e: SerializationException){
+                Sentry.captureException(RuntimeException("Exception while converting widget settings", e))
+            }
             prefs.edit { remove(WIDGETS_SETTINGS) }
         }
     }
@@ -169,7 +195,7 @@ object v1_9 {
     private const val SCHOOL_NAME = "school_name"
     private const val SCHOOL_ID = "school_id"
     private const val USERNAME = "username"
-    private const val ACCEESS_TOKEN = "access_token"
+    private const val ACCESS_TOKEN = "access_token"
     private const val REFRESH_TOKEN = "refresh_token"
 
     /**
@@ -195,6 +221,12 @@ object v1_9 {
      * Access this one only using [AppSingleton.getWidgetsSettings].
      */
     const val WIDGETS_SETTINGS = "widgets-settings"
+
+    @Serializable
+    data class OldWidgetSettings (
+        val widgetIds: HashSet<Int>,
+        val widgets: HashMap<Int,OldWidget>
+    )
 
     /** Old format of widget's settings */
     @Serializable

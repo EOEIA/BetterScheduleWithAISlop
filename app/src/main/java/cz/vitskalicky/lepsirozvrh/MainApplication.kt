@@ -18,6 +18,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
 import cz.vitskalicky.lepsirozvrh.database.Migrations
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
+import cz.vitskalicky.lepsirozvrh.migration.MigrationInterface
 import cz.vitskalicky.lepsirozvrh.migration.v1_9
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
@@ -197,14 +198,21 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     /** Performs data migrations, except for database. Database data is migrated in [rozvrhDb] -> addMigrations()*/
     private suspend fun doMigrations(){
         val prefs = SharedPrefsKt(this);
-        val lastCode = prefs.int(PrefsConsts.LAST_VERSION_SEEN) ?: Int.MAX_VALUE // if first launch, do not do any migration
+        withContext(NonCancellable){// It's bad idea to cancel migrations
+            val lastCode = prefs.int(PrefsConsts.LAST_VERSION_SEEN) ?: Int.MAX_VALUE // if first launch, do not do any migration
 
-        if (lastCode < 37 /* v1.9*/){
-            // multi-account and jetpack compose
-            v1_9.migrate(this)
+            val migrations: List<MigrationInterface> = listOf(
+                v1_9
+            );
+
+            for (item in migrations.sortedBy { it.versionCode } ){
+                if (lastCode < item.versionCode){
+                    item.migrate(this@MainApplication);
+                }
+            }
+
+            prefs.edit { putInt(PrefsConsts.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE) }
         }
-
-        prefs.edit { putInt(PrefsConsts.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE) }
     }
 
 
