@@ -3,6 +3,7 @@ package cz.vitskalicky.lepsirozvrh
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 
@@ -54,7 +55,7 @@ class SharedPrefsKt(context: Context){
 val Context.prefs: SharedPrefsKt
     get() = SharedPrefsKt(this)
 
-/** Keys for various settings more are in the old [SharedPrefs]*/
+/** Keys for various settings. more are in the old [SharedPrefs]*/
 object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val ACTIVE_ACCOUNT_ID = "long_active_account_id"
     const val LAST_SCHOOLS_LIST_UPDATE = "prefs-last-schools-list-update"
@@ -64,7 +65,7 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     /** non-set is treated as true */
     const val CENTER_TO_CURRENT_LESSON = "prefs-center-to-current-lesson"
     /**
-     * Account id for which persistent notification is active. Invalid id => persistent notification disabled
+     * Account id for which persistent notification is active. Invalid id or not set => the active account has been logged out. Id == [PermanentNotification.ACCOUNT_NOTIFICATION_DISABLED] => notifications have been intentionally disabled by the user.
      */
     const val NOTIFICATION_ACCOUNT = "notification-account"
     const val NOTIFICATION_PLEASE_GRANT_PERMISSION = "notification-please-grant-permission"
@@ -90,9 +91,10 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
             if (!contains(CENTER_TO_CURRENT_LESSON)) putBoolean(CENTER_TO_CURRENT_LESSON, true)
             if (!contains(SWITCH_TO_NEXT_WEEK_OPTION_INDEX)) putInt(SWITCH_TO_NEXT_WEEK_OPTION_INDEX, 2)
             if (!contains(SELECTED_THEME)) putInt(SELECTED_THEME, SelectedTheme.FOLLOW_SYSTEM_THEME.index)
-            DefaultRozvrhThemes.LIGHT
+            if (!contains(NOTIFICATION_ACCOUNT)) putLong(NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT)
+            DefaultRozvrhThemes.LIGHT //todo wtf is this
 
-            if (!contains(CUSTOM_THEME)) sharedPreferences.edit().apply { }
+            if (!contains(CUSTOM_THEME)) sharedPreferences.edit().apply { } //todo this seems unfinished
         } }
     }
 }

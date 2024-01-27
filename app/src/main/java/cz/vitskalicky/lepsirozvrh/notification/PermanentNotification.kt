@@ -37,6 +37,11 @@ object PermanentNotification {
     const val PREF_DONT_SHOW_INFO_DIALOG = "dont-show-notification-info-dialog-again"
     public val EXTRA_NOTIFICATION = PermanentNotification::class.java.canonicalName + "-extra-notification"
 
+    /** Special value for accountId which symbolizes that permanent notification have been disabled by the user. */
+    public const val ACCOUNT_NOTIFICATION_DISABLED = -1L;
+    /** Special value for the accountId which symbolizes that permanent notification was enabled, but that account has been logged out. */
+    public const val ACCOUNT_NOTIFICATION_LOGGED_OUT = -2L;
+
     suspend fun update(app: MainApplication) {
         val accountId: Long? = if (SharedPrefs.contains(app, PrefsConsts.NOTIFICATION_ACCOUNT))
             SharedPrefs.getLong(app, PrefsConsts.NOTIFICATION_ACCOUNT)
@@ -199,7 +204,7 @@ object PermanentNotification {
             ) == PackageManager.PERMISSION_DENIED
         ) {
             SharedPrefsKt(context).edit {
-                remove(PrefsConsts.NOTIFICATION_ACCOUNT)
+                putLong(PrefsConsts.NOTIFICATION_ACCOUNT, ACCOUNT_NOTIFICATION_DISABLED)
                 putBoolean(PrefsConsts.NOTIFICATION_PLEASE_GRANT_PERMISSION, true)
             }
             notificationManager.cancel(PERMANENT_NOTIFICATION_ID)

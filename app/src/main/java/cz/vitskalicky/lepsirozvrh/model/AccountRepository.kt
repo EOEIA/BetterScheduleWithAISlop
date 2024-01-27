@@ -331,7 +331,7 @@ class AccountRepository(val app: MainApplication) {
                 app.prefs.edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID)}
             }
             if (app.prefs.long(PrefsConsts.NOTIFICATION_ACCOUNT) == accountId) {
-                app.prefs.edit { remove(PrefsConsts.NOTIFICATION_ACCOUNT) }
+                app.prefs.edit { putLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT) }
                 PermanentNotification.update(app, null, false, null,0)
             }
 

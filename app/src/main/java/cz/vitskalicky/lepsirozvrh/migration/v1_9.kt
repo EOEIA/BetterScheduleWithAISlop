@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.Class
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings.Widget
@@ -99,10 +100,12 @@ object v1_9 : MigrationInterface {
         val account: Account? = accountvar;
         // update persistent notification setting
         prefs.edit {
-            if (account != null && (prefs.boolean(PREFS_NOTIFICATION) ?: false)) {
+            if (account != null && (prefs.boolean(PREFS_NOTIFICATION) ?: true)) { // logged in and notification enabled
                 putLong(PrefsConsts.NOTIFICATION_ACCOUNT, account.id)
-            }else{
-                remove(PrefsConsts.NOTIFICATION_ACCOUNT)
+            }else if (prefs.boolean(PREFS_NOTIFICATION) == false){ // explicitly disabled
+                putLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_DISABLED)
+            }else{ // not logged in and enabled
+                putLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT)
             }
             remove(PREFS_NOTIFICATION)
         }

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.*
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.model.Account
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 
 class SettingsViewModel(application: Application): AndroidViewModel(application) {
     private val repository = getApplication<MainApplication>().repository
@@ -46,7 +47,7 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
 
     var notificationAccountId: Long?
         get() = sp.long(PrefsConsts.NOTIFICATION_ACCOUNT)
-        set(value) = sp.edit { if (value == null) remove(PrefsConsts.NOTIFICATION_ACCOUNT) else putLong(PrefsConsts.NOTIFICATION_ACCOUNT, value) }
+        set(value) = sp.edit { if (value == null) putLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_DISABLED) else putLong(PrefsConsts.NOTIFICATION_ACCOUNT, value) }
     val notificationAccountIdLD: LiveData<Long?> = SharedPrefsLongLiveData(sp.sharedPreferences, PrefsConsts.NOTIFICATION_ACCOUNT, -1).map { if (it == -1L) null else it }
     val notificationAccountLD: LiveData<Account?> = notificationAccountIdLD.switchMap { it?.let { accountRepository.getAccountLD(it) } ?: MutableLiveData(null) }
 
