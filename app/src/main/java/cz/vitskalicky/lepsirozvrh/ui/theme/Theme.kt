@@ -47,7 +47,7 @@ fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), hasAppBar: Bool
     val themeLD: LiveData<RozvrhTheme?> = app.getThemeLD(darkTheme);
     //todo this is too slow at loading themes. Make tit faster
     val rt by themeLD.observeAsState()
-    val rozvrhTheme = rt ?: DefaultRozvrhThemes.UNSPECIFIED // :(
+    val rozvrhTheme = rt ?: if (BuildConfig.DEBUG) DefaultRozvrhThemes.UNSPECIFIED else if (darkTheme) DefaultRozvrhThemes.DARK else DefaultRozvrhThemes.LIGHT // :(
     val colors = rozvrhTheme.colors()
 
     CompositionLocalProvider(LocalRozvrhTheme provides rozvrhTheme){
