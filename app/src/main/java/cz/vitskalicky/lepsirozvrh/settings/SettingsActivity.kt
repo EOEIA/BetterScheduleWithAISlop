@@ -59,7 +59,7 @@ class SettingsActivity : ComponentActivity() {
         // if the user denies, reset the setting. If allows, set it to the pending account
         var pendingNotificationAccountId: Long? = null
         val showNotiPermissionDialogLD: MutableLiveData<Boolean> = MutableLiveData(false)
-        val notiPermissionGrantedLD = MutableLiveData<Boolean>(checkNotiPermissionGranted())
+        val notiPermissionGrantedLD = MutableLiveData<Boolean>(PermanentNotification.checkNotiPermissionGranted(this))
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -76,13 +76,13 @@ class SettingsActivity : ComponentActivity() {
                     viewModel.notificationAccountId = null
                     showNotiPermissionDialogLD.value = true
                 }
-                notiPermissionGrantedLD.value = isGranted || isApiLevelBeforeNotiPerm();
+                notiPermissionGrantedLD.value = isGranted || PermanentNotification.isApiLevelBeforeNotiPerm();
                 lifecycleScope.launch {
                     PermanentNotification.update(application as MainApplication)
                 }
             }
         val setNotificationAccount = {selectedAccount: Long? ->
-            if(!checkNotiPermissionGranted() && selectedAccount != null){
+            if(!PermanentNotification.checkNotiPermissionGranted(this) && selectedAccount != null){
                 //not granted - request it
                 pendingNotificationAccountId = selectedAccount
                 requestPermissionLauncher.launch(
@@ -340,16 +340,6 @@ class SettingsActivity : ComponentActivity() {
             dismissButtonContent = {Text("Open")},
             body = {Text("Tady bych vám chtěl říct něco důležitého.")}
         )
-    }
-
-    private fun isApiLevelBeforeNotiPerm() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
-
-    /** Returns true if you need to ask for notification permission (it is not granted) */
-    private fun checkNotiPermissionGranted(): Boolean{
-        return isApiLevelBeforeNotiPerm()
-                || ActivityCompat.checkSelfPermission(this@SettingsActivity,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onResume() {

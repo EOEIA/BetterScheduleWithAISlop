@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -226,4 +228,17 @@ object PermanentNotification {
             text = { Text(stringResource(R.string.notification_no_permission)) }
         )
     }
+
+    fun isApiLevelBeforeNotiPerm() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+
+    /** Returns true if you need to ask for notification permission (it is not granted) */
+    fun checkNotiPermissionGranted(ctx: Context): Boolean{
+        return isApiLevelBeforeNotiPerm()
+                || ActivityCompat.checkSelfPermission(ctx,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    @Composable
+    fun checkNotiPermissionGranted(): Boolean = checkNotiPermissionGranted(LocalContext.current)
 }

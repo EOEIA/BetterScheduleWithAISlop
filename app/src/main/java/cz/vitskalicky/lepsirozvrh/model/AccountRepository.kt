@@ -263,6 +263,15 @@ class AccountRepository(val app: MainApplication) {
             if (account == null){
                 throw RuntimeException("hmm, the id did not match")
                 //todo resolve properly
+            }            // If previous notification account has been logged out or no account has been logged in before, enable them for the account
+            //try to enable notification
+            if ((
+                    app.prefs.long(PrefsConsts.NOTIFICATION_ACCOUNT) == PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT //logged out
+                    || !app.prefs.contains(PrefsConsts.NOTIFICATION_ACCOUNT // or never logged in
+                )
+                && PermanentNotification.checkNotiPermissionGranted(app) // and we have permission to show notification
+                )){
+                app.prefs.putOne(PrefsConsts.NOTIFICATION_ACCOUNT, accountId) //enable notification for the newly added account
             }
 
             return SUCCESS.ok(account)
