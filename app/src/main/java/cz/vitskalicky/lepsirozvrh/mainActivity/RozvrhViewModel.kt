@@ -13,6 +13,8 @@ interface RozvrhViewModel {
     fun getStatusLD(): LiveData<StatusInfo>
     fun getIsOfflineLD(): LiveData<Boolean>
 
+    fun getShowSettingsBadgeLD(): LiveData<Boolean>
+
     var weekPosition: Int
     val showError: Boolean
     fun forceRefresh()

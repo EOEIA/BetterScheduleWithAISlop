@@ -15,6 +15,7 @@ import org.joda.time.LocalDate
 class MainActivityViewModel(
     application: Application,
 ) : AndroidViewModel(application), RozvrhViewModel {
+    private val app = application as MainApplication;
     private val repository = getApplication<MainApplication>().repository
     private val accountRepository = getApplication<MainApplication>().accountRepository
     private val accountIdLD: LiveData<Long?> = SharedPrefsLongLiveData(application.prefs.sharedPreferences, PrefsConsts.ACTIVE_ACCOUNT_ID, -1).map { if (it == -1L) null else it }
@@ -26,6 +27,11 @@ class MainActivityViewModel(
     private val statusLD: MediatorLiveData<StatusInfo> = MediatorLiveData()
     override fun getStatusLD(): LiveData<StatusInfo> = statusLD
 
+    private val showSettingBadgeLD = SharedPrefsBooleanLiveData(
+            application.prefs.sharedPreferences,
+            PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, false)
+        .switchMap { dontShow:Boolean -> app.isNotificationPermissionGranted.map { isGranted: Boolean -> !dontShow && !isGranted  } }
+    override fun getShowSettingsBadgeLD(): LiveData<Boolean> = showSettingBadgeLD
     private var currentlyUsedLD: LiveData<RozvrhRecord?>? = null
     private var currentlyUsedStatusLD: LiveData<StatusInfo>? = null
 

@@ -53,13 +53,13 @@ class SettingsActivity : ComponentActivity() {
     var donHelper = DonationHelper(this);
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val app = applicationContext as MainApplication
         donHelper.onCreate()
 
         // handles permission for notification
         // if the user denies, reset the setting. If allows, set it to the pending account
         var pendingNotificationAccountId: Long? = null
         val showNotiPermissionDialogLD: MutableLiveData<Boolean> = MutableLiveData(false)
-        val notiPermissionGrantedLD = MutableLiveData<Boolean>(PermanentNotification.checkNotiPermissionGranted(this))
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -76,7 +76,7 @@ class SettingsActivity : ComponentActivity() {
                     viewModel.notificationAccountId = null
                     showNotiPermissionDialogLD.value = true
                 }
-                notiPermissionGrantedLD.value = isGranted || PermanentNotification.isApiLevelBeforeNotiPerm();
+                app.isNotificationPermissionGranted.value = isGranted || PermanentNotification.isApiLevelBeforeNotiPerm();
                 lifecycleScope.launch {
                     PermanentNotification.update(application as MainApplication)
                 }
@@ -100,7 +100,7 @@ class SettingsActivity : ComponentActivity() {
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
             var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
             val showNotiPermissionDialog: Boolean by showNotiPermissionDialogLD.observeAsState(false)
-            val notiPermissionGrantedState: Boolean by notiPermissionGrantedLD.observeAsState(true)
+            val notiPermissionGrantedState: Boolean by app.isNotificationPermissionGranted.observeAsState(true)
             val dontShowNotiBanner: Boolean by viewModel.dontShowNotiBannerLD.observeAsState(true)
 
 

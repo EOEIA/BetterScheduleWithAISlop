@@ -70,6 +70,8 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     public val mainScope = MainScope()
     lateinit var notificationState: NotificationState
         private set
+    /** Update this properly to reflect the current state in UI. */
+    public var isNotificationPermissionGranted: MutableLiveData<Boolean> = MutableLiveData(false);
     /** Time of the next scheduled notification and widget update */
     private var updateTime: LocalDateTime? = null
     private lateinit var notificationAccountLD: LiveData<Long?>
@@ -229,6 +231,8 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         }
         lightThemeLD = selectedThemeLD.switchMap (themeMapper(false))
         darkThemeLD = selectedThemeLD.switchMap (themeMapper(true))
+
+        isNotificationPermissionGranted.value = PermanentNotification.checkNotiPermissionGranted(this);
     }
 
     /** Performs data migrations, except for database. Database data is migrated in [rozvrhDb] -> addMigrations()*/

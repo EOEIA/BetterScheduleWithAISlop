@@ -38,6 +38,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
     val rozvrh by viewModel.getDisplayLD().observeAsState()
     val status by viewModel.getStatusLD().observeAsState()
     val account by viewModel.getAccountLD().observeAsState()
+    val showSettingsBadge by viewModel.getShowSettingsBadgeLD().observeAsState()
 
     val context = LocalContext.current;
     val infolineLD = remember {
@@ -85,7 +86,8 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         },
         onRefreshPress = {viewModel.forceRefresh()},
         centerToCurrentLesson = centerToCurrentLesson,
-        onCenterCompleted = {centerToCurrentLesson = false}
+        onCenterCompleted = {centerToCurrentLesson = false},
+        showSettingsBadge = showSettingsBadge ?: false
     )
 }
 
@@ -106,6 +108,7 @@ fun RozvrhWithControlsStateless(
     onPermPress: () -> Unit,
     onSettingsPress: () -> Unit,
     onRefreshPress: () -> Unit,
+    showSettingsBadge: Boolean
 ){
     val scroolState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
@@ -119,7 +122,9 @@ fun RozvrhWithControlsStateless(
             verticalArrangement = Arrangement.Top
         ) {
             Box(
-                modifier = Modifier.horizontalScroll(scroolState).weight(1F)
+                modifier = Modifier
+                    .horizontalScroll(scroolState)
+                    .weight(1F)
             ) {
                 val rozvrhTheme = LocalRozvrhTheme.current
                 val screenWidth = LocalContext.current.resources.displayMetrics?.widthPixels ?: 0 // todo not optimal - assumes the view take up entire screen width, but proper solution is currently unnecessarily complicated
@@ -164,7 +169,9 @@ fun RozvrhWithControlsStateless(
                 ) {
                     //todo tooltips
                     IconButton(onSettingsPress) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                        BadgedBox(badge = { if(showSettingsBadge) Badge(Modifier.size(6.dp), backgroundColor = MaterialTheme.colors.error.copy(alpha = 1.0f)) { }}) {
+                            Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                        }
                     }
                     Row(Modifier.align(Alignment.Center)) {
                         if (weekPosition != RozvrhViewModel.PERM)
@@ -291,6 +298,6 @@ fun Rozvrhpreview(){
         {},
         {},
         {},
-
+        true
     )
 }
