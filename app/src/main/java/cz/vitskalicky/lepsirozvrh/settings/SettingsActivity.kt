@@ -12,6 +12,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -25,6 +26,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
@@ -56,6 +59,7 @@ class SettingsActivity : ComponentActivity() {
         // if the user denies, reset the setting. If allows, set it to the pending account
         var pendingNotificationAccountId: Long? = null
         val showNotiPermissionDialogLD: MutableLiveData<Boolean> = MutableLiveData(false)
+        val notiPermissionGrantedLD = MutableLiveData<Boolean>(checkNotiPermissionGranted())
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -72,10 +76,21 @@ class SettingsActivity : ComponentActivity() {
                     viewModel.notificationAccountId = null
                     showNotiPermissionDialogLD.value = true
                 }
+                notiPermissionGrantedLD.value = isGranted || isApiLevelBeforeNotiPerm();
                 lifecycleScope.launch {
                     PermanentNotification.update(application as MainApplication)
                 }
             }
+        val setNotificationAccount = {selectedAccount: Long? ->
+            if(!checkNotiPermissionGranted() && selectedAccount != null){
+                //not granted - request it
+                pendingNotificationAccountId = selectedAccount
+                requestPermissionLauncher.launch(
+                    Manifest.permission.POST_NOTIFICATIONS)
+            }else{
+                viewModel.notificationAccountId = selectedAccount
+            }
+        }
 
         setContent {
             val scrollState:ScrollState = rememberScrollState()
@@ -85,6 +100,8 @@ class SettingsActivity : ComponentActivity() {
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
             var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
             val showNotiPermissionDialog: Boolean by showNotiPermissionDialogLD.observeAsState(false)
+            val notiPermissionGrantedState: Boolean by notiPermissionGrantedLD.observeAsState(true)
+            val dontShowNotiBanner: Boolean by viewModel.dontShowNotiBannerLD.observeAsState(true)
 
 
             LepsirozvrhTheme {
@@ -104,7 +121,8 @@ class SettingsActivity : ComponentActivity() {
                     },
                     content = {paddingValues: PaddingValues ->
                         Column(
-                            Modifier.verticalScroll(scrollState)
+                            Modifier
+                                .verticalScroll(scrollState)
                                 .padding(
                                     start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                                     end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
@@ -116,14 +134,33 @@ class SettingsActivity : ComponentActivity() {
 
                             Spacer(Modifier.size(paddingValues.calculateTopPadding()))
 
-                            PreferenceGroupHeader(R.string.user.str)
-
                                 val account by viewModel.accountLD.observeAsState()
                                 if (viewModel.accountLD.isInitialized && account == null){
                                     intent = Intent(this@SettingsActivity, AccountPickerActivity::class.java)
                                     startActivity(intent)
                                     finishAffinity()
                                 }
+
+                            if(account != null) {
+                                AnimatedVisibility(!notiPermissionGrantedState && !dontShowNotiBanner) {
+                                    SettingsAlertBanner(
+                                        onConfirm = { setNotificationAccount(account!!.id) },
+                                        onDismiss = { viewModel.dontShowNotiBanner = true },
+                                        icon = {
+                                            Icon(
+                                                Icons.Default.NotificationsActive,
+                                                null,
+                                                Modifier.fillMaxSize()
+                                            )
+                                        },
+                                        confirmButtonContent = { Text(R.string.notification_banner_open.str.uppercase()) },
+                                        dismissButtonContent = { Text(R.string.notification_banner_dismiss.str.uppercase()) },
+                                        body = { Text(R.string.notification_banner_text.str) }
+                                    )
+                                }
+                            }
+
+                            PreferenceGroupHeader(R.string.user.str)
                             Preference(account?.fullName,account?.userTypeText){switchAccount()}
                             Preference(R.string.switch_account.str, null, Icons.Default.SwitchAccount.icon){ switchAccount() }
                             Preference(R.string.logout.str, null, Icons.Default.Logout.icon){ coroutinScope.launch { account?.let { logOut(it.id)} } }
@@ -179,25 +216,7 @@ class SettingsActivity : ComponentActivity() {
                                 val optIndex: Int? = (newOptionIndex -1).takeUnless { it == -1 }
                                 val selectedAccount = optIndex?.let { accounts[it].id }
 
-                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                                    //lower api - no need for notification permission
-                                    viewModel.notificationAccountId = selectedAccount
-                                }else{
-                                    //higher api - need to check and request permission
-                                    //check for notification permission
-                                    if (ActivityCompat.checkSelfPermission(this@SettingsActivity,
-                                            Manifest.permission.POST_NOTIFICATIONS
-                                        ) == PackageManager.PERMISSION_GRANTED
-                                    ) {
-                                        //already granted - no more action needed
-                                        viewModel.notificationAccountId = selectedAccount
-                                    }else{
-                                        //not granted - request it
-                                        pendingNotificationAccountId = selectedAccount
-                                        requestPermissionLauncher.launch(
-                                            Manifest.permission.POST_NOTIFICATIONS)
-                                    }
-                                }
+                                setNotificationAccount(selectedAccount)
                                 lifecycleScope.launch {
                                     PermanentNotification.update(application as MainApplication)
                                 }
@@ -267,11 +286,11 @@ class SettingsActivity : ComponentActivity() {
     }
 
     @Composable
-    fun SettingsAlert(onConfirm: ()->Unit, onDismiss: ()->Unit,
-                      icon: (@Composable () -> Unit)? = null,
-                      confirmButtonContent: (@Composable () -> Unit)? = null,
-                      dismissButtonContent: (@Composable () -> Unit)? = null,
-                      body: (@Composable () -> Unit)){
+    private fun SettingsAlertBanner(onConfirm: ()->Unit, onDismiss: ()->Unit,
+                            icon: (@Composable () -> Unit)? = null,
+                            confirmButtonContent: (@Composable () -> Unit)? = null,
+                            dismissButtonContent: (@Composable () -> Unit)? = null,
+                            body: (@Composable () -> Unit)){
         Column() {
             Surface(
             ) {
@@ -312,8 +331,8 @@ class SettingsActivity : ComponentActivity() {
 
     @Preview
     @Composable
-    fun SettingsAlertPreview(){
-        SettingsAlert(
+    private fun SettingsAlertBannerPreview(){
+        SettingsAlertBanner(
             onConfirm = {},
             onDismiss = {},
             icon = { Icon(Icons.Default.Doorbell, null, Modifier.fillMaxSize()) },
@@ -321,6 +340,16 @@ class SettingsActivity : ComponentActivity() {
             dismissButtonContent = {Text("Open")},
             body = {Text("Tady bych vám chtěl říct něco důležitého.")}
         )
+    }
+
+    private fun isApiLevelBeforeNotiPerm() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+
+    /** Returns true if you need to ask for notification permission (it is not granted) */
+    private fun checkNotiPermissionGranted(): Boolean{
+        return isApiLevelBeforeNotiPerm()
+                || ActivityCompat.checkSelfPermission(this@SettingsActivity,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onResume() {

@@ -69,6 +69,8 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
      */
     const val NOTIFICATION_ACCOUNT = "notification-account"
     const val NOTIFICATION_PLEASE_GRANT_PERMISSION = "notification-please-grant-permission"
+    /** If set to true, user has intentionally dismissed the "please enable notifications" banner in settings */
+    const val NOTIFICATION_DONT_SHOW_SETTINGS_BANNER = "notification-dont-show-settings-banner"
     /** this is where [AppSingleton] stores widgets settings */
     const val WIDGETS_SETTINGS = "widgets-settings-v2"
     /** Whether user allowed sending crash reports. Treat `null` as false and [BuildConfig.ALLOW_SENTRY] must be true as well to actually send the crashes */

@@ -51,6 +51,11 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
     val notificationAccountIdLD: LiveData<Long?> = SharedPrefsLongLiveData(sp.sharedPreferences, PrefsConsts.NOTIFICATION_ACCOUNT, -1).map { if (it == -1L) null else it }
     val notificationAccountLD: LiveData<Account?> = notificationAccountIdLD.switchMap { it?.let { accountRepository.getAccountLD(it) } ?: MutableLiveData(null) }
 
+    var dontShowNotiBanner: Boolean
+        get() = sp.boolean(PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER) ?: false
+        set(value) = sp.putOne(PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, value)
+    val dontShowNotiBannerLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, false);
+
     suspend fun logout(accountId: Long){
         accountRepository.logout(accountId)
     }

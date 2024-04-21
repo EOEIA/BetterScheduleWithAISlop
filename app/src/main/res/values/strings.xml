@@ -79,6 +79,9 @@
     </string>
     <string name="notification_off">Disabled</string>
     <string name="notification_status">Enabled for: %1$s</string>
+    <string name="notification_banner_text">Enable persistent notification to have quick access to the current and next lesson</string>
+    <string name="notification_banner_dismiss">Dismiss</string>
+    <string name="notification_banner_open">Enable</string>
     <string name="support_this_app">Support developer</string>
     <string name="support_this_app_desc">Donate to support development of this app</string>
     <string name="supporting_this_app">You are a sponsor</string>
@@ -224,7 +227,7 @@
     </string>
     <string name="feedback_loading">Preparing e-mail…</string>
 
-    <string name="notification_channel_name">Permanent notification</string>
+    <string name="notification_channel_name">Persistent notification</string>
 
     <string name="crash_reports_not_allowed">Automatic crash reports are allowed only on official release builds.
     </string>
