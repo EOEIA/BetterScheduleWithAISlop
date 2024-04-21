@@ -13,6 +13,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -142,6 +144,14 @@ class SettingsActivity : ComponentActivity() {
                                 }
 
                             if(account != null) {
+                                val infiniteTransition = rememberInfiniteTransition(label = "infinite transition")
+                                val animatedColor by infiniteTransition.animateColor(
+                                    initialValue = MaterialTheme.colors.onSurface,
+                                    targetValue = MaterialTheme.colors.error,
+                                    animationSpec = infiniteRepeatable(tween(500,1000), RepeatMode.Reverse),
+                                    label = "color"
+                                )
+
                                 AnimatedVisibility(!notiPermissionGrantedState && !dontShowNotiBanner) {
                                     SettingsAlertBanner(
                                         onConfirm = { setNotificationAccount(account!!.id) },
@@ -150,7 +160,8 @@ class SettingsActivity : ComponentActivity() {
                                             Icon(
                                                 Icons.Default.NotificationsActive,
                                                 null,
-                                                Modifier.fillMaxSize()
+                                                Modifier.fillMaxSize(),
+                                                tint = animatedColor
                                             )
                                         },
                                         confirmButtonContent = { Text(R.string.notification_banner_open.str.uppercase()) },
@@ -215,6 +226,10 @@ class SettingsActivity : ComponentActivity() {
                             ){newOptionIndex ->
                                 val optIndex: Int? = (newOptionIndex -1).takeUnless { it == -1 }
                                 val selectedAccount = optIndex?.let { accounts[it].id }
+
+                                if (BuildConfig.DEBUG && optIndex == null && optionIndex == 0){ //for debugging purposes
+                                    app.prefs.putOne(PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, false);
+                                }
 
                                 setNotificationAccount(selectedAccount)
                                 lifecycleScope.launch {
