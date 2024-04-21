@@ -29,11 +29,15 @@ import cz.vitskalicky.lepsirozvrh.notification.NotificationState
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolsDatabase
 import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolsWebservice
+import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
+import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
+import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid
 import io.sentry.protocol.User
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.joda.time.LocalDateTime
@@ -123,7 +127,11 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     val schoolsWebservice: SchoolsWebservice by lazy {
         schoolsRetrofit.create(SchoolsWebservice::class.java)
     }
-    //endregion
+
+    // Both variants may be same or not. Since system light/dark theme is determined in compose, both variants need to be ready here
+    private lateinit var lightThemeLD: LiveData<RozvrhTheme?>
+    private lateinit var darkThemeLD: LiveData<RozvrhTheme?>
+    fun getThemeLD(darkTheme: Boolean): LiveData<RozvrhTheme?> = if (darkTheme) darkThemeLD else lightThemeLD;
 
     override fun onCreate() {
         super.onCreate()
@@ -193,6 +201,34 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             delay(1000)
             pruneDatabase()
         }
+
+        //set up theme LiveData
+        val selectedThemeLD = prefs.sharedPreferences
+            .intLiveData(PrefsConsts.SELECTED_THEME, 0)
+            .map { savedIndex ->
+                SelectedTheme.values().firstOrNull { it.index == savedIndex } ?: SelectedTheme.FOLLOW_SYSTEM_THEME
+            }
+        // avoids repeating code - generates functions for mapping the theme for both dark and light system theme (it is known in compose, not now)
+        val themeMapper: (systemIsDark: Boolean) -> (SelectedTheme) -> LiveData<RozvrhTheme?> = {systemIsDark: Boolean ->
+            {selectedTheme: SelectedTheme ->
+                when (selectedTheme){
+                    SelectedTheme.FOLLOW_SYSTEM_THEME -> if (systemIsDark) {
+                        MutableLiveData(DefaultRozvrhThemes.DARK)
+                    } else {
+                        MutableLiveData(DefaultRozvrhThemes.LIGHT)
+                    }
+                    SelectedTheme.LIGHT -> MutableLiveData(DefaultRozvrhThemes.LIGHT)
+                    SelectedTheme.BLACK -> MutableLiveData(DefaultRozvrhThemes.DARK) //todo black theme
+                    SelectedTheme.DARK -> MutableLiveData(DefaultRozvrhThemes.DARK)
+                    SelectedTheme.CUSTOM -> prefs.sharedPreferences.stringLiveData(PrefsConsts.CUSTOM_THEME, "")
+                        .map {
+                            if (it.isBlank()) null else Json.decodeFromString<RozvrhTheme>(it)
+                        }
+                }
+            }
+        }
+        lightThemeLD = selectedThemeLD.switchMap (themeMapper(false))
+        darkThemeLD = selectedThemeLD.switchMap (themeMapper(true))
     }
 
     /** Performs data migrations, except for database. Database data is migrated in [rozvrhDb] -> addMigrations()*/

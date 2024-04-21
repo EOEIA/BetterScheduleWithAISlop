@@ -43,29 +43,8 @@ val LocalRozvrhTheme = compositionLocalOf { DefaultRozvrhThemes.UNSPECIFIED }
 @Composable
 fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), hasAppBar: Boolean = true, tintStatusBar: Boolean = true, content: @Composable () -> Unit) {
     val prefs = LocalContext.current.prefs
-    val themeLD: LiveData<RozvrhTheme?> = remember {
-        val selectedThemeLD = prefs.sharedPreferences
-            .intLiveData(PrefsConsts.SELECTED_THEME, 0)
-            .map { savedIndex ->
-                SelectedTheme.values().firstOrNull { it.index == savedIndex } ?: SelectedTheme.FOLLOW_SYSTEM_THEME
-            }
-        return@remember selectedThemeLD.switchMap {
-            when (it){
-                SelectedTheme.FOLLOW_SYSTEM_THEME -> if (darkTheme) {
-                    MutableLiveData(DefaultRozvrhThemes.DARK)
-                } else {
-                    MutableLiveData(DefaultRozvrhThemes.LIGHT)
-                }
-                SelectedTheme.LIGHT -> MutableLiveData(DefaultRozvrhThemes.LIGHT)
-                SelectedTheme.BLACK -> MutableLiveData(DefaultRozvrhThemes.DARK) //todo black theme
-                SelectedTheme.DARK -> MutableLiveData(DefaultRozvrhThemes.DARK)
-                SelectedTheme.CUSTOM -> prefs.sharedPreferences.stringLiveData(PrefsConsts.CUSTOM_THEME, "")
-                    .map {
-                        if (it.isBlank()) null else Json.decodeFromString<RozvrhTheme>(it)
-                    }
-            }
-        }
-    }
+    val app = LocalContext.current.applicationContext as MainApplication;
+    val themeLD: LiveData<RozvrhTheme?> = app.getThemeLD(darkTheme);
     //todo this is too slow at loading themes. Make tit faster
     val rt by themeLD.observeAsState()
     val rozvrhTheme = rt ?: DefaultRozvrhThemes.UNSPECIFIED // :(
