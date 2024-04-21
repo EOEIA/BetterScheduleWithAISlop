@@ -266,6 +266,63 @@ class SettingsActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    fun SettingsAlert(onConfirm: ()->Unit, onDismiss: ()->Unit,
+                      icon: (@Composable () -> Unit)? = null,
+                      confirmButtonContent: (@Composable () -> Unit)? = null,
+                      dismissButtonContent: (@Composable () -> Unit)? = null,
+                      body: (@Composable () -> Unit)){
+        Column() {
+            Surface(
+            ) {
+                Column(
+                    Modifier.padding(16.dp, 16.dp, 16.dp, 0.dp)
+                ) {
+                    Row {
+                        if (icon != null) {
+                            Box(Modifier.size(40.dp)) {
+                                icon()
+                            }
+                        }
+                        if (icon != null) Spacer(Modifier.size(16.dp));
+                        CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.body2) { // change text style for children
+                            body()
+                        }
+                    }
+                    if (dismissButtonContent != null || confirmButtonContent != null) {
+                        Spacer(Modifier.size(12.dp))
+                    }
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        if (dismissButtonContent != null) {
+                            TextButton(onDismiss) { dismissButtonContent() }
+                        }
+                        if (confirmButtonContent != null) {
+                            TextButton(onConfirm) { confirmButtonContent() }
+                        }
+                    }
+                    Spacer(Modifier.size(8.dp))
+                }
+            }
+            Divider()
+        }
+    }
+
+    @Preview
+    @Composable
+    fun SettingsAlertPreview(){
+        SettingsAlert(
+            onConfirm = {},
+            onDismiss = {},
+            icon = { Icon(Icons.Default.Doorbell, null, Modifier.fillMaxSize()) },
+            confirmButtonContent = {Text("Dismiss")},
+            dismissButtonContent = {Text("Open")},
+            body = {Text("Tady bych vám chtěl říct něco důležitého.")}
+        )
+    }
+
     override fun onResume() {
         super.onResume()
         // check for notification permission
