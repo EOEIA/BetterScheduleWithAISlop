@@ -1,6 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.notification
 
 import android.Manifest
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -44,9 +45,14 @@ object PermanentNotification {
     /** Special value for the accountId which symbolizes that permanent notification was enabled, but that account has been logged out. */
     public const val ACCOUNT_NOTIFICATION_LOGGED_OUT = -2L;
 
+    /** Does not guarantee the account is actually valid, just checks for special values (it still might be set to account which has been removed and it was not updated to [ACCOUNT_NOTIFICATION_LOGGED_OUT] by accident) */
+    public fun isNotificationAccountValid(id: Long): Boolean{
+        return id != ACCOUNT_NOTIFICATION_LOGGED_OUT && id != ACCOUNT_NOTIFICATION_DISABLED;
+    }
+
     suspend fun update(app: MainApplication) {
         val accountId: Long? = if (SharedPrefs.contains(app, PrefsConsts.NOTIFICATION_ACCOUNT))
-            SharedPrefs.getLong(app, PrefsConsts.NOTIFICATION_ACCOUNT)
+            SharedPrefs.getLong(app, PrefsConsts.NOTIFICATION_ACCOUNT).takeIf { isNotificationAccountValid(it) }
         else null;
         val account = accountId?.let{ app.accountRepository.getAccount(it) }
         if (account == null){
@@ -200,11 +206,7 @@ object PermanentNotification {
                 .addAction(R.drawable.ic_navigate_next_black_24dp, context.getString(R.string.next_lesson), nextPendingIntent)
         val ntf = builder.build()
 
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_DENIED
-        ) {
+        if (!areNotificationEnabled(context)) {
             SharedPrefsKt(context).edit {
                 putLong(PrefsConsts.NOTIFICATION_ACCOUNT, ACCOUNT_NOTIFICATION_DISABLED)
                 putBoolean(PrefsConsts.NOTIFICATION_PLEASE_GRANT_PERMISSION, true)
@@ -231,14 +233,19 @@ object PermanentNotification {
 
     fun isApiLevelBeforeNotiPerm() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
 
+    fun shouldShowNotificationRationale(activity: Activity): Boolean{
+        return !isApiLevelBeforeNotiPerm()
+                && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS);
+    }
     /** Returns true if you need to ask for notification permission (it is not granted) */
-    fun checkNotiPermissionGranted(ctx: Context): Boolean{
-        return isApiLevelBeforeNotiPerm()
-                || ActivityCompat.checkSelfPermission(ctx,
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
+    fun areNotificationEnabled(ctx: Context): Boolean{
+        return NotificationManagerCompat.from(ctx).areNotificationsEnabled()
+                && (
+                    isApiLevelBeforeNotiPerm()
+                    || ActivityCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                );
     }
 
     @Composable
-    fun checkNotiPermissionGranted(): Boolean = checkNotiPermissionGranted(LocalContext.current)
+    fun areNotificationEnabled(): Boolean = areNotificationEnabled(LocalContext.current)
 }

@@ -53,6 +53,8 @@ import cz.vitskalicky.lepsirozvrh.donations.DonationHelper
 class SettingsActivity : ComponentActivity() {
     val viewModel: SettingsViewModel by viewModels()
     var donHelper = DonationHelper(this);
+
+    val showNotiPermissionDialogLD: MutableLiveData<Boolean> = MutableLiveData(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = applicationContext as MainApplication
@@ -61,7 +63,6 @@ class SettingsActivity : ComponentActivity() {
         // handles permission for notification
         // if the user denies, reset the setting. If allows, set it to the pending account
         var pendingNotificationAccountId: Long? = null
-        val showNotiPermissionDialogLD: MutableLiveData<Boolean> = MutableLiveData(false)
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -78,17 +79,24 @@ class SettingsActivity : ComponentActivity() {
                     viewModel.notificationAccountId = null
                     showNotiPermissionDialogLD.value = true
                 }
-                app.isNotificationPermissionGranted.value = isGranted || PermanentNotification.isApiLevelBeforeNotiPerm();
+                app.areNotificationsEnabled.value = PermanentNotification.areNotificationEnabled(app)//isGranted || PermanentNotification.isApiLevelBeforeNotiPerm();
                 lifecycleScope.launch {
                     PermanentNotification.update(application as MainApplication)
                 }
             }
         val setNotificationAccount = {selectedAccount: Long? ->
-            if(!PermanentNotification.checkNotiPermissionGranted(this) && selectedAccount != null){
-                //not granted - request it
-                pendingNotificationAccountId = selectedAccount
-                requestPermissionLauncher.launch(
-                    Manifest.permission.POST_NOTIFICATIONS)
+            if(!PermanentNotification.areNotificationEnabled(this) && selectedAccount != null){
+                if(PermanentNotification.isApiLevelBeforeNotiPerm()){
+                    // low api level. user hae explicitly disabled notification
+                    viewModel.notificationAccountId = null
+                    showNotiPermissionDialogLD.value = true
+                }else {
+                    //not granted - request it
+                    pendingNotificationAccountId = selectedAccount
+                    requestPermissionLauncher.launch(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                }
             }else{
                 viewModel.notificationAccountId = selectedAccount
             }
@@ -102,7 +110,7 @@ class SettingsActivity : ComponentActivity() {
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
             var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
             val showNotiPermissionDialog: Boolean by showNotiPermissionDialogLD.observeAsState(false)
-            val notiPermissionGrantedState: Boolean by app.isNotificationPermissionGranted.observeAsState(true)
+            val areNotificationsEnabled: Boolean by app.areNotificationsEnabled.observeAsState(true)
             val dontShowNotiBanner: Boolean by viewModel.dontShowNotiBannerLD.observeAsState(true)
 
 
@@ -152,7 +160,7 @@ class SettingsActivity : ComponentActivity() {
                                     label = "color"
                                 )
 
-                                AnimatedVisibility(!notiPermissionGrantedState && !dontShowNotiBanner) {
+                                AnimatedVisibility(!areNotificationsEnabled && !dontShowNotiBanner) {
                                     SettingsAlertBanner(
                                         onConfirm = { setNotificationAccount(account!!.id) },
                                         onDismiss = { viewModel.dontShowNotiBanner = true },
@@ -359,14 +367,16 @@ class SettingsActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // check for notification permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(this@SettingsActivity,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_DENIED
-            ) {
-                //reset notification settings
-                viewModel.notificationAccountId = null
+        if (!PermanentNotification.isApiLevelBeforeNotiPerm()){
+            val app = applicationContext as MainApplication
+            val areNotEnabled = PermanentNotification.areNotificationEnabled(this);
+            app.areNotificationsEnabled.value = areNotEnabled;
+            if (!areNotEnabled){
+                val before = viewModel.notificationAccountId
+                if (before != null){
+                    viewModel.notificationAccountId = null;
+                    showNotiPermissionDialogLD.value = true;
+                }
             }
         }
     }

@@ -30,7 +30,7 @@ class MainActivityViewModel(
     private val showSettingBadgeLD = SharedPrefsBooleanLiveData(
             application.prefs.sharedPreferences,
             PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, false)
-        .switchMap { dontShow:Boolean -> app.isNotificationPermissionGranted.map { isGranted: Boolean -> !dontShow && !isGranted  } }
+        .switchMap { dontShow:Boolean -> app.areNotificationsEnabled.map { areEnabled: Boolean -> !dontShow && !areEnabled  } }
     override fun getShowSettingsBadgeLD(): LiveData<Boolean> = showSettingBadgeLD
     private var currentlyUsedLD: LiveData<RozvrhRecord?>? = null
     private var currentlyUsedStatusLD: LiveData<StatusInfo>? = null

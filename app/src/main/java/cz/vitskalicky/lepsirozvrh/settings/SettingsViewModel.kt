@@ -53,7 +53,7 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
     val sendCrashReportsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ENABLE_SENTRY, false)
 
     var notificationAccountId: Long?
-        get() = sp.long(PrefsConsts.NOTIFICATION_ACCOUNT)
+        get() = sp.long(PrefsConsts.NOTIFICATION_ACCOUNT).takeUnless { it != null && !PermanentNotification.isNotificationAccountValid(it) }
         set(value) = sp.edit { if (value == null) putLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_DISABLED) else putLong(PrefsConsts.NOTIFICATION_ACCOUNT, value) }
     val notificationAccountIdLD: LiveData<Long?> = SharedPrefsLongLiveData(sp.sharedPreferences, PrefsConsts.NOTIFICATION_ACCOUNT, -1).map { if (it == -1L) null else it }
     val notificationAccountLD: LiveData<Account?> = notificationAccountIdLD.switchMap { it?.let { accountRepository.getAccountLD(it) } ?: MutableLiveData(null) }

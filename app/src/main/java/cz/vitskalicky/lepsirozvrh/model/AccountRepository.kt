@@ -268,9 +268,9 @@ class AccountRepository(val app: MainApplication) {
             if ((
                     app.prefs.long(PrefsConsts.NOTIFICATION_ACCOUNT) == PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT //logged out
                     || !app.prefs.contains(PrefsConsts.NOTIFICATION_ACCOUNT // or never logged in
-                )
-                && PermanentNotification.checkNotiPermissionGranted(app) // and we have permission to show notification
-                )){
+                ))
+                && PermanentNotification.areNotificationEnabled(app) // and we have permission to show notification
+                ){
                 app.prefs.putOne(PrefsConsts.NOTIFICATION_ACCOUNT, accountId) //enable notification for the newly added account
             }
 

@@ -65,7 +65,7 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     /** non-set is treated as true */
     const val CENTER_TO_CURRENT_LESSON = "prefs-center-to-current-lesson"
     /**
-     * Account id for which persistent notification is active. Invalid id or not set => the active account has been logged out. Id == [PermanentNotification.ACCOUNT_NOTIFICATION_DISABLED] => notifications have been intentionally disabled by the user.
+     * Account id for which persistent notification is active. Invalid id or not set => the active account has been logged out. Id == [PermanentNotification.ACCOUNT_NOTIFICATION_DISABLED] => notifications have been intentionally disabled by the user. Always check using [PermanentNotification.isNotificationAccountValid] for special values.
      */
     const val NOTIFICATION_ACCOUNT = "notification-account"
     const val NOTIFICATION_PLEASE_GRANT_PERMISSION = "notification-please-grant-permission"

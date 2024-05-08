@@ -20,9 +20,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
+import androidx.preference.PreferenceManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord;
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -68,7 +70,10 @@ public class Utils {
     }
 
     public static @Nullable RozvrhRecord.Key getNotificationRozvrhKey(@NonNull Context context){
-        if (!SharedPrefs.contains(context, PrefsConsts.NOTIFICATION_ACCOUNT)){
+        long accountid = PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT);
+        if (!PermanentNotification.INSTANCE.isNotificationAccountValid(accountid)){
             return null;
         }
         return new RozvrhRecord.Key(SharedPrefs.getLong(context, PrefsConsts.NOTIFICATION_ACCOUNT), getCurrentMonday());
