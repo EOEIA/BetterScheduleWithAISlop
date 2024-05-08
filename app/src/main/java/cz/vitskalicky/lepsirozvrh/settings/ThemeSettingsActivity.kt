@@ -33,6 +33,7 @@ import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
 import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
+import cz.vitskalicky.lepsirozvrh.ui.theme.LocalRozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.preferences.*
 
 class ThemeSettingsActivity: ComponentActivity() {
@@ -46,7 +47,7 @@ class ThemeSettingsActivity: ComponentActivity() {
         setContent {
             val scaffoldState = rememberScaffoldState()
             val selectedTheme by viewModel.selectedThemeLD.observeAsState()
-            val theme by viewModel.themeLD.observeAsState()
+            val customTheme by viewModel.customThemeLD.observeAsState()
             val isSponsor by donHelper.isSponsorLD.observeAsState()
             val isDonationsEnabled by donHelper.donationsEnabledLD.observeAsState()
             var showindDonationDialog by rememberSaveable{mutableStateOf(false)};
@@ -72,6 +73,7 @@ class ThemeSettingsActivity: ComponentActivity() {
                         }
                         val isSupporter = (isSponsor ?: false) || !(isDonationsEnabled ?: false)
                         val scrollState = rememberScrollState()
+                        val currentTheme = LocalRozvrhTheme.current;
                         Column(Modifier.padding(paddingValues).verticalScroll(scrollState),) {
                             GeneralStateless(
                                 selectedTheme = selectedTheme ?: SelectedTheme.FOLLOW_SYSTEM_THEME,
@@ -80,28 +82,28 @@ class ThemeSettingsActivity: ComponentActivity() {
                                     @Suppress("UNUSED_VARIABLE") //we use the variable to make sure the `when` is exhaustive
                                     val exhaustiveCheck: Unit = when(it){
                                         SelectedTheme.LIGHT -> {
-                                            viewModel.theme = DefaultRozvrhThemes.LIGHT
+                                            viewModel.customTheme = DefaultRozvrhThemes.LIGHT
                                             viewModel.selectedTheme = it
 
                                         }
                                         SelectedTheme.DARK -> {
-                                            viewModel.theme = DefaultRozvrhThemes.DARK
+                                            viewModel.customTheme = DefaultRozvrhThemes.DARK
                                             viewModel.selectedTheme = it
                                         }
                                         SelectedTheme.BLACK -> {
                                             if (isSupporter) {
-                                                viewModel.theme = DefaultRozvrhThemes.DARK
+                                                viewModel.customTheme = DefaultRozvrhThemes.DARK
                                                 viewModel.selectedTheme = it
                                             }else {
                                                 showindDonationDialog = true;
                                             }
                                         }
                                         SelectedTheme.FOLLOW_SYSTEM_THEME -> {
-                                            viewModel.theme = DefaultRozvrhThemes.LIGHT
+                                            viewModel.customTheme = DefaultRozvrhThemes.LIGHT
                                             viewModel.selectedTheme = it
                                         }
                                         SelectedTheme.CUSTOM -> {
-                                            viewModel.theme = viewModel.theme.copy(customizationLevel = 1);
+                                            viewModel.customTheme = currentTheme.copy(customizationLevel = 1);
                                             viewModel.selectedTheme = it
                                             if (!isSupporter){
                                                 showindDonationDialog = true;
@@ -124,7 +126,7 @@ class ThemeSettingsActivity: ComponentActivity() {
                                     startActivity(browserIntent)
                                 }
                             )
-                            val t = theme;
+                            val t = customTheme;
                             if (selectedTheme == SelectedTheme.CUSTOM && t!=null){
                                 val m = if (isSupporter) Modifier else Modifier.alpha(ContentAlpha.disabled);
                                 Column(m) {
@@ -134,7 +136,7 @@ class ThemeSettingsActivity: ComponentActivity() {
                                         isSupporter,
                                         {
                                             if (isSupporter)
-                                                viewModel.theme = it
+                                                viewModel.customTheme = it
                                             else
                                                 showindDonationDialog = true;
                                         }

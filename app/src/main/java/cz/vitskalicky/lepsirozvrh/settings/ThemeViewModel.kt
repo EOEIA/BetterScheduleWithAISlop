@@ -24,11 +24,11 @@ class ThemeViewModel(application: Application): AndroidViewModel(application) {
             prefs.putOne(PrefsConsts.SELECTED_THEME,value.index);
         }
 
-    public val themeLD: LiveData<RozvrhTheme> =
+    public val customThemeLD: LiveData<RozvrhTheme> =
         SharedPrefsStringLiveData(prefs.sharedPreferences, PrefsConsts.CUSTOM_THEME,"")
             .map { if (it.isBlank()) {null} else {Json.decodeFromString(it)}?: DefaultRozvrhThemes.UNSPECIFIED }
 
-    public var theme: RozvrhTheme
+    public var customTheme: RozvrhTheme
         get() = prefs.string(PrefsConsts.CUSTOM_THEME)?.let { Json.decodeFromString(it) } ?: DefaultRozvrhThemes.UNSPECIFIED
         set(value) {
             prefs.putOne(PrefsConsts.CUSTOM_THEME, Json.encodeToString(value))

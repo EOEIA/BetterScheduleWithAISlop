@@ -199,7 +199,7 @@ class ImportThemeActivity : ComponentActivity(){
 
         if (td != null) {
             themeViewModel.selectedTheme = SelectedTheme.CUSTOM
-            themeViewModel.theme = td.toRozvrhTheme()
+            themeViewModel.customTheme = td.toRozvrhTheme()
             return true
         } else {
             return false

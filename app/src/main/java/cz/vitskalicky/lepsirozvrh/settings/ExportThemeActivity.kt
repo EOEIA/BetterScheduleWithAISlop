@@ -41,7 +41,7 @@ class ExportThemeActivity: ComponentActivity() {
             val scaffoldState = rememberScaffoldState()
             val themeDataUrlPrefix = R.string.THEME_DATA_LINK_PREFIX.str
             val themeStringLD = remember{
-                viewModel.themeLD.map {
+                viewModel.customThemeLD.map {
                     ThemeExchangeData
                         .fromRozvrhTheme(it)
                         .toZippedString()
