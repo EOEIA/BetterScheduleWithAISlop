@@ -73,7 +73,9 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val NOTIFICATION_DONT_SHOW_SETTINGS_BANNER = "notification-dont-show-settings-banner"
     /** this is where [AppSingleton] stores widgets settings */
     const val WIDGETS_SETTINGS = "widgets-settings-v2"
-    /** Whether user allowed sending crash reports. Treat `null` as false and [BuildConfig.ALLOW_SENTRY] must be true as well to actually send the crashes */
+    /** Change only using [MainApplication.enableSentry] and [MainApplication.disableSentry]!!
+     *
+     * Whether user allowed sending crash reports. Treat `null` as false and [BuildConfig.ALLOW_SENTRY] must be true as well to actually send the crashes */
     const val ENABLE_SENTRY = "prefs-send-crash-reports"
     /** If the user has seen the welcome screen */
     const val SEEN_WELCOME = "boolean_seen_welcome"

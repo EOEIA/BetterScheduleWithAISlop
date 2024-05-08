@@ -10,6 +10,7 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
     private val repository = getApplication<MainApplication>().repository
     private val accountRepository = getApplication<MainApplication>().accountRepository
     private val sp = SharedPrefsKt(getApplication())
+    private val app: MainApplication = application as MainApplication;
 
     val accounts: LiveData<List<Account>> = accountRepository.getAccountsLD();
 
@@ -42,7 +43,13 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
 
     var sendCrashReports: Boolean
         get() = sp.boolean(PrefsConsts.ENABLE_SENTRY) ?: false
-        set(value) = sp.edit { putBoolean(PrefsConsts.ENABLE_SENTRY, value) }
+        set(value) {
+            if (value){
+                app.enableSentry();
+            }else{
+                app.disableSentry();
+            }
+        }
     val sendCrashReportsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ENABLE_SENTRY, false)
 
     var notificationAccountId: Long?
