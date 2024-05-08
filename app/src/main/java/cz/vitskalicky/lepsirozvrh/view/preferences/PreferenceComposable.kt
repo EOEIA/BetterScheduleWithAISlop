@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.FirstBaseline
@@ -334,6 +335,7 @@ fun FloatPreference(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class) //for the (here unused) autofill functionality of TextFieldWithError
 @Composable
 private fun FloatPreferenceDialog(
     title: String?,

@@ -17,7 +17,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.error
@@ -48,6 +50,7 @@ import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolList
 import cz.vitskalicky.lepsirozvrh.view.TextFieldWithError
 
 /** The UI of login form, but it does not keep any data in state. Just the UI*/
+@OptIn(ExperimentalComposeUiApi::class) //for autofill
 @Composable
 fun LoginForm(
     school: String, username: String, password: String,
@@ -121,7 +124,8 @@ fun LoginForm(
             label = {Text(stringResource(R.string.username))},
             errorMessage = if (!loading) usernameError else null,
             singleLine = true,
-            textFieldModifier = Modifier.fillMaxWidth()
+            textFieldModifier = Modifier.fillMaxWidth(),
+            autofillTypes = listOf(AutofillType.Username)
         )
         TextFieldWithError(
             value = password,
@@ -142,7 +146,8 @@ fun LoginForm(
                         if (showPassword) stringResource(R.string.hide_password) else stringResource(R.string.show_password)
                     Icon(imageVector = visibilityIcon, contentDescription = description)
                 }
-            }
+            },
+            autofillTypes = listOf(AutofillType.Password)
         )
         Spacer(Modifier.size(16.dp))
         Row(
