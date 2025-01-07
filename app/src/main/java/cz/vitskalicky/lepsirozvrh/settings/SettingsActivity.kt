@@ -48,17 +48,14 @@ import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
 import kotlinx.coroutines.launch
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.icon
-import cz.vitskalicky.lepsirozvrh.donations.DonationHelper
 
 class SettingsActivity : ComponentActivity() {
     val viewModel: SettingsViewModel by viewModels()
-    var donHelper = DonationHelper(this);
 
     val showNotiPermissionDialogLD: MutableLiveData<Boolean> = MutableLiveData(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = applicationContext as MainApplication
-        donHelper.onCreate()
 
         // handles permission for notification
         // if the user denies, reset the setting. If allows, set it to the pending account
@@ -251,21 +248,6 @@ class SettingsActivity : ComponentActivity() {
                             Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){
                                 showWhatsNewDialog = true;
                             }
-                                val donationsEnabled by donHelper.donationsEnabledLD.observeAsState()
-                                val isSponsor by donHelper.isSponsorLD.observeAsState()
-                                if (donationsEnabled ?: false){
-                                    var displayDonationDialog by rememberSaveable{mutableStateOf(false)}
-                                    if (displayDonationDialog){
-                                        donHelper.donations?.ShowDialog(onDismiss = {displayDonationDialog = false})
-                                    }
-                            Preference(
-                                    title = if (isSponsor ?: false) R.string.donate_title_ok.str else R.string.donate_title.str,
-                                    description = if (isSponsor ?: false) R.string.donate_text1.str else R.string.donate_text1_ok.str,
-                                    icon = {Icon(Icons.Default.AttachMoney, null)},
-                                ){
-                                    displayDonationDialog = true;
-                                }
-                                }
                             Preference(R.string.website.str, R.string.website_desc.str,Icons.Default.Language.icon){
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.website_link)))
                                 startActivity(browserIntent)
@@ -280,9 +262,6 @@ class SettingsActivity : ComponentActivity() {
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.PRIVACY_POLICY_LINK)))
                                 startActivity(browserIntent)
                             }
-                                if (donationsEnabled ?: false){
-                            Preference(R.string.restore_purchases.str, R.string.restore_purchases_desc.str){donHelper.donations?.restorePurchases()}
-                                }
                             Preference(R.string.oss_licences.str, R.string.oss_licences_desc.str){
                                 val intent = Intent(this@SettingsActivity, LicencesActivity::class.java);
                                 startActivity(intent)
@@ -391,10 +370,5 @@ class SettingsActivity : ComponentActivity() {
         intent = Intent(this, AccountPickerActivity::class.java)
         startActivity(intent)
         finishAffinity()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        donHelper.release()
     }
 }

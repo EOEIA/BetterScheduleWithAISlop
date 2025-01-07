@@ -232,8 +232,4 @@ dependencies {
 
     //icons
     implementation "androidx.compose.material:material-icons-extended:$compose_ui_version"
-
-    playImplementation 'com.android.billingclient:billing:6.1.0'
-
-
 }

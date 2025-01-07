@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.donations.DonationHelper
 import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 import cz.vitskalicky.lepsirozvrh.theme.ThemeExchangeData
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
@@ -39,17 +38,13 @@ import kotlinx.coroutines.launch
 class ImportThemeActivity : ComponentActivity(){
     private val themeViewModel: ThemeViewModel by viewModels()
     private val viewModel: ImportThemeViewModel by viewModels()
-    private val donHelper = DonationHelper(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        donHelper.onCreate()
         handleIntent(intent)
 
         setContent {
             val scaffoldState = rememberScaffoldState()
-            val isSupporter = donHelper.donations?.let { it.isSponsor || !it.isEnabled} ?: true;
-            var showDonateDialog by rememberSaveable{mutableStateOf(isSupporter)}
             val textFieldText by viewModel.textFieldTextLD.observeAsState()
 
             val paste: () -> Unit = {
@@ -75,9 +70,6 @@ class ImportThemeActivity : ComponentActivity(){
                         )
                     },
                     content = {paddingValues: PaddingValues ->
-                        if (showDonateDialog){
-                            donHelper.donations?.ShowDialog { showDonateDialog = false }
-                        }
                         val textScrollState = rememberScrollState()
                         Column(Modifier.padding(paddingValues).padding(horizontal = 16.dp, vertical = 16.dp)) {
 
@@ -141,10 +133,6 @@ class ImportThemeActivity : ComponentActivity(){
                                     Text(R.string.import_clear.str)
                                 }
                                 Button(onClick = {
-                                    if (!isSupporter){
-                                        showDonateDialog = true;
-                                        return@Button
-                                    }
                                     val success = import(textFieldText ?: "")
                                     if (!success){
                                         lifecycleScope.launch {
@@ -244,10 +232,5 @@ class ImportThemeActivity : ComponentActivity(){
         if (intent != null) {
             handleIntent(intent)
         }
-    }
-
-    override fun onDestroy() {
-        donHelper.release()
-        super.onDestroy()
     }
 }

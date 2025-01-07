@@ -27,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.icon
-import cz.vitskalicky.lepsirozvrh.donations.DonationHelper
 import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
 import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
@@ -38,19 +37,14 @@ import cz.vitskalicky.lepsirozvrh.view.preferences.*
 
 class ThemeSettingsActivity: ComponentActivity() {
     val viewModel: ThemeViewModel by viewModels()
-    var donHelper = DonationHelper(this);
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        donHelper.onCreate()
 
         setContent {
             val scaffoldState = rememberScaffoldState()
             val selectedTheme by viewModel.selectedThemeLD.observeAsState()
             val customTheme by viewModel.customThemeLD.observeAsState()
-            val isSponsor by donHelper.isSponsorLD.observeAsState()
-            val isDonationsEnabled by donHelper.donationsEnabledLD.observeAsState()
-            var showindDonationDialog by rememberSaveable{mutableStateOf(false)};
 
             LepsirozvrhTheme {
                 Scaffold(
@@ -68,35 +62,25 @@ class ThemeSettingsActivity: ComponentActivity() {
                         )
                     },
                     content = {paddingValues: PaddingValues ->
-                        if (showindDonationDialog){
-                            donHelper.donations?.ShowDialog { showindDonationDialog = false }
-                        }
-                        val isSupporter = (isSponsor ?: false) || !(isDonationsEnabled ?: false)
                         val scrollState = rememberScrollState()
                         val currentTheme = LocalRozvrhTheme.current;
                         Column(Modifier.padding(paddingValues).verticalScroll(scrollState),) {
                             GeneralStateless(
                                 selectedTheme = selectedTheme ?: SelectedTheme.FOLLOW_SYSTEM_THEME,
-                                isSupporter = isSupporter,
                                 onThemeChange = {
                                     @Suppress("UNUSED_VARIABLE") //we use the variable to make sure the `when` is exhaustive
                                     val exhaustiveCheck: Unit = when(it){
                                         SelectedTheme.LIGHT -> {
                                             viewModel.customTheme = DefaultRozvrhThemes.LIGHT
                                             viewModel.selectedTheme = it
-
                                         }
                                         SelectedTheme.DARK -> {
                                             viewModel.customTheme = DefaultRozvrhThemes.DARK
                                             viewModel.selectedTheme = it
                                         }
                                         SelectedTheme.BLACK -> {
-                                            if (isSupporter) {
-                                                viewModel.customTheme = DefaultRozvrhThemes.DARK
-                                                viewModel.selectedTheme = it
-                                            }else {
-                                                showindDonationDialog = true;
-                                            }
+                                            viewModel.customTheme = DefaultRozvrhThemes.DARK
+                                            viewModel.selectedTheme = it
                                         }
                                         SelectedTheme.FOLLOW_SYSTEM_THEME -> {
                                             viewModel.customTheme = DefaultRozvrhThemes.LIGHT
@@ -105,14 +89,9 @@ class ThemeSettingsActivity: ComponentActivity() {
                                         SelectedTheme.CUSTOM -> {
                                             viewModel.customTheme = currentTheme.copy(customizationLevel = 1);
                                             viewModel.selectedTheme = it
-                                            if (!isSupporter){
-                                                showindDonationDialog = true;
-                                            }
-                                            Unit
                                         }
                                     }
                                 },
-                                onSupportClicked = {showindDonationDialog = true},
                                 onImportClicked = {
                                     val intent = Intent(this@ThemeSettingsActivity, ImportThemeActivity::class.java)
                                     startActivity(intent)
@@ -128,17 +107,12 @@ class ThemeSettingsActivity: ComponentActivity() {
                             )
                             val t = customTheme;
                             if (selectedTheme == SelectedTheme.CUSTOM && t!=null){
-                                val m = if (isSupporter) Modifier else Modifier.alpha(ContentAlpha.disabled);
-                                Column(m) {
+                                Column {
                                     @Suppress("MoveLambdaOutsideParentheses")
                                     CustomizationsStateless(
                                         t,
-                                        isSupporter,
                                         {
-                                            if (isSupporter)
-                                                viewModel.customTheme = it
-                                            else
-                                                showindDonationDialog = true;
+                                            viewModel.customTheme = it
                                         }
                                     )
                                 }
@@ -149,19 +123,12 @@ class ThemeSettingsActivity: ComponentActivity() {
             }
         }
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        donHelper.release()
-    }
 }
 
 @Composable
 private fun GeneralStateless(
     selectedTheme: SelectedTheme,
-    isSupporter: Boolean,
     onThemeChange: (newValue: SelectedTheme) -> Unit,
-    onSupportClicked: () -> Unit,
     onImportClicked: () -> Unit,
     onExportClicked: () -> Unit,
     onGetMoreThemesClicked: () -> Unit
@@ -181,28 +148,16 @@ private fun GeneralStateless(
 
     Preference(R.string.more_themes.str, null, Icons.Default.Add.icon,){onGetMoreThemesClicked()}
 
-    if (!isSupporter){
-        Preference(
-            title = R.string.donate_title.str,
-            description = R.string.donate_text1.str,
-            icon = { Icon(Icons.Default.AttachMoney, null) },
-        ){
-            onSupportClicked()
-        }
-    }
-
     Preference(
         title = R.string.export_theme.str,
         description = R.string.export_theme_desc.str,
         icon = Icons.Default.Share.icon,
-        enabled = isSupporter,
         onClicked = onExportClicked
     )
     Preference(
         title = R.string.import_theme.str,
         description = R.string.import_theme_desc.str,
         icon = Icons.Default.ExitToApp.icon, // this symbol is the closest I could find for import
-        enabled = isSupporter,
         onClicked = onImportClicked
     )
 }
@@ -210,7 +165,6 @@ private fun GeneralStateless(
 @Composable
 fun CustomizationsStateless(
     theme: RozvrhTheme,
-    isSupporter: Boolean,
     onChange: (newValues: RozvrhTheme) -> Unit
 ){
     val t = theme
