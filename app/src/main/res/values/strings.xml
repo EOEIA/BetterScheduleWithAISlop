@@ -82,10 +82,6 @@
     <string name="notification_banner_text">Enable persistent notification to have quick access to the current and next lesson</string>
     <string name="notification_banner_dismiss">Dismiss</string>
     <string name="notification_banner_open">Enable</string>
-    <string name="support_this_app">Support developer</string>
-    <string name="support_this_app_desc">Donate to support development of this app</string>
-    <string name="supporting_this_app">You are a sponsor</string>
-    <string name="supporting_this_app_desc">You already donated some money. Thank you!</string>
     <string name="dont_show_again">Don\'t show again</string>
     <string name="something_went_wrong">Something went wrong :(</string>
     <string name="report">Report</string>
