@@ -8,8 +8,18 @@ import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 
 /** Shortcuts for working with shared preferences */
-class SharedPrefsKt(context: Context){
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+class SharedPrefsKt(context: Context, name: String?){
+    val sharedPreferences: SharedPreferences;
+
+    constructor(context: Context): this(context, null)
+
+    init {
+        if (name != null) {
+            sharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE)
+        }else {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        }
+    }
 
     @JvmName("getString")
     fun string(key: String): String? = sharedPreferences.getString(key,null)

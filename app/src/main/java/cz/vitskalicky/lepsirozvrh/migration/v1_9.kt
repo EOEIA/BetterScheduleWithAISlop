@@ -154,6 +154,16 @@ object v1_9 : MigrationInterface {
         }
     }
 
+    /** Constant for reading preferences of the obsolete Cyanea library */
+    internal object CyaneaPrefKeys {
+        const val PREF_FILE_NAME = "com.jaredrummler.cyanea"
+        const val PREF_BASE_THEME = "base_theme"
+        const val PREF_PRIMARY = "primary"
+        const val PREF_ACCENT = "accent"
+        const val PREF_BACKGROUND_LIGHT = "background_light"
+        const val PREF_BACKGROUND_DARK = "background_dark"
+    }
+
     private fun theme(context: Context){
         val sp = context.prefs;
 
@@ -164,10 +174,17 @@ object v1_9 : MigrationInterface {
         }
 
         // todo load primary, accent adn background colors from Cyanea
+        val cyaneaPrefs = SharedPrefsKt(context, CyaneaPrefKeys.PREF_FILE_NAME)
+
+        val isDark = cyaneaPrefs.string(CyaneaPrefKeys.PREF_BASE_THEME) == "DARK" // This checks if the theme is dark (defaults to light for bad values)
 
         // Load old custom theme settings and save into new ones
-        var theme = DefaultRozvrhThemes.LIGHT
+        var theme = if(isDark) DefaultRozvrhThemes.DARK else DefaultRozvrhThemes.LIGHT
         theme = theme.copy(
+            isLight = !isDark,
+            cPrimary = cyaneaPrefs.int(CyaneaPrefKeys.PREF_PRIMARY)?.let { Color(it) } ?: theme.cPrimary,
+            cSecondary = cyaneaPrefs.int(CyaneaPrefKeys.PREF_ACCENT)?.let { Color(it) } ?: theme.cSecondary,
+            cSurface = cyaneaPrefs.int(if (isDark) CyaneaPrefKeys.PREF_BACKGROUND_DARK else CyaneaPrefKeys.PREF_BACKGROUND_LIGHT)?.let { Color(it) } ?: theme.cSurface,
             cEmptyBg = sp.int("PREFS-THEME-cEmptyBg")?.let { Color(it) } ?: theme.cEmptyBg,
             cABg = sp.int("PREFS-THEME-cABg")?.let { Color(it) } ?: theme.cABg,
             cHBg = sp.int("PREFS-THEME-cHBg")?.let { Color(it) } ?: theme.cHBg,
