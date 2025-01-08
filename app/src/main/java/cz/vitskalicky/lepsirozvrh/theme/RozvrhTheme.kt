@@ -74,7 +74,8 @@ data class RozvrhTheme (
     @get:JvmName("cHomework") val cHomework: Color,
     @get:JvmName("dpHomework") val dpHomework: Float,
 
-    /** How much customization did the user specify when creating the theme. does not affect any colors, only the theme customization UI.
+    /** How much customization did the user specify when creating the theme. does not affect any colors, only the theme
+     * customization UI. Meaning must not change to keep compatibility with old versions of the app, see [cz.vitskalicky.lepsirozvrh.migration.v1_9.theme].
      *
      * * 0 - one of the preset themes is used
      * * 1 - user specifies primary, secondary and surface colors
@@ -86,7 +87,7 @@ data class RozvrhTheme (
 
 }
 
-/** Must match [R.array.themes_entries] and [R.array.themes_values] */
+/** Must match [R.array.themes_entries] and [R.array.themes_values]. Also, integer values must not change to keep compatibility with old versions, see [cz.vitskalicky.lepsirozvrh.migration.v1_9.theme]. */
 enum class SelectedTheme(val index: Int){
     FOLLOW_SYSTEM_THEME(0),
     LIGHT(1),

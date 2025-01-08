@@ -8,11 +8,13 @@ import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.Class
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
+import cz.vitskalicky.lepsirozvrh.theme.SelectedTheme
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings
 import cz.vitskalicky.lepsirozvrh.widget.WidgetsSettings.Widget
 import io.sentry.Sentry
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -37,9 +39,9 @@ object v1_9 : MigrationInterface {
         // extract required data from old storage
         val oldData = mapOf(
             "serverUrl" to prefs.string(URL),
-            "username" to prefs.string(USERNAME),
-            "accessToken" to prefs.string(ACCESS_TOKEN),
-            "refreshToken" to prefs.string(REFRESH_TOKEN),
+            "usernameLength" to prefs.string(USERNAME)?.length,
+            "accessTokenLength" to prefs.string(ACCESS_TOKEN)?.length,
+            "refreshTokenLength" to prefs.string(REFRESH_TOKEN)?.length,
             "accessExpires" to prefs.string(ACCESS_EXPIRES)
             )
         val acc: Account? = with(prefs) {
@@ -100,7 +102,7 @@ object v1_9 : MigrationInterface {
         val account: Account? = accountvar;
         // update persistent notification setting
         prefs.edit {
-            if (account != null && (prefs.boolean(PREFS_NOTIFICATION) ?: true)) { // logged in and notification enabled
+            if (account != null && (prefs.boolean(PREFS_NOTIFICATION) != false)) { // logged in and notification enabled
                 putLong(PrefsConsts.NOTIFICATION_ACCOUNT, account.id)
             }else if (prefs.boolean(PREFS_NOTIFICATION) == false){ // explicitly disabled
                 putLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_DISABLED)
@@ -154,6 +156,16 @@ object v1_9 : MigrationInterface {
 
     private fun theme(context: Context){
         val sp = context.prefs;
+
+        // Migrate general theme preference
+        val oldThemePref = sp.string("prefs-app-theme")?.toIntOrNull() ?: SelectedTheme.FOLLOW_SYSTEM_THEME.index;
+        sp.edit {
+            putInt(PrefsConsts.SELECTED_THEME, oldThemePref)
+        }
+
+        // todo load primary, accent adn background colors from Cyanea
+
+        // Load old custom theme settings and save into new ones
         var theme = DefaultRozvrhThemes.LIGHT
         theme = theme.copy(
             cEmptyBg = sp.int("PREFS-THEME-cEmptyBg")?.let { Color(it) } ?: theme.cEmptyBg,
@@ -189,8 +201,9 @@ object v1_9 : MigrationInterface {
             cError = sp.int("PREFS-THEME-cError")?.let { Color(it) } ?: theme.cError,
             cHomework = sp.int("PREFS-THEME-cHomework")?.let { Color(it) } ?: theme.cHomework,
             dpHomework = sp.float("PREFS-THEME-dpHomework") ?: theme.dpHomework,
+            customizationLevel = sp.int("prefs-detail-level") ?: theme.customizationLevel,
         )
-        //todo save theme
+        sp.putOne(PrefsConsts.CUSTOM_THEME, Json.encodeToString(theme))
     }
 
     // constants used for keys in old versions
