@@ -48,7 +48,7 @@ class MainActivityViewModel(
     private var invalidateCache = false
 
     private val switchDayLD = SharedPrefsIntLiveData(application.prefs.sharedPreferences,PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX,0)
-    private val switchDayObserver: Observer<Int> = Observer { newOptionIndex->
+    private val switchDayObserver: Observer<Int> = Observer { _ ->
         invalidateCache = true
         weekPosition = weekPosition
     }

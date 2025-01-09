@@ -98,28 +98,38 @@ class ExportThemeActivity: ComponentActivity() {
                     },
                     content = {paddingValues: PaddingValues ->
                         val textScrollState = rememberScrollState()
-                        Column(Modifier.padding(paddingValues).padding(horizontal = 16.dp, vertical = 16.dp)) {
-                            Text(R.string.export_theme_detail.str)
-                            Spacer(Modifier.size(16.dp))
+                        Column(Modifier.verticalScroll(textScrollState)) {
+                            Column(Modifier.padding(paddingValues).padding(horizontal = 16.dp, vertical = 16.dp)) {
+                                Text(R.string.export_theme_detail.str)
+                                Spacer(Modifier.size(16.dp))
 
-                            SelectionContainer(Modifier.padding(4.dp).fillMaxWidth()) {
-                                Text(themeString ?: "null" /*todo*/, style = MaterialTheme.typography.body2.copy(fontFamily = FontFamily.Monospace), modifier =  Modifier.verticalScroll(textScrollState))
-                            }
-                            Spacer(Modifier.fillMaxHeight().weight(1f))
-                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                Button(onClick = {copy()}){
-                                    Row {
-                                        Icon(Icons.Default.ContentCopy, null)
-                                        Spacer(Modifier.size(4.dp))
-                                        Text(R.string.copy_to_clipboard.str)
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Button(onClick = { copy() }) {
+                                        Row {
+                                            Icon(Icons.Default.ContentCopy, null)
+                                            Spacer(Modifier.size(4.dp))
+                                            Text(R.string.copy_to_clipboard.str)
+                                        }
+                                    }
+                                    Button(onClick = { share() }) {
+                                        Row {
+                                            Icon(Icons.Default.Share, null)
+                                            Spacer(Modifier.size(4.dp))
+                                            Text(R.string.share.str)
+                                        }
                                     }
                                 }
-                                Button(onClick = {share()}){
-                                    Row {
-                                        Icon(Icons.Default.Share,null)
-                                        Spacer(Modifier.size(4.dp))
-                                        Text(R.string.share.str)
-                                    }
+
+                                Spacer(Modifier.size(16.dp))
+
+                                SelectionContainer(Modifier.padding(4.dp).fillMaxWidth()) {
+                                    Text(
+                                        themeString ?: "null" /*todo*/,
+                                        style = MaterialTheme.typography.body2.copy(fontFamily = FontFamily.Monospace)
+                                    )
                                 }
                             }
                         }

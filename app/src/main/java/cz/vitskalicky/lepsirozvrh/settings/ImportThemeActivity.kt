@@ -70,7 +70,6 @@ class ImportThemeActivity : ComponentActivity(){
                         )
                     },
                     content = {paddingValues: PaddingValues ->
-                        val textScrollState = rememberScrollState()
                         Column(Modifier.padding(paddingValues).padding(horizontal = 16.dp, vertical = 16.dp)) {
 
                             // instruction text
@@ -109,7 +108,7 @@ class ImportThemeActivity : ComponentActivity(){
                             ClickableText(
                                 annotatedString,
                                 onClick = {index ->
-                                    if (index >= startIndex && index < endIndex){
+                                    if (index in startIndex until endIndex){
                                         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.MORE_THEMES_LINK)))
                                         startActivity(browserIntent)
                                     }

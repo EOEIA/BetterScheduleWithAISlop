@@ -213,6 +213,7 @@ class AccountRepository(val app: MainApplication) {
     }
 
     suspend fun addAccount(url: String, username: String, password: String, isUrlManual: Boolean): LoginResult {
+        @Suppress("NAME_SHADOWING")
         val url: String = unifyUrl(url)
         try {
             val webservice = getUnloggedRetrofit(url).create(LoginWebservice::class.java)
@@ -422,7 +423,7 @@ class AccountRepository(val app: MainApplication) {
     private fun createRetrofit(account: Account, connectDb: Boolean = true): Retrofit? {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
-        val tokenAuthenticator = getTokenAuthenticator(account, connectDb) ?: return null
+        val tokenAuthenticator = getTokenAuthenticator(account, connectDb)
         val client = OkHttpClient.Builder()
             .addInterceptor(interceptor)
             .addInterceptor(tokenAuthenticator)
@@ -444,6 +445,7 @@ class AccountRepository(val app: MainApplication) {
          * Removes /next/login.aspx
          */
         private fun unifyUrl(url: String): String {
+            @Suppress("NAME_SHADOWING")
             var url = url
             if (url.endsWith(".aspx")) url = url.substring(0, url.length - 5)
             if (url.endsWith("login")) {

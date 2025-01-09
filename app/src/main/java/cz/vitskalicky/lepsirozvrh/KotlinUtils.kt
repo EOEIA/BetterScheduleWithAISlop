@@ -4,6 +4,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import android.os.Parcel
+import android.util.TypedValue
+import android.util.TypedValue.COMPLEX_UNIT_SP
 import androidx.annotation.PluralsRes
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
@@ -69,7 +71,8 @@ object KotlinUtils {
     fun dpToPx(dpValue: Float, context: Context): Int = (dpValue * context.resources.displayMetrics.density).roundToInt()
     /** Converts SP into pixels*/
     @JvmStatic
-    fun spToPx(spValue: Float, context: Context): Int = (spValue * context.resources.displayMetrics.scaledDensity).roundToInt()
+    fun spToPx(spValue: Float, context: Context): Int =
+        TypedValue.applyDimension(COMPLEX_UNIT_SP, spValue, context.resources.displayMetrics).toInt()
 
     // composable shortcuts
     inline val Int.str: String

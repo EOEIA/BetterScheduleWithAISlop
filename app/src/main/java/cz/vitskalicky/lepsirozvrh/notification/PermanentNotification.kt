@@ -38,7 +38,7 @@ object PermanentNotification {
     const val PERMANENT_NOTIFICATION_ID = 7055713
     const val PERMANENT_CHANNEL_ID = BuildConfig.APPLICATION_ID + ".permanentNotificationChannel"
     const val PREF_DONT_SHOW_INFO_DIALOG = "dont-show-notification-info-dialog-again"
-    public val EXTRA_NOTIFICATION = PermanentNotification::class.java.canonicalName + "-extra-notification"
+    public val EXTRA_NOTIFICATION = PermanentNotification::class.java.canonicalName!! + "-extra-notification"
 
     /** Special value for accountId which symbolizes that permanent notification have been disabled by the user. */
     public const val ACCOUNT_NOTIFICATION_DISABLED = -1L;
@@ -87,6 +87,7 @@ object PermanentNotification {
     /**
      * Updates the notification with the data of the first lesson of supplied [BlockRelated]. If there are no lesson "no lesson" text in notification is showed. If [block] is `null` and offset is 0, the notification is hidden.
      */
+    @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
     fun update(context: Context, block: RozvrhBlock?, isTeacher: Boolean, accountId: Long?, offset: Int = 0) {
         val notificationManager = NotificationManagerCompat.from(context)
         if (block == null && offset == 0) {
@@ -94,10 +95,10 @@ object PermanentNotification {
             return
         }
         var offsetText = ""
-        var predmet: String = ""
-        var mistnost: String = ""
-        var ucitel: String = ""
-        var skupina: String = ""
+        var predmet = ""
+        var mistnost = ""
+        var ucitel = ""
+        var skupina = ""
         var cas = ""
 
         val lesson = block?.lessons?.firstOrNull();
@@ -138,7 +139,7 @@ object PermanentNotification {
             }
         }
         var title: CharSequence = ""
-        title = if (!predmet.isBlank() && !mistnost.isBlank()) {
+        title = if (predmet.isNotBlank() && mistnost.isNotBlank()) {
             buildSpannedString {
                 append("$offsetText$predmet ${context.getString(R.string.`in`)} ")
                 bold { append(mistnost) }
@@ -152,21 +153,20 @@ object PermanentNotification {
         /*if (!offsetText.isEmpty()){
             title = offsetText + title;
         }*/
-        var content: CharSequence? = ""
-        var contentString = ""
-        contentString = if (!ucitel!!.isEmpty() && !skupina!!.isEmpty()) {
+        val content: CharSequence?
+        var contentString: String = if (ucitel.isNotBlank() && skupina.isNotBlank()) {
             "$ucitel, $skupina"
         } else {
             ucitel + skupina
         }
-        contentString = if (!contentString.isEmpty() && !cas.isEmpty()) {
+        contentString = if (contentString.isNotBlank() && cas.isNotBlank()) {
             "$contentString, $cas"
         } else {
             contentString + cas
         }
         content = contentString
         var expanded: CharSequence = content
-        if (!mistnost!!.isEmpty()) {
+        if (mistnost.isNotBlank()) {
             expanded = expanded.toString() + ", " + context.getString(R.string.room) + " " + mistnost
         }
         val nextIntent = Intent(context, UpdateBroadcastReciever::class.java)

@@ -53,6 +53,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     public override val lifecycle: Lifecycle
         get() = lifecycleRegistry
 
+    @Suppress("DEPRECATION")
     companion object {
         private val TAG = MainApplication::class.java.simpleName
 
@@ -259,6 +260,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
 
     /** Schedules notification and widget update */
     fun scheduleUpdate(triggerTime: LocalDateTime?) {
+        @Suppress("NAME_SHADOWING")
         var triggerTime: LocalDateTime? = triggerTime
 
         if (notificationState.offsetResetTime != null && triggerTime?.isAfter(notificationState.offsetResetTime) ?: true) {
