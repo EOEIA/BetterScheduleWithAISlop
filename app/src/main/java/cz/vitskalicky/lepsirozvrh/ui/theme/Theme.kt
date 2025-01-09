@@ -40,8 +40,11 @@ private fun RozvrhTheme.colors(isLight: Boolean = this.isLight) = Colors(
 
 val LocalRozvrhTheme = compositionLocalOf { DefaultRozvrhThemes.UNSPECIFIED }
 
+/**
+ * [isRozvrhScreen] - If true, status bar color will be matched to rozvrh headers color.
+ * */
 @Composable
-fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), hasAppBar: Boolean = true, tintStatusBar: Boolean = true, content: @Composable () -> Unit) {
+fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), hasAppBar: Boolean = true, tintStatusBar: Boolean = true, isRozvrhScreen: Boolean = false, content: @Composable () -> Unit) {
     val prefs = LocalContext.current.prefs
     val app = LocalContext.current.applicationContext as MainApplication;
     val themeLD: LiveData<RozvrhTheme?> = app.getThemeLD(darkTheme);
@@ -59,7 +62,15 @@ fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), hasAppBar: Bool
                 if (tintStatusBar) {
                     val suiController = rememberSystemUiController()
                     suiController.setStatusBarColor(
-                        if (hasAppBar) MaterialTheme.colors.primarySurface.darker() else MaterialTheme.colors.surface.darker()
+                        if (hasAppBar) {
+                            MaterialTheme.colors.primarySurface.darker()
+                        } else {
+                            if (isRozvrhScreen){
+                                rozvrhTheme.cHeaderBg.darker()
+                            }else {
+                                MaterialTheme.colors.surface.darker()
+                            }
+                        }
                     )
                 }
                 content()

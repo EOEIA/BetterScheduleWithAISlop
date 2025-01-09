@@ -79,7 +79,7 @@ class ThemeSettingsActivity: ComponentActivity() {
                                             viewModel.selectedTheme = it
                                         }
                                         SelectedTheme.BLACK -> {
-                                            viewModel.customTheme = DefaultRozvrhThemes.DARK
+                                            viewModel.customTheme = DefaultRozvrhThemes.BLACK
                                             viewModel.selectedTheme = it
                                         }
                                         SelectedTheme.FOLLOW_SYSTEM_THEME -> {

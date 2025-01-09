@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             setContent {
-                LepsirozvrhTheme(hasAppBar = false) {
+                LepsirozvrhTheme(hasAppBar = false, isRozvrhScreen = true) {
                     RozvrhWithControls(viewModel)
 
                     //if notifications have been suddenly disabled

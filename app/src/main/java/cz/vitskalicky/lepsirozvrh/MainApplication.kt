@@ -220,7 +220,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
                         MutableLiveData(DefaultRozvrhThemes.LIGHT)
                     }
                     SelectedTheme.LIGHT -> MutableLiveData(DefaultRozvrhThemes.LIGHT)
-                    SelectedTheme.BLACK -> MutableLiveData(DefaultRozvrhThemes.DARK) //todo black theme
+                    SelectedTheme.BLACK -> MutableLiveData(DefaultRozvrhThemes.BLACK) //todo black theme
                     SelectedTheme.DARK -> MutableLiveData(DefaultRozvrhThemes.DARK)
                     SelectedTheme.CUSTOM -> prefs.sharedPreferences.stringLiveData(PrefsConsts.CUSTOM_THEME, "")
                         .map {
