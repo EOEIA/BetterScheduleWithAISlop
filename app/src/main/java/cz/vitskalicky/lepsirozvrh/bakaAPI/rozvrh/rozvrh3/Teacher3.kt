@@ -5,6 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 @JsonIgnoreProperties(ignoreUnknown=true)
 data class Teacher3 (
     val id: String,
-    val abbrev: String,
-    val name: String,
+    val abbrev: String?,
+    val name: String?,
 )

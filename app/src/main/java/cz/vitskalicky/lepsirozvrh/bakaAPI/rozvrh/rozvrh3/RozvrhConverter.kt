@@ -38,7 +38,7 @@ object RozvrhConverter {
      * */
     @Throws(RozvrhConversionException::class)
     fun convert(rozvrh3: Rozvrh3, date: LocalDate?, context: Context): Rozvrh{
-        //todo perform further testing after creating a testing server
+        @Suppress("NAME_SHADOWING")
         val rozvrh3 = remove0thCaptionIfUnnecessary(rozvrh3)
 
         val monday : LocalDate = date?.let { Utils.getWeekMonday(date) } ?: Rozvrh.PERM
@@ -144,28 +144,28 @@ object RozvrhConverter {
                     //report problem
                     throw RozvrhConversionException("Failed to parse Rozvrh3 to Rozvrh: Could not find a caption for an atom: searched for '${atom.hourId}' available caption ids: ${captionsMap.keys}")
 
-                var subjectName: String = ""
-                var subjectAbbrev: String = ""
+                var subjectName = ""
+                var subjectAbbrev = ""
 
                 atom.subjectId?.let { subjects[it] }?.let{
                     subjectName = it.name ?: ""
                     subjectAbbrev = it.abbrev ?: ""
                 }
 
-                var teacherName: String = ""
-                var teacherAbbrev: String = ""
+                var teacherName = ""
+                var teacherAbbrev = ""
 
                 atom.teacherId?.let { teachers[it] }?.let {
-                    teacherName = it.name
-                    teacherAbbrev = it.abbrev
+                    teacherName = it.name ?: ""
+                    teacherAbbrev = it.abbrev ?: ""
                 }
 
-                var roomName: String = ""
-                var roomAbbrev: String = ""
+                var roomName = ""
+                var roomAbbrev = ""
 
                 atom.roomId?.let { rooms[it] }?.let {
-                    roomName = it.name
-                    roomAbbrev = it.abbrev
+                    roomName = it.name ?: ""
+                    roomAbbrev = it.abbrev ?: ""
                 }
 
                 val theme = atom.theme ?: ""
