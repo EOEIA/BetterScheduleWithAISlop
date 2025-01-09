@@ -42,13 +42,8 @@ class MainActivity : ComponentActivity() {
                 finish()
                 return@launch
             }
-            // if coming from notification, switch to the account used in the notification
-            if (intent.hasExtra(EXTRA_SWITCH_TO_ACCOUNT)){
-                val newAccount = intent.getLongExtra(EXTRA_SWITCH_TO_ACCOUNT, -1)
-                val currentAccount = SharedPrefsKt(this@MainActivity).long(PrefsConsts.ACTIVE_ACCOUNT_ID)
-                if (newAccount != currentAccount) {
-                    (application as MainApplication).accountRepository.switchToAccount(newAccount);
-                }
+            if (intent != null){
+                handleIntent(intent)
             }
             viewModel.getAccountIdLD().observe(this@MainActivity){
                 if (it == null){
@@ -74,6 +69,31 @@ class MainActivity : ComponentActivity() {
                         PermanentNotification.ShowNoPermissionDialog { showNotiPermissionDialog = false }
                     }
                 }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent != null){
+            handleIntent(intent)
+        }
+    }
+
+    private fun handleIntent(intent: Intent){
+        lifecycleScope.launch {
+            // if coming from notification, switch to the account used in the notification
+            if (intent.hasExtra(EXTRA_SWITCH_TO_ACCOUNT)){
+                val newAccount = intent.getLongExtra(EXTRA_SWITCH_TO_ACCOUNT, -1)
+                val currentAccount = SharedPrefsKt(this@MainActivity).long(PrefsConsts.ACTIVE_ACCOUNT_ID)
+                if (newAccount != currentAccount) {
+                    (application as MainApplication).accountRepository.switchToAccount(newAccount);
+                }
+            }
+            // And jump to current lesson if requested
+            if (intent.getBooleanExtra(EXTRA_JUMP_TO_TODAY, false)){
+                viewModel.weekPosition = 0
+                viewModel.centerToCurrentLessonLD.value = true;
             }
         }
     }

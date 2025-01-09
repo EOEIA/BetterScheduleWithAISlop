@@ -227,6 +227,9 @@ class MainActivityViewModel(
         }
     }
 
+    /** See [RozvrhViewModel.centerToCurrentLessonLD]. */
+    override var centerToCurrentLessonLD: MutableLiveData<Boolean?> = MutableLiveData(null)
+
     private fun initThisAndPermLD(){
         val thisWeekLDs = prepareLD( 0)
         thisWeekLD = thisWeekLDs.first

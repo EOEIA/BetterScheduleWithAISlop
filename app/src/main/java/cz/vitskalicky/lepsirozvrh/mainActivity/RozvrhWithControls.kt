@@ -67,9 +67,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
     if (showInfoline == false) infotext = null
 
     val isCenterToCurrentLessonEnabled: () -> Boolean = {SharedPrefsKt(context).boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON)?:true}
-    var centerToCurrentLesson: Boolean by rememberSaveable{
-        mutableStateOf(isCenterToCurrentLessonEnabled())
-    }
+    val centerToCurrentLesson by viewModel.centerToCurrentLessonLD.observeAsState()
     RozvrhWithControlsStateless(
         rozvrh = rozvrh?.data,
         isTeacher = account?.isTeacher() ?: false,
@@ -78,15 +76,15 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         statusLineText = infotext, //todo theme hide infoline
         onNextPress = {viewModel.weekPosition++},
         onPrevPress = {viewModel.weekPosition--},
-        onCurrentPress = {viewModel.weekPosition = 0; centerToCurrentLesson = isCenterToCurrentLessonEnabled()},
+        onCurrentPress = {viewModel.weekPosition = 0; viewModel.centerToCurrentLessonLD.value = isCenterToCurrentLessonEnabled()},
         onPermPress = {viewModel.weekPosition = RozvrhViewModel.PERM},
         onSettingsPress = {
             val intent = Intent(context, SettingsActivity::class.java)
             context.startActivity(intent)
         },
         onRefreshPress = {viewModel.forceRefresh()},
-        centerToCurrentLesson = centerToCurrentLesson,
-        onCenterCompleted = {centerToCurrentLesson = false},
+        centerToCurrentLesson = centerToCurrentLesson ?: isCenterToCurrentLessonEnabled(),
+        onCenterCompleted = {viewModel.centerToCurrentLessonLD.value = false},
         showSettingsBadge = showSettingsBadge ?: false
     )
 }
