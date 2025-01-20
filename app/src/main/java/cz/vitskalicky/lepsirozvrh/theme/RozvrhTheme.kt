@@ -176,6 +176,7 @@ object ThemeGenerator{
         return ret
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun generateEmptyCellColor(primaryColor: Color, accentColor: Color, backgroundColor: Color): Color {
         return backgroundColor
     }
@@ -203,6 +204,7 @@ object ThemeGenerator{
     @JvmName("extensionLighter")
     fun Color.lighter( @FloatRange(from = 0.0, to = 1.0) factor: Float = 0.15f): Color = ThemeGenerator.lighter(this, factor)
 
+    @Suppress("UNUSED_PARAMETER")
     fun generateHodinaColor(primaryColor: Color, accentColor: Color, backgroundColor: Color): Color {
         val lightSumBg = backgroundColor.luminance()
         val maxColor: Color = Color.White.darker()
@@ -214,18 +216,22 @@ object ThemeGenerator{
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun generateChangeColor(primaryColor: Color, accentColor: Color, backgroundColor: Color): Color {
         return mix(accentColor, backgroundColor, 0.2f)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun generateHeaderColor(primaryColor: Color, accentColor: Color, backgroundColor: Color): Color {
         return mix(backgroundColor, primaryColor, 0.9f)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun generateHighlightColor(primaryColor: Color, accentColor: Color, backgroundColor: Color): Color {
         return primaryColor
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun generateHomeworkColor(primaryColor: Color, accentColor: Color, backgroundColor: Color): Color {
         return accentColor
     }

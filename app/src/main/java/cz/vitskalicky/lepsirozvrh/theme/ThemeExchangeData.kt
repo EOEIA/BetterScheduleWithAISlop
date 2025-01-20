@@ -271,7 +271,6 @@ data class ThemeExchangeData(
      * @return JSON string or `null` if it fails (it shouldn't)
      */
     fun toJsonString(): String? {
-        val mapper = ObjectMapper()
         return try {
             Json.encodeToString(this)
         } catch (e: IOException) {

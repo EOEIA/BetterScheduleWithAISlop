@@ -321,7 +321,7 @@ fun FloatPreference(
             value = value,
             onDismissDialog = {dialogOpen = false},
             validator = validator,
-            onSubmit = {newValue: Float -> onChanged(value) }
+            onSubmit = {newValue: Float -> dialogOpen = false; onChanged(newValue) }
         )
     }
 

@@ -45,7 +45,6 @@ val LocalRozvrhTheme = compositionLocalOf { DefaultRozvrhThemes.UNSPECIFIED }
  * */
 @Composable
 fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), hasAppBar: Boolean = true, tintStatusBar: Boolean = true, isRozvrhScreen: Boolean = false, content: @Composable () -> Unit) {
-    val prefs = LocalContext.current.prefs
     val app = LocalContext.current.applicationContext as MainApplication;
     val themeLD: LiveData<RozvrhTheme?> = app.getThemeLD(darkTheme);
     //todo this is too slow at loading themes. Make tit faster

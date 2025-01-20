@@ -89,7 +89,7 @@ private suspend fun sendFeedback(includeRozvrh: Boolean, scaffoldState: Scaffold
                     val address = context.getString(R.string.CONTACT_MAIL)
                     val clip = ClipData.newPlainText(address, address)
                     clipboard.setPrimaryClip(clip)
-                    val result2 = scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.copied_to_clipboard))
+                    scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.copied_to_clipboard))
                 }
             }
         }

@@ -70,8 +70,8 @@ object RozvrhConverter {
         //here we have the RozvrhCaptions. Key is the hourId, first in the pair is the index and second is the caption
         val captionsMap = HashMap<String, Pair<Int,RozvrhCaption>>()
         captionsUnsorted.forEachIndexed { index, pair -> captionsMap[pair.first] = Pair(index, pair.second) }
-        //and here they are sorted by index
-        val captions: List<RozvrhCaption> = captionsUnsorted.mapIndexed { index, pair -> pair.second }
+        //and here they are sorted by beginTime
+        val captions: List<RozvrhCaption> = captionsUnsorted.mapIndexed { _, pair -> pair.second }
 
         // save each type of objects into a map with their id as keys
         val hours = HashMap<String, Hour3>()
