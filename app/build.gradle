@@ -101,7 +101,7 @@ android {
             buildConfigField "Boolean", "ALLOW_SENTRY", "true"
         }
         /**
-         *  For Google play releases containing google in-app purchases only.
+         *  For Google play releases. Used to contain in-app purchases, but it does not anymore.
          *  Allows crash reports using Sentry, which is managed by Vít Skalický.
          *  Crashes from your testing are not welcome there.
          */
