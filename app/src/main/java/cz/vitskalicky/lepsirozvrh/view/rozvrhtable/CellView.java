@@ -44,11 +44,11 @@ public class CellView extends View {
     }
     /** Shortcut */
     protected int dp(float dpValue){
-        return KotlinUtils.dpToPx(dpValue, getContext());
+        return Math.round(KotlinUtils.dpToPx(dpValue, getContext()));
     }
     /** Shortcut */
     protected int sp(float spValue){
-        return KotlinUtils.spToPx(spValue, getContext());
+        return Math.round(KotlinUtils.spToPx(spValue, getContext()));
     }
 
     public CellView(Context context, @Nullable AttributeSet attrs) {

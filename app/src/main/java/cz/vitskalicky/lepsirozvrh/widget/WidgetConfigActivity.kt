@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import cz.vitskalicky.lepsirozvrh.KotlinUtils
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.Account
@@ -221,8 +222,8 @@ abstract class WidgetConfigActivity : ComponentActivity() {
     fun saveConfig(widgetID: Int, accountId: Long, bgColor: Int, transparency: Float, textColor: Int) {
         val ws: WidgetsSettings.Widget = WidgetsSettings.Widget();
 
-        ws.primaryTextSize = resources.getDimension(R.dimen.widgetTextPrimary) / resources.displayMetrics.scaledDensity;
-        ws.secondaryTextSize = resources.getDimension(R.dimen.widgetTextSecondary) / resources.displayMetrics.scaledDensity;
+        ws.primaryTextSize = KotlinUtils.pxToSp(resources.getDimension(R.dimen.widgetTextPrimary), this)
+        ws.secondaryTextSize = KotlinUtils.pxToSp(resources.getDimension(R.dimen.widgetTextSecondary), this)
 
         ws.primaryTextColor = textColor;
         ws.secondaryTextColor = calculateSecondaryTextColor(textColor)

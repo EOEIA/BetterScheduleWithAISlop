@@ -68,11 +68,19 @@ object KotlinUtils {
 
     /** Converts DP into pixels*/
     @JvmStatic
-    fun dpToPx(dpValue: Float, context: Context): Int = (dpValue * context.resources.displayMetrics.density).roundToInt()
+    fun dpToPx(dpValue: Float, context: Context): Float = (dpValue * context.resources.displayMetrics.density)
     /** Converts SP into pixels*/
     @JvmStatic
-    fun spToPx(spValue: Float, context: Context): Int =
-        TypedValue.applyDimension(COMPLEX_UNIT_SP, spValue, context.resources.displayMetrics).toInt()
+    fun spToPx(spValue: Float, context: Context): Float =
+        TypedValue.applyDimension(COMPLEX_UNIT_SP, spValue, context.resources.displayMetrics)
+
+    @JvmStatic
+    fun pxToSp(pxValue: Float, context: Context): Float = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        TypedValue.deriveDimension(COMPLEX_UNIT_SP, pxValue, context.resources.displayMetrics)
+    } else {
+        @Suppress("DEPRECATION")
+        pxValue / context.resources.displayMetrics.scaledDensity // Deprecated in API level 34 (UPSIDE_DOWN_CAKE)
+    }
 
     // composable shortcuts
     inline val Int.str: String

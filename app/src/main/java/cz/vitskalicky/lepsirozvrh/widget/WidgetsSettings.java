@@ -14,7 +14,9 @@ public class WidgetsSettings {
         public int backgroundColor;
         public int primaryTextColor;
         public int secondaryTextColor;
+        /** in sp units */
         public float primaryTextSize;
+        /** in sp units */
         public float secondaryTextSize;
     }
 

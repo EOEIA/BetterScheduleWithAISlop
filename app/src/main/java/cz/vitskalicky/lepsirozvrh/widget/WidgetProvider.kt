@@ -42,8 +42,8 @@ open class WidgetProvider : AppWidgetProvider() {
                 val settings = Widget()
                 settings.primaryTextColor = ContextCompat.getColor(context, R.color.widgetLightText)
                 settings.secondaryTextColor = WidgetConfigActivity.calculateSecondaryTextColor(settings.primaryTextColor)
-                settings.primaryTextSize = context.resources.getDimensionPixelSize(R.dimen.widgetTextPrimary) / context.resources.displayMetrics.scaledDensity
-                settings.secondaryTextSize = context.resources.getDimensionPixelSize(R.dimen.widgetTextSecondary) / context.resources.displayMetrics.scaledDensity
+                settings.primaryTextSize = KotlinUtils.pxToSp(context.resources.getDimension(R.dimen.widgetTextPrimary), context)
+                settings.secondaryTextSize = KotlinUtils.pxToSp(context.resources.getDimension(R.dimen.widgetTextSecondary), context)
                 settings.backgroundColor = ContextCompat.getColor(context, R.color.widgetLightBackground)
                 widgetsSettings.widgets[id] = settings
             }
@@ -75,8 +75,8 @@ open class WidgetProvider : AppWidgetProvider() {
             val settings = Widget()
             settings.primaryTextColor = ContextCompat.getColor(context, R.color.widgetLightText)
             settings.secondaryTextColor = WidgetConfigActivity.calculateSecondaryTextColor(settings.primaryTextColor)
-            settings.primaryTextSize = context.resources.getDimensionPixelSize(R.dimen.widgetTextPrimary) / context.resources.displayMetrics.scaledDensity
-            settings.secondaryTextSize = context.resources.getDimensionPixelSize(R.dimen.widgetTextSecondary) / context.resources.displayMetrics.scaledDensity
+            settings.primaryTextSize = KotlinUtils.pxToSp(context.resources.getDimension(R.dimen.widgetTextPrimary), context)
+            settings.secondaryTextSize = KotlinUtils.pxToSp(context.resources.getDimension(R.dimen.widgetTextSecondary), context)
             settings.backgroundColor = ContextCompat.getColor(context, R.color.widgetLightBackground)
             widgetsSettings.widgets[appWidgetId] = settings
             AppSingleton.getInstance(context).saveWidgetsSettings()
