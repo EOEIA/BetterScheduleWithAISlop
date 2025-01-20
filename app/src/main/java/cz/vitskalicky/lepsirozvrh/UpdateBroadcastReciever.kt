@@ -43,14 +43,11 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
                 //todo move widget updating elsewhere
                 if (account == null){
                     PermanentNotification.update(application, null, false,null, 0)
-                    if (rozvrhKey != null) {
-                        WidgetProvider.updateAccountLoggedOut(context, rozvrhKey.account)
-                    }
                 }else {
                     val rozvrh: Rozvrh? = application.repository.getRozvrh(rozvrhKey, false)
                     PermanentNotification.update(application, rozvrh, isTeacher, account.id)
-                    WidgetProvider.updateAllForAccount(account, rozvrh, context)
                 }
+                WidgetProvider.updateAll(application)
                 application.updateUpdateTime()
             }finally {
                 pendingResult.finish()
