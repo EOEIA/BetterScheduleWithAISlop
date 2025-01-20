@@ -2,16 +2,13 @@ package cz.vitskalicky.lepsirozvrh.view.rozvrhtable
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.widget.HorizontalScrollView
-import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
-import cz.vitskalicky.lepsirozvrh.SharedPrefsKt
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.*
 import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
-import org.joda.time.LocalDate
+import io.sentry.Sentry
 
 /** Custom layout for the schedule table */
 class RozvrhLayout : ViewGroup {
@@ -20,7 +17,7 @@ class RozvrhLayout : ViewGroup {
      * Creates a cell with reasonably long data and calculates its minimum width
      */
     private var naturalCellWidth = -1
-        private get() {
+        get() {
             if (field != -1 && childHeightWhenCalculatingNaturalCellWidth == childHeight) {
                 return field
             }
@@ -60,8 +57,9 @@ class RozvrhLayout : ViewGroup {
         val specWS = MeasureSpec.getSize(widthMeasureSpec)
         val specWM = MeasureSpec.getMode(widthMeasureSpec)
         val specHS = MeasureSpec.getSize(heightMeasureSpec)
+        @Suppress("UNUSED_VARIABLE")
         val specHM = MeasureSpec.getMode(heightMeasureSpec)
-        var width = specWS
+        val width: Int;
         val height = specHS
         var childState = 0
         childHeight = Math.ceil(specHS.toDouble() / (rows + 1)).toInt()
@@ -135,7 +133,7 @@ class RozvrhLayout : ViewGroup {
             spaceToLeft += columnSizes[i + 1]
         }
         setMeasuredDimension(resolveSizeAndState(width, widthMeasureSpec, childState),
-                resolveSizeAndState(specHS, heightMeasureSpec,
+                resolveSizeAndState(height, heightMeasureSpec,
                         childState shl MEASURED_HEIGHT_STATE_SHIFT))
     }
 
@@ -286,7 +284,6 @@ class RozvrhLayout : ViewGroup {
 
             if (den.event == null){
                 den.blocks.forEachIndexed {index: Int, it ->
-                    val blck = it
                     it.forEach {
                         val view = hodinaViewRecycler.retrieve()
                         view.setHodina(it, perm, isTeacher)
@@ -319,7 +316,6 @@ class RozvrhLayout : ViewGroup {
         //debug timing: Log.d(TAG_TIMER, "populate end " + Utils.getDebugTime());
     }
 
-    var displayingWtfRozvrhDialog = false
     fun highlightCurrentLesson() {
         val indexes = rozvrh?.getHighlightBlockIndexes(false)
         val dayIndex = indexes?.first
@@ -343,26 +339,15 @@ class RozvrhLayout : ViewGroup {
         if (toHighlight == null || dayIndex == null || captionIndex == null) {
             return
         }
-        val block: RozvrhBlock = toHighlight
-        val day:LocalDate = block.day.date
-        val caption: RozvrhCaption = toHighlight.caption
 
         //fail-safe
-        /*if (hodinaIndex >= hodinasByCaptions.size || denIndex >= hodinasByCaptions[hodinaIndex].length) {
-            // I've never seen such rozvrh
-            Log.w(TAG, "There are more lessons than captions in a weekly schedule. Showing WTF rozvrh dialog.")
-            Sentry.getContext().recordBreadcrumb(BreadcrumbBuilder().setMessage("There are more lessons than captions in a weekly schedule. Showing WTF rozvrh dialog.").build())
-            if (!displayingWtfRozvrhDialog) {
-                try {
-                    Utils.wtfRozvrh(context, this, oldRozvrh.getDny().get(0).getParsedDatum())
-                    displayingWtfRozvrhDialog = true
-                } catch (e: Exception) {
-                    Toast.makeText(context, "!", Toast.LENGTH_SHORT).show()
-                }
-            }
-            hodinaIndex = Math.min(hodinaIndex, hodinasByCaptions.size - 1)
-            denIndex = Math.min(denIndex, hodinasByCaptions[hodinaIndex].length - 1)
-        }*/
+        if (captionIndex >= hodinasByCaptions.size || dayIndex >= hodinasByCaptions[captionIndex].size) {
+            // the rozvrh is very weird
+            val msg = "There are more lessons than captions in a weekly schedule."
+            Log.w(TAG, msg)
+            Sentry.addBreadcrumb(msg)
+            // todo: allow user to submit the weird schedule
+        }
 
         nextHodinaView = hodinasByCaptions[captionIndex][dayIndex].firstOrNull() ?: return //todo report error. this should not happen
 

@@ -282,6 +282,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
                 val overflow: Float = textWidth - drawableEventWidth
                 actualPrimaryTextSize *= overflow / textWidth
                 primaryTextPaint.textSize = actualPrimaryTextSize
+                @Suppress("UNUSED_VALUE")
                 textWidth = primaryTextPaint.measureText(event)
             }
 
