@@ -155,10 +155,9 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             // Register notification channel for the permanent notification
             val name: CharSequence = getString(R.string.notification_channel_name)
             val description = getString(R.string.notification_detials)
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val importance = NotificationManager.IMPORTANCE_LOW
             val channel = NotificationChannel(PermanentNotification.PERMANENT_CHANNEL_ID, name, importance)
             channel.description = description
-            channel.setSound(Uri.parse("android.resource://" + BuildConfig.APPLICATION_ID + "/" + R.raw.silence), AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build())
             channel.setShowBadge(false)
             channel.vibrationPattern = null
             channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC

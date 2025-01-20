@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -241,6 +242,15 @@ class SettingsActivity : ComponentActivity() {
                                     PermanentNotification.update(application as MainApplication)
                                 }
                             }
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Preference(R.string.notification_open_settings.str, null,icon = Icons.Default.Tune.icon) {
+                                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                                        putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                                        putExtra(Settings.EXTRA_CHANNEL_ID, PermanentNotification.PERMANENT_CHANNEL_ID)
+                                    }
+                                    startActivity(intent)
+                            }
+                                }
                             Divider()
                             PreferenceGroupHeader(R.string.about.str)
 

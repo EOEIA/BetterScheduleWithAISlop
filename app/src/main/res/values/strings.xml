@@ -79,6 +79,7 @@
     </string>
     <string name="notification_off">Disabled</string>
     <string name="notification_status">Enabled for: %1$s</string>
+    <string name="notification_open_settings">Customize notification…</string>
     <string name="notification_banner_text">Enable persistent notification to have quick access to the current and next lesson</string>
     <string name="notification_banner_dismiss">Dismiss</string>
     <string name="notification_banner_open">Enable</string>

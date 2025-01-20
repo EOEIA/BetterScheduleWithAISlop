@@ -71,6 +71,7 @@
         nebude fungovat dokud v nastavení systému neudělíte Lepšímu rozvrhu oprávnění zobrazovat oznámení.</string>
     <string name="notification_off">Vypnuto</string>
     <string name="notification_status">Zapnuto pro: %1$s</string>
+    <string name="notification_open_settings">Přizpůsobit upozornění…</string>
     <string name="notification_banner_text">Zapněte si stálé upozornění, díky kterému budete mít informace o příští a právě probíhající hodině vždy po ruce</string>
     <string name="notification_banner_dismiss">Nyní ne</string>
     <string name="notification_banner_open">Zapnout</string>
