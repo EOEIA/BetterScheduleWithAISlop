@@ -2,7 +2,8 @@
 
 buildscript {
     ext {
-        kotlin_version = '1.8.20'
+        kotlin_version = '1.8.21'
+        compose_ui_version = '1.2.0'
     }
     repositories {
         google()
@@ -10,7 +11,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.0.2'
         classpath 'com.jaredsburrows:gradle-license-plugin:0.8.42'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
@@ -27,8 +28,4 @@ allprojects {
         jcenter()
         mavenCentral()
     }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

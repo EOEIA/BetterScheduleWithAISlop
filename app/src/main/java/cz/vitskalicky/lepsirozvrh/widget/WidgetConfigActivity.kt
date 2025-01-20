@@ -3,93 +3,236 @@ package cz.vitskalicky.lepsirozvrh.widget
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import cz.vitskalicky.lepsirozvrh.AppSingleton
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.Utils
-import cz.vitskalicky.lepsirozvrh.donations.Donations
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
-import cz.vitskalicky.lepsirozvrh.widget.WidgetThemeFragment.CallbackListener
+import cz.vitskalicky.lepsirozvrh.model.Account
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.darker
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.textColorFor
+import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
+import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
+import cz.vitskalicky.lepsirozvrh.view.preferences.ColorPreference
+import cz.vitskalicky.lepsirozvrh.view.preferences.SliderPreference
+import cz.vitskalicky.lepsirozvrh.view.preferences.SwitchPreference
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
-/**
- * A base class for Widget configuration activities taking care of saving the data, OK, button and spinner.
- */
-abstract class WidgetConfigActivity : AppCompatActivity(), CallbackListener {
-    protected var widgetThemeFragment: WidgetThemeFragment? = null
-    protected var okButton: Button? = null
-    protected var donations: Donations? = null
-    var widgetID = 0
-    var isWidgetIDSet = false
+/** Base activity for both small and wide widget that provides the shared logic */
+abstract class WidgetConfigActivity : ComponentActivity() {
+    companion object {
+        /** Must match R.array.widget_style_entries*/
+        private const val LIGHT = 0
+        /** Must match R.array.widget_style_entries*/
+        private const val DARK = 1
+        /** Must match R.array.widget_style_entries*/
+        private const val CUSTOM = 2
+
+        fun calculateSecondaryTextColor(primaryTextColor: Int): Int = (primaryTextColor and 0x00ffffff) or 0xCC000000.toInt()
+    }
+
+    private val viewModel: WidgetConfigActivityViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        createContentView()
-        donations = Donations(this, this) {
-            //on sponsor change
-            widgetThemeFragment?.updateSponsor()
-        }
-        if (widgetThemeFragment == null) {
-            widgetThemeFragment = supportFragmentManager.findFragmentById(R.id.widgetThemeFragment) as WidgetThemeFragment?
-            if (widgetThemeFragment == null) {
-                throw RuntimeException("Layout must contain a WidgetThemeFragment with id \"widgetThemeFragment\" or the protected field \"widgetThemeFragment\" must be set in \"createContentView()\"")
-            }
-        }
-        widgetThemeFragment!!.init(donations)
-        if (okButton == null) {
-            okButton = findViewById(R.id.buttonOK)
-            if (okButton == null) {
-                throw RuntimeException("Layout must contain a Button with id \"okButton\" or the protected field \"okButton\" must be set in \"createContentView()\"")
-            }
-        }
-        val intent = intent
-        val extras = intent.extras
-        if (extras != null) {
-            widgetID = extras.getInt(
-                    AppWidgetManager.EXTRA_APPWIDGET_ID,
-                    AppWidgetManager.INVALID_APPWIDGET_ID)
-            isWidgetIDSet = true
-            widgetThemeFragment!!.setWidgetID(widgetID)
-        }
-        okButton!!.setOnClickListener { v: View? ->
-            widgetThemeFragment!!.saveConfig()
-            if (isWidgetIDSet) {
-                val resultValue = Intent()
-                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID)
-                setResult(RESULT_OK, resultValue)
 
-                lifecycleScope.launch{
-                    val rozvrh: RozvrhRelated? = (application as? MainApplication)?.repository?.getRozvrh(Utils.getCurrentMonday(),true)
-                    val tmp = rozvrh?.getWidgetDisplayBlocks(5)
-                    WidgetProvider.update(this@WidgetConfigActivity,widgetID,tmp?.first, tmp?.second )
-                    finish()
+
+
+        setContent {
+            val lightBgColor = colorResource(R.color.widgetLightBackground).toArgb()
+            val darkBgColor = colorResource(R.color.widgetDarkBackground).toArgb()
+
+            val widgetID: Int? by rememberSaveable{
+                val intent = intent
+                val extras = intent.extras
+                val widgetID: Int? = extras?.getInt(
+                        AppWidgetManager.EXTRA_APPWIDGET_ID,
+                        AppWidgetManager.INVALID_APPWIDGET_ID)
+                mutableStateOf(widgetID)
+            }
+            BackHandler {
+                if (widgetID != null) {
+                    val resultValue = Intent()
+                    resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID)
+                    setResult(RESULT_CANCELED, resultValue)
                 }
-            } else {
                 finish()
             }
+
+            var widgetStyle: Int by rememberSaveable{mutableStateOf(LIGHT)}
+
+            var bgColor: Int by rememberSaveable{mutableStateOf(lightBgColor)}
+            var bgTransparency: Float by rememberSaveable{ mutableStateOf(0f) }
+            var autoTextColor: Boolean by rememberSaveable{ mutableStateOf(true) }
+            var textColor: Int by rememberSaveable{mutableStateOf(textColorFor(Color(bgColor)).toArgb())}
+            if (autoTextColor){
+                val newColor = textColorFor(Color(bgColor)).toArgb()
+                if (newColor != textColor){
+                    textColor = newColor
+                }
+            }
+
+            var selectedAccount: Account? by rememberSaveable{mutableStateOf(null)}
+
+
+            LepsirozvrhTheme(tintStatusBar = false) {
+                Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
+                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+                        Box(Modifier.weight(1f, fill = false).fillMaxSize(), contentAlignment = Alignment.Center){
+                            WidgetView(bgColor, bgTransparency,textColor)
+                        }
+                        Surface(Modifier.weight(2f, fill = false).fillMaxWidth(), color = MaterialTheme.colors.surface, elevation = 8.dp ) {
+                            val scrollState = rememberScrollState()
+                            Column(Modifier.verticalScroll(scrollState)) {
+                                Spacer(Modifier.size(16.dp))
+
+                                val accounts: List<Account> = (viewModel.accountsLD.observeAsState().value?.sortedBy { it.username + it.serverUrl } ?: emptyList())
+                                if (accounts.size == 1 && selectedAccount == null){
+                                    selectedAccount = accounts[0]
+                                }
+                                val accountNames = accounts.map { it.fullName }
+                                val optionIndex = accounts.indexOfFirst { it.id == selectedAccount?.id }.takeUnless { it == -1 }
+                                val descText = selectedAccount?.fullName ?: stringResource(R.string.widget_account_none)
+                                RadioPreference(stringResource(R.string.widget_account), descText,
+                                    accountNames,
+                                    optionIndex,
+                                    { },
+                                    { Icon(Icons.Default.Person, null) }
+                                ){newOptionIndex ->
+                                    selectedAccount = accounts[newOptionIndex]
+                                }
+
+                                    val styleOptions = stringArrayResource(R.array.widget_style_entries)
+                                    val styleText = styleOptions[widgetStyle]
+                                RadioPreference(
+                                    title = stringResource(R.string.widget_style),
+                                    description = styleText,
+                                    options = styleOptions.toList(),
+                                    selectedOptionIndex = widgetStyle,
+                                    dialogTitle = { },
+                                    icon = {Icon(Icons.Default.Palette, null) }){
+                                    widgetStyle = it
+                                    when (widgetStyle){
+                                        LIGHT -> {
+                                            bgColor = lightBgColor
+                                            textColor = textColorFor(Color(bgColor)).toArgb()
+                                            bgTransparency = 0f
+                                            autoTextColor = true
+                                        }
+                                        DARK -> {
+                                            bgColor = darkBgColor
+                                            textColor = textColorFor(Color(bgColor)).toArgb()
+                                            bgTransparency = 0f
+                                            autoTextColor = true
+                                        }
+                                    }
+                                }
+                                if (widgetStyle == CUSTOM){
+                                    ColorPreference(
+                                        title = stringResource(R.string.widget_background),
+                                        description = null,
+                                        icon = null,
+                                        enabled = true,
+                                        color = Color(bgColor),
+                                        onColorSelected = {bgColor = it.toArgb()}
+                                    )
+                                    SliderPreference(
+                                        title = stringResource(R.string.widget_transparency),
+                                        icon = null,
+                                        enabled = true,
+                                        onChanged = {bgTransparency = it},
+                                        onValueChangeFinished = null,
+                                        value = bgTransparency,
+                                    )
+                                    SwitchPreference(
+                                        stringResource(R.string.widget_autotext),
+                                        null,
+                                        autoTextColor,
+                                    ){
+                                        autoTextColor = it
+                                    }
+                                    if (!autoTextColor){
+                                        ColorPreference(
+                                            title = stringResource(R.string.widget_text_color),
+                                            description = null,
+                                            icon = null,
+                                            enabled = true,
+                                            color = Color(textColor),
+                                            onColorSelected = {textColor = it.toArgb()}
+                                        )
+                                    }
+                                }
+
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                                    Button({
+                                        @Suppress("NAME_SHADOWING")
+                                        val selectedAccount = selectedAccount ?: return@Button;
+                                        if (widgetID != null){
+                                            saveConfig(widgetID!!, selectedAccount.id, bgColor, bgTransparency, textColor)
+                                        }
+                                        val resultValue = Intent()
+                                        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID)
+                                        setResult(RESULT_OK, resultValue)
+
+                                        widgetID?.let { widgetID ->
+                                            lifecycleScope.launch{
+                                                val rozvrh: Rozvrh? = (application as? MainApplication)?.repository?.getRozvrh(RozvrhRecord.Key(selectedAccount.id,cz.vitskalicky.lepsirozvrh.Utils.getCurrentMonday()),true)
+                                                val tmp = rozvrh?.getWidgetDisplayBlocks(5)
+                                                WidgetProvider.update(this@WidgetConfigActivity,widgetID,tmp?.first,selectedAccount.isTeacher(), tmp?.second )
+                                                finish()
+                                            }
+                                        }?:finish()
+                                    },
+                                        Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                                        enabled = selectedAccount != null,
+                                    ){ Text(stringResource(R.string.ok)) }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        widgetThemeFragment!!.setCallbackListener(this)
     }
 
-    protected abstract fun createContentView()
-    override fun onBackPressed() {
-        if (isWidgetIDSet) {
-            val resultValue = Intent()
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID)
-            setResult(RESULT_CANCELED, resultValue)
-        }
-        finish()
+    fun saveConfig(widgetID: Int, accountId: Long, bgColor: Int, transparency: Float, textColor: Int) {
+        val ws: WidgetsSettings.Widget = WidgetsSettings.Widget();
+
+        ws.primaryTextSize = resources.getDimension(R.dimen.widgetTextPrimary) / resources.displayMetrics.scaledDensity;
+        ws.secondaryTextSize = resources.getDimension(R.dimen.widgetTextSecondary) / resources.displayMetrics.scaledDensity;
+
+        ws.primaryTextColor = textColor;
+        ws.secondaryTextColor = calculateSecondaryTextColor(textColor)
+        ws.backgroundColor = (bgColor and 0x00ffffff) or (((1f - transparency)*255f).roundToInt() shl 24);
+
+        ws.accountId = accountId
+
+        viewModel.saveWidgetConfig(widgetID, ws)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        donations!!.release()
-    }
-
-    companion object {
-        private val TAG = WidgetConfigActivity::class.java.simpleName
-    }
+    @Composable
+    abstract fun WidgetView(bgColor: Int, transparency: Float, textColor: Int)
 }

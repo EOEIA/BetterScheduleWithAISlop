@@ -5,6 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 @JsonIgnoreProperties(ignoreUnknown=true)
 data class Subject3 (
     var id: String,
-    var abbrev: String,
-    var name: String,
+    var abbrev: String?,
+    var name: String?,
 )

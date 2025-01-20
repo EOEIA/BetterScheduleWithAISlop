@@ -3,7 +3,7 @@ package cz.vitskalicky.lepsirozvrh.bakaAPI.login
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
-
+/** Response for the user API endpoint. see [UserWebservice]*/
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserResponse(
         val fullName: String? = null,

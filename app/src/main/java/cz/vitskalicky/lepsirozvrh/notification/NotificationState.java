@@ -10,6 +10,7 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 
 import cz.vitskalicky.lepsirozvrh.SharedPrefs;
 
+/** Handles current state of the permanent notification, such as when should it reset offset.*/
 @SuppressWarnings("WeakerAccess")
 public class NotificationState {
     private static final String TAG = NotificationState.class.getSimpleName();

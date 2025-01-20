@@ -2,9 +2,9 @@ package cz.vitskalicky.lepsirozvrh.model
 
 import androidx.annotation.StringRes
 import cz.vitskalicky.lepsirozvrh.R
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo.Status.*
 
+/** Data class for passing around status about data with optional error message and specification*/
 data class StatusInfo(
     val status: Status,
     @StringRes
@@ -29,7 +29,7 @@ data class StatusInfo(
         fun appError(): StatusInfo = StatusInfo(ERROR, R.string.info_app_error, Specification.ERROR_APP)
     }
 
-    fun asResource(rozvrh: RozvrhRelated?): Resource<RozvrhRelated>{
+    fun asResource(rozvrh: Rozvrh?): Resource<Rozvrh>{
         val resourceStatus: Resource.Status = when(status){
             SUCCESS -> Resource.Status.SUCCESS
             LOADING -> Resource.Status.LOADING

@@ -1,33 +1,25 @@
 package cz.vitskalicky.lepsirozvrh.model.rozvrh
 
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.ForeignKey.Companion.CASCADE
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import cz.vitskalicky.lepsirozvrh.database.LocalDateSerializer
+import kotlinx.serialization.Serializable
 import org.joda.time.LocalDate
 
-@Entity(
-    foreignKeys = [ForeignKey(
-            entity = Rozvrh::class,
-            parentColumns = arrayOf("id"),
-            childColumns = arrayOf("rozvrh"),
-            onDelete = CASCADE,
-            onUpdate = CASCADE,
-            deferred = true
-    )],
-    indices = [Index("rozvrh")]
-)
+@Serializable
 data class RozvrhDay(
     /**
      * if permanent, then it is a date from the week of [Rozvrh.PERM].
      */
-    @PrimaryKey
+    @Serializable(LocalDateSerializer::class)
     val date: LocalDate,
-    val rozvrh: LocalDate,
     //val dayOfWeek: Int,
     /**
      * For completely free days such as holiday. If not `null`, then the whole day is free.
      */
-    val event: String?
-)
+    val event: String?,
+    /** Outer list represents list of *blocks* (lessons in one caption), each inner list is a block with lessons.
+     * shall be exactly the length of the captions list of the rozvrh.
+     */
+    val blocks: List<List<RozvrhLesson>>
+){
+    fun isPerm(): Boolean = !date.isAfter(Rozvrh.PERM.plusDays(7))
+}

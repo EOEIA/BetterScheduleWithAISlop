@@ -3,12 +3,11 @@ package cz.vitskalicky.lepsirozvrh
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
+import cz.vitskalicky.lepsirozvrh.model.Account
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
@@ -28,19 +27,30 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
         }
         CoroutineScope(SupervisorJob()).launch(EmptyCoroutineContext) {
             try{
-                if (application.repository.refreshNeeded(Utils.getCurrentMonday(), false)){
-                    //If the rozvrh needs to be refresh, then the network call might take a long time
+                val rozvrhKey = Utils.getNotificationRozvrhKey(application)
+                val account: Account? = rozvrhKey?.let { application.accountRepository.getAccount(it.account) }
+                val isTeacher = if (rozvrhKey == null) false else application.accountRepository.getAccount(rozvrhKey.account)?.isTeacher() ?: false
+                if (account != null && application.repository.refreshNeeded(rozvrhKey, false)){
+                    //If the rozvrh needs to be refreshed, then the network call might take a long time
                     // and there would be a significant delay between user clicking "next week"
                     // in notification and any UI response.
                     // So we display the cached one immediately.
-                    val cachedRozvrh = application.repository.getCachedRozvrh(Utils.getCurrentMonday());
+                    val cachedRozvrh = application.repository.getCachedRozvrh(rozvrhKey);
                     if (cachedRozvrh != null){
-                        PermanentNotification.update(cachedRozvrh,application)
+                        PermanentNotification.update(application, cachedRozvrh,isTeacher, account.id)
                     }
                 }
-                val rozvrh: RozvrhRelated? = application.repository.getRozvrh(Utils.getCurrentMonday(), false)
-                PermanentNotification.update(rozvrh,application)
-                WidgetProvider.updateAll(rozvrh, context)
+                //todo move widget updating elsewhere
+                if (account == null){
+                    PermanentNotification.update(application, null, false,null, 0)
+                    if (rozvrhKey != null) {
+                        WidgetProvider.updateAccountLoggedOut(context, rozvrhKey.account)
+                    }
+                }else {
+                    val rozvrh: Rozvrh? = application.repository.getRozvrh(rozvrhKey, false)
+                    PermanentNotification.update(application, rozvrh, isTeacher, account.id)
+                    WidgetProvider.updateAllForAccount(account, rozvrh, context)
+                }
                 application.updateUpdateTime()
             }finally {
                 pendingResult.finish()

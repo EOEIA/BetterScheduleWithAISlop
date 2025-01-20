@@ -4,6 +4,7 @@ import retrofit2.http.GET
 
 interface UserWebservice {
 
+    /** Retrieves details about current user */
     @GET("api/3/user")
     suspend fun getUser(): UserResponse
 }

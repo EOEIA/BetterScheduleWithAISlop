@@ -1,13 +1,24 @@
 package cz.vitskalicky.lepsirozvrh.notification
 
+import android.Manifest
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
-import android.view.LayoutInflater
-import android.widget.CheckBox
-import androidx.appcompat.app.AlertDialog
+import android.os.Build
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -15,70 +26,79 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
-import cz.vitskalicky.lepsirozvrh.activity.MainActivity
-import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
+import cz.vitskalicky.lepsirozvrh.mainActivity.MainActivity
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhBlock
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import org.joda.time.format.DateTimeFormat
 
+/** Logic and stuff for the persistent notification */
 object PermanentNotification {
     const val PERMANENT_NOTIFICATION_ID = 7055713
     const val PERMANENT_CHANNEL_ID = BuildConfig.APPLICATION_ID + ".permanentNotificationChannel"
     const val PREF_DONT_SHOW_INFO_DIALOG = "dont-show-notification-info-dialog-again"
-    public val EXTRA_NOTIFICATION = PermanentNotification::class.java.canonicalName + "-extra-notification"
+    public val EXTRA_NOTIFICATION = PermanentNotification::class.java.canonicalName!! + "-extra-notification"
 
-    suspend fun update(application: MainApplication) {
-        if (!SharedPrefs.getBooleanPreference(application, R.string.PREFS_NOTIFICATION, true)) {
-            update(null, 0, application)
+    /** Special value for accountId which symbolizes that permanent notification have been disabled by the user. */
+    public const val ACCOUNT_NOTIFICATION_DISABLED = -1L;
+    /** Special value for the accountId which symbolizes that permanent notification was enabled, but that account has been logged out. */
+    public const val ACCOUNT_NOTIFICATION_LOGGED_OUT = -2L;
+
+    /** Does not guarantee the account is actually valid, just checks for special values (it still might be set to account which has been removed and it was not updated to [ACCOUNT_NOTIFICATION_LOGGED_OUT] by accident) */
+    public fun isNotificationAccountValid(id: Long): Boolean{
+        return id != ACCOUNT_NOTIFICATION_LOGGED_OUT && id != ACCOUNT_NOTIFICATION_DISABLED;
+    }
+
+    suspend fun update(app: MainApplication) {
+        val accountId: Long? = if (SharedPrefs.contains(app, PrefsConsts.NOTIFICATION_ACCOUNT))
+            SharedPrefs.getLong(app, PrefsConsts.NOTIFICATION_ACCOUNT).takeIf { isNotificationAccountValid(it) }
+        else null;
+        val account = accountId?.let{ app.accountRepository.getAccount(it) }
+        if (account == null){
+            update(app, null as Rozvrh?, false, null)
             return
         }
-        application.repository.getRozvrh(Utils.getCurrentMonday(), false).let {
-            update(it, application)
-        }
+        val key = RozvrhRecord.Key(accountId, Utils.getCurrentMonday());
+        val rozvrh = app.repository.getRozvrh(key, false)
+        update(app, rozvrh, account.isTeacher(), accountId)
     }
 
     /**
      * Same as [update], but gets the RozvrhHodina for you.
      */
-    fun update(rozvrh: RozvrhRelated?, application: MainApplication) {
+    fun update(application: MainApplication, rozvrh: Rozvrh?, isTeacher: Boolean, accountId: Long?) {
         val context: Context = application
-        if (!SharedPrefs.getBooleanPreference(context, R.string.PREFS_NOTIFICATION, true)) {
-            update(null, 0, context)
-            return
-        }
         if (rozvrh != null) {
-            val block = rozvrh.getHighlightBlock(true)
+            val blockIndexes = rozvrh.getHighlightBlockIndexes(true)
+
             val offset = application.notificationState.offset
-            if (block == null) {
-                update(null, 0, context)
+            if (blockIndexes == null) {
+                update(context, null, isTeacher, accountId)
             } else {
-                val hodiny = rozvrh.days.find { it.day.date == block.block.day }?.blocks
-                val hodinaIndex = block.caption.index + offset
-                val newBlock = hodiny?.getOrNull(hodinaIndex)
-                update(newBlock, offset, context)
+                val offsetBlock: RozvrhBlock? = rozvrh.getAsRozvrhBlock(blockIndexes.first, blockIndexes.second + offset)
+                update(context, offsetBlock, isTeacher, accountId, offset)
             }
         } else {
-            if (!(context.applicationContext as MainApplication).login.isLoggedIn()) {
-                update(null, 0, context)
-            }
+            update(context, null, isTeacher, accountId)
         }
     }
 
     /**
-     * Updates the notification with the data of the first lesson of supplied [BlockRelated]. If there are no lesson "no lesson" text in notification is showed. If [block] is `null`, the notification is hidden.
+     * Updates the notification with the data of the first lesson of supplied [BlockRelated]. If there are no lesson "no lesson" text in notification is showed. If [block] is `null` and offset is 0, the notification is hidden.
      */
-    fun update(block: BlockRelated?, offset: Int, context: Context) {
+    @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
+    fun update(context: Context, block: RozvrhBlock?, isTeacher: Boolean, accountId: Long?, offset: Int = 0) {
         val notificationManager = NotificationManagerCompat.from(context)
-        val isTeacher = (context.applicationContext as MainApplication).login.isTeacher()
-        if (block == null && offset == 0 || !SharedPrefs.getBooleanPreference(context, R.string.PREFS_NOTIFICATION, true)) {
+        if (block == null && offset == 0) {
             notificationManager.cancel(PERMANENT_NOTIFICATION_ID)
             return
         }
         var offsetText = ""
-        var predmet: String = ""
-        var mistnost: String = ""
-        var ucitel: String = ""
-        var skupina: String = ""
+        var predmet = ""
+        var mistnost = ""
+        var ucitel = ""
+        var skupina = ""
         var cas = ""
 
         val lesson = block?.lessons?.firstOrNull();
@@ -119,7 +139,7 @@ object PermanentNotification {
             }
         }
         var title: CharSequence = ""
-        title = if (!predmet.isBlank() && !mistnost.isBlank()) {
+        title = if (predmet.isNotBlank() && mistnost.isNotBlank()) {
             buildSpannedString {
                 append("$offsetText$predmet ${context.getString(R.string.`in`)} ")
                 bold { append(mistnost) }
@@ -133,21 +153,20 @@ object PermanentNotification {
         /*if (!offsetText.isEmpty()){
             title = offsetText + title;
         }*/
-        var content: CharSequence? = ""
-        var contentString = ""
-        contentString = if (!ucitel!!.isEmpty() && !skupina!!.isEmpty()) {
+        val content: CharSequence?
+        var contentString: String = if (ucitel.isNotBlank() && skupina.isNotBlank()) {
             "$ucitel, $skupina"
         } else {
             ucitel + skupina
         }
-        contentString = if (!contentString.isEmpty() && !cas.isEmpty()) {
+        contentString = if (contentString.isNotBlank() && cas.isNotBlank()) {
             "$contentString, $cas"
         } else {
             contentString + cas
         }
         content = contentString
         var expanded: CharSequence = content
-        if (!mistnost!!.isEmpty()) {
+        if (mistnost.isNotBlank()) {
             expanded = expanded.toString() + ", " + context.getString(R.string.room) + " " + mistnost
         }
         val nextIntent = Intent(context, UpdateBroadcastReciever::class.java)
@@ -161,6 +180,8 @@ object PermanentNotification {
         val intent = Intent(context, MainActivity::class.java)
         intent.putExtra(MainActivity.EXTRA_JUMP_TO_TODAY, true)
         intent.putExtra(EXTRA_NOTIFICATION, true)
+        intent.putExtra(MainActivity.EXTRA_SWITCH_TO_ACCOUNT, accountId)
+        //todo is this the correct way to do it?
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntentWithParentStack(intent)
         val pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
@@ -185,30 +206,46 @@ object PermanentNotification {
                 .addAction(R.drawable.ic_navigate_next_black_24dp, context.getString(R.string.next_lesson), nextPendingIntent)
         val ntf = builder.build()
 
-        // notificationId is a unique int for each notification that you must
-        if (notificationManager.areNotificationsEnabled()) {
+        if (!areNotificationEnabled(context)) {
+            SharedPrefsKt(context).edit {
+                putLong(PrefsConsts.NOTIFICATION_ACCOUNT, ACCOUNT_NOTIFICATION_DISABLED)
+                putBoolean(PrefsConsts.NOTIFICATION_PLEASE_GRANT_PERMISSION, true)
+            }
+            notificationManager.cancel(PERMANENT_NOTIFICATION_ID)
+        }else{
             notificationManager.notify(PERMANENT_NOTIFICATION_ID, ntf)
         }
     }
 
-    fun showInfoDialog(context: Context?, ignoreSetting: Boolean) {
-        if (!ignoreSetting && SharedPrefs.getBoolean(context, PREF_DONT_SHOW_INFO_DIALOG)) {
-            return
-        }
-        val builder = AlertDialog.Builder(context!!)
-        builder.setTitle(R.string.notification)
-        val contentView = LayoutInflater.from(context).inflate(R.layout.notification_dialog, null)
-        val checkBox = contentView.findViewById<CheckBox>(R.id.checkBox)
-        builder.setView(contentView)
-        builder.setPositiveButton(android.R.string.ok) { dialog: DialogInterface?, which: Int -> SharedPrefs.setBoolean(context, PREF_DONT_SHOW_INFO_DIALOG, checkBox.isChecked) }
-        builder.show()
+    @Composable
+    fun ShowNoPermissionDialog(onDismissed: () -> Unit){
+        AlertDialog(
+            onDismissed,
+            { Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.End, ) {
+                TextButton(onDismissed){
+                    Text(stringResource(R.string.ok))
+                }
+            } },
+            title = { Text(stringResource(R.string.notification_no_permission_title)) },
+            text = { Text(stringResource(R.string.notification_no_permission)) }
+        )
     }
 
-    fun showNoPermissionDialog(context: Context?){
-        val builder = AlertDialog.Builder(context!!)
-        builder.setTitle(R.string.notification_no_permission_title)
-        builder.setMessage(R.string.notification_no_permission)
-        builder.setPositiveButton(android.R.string.ok){_,_ ->}
-        builder.show()
+    fun isApiLevelBeforeNotiPerm() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+
+    fun shouldShowNotificationRationale(activity: Activity): Boolean{
+        return !isApiLevelBeforeNotiPerm()
+                && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS);
     }
+    /** Returns true if you need to ask for notification permission (it is not granted) */
+    fun areNotificationEnabled(ctx: Context): Boolean{
+        return NotificationManagerCompat.from(ctx).areNotificationsEnabled()
+                && (
+                    isApiLevelBeforeNotiPerm()
+                    || ActivityCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                );
+    }
+
+    @Composable
+    fun areNotificationEnabled(): Boolean = areNotificationEnabled(LocalContext.current)
 }

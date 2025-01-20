@@ -4,7 +4,6 @@
 */
 package cz.vitskalicky.lepsirozvrh;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -14,16 +13,18 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
-import com.google.android.material.snackbar.BaseTransientBottomBar;
+import androidx.preference.PreferenceManager;
 import com.google.android.material.snackbar.Snackbar;
 
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord;
+import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -33,41 +34,12 @@ import org.joda.time.format.DateTimeFormatter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
 
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh;
-import io.sentry.Sentry;
 
 public class Utils {
     public static final String TAG = Utils.class.getSimpleName();
-
-    public static String parseDate(String rawDate, String inputFormat, String outputFormat) {
-        SimpleDateFormat sdf = new SimpleDateFormat(inputFormat, Locale.US);
-        SimpleDateFormat readable = new SimpleDateFormat(outputFormat, Locale.US);
-
-        try {
-            Date date = sdf.parse(rawDate);
-            if (date == null) return null;
-            return readable.format(date);
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
-    public static int minutesOfDay(String t) {
-        String[] time = t.split(":");
-        int hours = Integer.valueOf(time[0]);
-        int minutes = Integer.valueOf(time[1]);
-        return minutes + hours * 60;
-    }
 
     public static LocalDate getWeekMonday(LocalDate date) {
         if (date == null) return null;
@@ -92,16 +64,19 @@ public class Utils {
     }
 
     public static LocalDate getDisplayWeekMonday(Context context) {
-        int offset = 2;
-        if (SharedPrefs.containsPreference(context, R.string.PREFS_SWITCH_TO_NEXT_WEEK)) {
-            try {
-                offset = Integer.parseInt(SharedPrefs.getString(context, context.getString(R.string.PREFS_SWITCH_TO_NEXT_WEEK)));
-            } catch (NumberFormatException e) {
-                Log.e(TAG, "Failed to cast 'Switch to the next week' setting value. Value: " + SharedPrefs.getString(context, context.getString(R.string.PREFS_SWITCH_TO_NEXT_WEEK)));
-            }
-        }
+        int offset = KotlinUtils.INSTANCE.getWeekSwitchOffset(context);
 
         return getWeekMonday(LocalDate.now().plusDays(offset));
+    }
+
+    public static @Nullable RozvrhRecord.Key getNotificationRozvrhKey(@NonNull Context context){
+        long accountid = PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT);
+        if (!PermanentNotification.INSTANCE.isNotificationAccountValid(accountid)){
+            return null;
+        }
+        return new RozvrhRecord.Key(SharedPrefs.getLong(context, PrefsConsts.NOTIFICATION_ACCOUNT), getCurrentMonday());
     }
 
     /**
@@ -139,19 +114,6 @@ public class Utils {
 
     public static interface Listener{
         public void method();
-    }
-    public static String join(List<Object> list, String separator){
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-
-        for (Object item :list) {
-            if (!first){
-                sb.append(separator);
-            }
-            first = false;
-            sb.append(item);
-        }
-        return sb.toString();
     }
 
     /**
@@ -191,7 +153,7 @@ public class Utils {
                         }else {
                             body += "\n Sentry client id not available";
                         }
-                        body += "\n Sentry enabled: " + SharedPrefs.getBooleanPreference(context, R.string.PREFS_SEND_CRASH_REPORTS);
+                        body += "\n Sentry enabled: " + (new SharedPrefsKt(context)).getBoolean(PrefsConsts.ENABLE_SENTRY);
                         final String finBody = body;
                         new Thread(() -> {
                             String fileName;
@@ -249,20 +211,5 @@ public class Utils {
                 })
                 .create();
         ad.show();
-    }
-
-    /*public static void somethingWrong(Exception e, View forToast, Context context){
-        Snackbar.make(forToast, R.string.something_went_wrong, BaseTransientBottomBar.LENGTH_LONG)
-                .setAction(R.string.report,v -> {
-                    sendFeedback(false, e, context, forToast);
-                })
-                .show();
-    }*/
-
-    public static interface RecreateWithAnimationActivity{
-        /**
-         * Use this to recreate an activity with some nice animation instead of just "blink", which is what {@link Activity#recreate()} does.
-         */
-        public void recreateWithAnimation();
     }
 }

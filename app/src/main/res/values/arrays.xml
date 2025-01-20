@@ -5,21 +5,18 @@
         <item>On Sunday</item>
         <item>On Saturday</item>
     </string-array>
-    <string-array name="switch_to_next_week_values">
+    <integer-array name="switch_to_next_week_offsets">
         <item>0</item>
         <item>1</item>
         <item>2</item>
-    </string-array>
+    </integer-array>
+    <!-- must match WidgetConfigActivity.LIGHT, DARK, CUSTOM-->
     <string-array name="widget_style_entries">
         <item>Light</item>
         <item>Dark</item>
         <item>Custom</item>
     </string-array>
-    <string-array name="widget_style_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
+    <!-- must match ThemeSettingsActivity.SelectedTheme -->
     <string-array name="themes_entries">
         <item>Follow system theme</item>
         <item>Light</item>
@@ -33,5 +30,9 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+    </string-array>
+    <string-array name="theme_url_bases">
+        <item>https://vitskalicky.github.io/lepsi-rozvrh/motiv-info</item>
+        <item>https://vitskalicky.gitlab.io/lepsi-rozvrh/motiv-info</item>
     </string-array>
 </resources>

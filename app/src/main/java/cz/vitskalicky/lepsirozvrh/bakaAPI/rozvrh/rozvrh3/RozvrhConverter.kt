@@ -4,9 +4,6 @@ import android.content.Context
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.Utils
-import cz.vitskalicky.lepsirozvrh.model.relations.BlockRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.DayRelated
-import cz.vitskalicky.lepsirozvrh.model.relations.RozvrhRelated
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.*
 import io.sentry.Sentry
 import org.joda.time.DateTime
@@ -16,6 +13,7 @@ import org.joda.time.format.DateTimeFormat
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
+/** Converts [Rozvrh3] (what API uses) into [Rozvrh] (what this app uses).*/
 object RozvrhConverter {
     /**
      * backup text to day description in case it is empty, but it is holiday.
@@ -33,9 +31,14 @@ object RozvrhConverter {
      */
     var sendUnknownDayTypeReport = true
 
+    /** Converts [Rozvrh3] (what API uses) into [Rozvrh] (what this app uses).
+     *  - [rozvrh3]: the data to cenvert
+     *  - [date]: monday of the rozvrh or `null` if permanent
+     *  - [context]: android context (used for translated strings)
+     * */
     @Throws(RozvrhConversionException::class)
-    fun convert(rozvrh3: Rozvrh3, date: LocalDate?, context: Context): RozvrhRelated{
-        //todo perform further testing after creating a testing server
+    fun convert(rozvrh3: Rozvrh3, date: LocalDate?, context: Context): Rozvrh{
+        @Suppress("NAME_SHADOWING")
         val rozvrh3 = remove0thCaptionIfUnnecessary(rozvrh3)
 
         val monday : LocalDate = date?.let { Utils.getWeekMonday(date) } ?: Rozvrh.PERM
@@ -50,34 +53,30 @@ object RozvrhConverter {
                 }
             }
 
-        val rozvrh = Rozvrh(monday, DateTime.now(), monday == Rozvrh.PERM, cycle)
-
         //caption3 id and corresponding RozvrhCaption
         val captionsUnsorted = ArrayList<Pair<String,RozvrhCaption>>()
         for (value in rozvrh3.hours.withIndex()) {
             val item = value.value
             val nev = RozvrhCaption(
-                    monday,
-                    monday.toString() + "-" + (item.id.hashCode() * item.beginTime.hashCode()).hashCode().toString(16),
-                    item.caption,
-                    LocalTime.parse(item.beginTime),
-                    LocalTime.parse(item.endTime),
-                    value.index
+                name = item.caption,
+                beginTime = LocalTime.parse(item.beginTime),
+                endTime = LocalTime.parse(item.endTime)
             )
             captionsUnsorted.add(Pair(item.id.toString(), nev))
         }
 
         //to be extra sure, we sort the caption ascending by begin time to make sure it has the right index
         captionsUnsorted.sortWith( compareBy { it.second.beginTime } )
-        //here we have the RozvrhCaptions. Key is the hourId
-        val captionsMap = HashMap<String, RozvrhCaption>()
-        captionsUnsorted.forEachIndexed { index, pair -> captionsMap[pair.first] = pair.second.copy(index = index) }
+        //here we have the RozvrhCaptions. Key is the hourId, first in the pair is the index and second is the caption
+        val captionsMap = HashMap<String, Pair<Int,RozvrhCaption>>()
+        captionsUnsorted.forEachIndexed { index, pair -> captionsMap[pair.first] = Pair(index, pair.second) }
         //and here they are sorted by index
-        val captions: List<RozvrhCaption> = captionsUnsorted.mapIndexed { index, pair -> pair.second.copy(index = index) }
+        val captions: List<RozvrhCaption> = captionsUnsorted.mapIndexed { index, pair -> pair.second }
 
+        // save each type of objects into a map with their id as keys
         val hours = HashMap<String, Hour3>()
         for (item in rozvrh3.hours) {
-            hours[item.id.toString() + ""] = item
+            hours[item.id.toString()] = item
         }
         val classes = HashMap<String, Class3>()
         for (item in rozvrh3.classes) {
@@ -104,15 +103,17 @@ object RozvrhConverter {
             cycles[item.id] = item
         }
 
-        val days = ArrayList<DayRelated>()
+        val days = ArrayList<RozvrhDay>() //days for the filan Rozvrh
 
         for (item in rozvrh3.days) {
 
+            // determine day date
             var dayDate : LocalDate = if (monday != Rozvrh.PERM) {
                 DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZZ").parseLocalDate(item.date)
             }else{
                 Rozvrh.PERM.plusDays(item.dayOfWeek - 1)
             }
+            // determine if there is an event on that day (such as holiday)
             var event: String? = null
             if (monday != Rozvrh.PERM){ //events in permanent schedule are ignored to "fix" a bug in Bakaláři API which puts celebration events into permanent schedule. You cannot have holiday in permanent schedule.
                 if (item.dayDescription.isNotBlank()){
@@ -124,7 +125,7 @@ object RozvrhConverter {
                         //prevent spam
                         if (sendUnknownDayTypeReport){
                             sendUnknownDayTypeReport = false
-                            (context.applicationContext as MainApplication).sendReport(java.lang.Exception("[NOT CRITICAL] Unknown day type: ${item.dayType}"));
+                            (context.applicationContext as? MainApplication)?.sendReport(java.lang.Exception("[NOT CRITICAL] Unknown day type: ${item.dayType}"));
                         }
                         event = null
                     }else{
@@ -137,45 +138,34 @@ object RozvrhConverter {
                 }
             }
 
-            val day = RozvrhDay(dayDate, monday, event)
-            val blocks = Array<RozvrhBlock?>(captions.size) {null}
-            for (i in captions.indices){
-                blocks[i] = RozvrhBlock(
-                        day.date,
-                        captions[i].id
-                )
-            }
-
             val lessons = Array<ArrayList<RozvrhLesson>>(captions.size) { ArrayList() }
             for (atom in item.atoms) {
-                val caption: RozvrhCaption = captionsMap[atom.hourId] ?:
+                val captionIndex: Int = captionsMap[atom.hourId]?.first ?:
                     //report problem
                     throw RozvrhConversionException("Failed to parse Rozvrh3 to Rozvrh: Could not find a caption for an atom: searched for '${atom.hourId}' available caption ids: ${captionsMap.keys}")
 
-                val captionId: String = caption.id
-
-                var subjectName: String = ""
-                var subjectAbbrev: String = ""
+                var subjectName = ""
+                var subjectAbbrev = ""
 
                 atom.subjectId?.let { subjects[it] }?.let{
                     subjectName = it.name ?: ""
                     subjectAbbrev = it.abbrev ?: ""
                 }
 
-                var teacherName: String = ""
-                var teacherAbbrev: String = ""
+                var teacherName = ""
+                var teacherAbbrev = ""
 
                 atom.teacherId?.let { teachers[it] }?.let {
-                    teacherName = it.name
-                    teacherAbbrev = it.abbrev
+                    teacherName = it.name ?: ""
+                    teacherAbbrev = it.abbrev ?: ""
                 }
 
-                var roomName: String = ""
-                var roomAbbrev: String = ""
+                var roomName = ""
+                var roomAbbrev = ""
 
                 atom.roomId?.let { rooms[it] }?.let {
-                    roomName = it.name
-                    roomAbbrev = it.abbrev
+                    roomName = it.name ?: ""
+                    roomAbbrev = it.abbrev ?: ""
                 }
 
                 val theme = atom.theme ?: ""
@@ -219,9 +209,7 @@ object RozvrhConverter {
                     }
                 }
 
-                lessons[caption.index].add(RozvrhLesson(
-                        blocks[caption.index]!!.id ,
-                        lessons[caption.index].size,
+                lessons[captionIndex].add(RozvrhLesson(
                         subjectName,
                         subjectAbbrev,
                         teacherName,
@@ -237,23 +225,10 @@ object RozvrhConverter {
                 ))
             }
 
-            val blocksRelated = ArrayList<BlockRelated>(captions.size)
-
-            for (capt in captions){
-                blocksRelated.add(BlockRelated(
-                        RozvrhBlock(
-                            dayDate,
-                            capt.id
-                        ),
-                        capt,
-                        lessons[capt.index].toSet()
-                    )
-                )
-            }
-            days.add(DayRelated(day, blocksRelated))
+            days.add(RozvrhDay(dayDate, event, lessons.toList()))
         }
         
-        return RozvrhRelated(rozvrh, captions, days)
+        return Rozvrh(monday, monday == Rozvrh.PERM, cycle,captions, days)
     }
 
     /**
