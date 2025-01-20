@@ -1,15 +1,9 @@
 package cz.vitskalicky.lepsirozvrh.database
 
 import androidx.room.TypeConverter
-import com.fasterxml.jackson.databind.type.TypeFactory
-import cz.vitskalicky.lepsirozvrh.MainApplication
-import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCycle
-import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhGroup
 import org.joda.time.*
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
-
-//todo cleanup
 
 object LocalDateConverters {
     val localDateFormatter: DateTimeFormatter = ISODateTimeFormat.date()

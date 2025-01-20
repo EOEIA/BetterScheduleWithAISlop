@@ -63,7 +63,6 @@ object v1_9 : MigrationInterface {
                 )
             }catch (e: NullPointerException){
                 if (!string(ACCESS_TOKEN).isNullOrBlank()){
-                    //todo check what if the user has logged in and out
                     Sentry.captureException(RuntimeException("Exception while migrating account: Could not get info about old account, but there seems to be some account present. Old data from shared preferences: $oldData", e));
                 }
                 null
@@ -173,7 +172,7 @@ object v1_9 : MigrationInterface {
             putInt(PrefsConsts.SELECTED_THEME, oldThemePref)
         }
 
-        // todo load primary, accent adn background colors from Cyanea
+        // load primary, accent adn background colors from Cyanea
         val cyaneaPrefs = SharedPrefsKt(context, CyaneaPrefKeys.PREF_FILE_NAME)
 
         val isDark = cyaneaPrefs.string(CyaneaPrefKeys.PREF_BASE_THEME) == "DARK" // This checks if the theme is dark (defaults to light for bad values)

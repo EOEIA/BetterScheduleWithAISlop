@@ -73,7 +73,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         isTeacher = account?.isTeacher() ?: false,
         weekPosition = viewModel.weekPosition,
         status = status?.status ?: StatusInfo.Status.UNKNOWN,
-        statusLineText = infotext, //todo theme hide infoline
+        statusLineText = infotext,
         onNextPress = {viewModel.weekPosition++},
         onPrevPress = {viewModel.weekPosition--},
         onCurrentPress = {viewModel.weekPosition = 0; viewModel.centerToCurrentLessonLD.value = isCenterToCurrentLessonEnabled()},
@@ -202,7 +202,7 @@ fun RozvrhWithControlsStateless(
 
                     Box(Modifier.align(Alignment.CenterEnd)) {
                         if (status == StatusInfo.Status.LOADING) {
-                            CircularProgressIndicator(color = MaterialTheme.colors.secondary) // todo change color
+                            CircularProgressIndicator(color = MaterialTheme.colors.onPrimary)
                         } else {
                             IconButton(onRefreshPress) {
                                 Icon(

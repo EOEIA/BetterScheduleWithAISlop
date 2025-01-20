@@ -45,7 +45,7 @@ abstract class RozvrhDao {
 
     /** Leave [permdate] default - did not find any elegant way to insert it into the query*/
     @Query("DELETE FROM Rozvrh WHERE monday != :permdate AND monday < :start OR monday > :end")
-    abstract suspend fun deleteOutside(start: LocalDate, end: LocalDate, permdate: LocalDate = Rozvrh.PERM) //todo do we need to specify account here?
+    abstract suspend fun deleteOutside(start: LocalDate, end: LocalDate, permdate: LocalDate = Rozvrh.PERM)
 
     suspend fun deleteUnnecessary(){
         deleteOutside(Utils.getCurrentMonday().minusWeeks(2), Utils.getCurrentMonday().plusWeeks(2))

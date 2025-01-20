@@ -10,7 +10,6 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.LocalDate
-//todo is this still needed?
 
 class MainActivityViewModel(
     application: Application,
@@ -75,7 +74,7 @@ class MainActivityViewModel(
     }
 
     /**
-     * Loads the LiveData and triggers data load so that it has a value ready to be instantly displayed. todo replace with a better method if you find any.
+     * Loads the LiveData and triggers data load so that it has a value ready to be instantly displayed.
      */
     private fun prepareLD(week: Int): Pair<LiveData<RozvrhRecord?>, LiveData<StatusInfo>>{
         val mnd = weekToMonday(week)

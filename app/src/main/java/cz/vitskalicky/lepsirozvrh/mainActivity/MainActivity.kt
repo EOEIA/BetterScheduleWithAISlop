@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
 
     companion object {
-        /** Jump to current lesson on open */ //todo implement this
+        /** Jump to current lesson on open */
         const val EXTRA_JUMP_TO_TODAY = "MainActivity.jump_to_today"
         /** switch to this account on open (extra is a long with the id). useful for persistent notification*/
         const val EXTRA_SWITCH_TO_ACCOUNT = "MainActivity.switch_to_account"

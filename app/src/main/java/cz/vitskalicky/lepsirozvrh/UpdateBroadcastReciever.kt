@@ -3,6 +3,7 @@ package cz.vitskalicky.lepsirozvrh
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
@@ -18,6 +19,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 class UpdateBroadcastReciever : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        Log.d(TAG, "UpdateBroadcastReciever received intent")
         val application = context.applicationContext as MainApplication
         val pendingResult = goAsync()
         if (intent.action != null && intent.action == ACTION_NEXT_PREV && intent.hasExtra(EXTRA_NEXT_PREV)) {

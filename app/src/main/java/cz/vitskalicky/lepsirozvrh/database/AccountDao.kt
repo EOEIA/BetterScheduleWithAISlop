@@ -9,7 +9,7 @@ abstract class AccountDao {
     @Update
     abstract suspend fun updateAccount(account: Account)
     @Insert
-    abstract suspend fun insertAccount(account: Account): Long //todo test if returning primary key works as expected or change to handle rowID, see https://developer.android.com/training/data-storage/room/accessing-data#convenience-insert and https://www.sqlite.org/rowidtable.html
+    abstract suspend fun insertAccount(account: Account): Long // returns rowid which is the primary key
     @Delete
     abstract suspend fun deleteAccount(account: Account): Int
     @Query("DELETE FROM account WHERE id = :accountId")
@@ -18,7 +18,6 @@ abstract class AccountDao {
     abstract fun loadAllAccountsLD(): LiveData<List<Account>>
     @MapInfo(keyColumn = "id", valueColumn = "")
     @Query("SELECT * FROM account")
-    //todo check if it is working as intended
     abstract fun loadAllAccountsLDMap(): LiveData<Map<Long, Account>>
     @Query("SELECT * FROM account")
     abstract suspend fun loadAllAccounts(): List<Account>
