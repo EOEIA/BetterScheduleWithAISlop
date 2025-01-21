@@ -1,5 +1,19 @@
 # Seznam změn / Changelog
 
+## 2.0 (21. 1. 2025)
+
+- Nyní se můžete přihlásit více účty najednou
+- Vylepšeny motivy
+- Aplikace nyní lépe funguje na nových verzích Androidu
+- Všechny funkce jsou od teď zdarma. Děkuji všem, kteří v minulosti přispěli ❤️!
+
+---
+
+- Added support for multiple accounts
+- Improved themes
+- Updated for newer versions of Android
+- All features are now free. A big thanks to everyone who donated so far ❤️!
+
 ## 1.8.11 (13. 1. 2024)
 
 - Aktualizována Billing library
