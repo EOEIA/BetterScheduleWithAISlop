@@ -251,6 +251,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
                 }
             }
 
+            // This must be done after all migration complete
             prefs.edit { putInt(PrefsConsts.LAST_VERSION_SEEN, BuildConfig.VERSION_CODE) }
         }
     }

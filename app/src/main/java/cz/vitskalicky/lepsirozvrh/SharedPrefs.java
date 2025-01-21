@@ -16,8 +16,6 @@ public class SharedPrefs {
 
     public static final String REMEMBERED_ROWS = "remembered_rows";
     public static final String REMEMBERED_COLUMNS = "remembered_columns";
-
-    public static final String LAST_VERSION_SEEN = "last_version_seen";
     /**
      * All weird rozvrh before this date won't show any dialog.
      */

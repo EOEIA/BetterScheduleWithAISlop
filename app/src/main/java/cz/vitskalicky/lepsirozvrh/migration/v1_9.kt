@@ -28,6 +28,16 @@ object v1_9 : MigrationInterface {
         account(context)
         switchToNextWeek(context)
         theme(context)
+        other(context)
+    }
+
+    private suspend fun other(context: Context){
+        val sp = SharedPrefsKt(context)
+
+        /** Initiate LAST_VERSION_ACKNOWLEDGED */
+        sp.edit {
+            putInt(PrefsConsts.LAST_VERSION_ACKNOWLEDGED, sp.int(PrefsConsts.LAST_VERSION_SEEN) ?: 0)
+        }
     }
 
     /**

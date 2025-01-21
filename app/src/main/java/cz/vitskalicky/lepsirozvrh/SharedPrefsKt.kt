@@ -91,8 +91,8 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val SEEN_WELCOME = "boolean_seen_welcome"
     /** The version code of the app when it was last launched*/
     const val LAST_VERSION_SEEN = "last_version_seen";
-    /** The version code of the app when MainActivity was last launched. useful for showing "what's new" toast*/
-    const val LAST_VERSION_SEEN_MAIN_ACTIVITY = "int_last_version_seen_main_activity";
+    /** Last version the user has read release notes for */
+    const val LAST_VERSION_ACKNOWLEDGED = "last_version_acknowledged";
     /** Which theme the user selected. Save [SelectedTheme] into this.*/
     const val SELECTED_THEME = "selected_theme"
     /** The data of the current theme */
@@ -106,9 +106,7 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
             if (!contains(SWITCH_TO_NEXT_WEEK_OPTION_INDEX)) putInt(SWITCH_TO_NEXT_WEEK_OPTION_INDEX, 2)
             if (!contains(SELECTED_THEME)) putInt(SELECTED_THEME, SelectedTheme.FOLLOW_SYSTEM_THEME.index)
             if (!contains(NOTIFICATION_ACCOUNT)) putLong(NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT)
-            DefaultRozvrhThemes.LIGHT //todo wtf is this
-
-            if (!contains(CUSTOM_THEME)) sharedPreferences.edit().apply { } //todo this seems unfinished
+            if (!contains(LAST_VERSION_ACKNOWLEDGED)) putInt(LAST_VERSION_ACKNOWLEDGED, BuildConfig.VERSION_CODE)
         } }
     }
 }

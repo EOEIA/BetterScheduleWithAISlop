@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -31,7 +30,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import cz.vitskalicky.lepsirozvrh.*
@@ -45,10 +43,10 @@ import cz.vitskalicky.lepsirozvrh.view.preferences.Preference
 import cz.vitskalicky.lepsirozvrh.view.preferences.PreferenceGroupHeader
 import cz.vitskalicky.lepsirozvrh.view.preferences.RadioPreference
 import cz.vitskalicky.lepsirozvrh.view.preferences.SwitchPreference
-import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNewDialog
 import kotlinx.coroutines.launch
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.str
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.icon
+import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNew
 
 class SettingsActivity : ComponentActivity() {
     val viewModel: SettingsViewModel by viewModels()
@@ -110,6 +108,7 @@ class SettingsActivity : ComponentActivity() {
             val showNotiPermissionDialog: Boolean by showNotiPermissionDialogLD.observeAsState(false)
             val areNotificationsEnabled: Boolean by app.areNotificationsEnabled.observeAsState(true)
             val dontShowNotiBanner: Boolean by viewModel.dontShowNotiBannerLD.observeAsState(true)
+            val shouldNotifyAboutNew: Boolean by viewModel.shouldNotifyAboutNewLD.observeAsState(false)
 
 
             LepsirozvrhTheme {
@@ -175,6 +174,23 @@ class SettingsActivity : ComponentActivity() {
                                         body = { Text(R.string.notification_banner_text.str) }
                                     )
                                 }
+                            }
+
+                            AnimatedVisibility(shouldNotifyAboutNew) {
+                                SettingsAlertBanner(
+                                    onConfirm = { showWhatsNewDialog = true; viewModel.userAcknowledgedNew() },
+                                    onDismiss = { viewModel.userAcknowledgedNew() },
+                                    icon = {
+                                        Icon(
+                                            Icons.Default.NewReleases,
+                                            null,
+                                            Modifier.fillMaxSize(),
+                                            )
+                                    },
+                                    confirmButtonContent = { Text(R.string.whats_new.str.uppercase()) },
+                                    dismissButtonContent = { Text(R.string.notification_banner_dismiss.str.uppercase()) },
+                                    body = { Text(R.string.app_updated.str) }
+                                )
                             }
 
                             PreferenceGroupHeader(R.string.user.str)
@@ -254,7 +270,7 @@ class SettingsActivity : ComponentActivity() {
                             Divider()
                             PreferenceGroupHeader(R.string.about.str)
 
-                                if (showWhatsNewDialog) WhatsNewDialog(onDismissed = {showWhatsNewDialog = false})
+                                if (showWhatsNewDialog) WhatsNew.WhatsNewDialog(onDismissed = {showWhatsNewDialog = false; viewModel.userAcknowledgedNew()})
                             Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){
                                 showWhatsNewDialog = true;
                             }
@@ -329,6 +345,9 @@ class SettingsActivity : ComponentActivity() {
                     ) {
                         if (dismissButtonContent != null) {
                             TextButton(onDismiss) { dismissButtonContent() }
+                        }
+                        if (dismissButtonContent != null && confirmButtonContent != null) {
+                            Spacer(Modifier.size(12.dp))
                         }
                         if (confirmButtonContent != null) {
                             TextButton(onConfirm) { confirmButtonContent() }

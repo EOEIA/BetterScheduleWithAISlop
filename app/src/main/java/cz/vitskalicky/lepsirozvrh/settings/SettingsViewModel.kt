@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
+import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNew
 
 class SettingsViewModel(application: Application): AndroidViewModel(application) {
     private val repository = getApplication<MainApplication>().repository
@@ -62,6 +63,11 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         get() = sp.boolean(PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER) ?: false
         set(value) = sp.putOne(PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, value)
     val dontShowNotiBannerLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, false);
+
+    val shouldNotifyAboutNewLD: LiveData<Boolean> = WhatsNew.shouldNotifyAboutNewLD(app)
+    fun userAcknowledgedNew() {
+        WhatsNew.userAcknowledgedNew(app)
+    }
 
     suspend fun logout(accountId: Long){
         accountRepository.logout(accountId)

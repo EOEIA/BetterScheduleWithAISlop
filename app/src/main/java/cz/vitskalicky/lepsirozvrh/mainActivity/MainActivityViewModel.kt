@@ -9,6 +9,7 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNew
 import org.joda.time.LocalDate
 
 class MainActivityViewModel(
@@ -26,10 +27,12 @@ class MainActivityViewModel(
     private val statusLD: MediatorLiveData<StatusInfo> = MediatorLiveData()
     override fun getStatusLD(): LiveData<StatusInfo> = statusLD
 
+    private val shouldNotifyNewLD: LiveData<Boolean> = WhatsNew.shouldNotifyAboutNewLD(app)
     private val showSettingBadgeLD = SharedPrefsBooleanLiveData(
             application.prefs.sharedPreferences,
             PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, false)
         .switchMap { dontShow:Boolean -> app.areNotificationsEnabled.map { areEnabled: Boolean -> !dontShow && !areEnabled  } }
+        .switchMap {becauseNoti: Boolean -> shouldNotifyNewLD.map { becauseNew: Boolean -> becauseNoti || becauseNew }}
     override fun getShowSettingsBadgeLD(): LiveData<Boolean> = showSettingBadgeLD
     private var currentlyUsedLD: LiveData<RozvrhRecord?>? = null
     private var currentlyUsedStatusLD: LiveData<StatusInfo>? = null
