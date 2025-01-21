@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
-import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.isLegible
 import kotlin.math.max
 
@@ -66,7 +65,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     }
 
     /**
-     * Measures what the minimal width would be for an example cell with reasonably long texts.
+     * Measures what the minimal width would be for an example cell with reasonably long texts. Don't forget to set theme using [setTheme] so that text size is measured correctly.
      */
     fun measureExampleWidth(): Int {
         val padding = super.getMinimumWidth()

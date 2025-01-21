@@ -22,6 +22,7 @@ class RozvrhLayout : ViewGroup {
                 return field
             }
             val view = HodinaView(context, null)
+            view.setTheme(t)
             val minWidth = Math.max(view.measureExampleWidth(), CellView.goldenRectangle(childHeight))
             field = minWidth
             childHeightWhenCalculatingNaturalCellWidth = childHeight
