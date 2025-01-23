@@ -1,0 +1,4 @@
+- Nyní se můžete přihlásit více účty najednou
+- Vylepšeny motivy
+- Aplikace nyní lépe funguje na nových verzích Androidu
+- Všechny funkce jsou od teď zdarma. Děkuji všem, kteří v minulosti přispěli ❤️!
