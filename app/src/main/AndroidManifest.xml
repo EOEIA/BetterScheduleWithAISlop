@@ -65,7 +65,7 @@
             android:launchMode="singleTask"
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme">
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -74,7 +74,7 @@
                 <data android:host="vitskalicky.github.io"/>
                 <data android:pathPrefix="/lepsi-rozvrh/motiv-info"/>
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
