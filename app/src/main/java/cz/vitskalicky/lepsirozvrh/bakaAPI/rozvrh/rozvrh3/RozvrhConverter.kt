@@ -225,6 +225,12 @@ object RozvrhConverter {
                 ))
             }
 
+            // Sometimes Bakaláři reports "Holiday" event even though there are lessons. The correct behaviour is to
+            // ignore the event and display the lessons
+            if (!lessons.all { it.isEmpty() }){
+                event = null;
+            }
+
             days.add(RozvrhDay(dayDate, event, lessons.toList()))
         }
         
