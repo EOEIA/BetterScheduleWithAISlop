@@ -1,0 +1,4 @@
+- Added support for multiple accounts
+- Improved themes
+- Updated for newer versions of Android
+- All features are now free. A big thanks to everyone who donated so far ❤️!
