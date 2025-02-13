@@ -173,7 +173,7 @@ data class Rozvrh(
         val ret = ArrayList<RozvrhBlock>()
         for (i in 0 until length){
             if (nowIndex + i < blocksToCheck.size){
-                ret.add(RozvrhBlock(day, captions[nowIndex+1], blocksToCheck[nowIndex + i]))
+                ret.add(RozvrhBlock(day, captions[nowIndex + i], blocksToCheck[nowIndex + i]))
             }
         }
         return Pair(ret, null)
