@@ -27,7 +27,7 @@ object WhatsNew {
     private val TAG = WhatsNew::class.simpleName!!
 
     /** If last version seen is older than this, notify the user that there has been an update */
-    private const val INTERESTING_VERSION = 41
+    private const val INTERESTING_VERSION = 46
 
     /** Shows a dialog with new features in the app */
     @Composable
