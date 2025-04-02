@@ -25,6 +25,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.IOException
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
+import kotlin.jvm.Throws
 import kotlin.math.min
 
 /**
@@ -123,6 +124,7 @@ class AccountRepository(val app: MainApplication) {
      * if internet connection available)
      *
      * This method is thread-safe, but locking non-reentrant.*/
+    @Throws(LoginException::class)
     suspend fun getAccount(id: Long, refreshTokens: Boolean = false): Account? {
         val lock = locksLock.withLock { locks.getOrPut(id){Mutex()} }
         lock.withLock {
@@ -130,32 +132,17 @@ class AccountRepository(val app: MainApplication) {
         }
     }
     /** Corresponding [locks] must be locked when calling this function */
+    @Throws(LoginException::class)
     private suspend fun _getAccount(id: Long, refreshTokens: Boolean = false): Account?{
         if (refreshTokens || dao.refreshRequired(id) == true){
-            _refreshToken(id, force = false)
+            val res = _refreshToken(id, force = false)
+            if (res.status == WRONG_LOGIN){
+                Log.d(TAG, "Token refresh failed with wrong login")
+                throw LoginException("Token refresh failed")
+            }
+            Log.d(TAG, "Token refreshed")
         }
         return dao.loadAccount(id);
-    }
-
-    /**
-     * If [account] has expired access token, refresh it and return [Account] with fresh tokens. If access token is not
-     * expired, simply return [account].
-     *
-     * Thread-safe, but locking is non-reentrant.
-     */
-    suspend fun tryRefresh(account: Account): Account {
-        val lock = locksLock.withLock { locks.getOrPut(account.id) {Mutex()} }
-        lock.withLock {
-            //make sure we are using up-to-data data
-            val acc: Account = dao.loadAccount(account.id) ?: return account
-            return if (acc.isAccessExpired()){
-                Log.d(TAG, "tryRefresh: refreshing")
-                _getAccount(acc.id, refreshTokens = true) ?: acc /*the account may have been deleted from database*/
-            }else{
-                Log.d(TAG, "tryRefresh: not expired")
-                acc
-            }
-        }
     }
 
     private suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResultStatus {
@@ -244,7 +231,9 @@ class AccountRepository(val app: MainApplication) {
             //check if user info should be refreshed
             if (account.semesterEnd == null || account.semesterEnd.isBeforeNow || account.requireRefresh){
                 updatedAccount = _refreshUserInfo(account).account ?: updatedAccount
+                Log.d(TAG,"Account updated")
             }
+            Log.d(TAG, "Updating account")
             dao.updateAccount(updatedAccount)
 
             return SUCCESS.ok(updatedAccount)
@@ -338,9 +327,12 @@ class AccountRepository(val app: MainApplication) {
 
     /** Corresponding [locks] must be locked when calling thin function.*/
     private suspend fun _refreshUserInfo(account: Account): LoginResult {
+        Log.d(TAG, "Refreshing user info")
         val userWebservice: UserWebservice = withContext(Dispatchers.Main){ getUserWebservice(account) } ?: return UNREACHABLE.fail()
+        Log.d(TAG, "Got the user webservice")
         try {
             val userResponse: UserResponse = userWebservice.getUser()
+            Log.d(TAG, "Got the user")
 
             val semesterEnd: DateTime? = userResponse.settingModules?.common?.actualSemester?.to?.let {
                 try {

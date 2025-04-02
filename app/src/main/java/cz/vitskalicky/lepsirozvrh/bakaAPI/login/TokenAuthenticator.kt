@@ -5,7 +5,7 @@ import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResultStatus.*
-import cz.vitskalicky.lepsirozvrh.model.LoginRequiredException
+import cz.vitskalicky.lepsirozvrh.model.LoginException
 import io.sentry.Sentry
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
@@ -45,12 +45,13 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?, val co
             Log.d(TAG, "[$logid] access tokens are equal.")
             val refreshResult: AccountRepository.LoginResult = runBlocking {
                 if (account == null) return@runBlocking WRONG_LOGIN.fail()
-                if (connectDb) app.accountRepository.refreshToken(account!!.id) else SUCCESS.ok(account!!)
+                if (connectDb) app.accountRepository.refreshToken(account!!.id, force = true) else SUCCESS.ok(account!!)
             }
             Log.d(TAG, "[$logid] refreshed with status ${refreshResult.status}.")
             when (refreshResult.status) {
                 WRONG_LOGIN -> {
-                    Sentry.addBreadcrumb("[$logid] Authentication: token refresh failed");
+                    Sentry.addBreadcrumb("[$logid] Authentication: token refresh failed")
+                    Log.d(TAG, "[$logid] Authentication: token refresh failed")
                     return null
                 }
                 UNREACHABLE, UNEXPECTED_RESPONSE -> {
@@ -78,14 +79,27 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?, val co
     override fun intercept(chain: Interceptor.Chain): Response {
         val logid = logids.getAndIncrement()
         Log.d(TAG, "[$logid] Authenticator for account ${account?.id} (connectDb: $connectDb) is interception request ${chain.request().url}.")
-        val token: String? = runBlocking {
+        val token: String? = try {
+            runBlocking {
             if (account == null) return@runBlocking null
-            try {
-                if (connectDb) account = app.accountRepository.tryRefresh(account!!) // ensure token is valid
+                if (connectDb) {
+                    val res = app.accountRepository.refreshToken(account!!.id, force = false)
+                    if (res.status == WRONG_LOGIN){
+                        throw LoginException("Refresh token failed")
+                    }else if (res.account != null){
+                        account = res.account
+                    }
+                } // ensure token is valid
                 account?.accessToken
-            } catch (_: LoginRequiredException) {
-                null
             }
+        } catch (_: LoginException) {
+            Log.d(TAG, "[$logid] Refreshed failed, terminating request with 401.")
+            return Response.Builder()
+                .code(401) //unauthorized
+                .protocol(Protocol.HTTP_2)
+                .message("Failed to refresh token")
+                .request(chain.request())
+                .build();
         }
         Log.d(TAG, "[$logid] Token length is: ${token?.length}.")
         if (!token.isNullOrBlank()) {

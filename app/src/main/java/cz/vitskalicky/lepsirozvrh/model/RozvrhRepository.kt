@@ -184,9 +184,12 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                     }
                 } catch (e: Exception) {
                     when (e) {
-                        is HttpException -> if (e.code() == 401) //unauthorized
-                            throw LoginRequiredException()
-                        else
+                        is HttpException -> if (e.code() == 401) { //unauthorized
+                            withContext(Dispatchers.Main) {
+                                accountRep.logout(rozvrhId.account)
+                            }
+                            return@async null
+                        }else
                             throw e
                         is TimeoutCancellationException, is IOException -> {
                             //transform timeoutCancell..tion to IOException
@@ -199,7 +202,9 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                             throw newe
                         }
                         is LoginException -> {
-                            accountRep.logout(rozvrhId.account)
+                            withContext(Dispatchers.Main) {
+                                accountRep.logout(rozvrhId.account)
+                            }
                             return@async null
                         }
                         else -> throw e
