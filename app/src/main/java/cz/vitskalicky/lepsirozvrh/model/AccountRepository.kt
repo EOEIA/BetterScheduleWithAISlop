@@ -209,6 +209,9 @@ class AccountRepository(val app: MainApplication) {
         if (!force && !account.isAccessExpired() && !account.requireRefresh){
             return SUCCESS.ok(account);
         }
+        if (account.refreshToken.isBlank()){
+            return WRONG_LOGIN.fail()
+        }
 //        val refreshToken: String = sprefs.getString(SharedPrefs.REFRESH_TOKEN, null)?.takeUnless { it.isBlank() } ?: return WRONG_LOGIN
 
         try {
@@ -238,7 +241,11 @@ class AccountRepository(val app: MainApplication) {
 
             return SUCCESS.ok(updatedAccount)
         }catch (e: HttpException){
-            return handleException(e, "login").fail()
+            val res = handleException(e, "login").fail()
+            if (res.status == WRONG_LOGIN){
+                dao.updateAccount(account.copy(refreshToken = "")) // This makes sure there will be no useless attempt at refreshing with this token that does not work.
+            }
+            return res
         }catch (e: IOException){
             return handleException(e, "login").fail()
         }//todo catch invalid url

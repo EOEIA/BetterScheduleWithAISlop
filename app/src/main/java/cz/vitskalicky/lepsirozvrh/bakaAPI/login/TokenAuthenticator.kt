@@ -9,6 +9,7 @@ import cz.vitskalicky.lepsirozvrh.model.LoginException
 import io.sentry.Sentry
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
+import okhttp3.ResponseBody.Companion.toResponseBody
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -82,20 +83,21 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?, val co
         val token: String? = try {
             runBlocking {
             if (account == null) return@runBlocking null
-                if (connectDb) {
-                    val res = app.accountRepository.refreshToken(account!!.id, force = false)
-                    if (res.status == WRONG_LOGIN){
-                        throw LoginException("Refresh token failed")
-                    }else if (res.account != null){
-                        account = res.account
-                    }
-                } // ensure token is valid
-                account?.accessToken
+            if (connectDb) {
+                val res = app.accountRepository.refreshToken(account!!.id, force = false)
+                if (res.status == WRONG_LOGIN){
+                    throw LoginException("Refresh token failed")
+                }else if (res.account != null){
+                    account = res.account
+                }
+            } // ensure token is valid
+            account?.accessToken
             }
         } catch (_: LoginException) {
             Log.d(TAG, "[$logid] Refreshed failed, terminating request with 401.")
             return Response.Builder()
                 .code(401) //unauthorized
+                .body("Failed to refresh token".toResponseBody(null))
                 .protocol(Protocol.HTTP_2)
                 .message("Failed to refresh token")
                 .request(chain.request())
