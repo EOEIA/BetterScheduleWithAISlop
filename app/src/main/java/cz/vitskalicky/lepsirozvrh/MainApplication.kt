@@ -67,6 +67,8 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         }
     }
 
+    public val lock = Object();
+
     private val tohle = this
     public val mainScope = MainScope()
     lateinit var notificationState: NotificationState

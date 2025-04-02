@@ -12,6 +12,8 @@ import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResultStatus.*
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.prefs
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.joda.time.DateTime
@@ -20,9 +22,13 @@ import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.IOException
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 import kotlin.math.min
 
-
+/**
+ * Unless noted otherwise, methods of this class are not thread-safe.
+ * */
 class AccountRepository(val app: MainApplication) {
     private val db: RozvrhDatabase = app.rozvrhDb
     private val dao = db.accountDao()
@@ -35,13 +41,15 @@ class AccountRepository(val app: MainApplication) {
     private val rozvrhWebservices: MutableMap<Long, RozvrhWebservice> = HashMap()
     private val userWebservices: MutableMap<Long, UserWebservice> = HashMap()
 
+    private val locksLock: Mutex = Mutex();
+    private val locks: MutableMap<Long, Mutex> = HashMap()
+
     init {
-        accountLDs.observe(app){
+        accountLDs.observe(app){ //happens on main thread
             val toRemove = HashSet(tokenAuthenticators.keys);
             for (account in it.values){
                 toRemove.remove(account.id)
-                tokenAuthenticators.getOrPut(account.id){TokenAuthenticator(app, account)}
-                    .account = account
+                getTokenAuthenticator(account, connectDb = true).account = account
             }
             for (id in toRemove){
                 tokenAuthenticators[id]?.account = null
@@ -51,6 +59,8 @@ class AccountRepository(val app: MainApplication) {
     }
     /**
      * Returns a new retrofit which does not inject login token.
+     *
+     * Thread-safe
      */
     fun getUnloggedRetrofit(baseUrl: String): Retrofit {
         val interceptor = HttpLoggingInterceptor()
@@ -68,6 +78,8 @@ class AccountRepository(val app: MainApplication) {
     /** Returns an instance of retrofit (cached for each account) or `null` if it could not be created (likely because the URL is invalid, see [createRetrofit]).
      * Also, the [account] must have a valid id and be stored in database, otherwise the credentials will not be renewed,
      * may be replaced by credentials of a different account with the same id or other bad things might happen
+     *
+     * Non thread-safe.
      * */
     fun getRetrofit(account: Account): Retrofit? {
         var retrofit = retrofits[account.id];
@@ -77,7 +89,10 @@ class AccountRepository(val app: MainApplication) {
         return retrofit;
     }
 
-    /** Returns an instance of webservice (cached for each account) or `null` if corresponding retrofit could not be created (see [getRetrofit])*/
+    /** Returns an instance of webservice (cached for each account) or `null` if corresponding retrofit could not be created (see [getRetrofit])
+     *
+     * Not thread-safe
+     * */
     fun getRozvrhWebservice(account: Account): RozvrhWebservice?{
         var webservice = rozvrhWebservices[account.id]
         if (webservice == null){
@@ -86,7 +101,9 @@ class AccountRepository(val app: MainApplication) {
         return webservice
     }
 
-    /** Returns an instance of webservice (cached for each account) or `null` if corresponding retrofit could not be created (see [getRetrofit])*/
+    /** Returns an instance of webservice (cached for each account) or `null` if corresponding retrofit could not be created (see [getRetrofit])
+     *
+     * (Not thread-safe - always run from main thread.)*/
     fun getUserWebservice(account: Account): UserWebservice?{
         var webservice = userWebservices[account.id]
         if (webservice == null){
@@ -102,10 +119,19 @@ class AccountRepository(val app: MainApplication) {
      * Does what its name suggest.
      *
      * If [refreshTokens] is `true`, [Account.accessToken] and [Account.refreshToken] will be refreshed if expired (and
-     * if internet connection available) */
-    suspend fun getAccount(id: Long, refreshTokens: Boolean = false): Account?{
+     * if internet connection available)
+     *
+     * This method is thread-safe, but locking non-reentrant.*/
+    suspend fun getAccount(id: Long, refreshTokens: Boolean = false): Account? {
+        val lock = locksLock.withLock { locks.getOrPut(id){Mutex()} }
+        lock.withLock {
+            return _getAccount(id, refreshTokens)
+        }
+    }
+    /** Corresponding [locks] must be locked when calling this function */
+    private suspend fun _getAccount(id: Long, refreshTokens: Boolean = false): Account?{
         if (refreshTokens || dao.refreshRequired(id) == true){
-            refreshToken(id, force = false)
+            _refreshToken(id, force = false)
         }
         return dao.loadAccount(id);
     }
@@ -113,12 +139,19 @@ class AccountRepository(val app: MainApplication) {
     /**
      * If [account] has expired access token, refresh it and return [Account] with fresh tokens. If access token is not
      * expired, simply return [account].
+     *
+     * Thread-safe, but locking is non-reentrant.
      */
     suspend fun tryRefresh(account: Account): Account {
-        return if (account.isAccessExpired()){
-            getAccount(account.id, refreshTokens = true) ?: account /*the account may have been deleted from database*/
-        }else{
-            account
+        val lock = locksLock.withLock { locks.getOrPut(account.id) {Mutex()} }
+        lock.withLock {
+            //make sure we are using up-to-data data
+            val acc: Account = dao.loadAccount(account.id) ?: return account
+            return if (acc.isAccessExpired()){
+                _getAccount(acc.id, refreshTokens = true) ?: acc /*the account may have been deleted from database*/
+            }else{
+                acc
+            }
         }
     }
 
@@ -173,8 +206,15 @@ class AccountRepository(val app: MainApplication) {
         }
     }
 
-    /** Token will also be updated in database */
+    /** Token will also be updated in database. Thread-safe, but non-reentrant. */
     suspend fun refreshToken(id: Long, force: Boolean = true): LoginResult {
+        val lock = locksLock.withLock { locks.getOrPut(id) {Mutex()} }
+        lock.withLock {
+            return _refreshToken(id, force)
+        }
+    }
+    /** Same as [refreshToken], but corresponding [locks] must be locked when calling.*/
+    private suspend fun _refreshToken(id: Long, force: Boolean = true): LoginResult {
         val account = dao.loadAccount(id) ?: return WRONG_LOGIN.fail();
         if (!force && !account.isAccessExpired() && !account.requireRefresh){
             return SUCCESS.ok(account);
@@ -200,7 +240,7 @@ class AccountRepository(val app: MainApplication) {
 
             //check if user info should be refreshed
             if (account.semesterEnd == null || account.semesterEnd.isBeforeNow || account.requireRefresh){
-                updatedAccount = refreshUserInfo(account).account ?: updatedAccount
+                updatedAccount = _refreshUserInfo(account).account ?: updatedAccount
             }
             dao.updateAccount(updatedAccount)
 
@@ -212,6 +252,7 @@ class AccountRepository(val app: MainApplication) {
         }//todo catch invalid url
     }
 
+    /** Not thread-safe.*/
     suspend fun addAccount(url: String, username: String, password: String, isUrlManual: Boolean): LoginResult {
         @Suppress("NAME_SHADOWING")
         val url: String = unifyUrl(url)
@@ -284,10 +325,17 @@ class AccountRepository(val app: MainApplication) {
             return handleException(e, "login", url, isUrlManual).fail()
         }
     }
-
+    /** Thread-safe, non-reentrant. */
     suspend fun refreshUserInfo(account: Account): LoginResult {
+        val lock = locksLock.withLock { locks.getOrPut(account.id) {Mutex()} }
+        lock.withLock {
+            return _refreshUserInfo(account)
+        }
+    }
 
-        val userWebservice: UserWebservice = getUserWebservice(account)?: return UNREACHABLE.fail()
+    /** Corresponding [locks] must be locked when calling thin function.*/
+    private suspend fun _refreshUserInfo(account: Account): LoginResult {
+        val userWebservice: UserWebservice = withContext(Dispatchers.Main){ getUserWebservice(account) } ?: return UNREACHABLE.fail()
         try {
             val userResponse: UserResponse = userWebservice.getUser()
 
@@ -329,26 +377,29 @@ class AccountRepository(val app: MainApplication) {
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun logout(accountId: Long) {
         withContext(NonCancellable) {
-            dao.deleteAccountById(accountId)
-            app.rozvrhStatusStore.clear()
-            rozvrhWebservices.remove(accountId)
-            userWebservices.remove(accountId)
-            retrofits.remove(accountId)
-            tokenAuthenticators[accountId]?.account = null
-            tokenAuthenticators.remove(accountId)
+            val lock = locksLock.withLock { locks.getOrPut(accountId) {Mutex()} }
+            lock.withLock {
+                dao.deleteAccountById(accountId)
+                app.rozvrhStatusStore.clear()
+                rozvrhWebservices.remove(accountId)
+                userWebservices.remove(accountId)
+                retrofits.remove(accountId)
+                tokenAuthenticators[accountId]?.account = null
+                tokenAuthenticators.remove(accountId)
 
-            if (app.prefs.long(PrefsConsts.ACTIVE_ACCOUNT_ID) == accountId){
-                app.prefs.edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID)}
-            }
-            if (app.prefs.long(PrefsConsts.NOTIFICATION_ACCOUNT) == accountId) {
-                app.prefs.edit { putLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT) }
-                PermanentNotification.update(app, null, false, null,0)
-            }
+                if (app.prefs.long(PrefsConsts.ACTIVE_ACCOUNT_ID) == accountId){
+                    app.prefs.edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID)}
+                }
+                if (app.prefs.long(PrefsConsts.NOTIFICATION_ACCOUNT) == accountId) {
+                    app.prefs.edit { putLong(PrefsConsts.NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT) }
+                    PermanentNotification.update(app, null, false, null,0)
+                }
 
-            //todo notification and widget cleanup
+                //todo notification and widget cleanup
 //            app.notificationState.offset = 0
 //            PermanentNotification.update(null, 0, app)
 //            WidgetProvider.updateAll(null, app)
+            }
         }
     }
 
@@ -391,6 +442,8 @@ class AccountRepository(val app: MainApplication) {
     /**
      * Returns an instance of TokenAuthenticator for the given account. If [connectDb] is `true`, it is stored in a cache and its tokens are
      * automatically updated according to database. If [connectDb] is `false` the database will not be touched.
+     *
+     * Not thread-safe, must be called from main thread.
      */
     private fun getTokenAuthenticator(account: Account, connectDb: Boolean = true): TokenAuthenticator {
 //        var account: Account? = tokenAuthenticators[accountId]?.account
@@ -404,6 +457,7 @@ class AccountRepository(val app: MainApplication) {
         }
     }
 
+    /** Thread-safe */
     private fun createRetrofitNoAuth(url: String): Retrofit{
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -419,6 +473,8 @@ class AccountRepository(val app: MainApplication) {
      * Creates new instance of Retrofit with the account's URL and login credentials. If the URL is invalid, `null` is returned.
      *
      * If [connectDb] is `true` the credentials will automatically be renewed and stored in database, and if `false`, the DB will not be touched.
+     *
+     * Not thread-safe
      * */
     private fun createRetrofit(account: Account, connectDb: Boolean = true): Retrofit? {
         val interceptor = HttpLoggingInterceptor()

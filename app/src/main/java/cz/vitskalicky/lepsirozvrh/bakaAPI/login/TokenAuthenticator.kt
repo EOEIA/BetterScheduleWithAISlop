@@ -38,41 +38,39 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?, val co
             return null
         }
         val usedAccessToken: String? = origRequest.header("Authorization")?.removePrefix("Bearer ")
-        synchronized(app) {
-            Log.d(TAG, "[$logid] Current access token has length ${account?.accessToken?.length}")
-            Sentry.addBreadcrumb("[$logid] Current access token has length ${account?.accessToken?.length}")
-            var currentAccessToken: String = account?.accessToken ?: return null
-            if (usedAccessToken == currentAccessToken) {
-                Log.d(TAG, "[$logid] access tokens are equal.")
-                val refreshResult: AccountRepository.LoginResult = runBlocking {
-                    if (account == null) return@runBlocking WRONG_LOGIN.fail()
-                    if (connectDb) app.accountRepository.refreshToken(account!!.id) else SUCCESS.ok(account!!)
+        Log.d(TAG, "[$logid] Current access token has length ${account?.accessToken?.length}")
+        Sentry.addBreadcrumb("[$logid] Current access token has length ${account?.accessToken?.length}")
+        var currentAccessToken: String = account?.accessToken ?: return null
+        if (usedAccessToken == currentAccessToken) {
+            Log.d(TAG, "[$logid] access tokens are equal.")
+            val refreshResult: AccountRepository.LoginResult = runBlocking {
+                if (account == null) return@runBlocking WRONG_LOGIN.fail()
+                if (connectDb) app.accountRepository.refreshToken(account!!.id) else SUCCESS.ok(account!!)
+            }
+            Log.d(TAG, "[$logid] refreshed with status ${refreshResult.status}.")
+            when (refreshResult.status) {
+                WRONG_LOGIN -> {
+                    Sentry.addBreadcrumb("[$logid] Authentication: token refresh failed");
+                    return null
                 }
-                Log.d(TAG, "[$logid] refreshed with status ${refreshResult.status}.")
-                when (refreshResult.status) {
-                    WRONG_LOGIN -> {
-                        Sentry.addBreadcrumb("[$logid] Authentication: token refresh failed");
-                        return null
-                    }
-                    UNREACHABLE, UNEXPECTED_RESPONSE -> {
-                        return origRequest.newBuilder()
-                                .tag(Retried::class.java, Retried(retried + 1))
-                                .build()
-                    }
-                    SUCCESS -> {
-                        account = refreshResult.account
-                        currentAccessToken = account?.accessToken ?: return null
-                    }
+                UNREACHABLE, UNEXPECTED_RESPONSE -> {
+                    return origRequest.newBuilder()
+                            .tag(Retried::class.java, Retried(retried + 1))
+                            .build()
+                }
+                SUCCESS -> {
+                    account = refreshResult.account
+                    currentAccessToken = account?.accessToken ?: return null
                 }
             }
-            Sentry.addBreadcrumb("[$logid] Authentication: tryeing again with ${if(currentAccessToken == usedAccessToken) "the same" else "different"} token");
-            Log.d(TAG, "[$logid] Authentication: trying again with ${if(currentAccessToken == usedAccessToken) "the same" else "different"} token");
-            return origRequest.newBuilder()
-                    .removeHeader("Authorization")
-                    .addHeader("Authorization", "Bearer $currentAccessToken")
-                    .tag(Retried::class.java, Retried(retried + 1))
-                    .build()
         }
+        Sentry.addBreadcrumb("[$logid] Authentication: trying again with ${if(currentAccessToken == usedAccessToken) "the same" else "different"} token");
+        Log.d(TAG, "[$logid] Authentication: trying again with ${if(currentAccessToken == usedAccessToken) "the same" else "different"} token");
+        return origRequest.newBuilder()
+                .removeHeader("Authorization")
+                .addHeader("Authorization", "Bearer $currentAccessToken")
+                .tag(Retried::class.java, Retried(retried + 1))
+                .build()
     }
 
     data class Retried(val count: Int)
@@ -80,23 +78,21 @@ class TokenAuthenticator(val app: MainApplication, var account: Account?, val co
     override fun intercept(chain: Interceptor.Chain): Response {
         val logid = logids.getAndIncrement()
         Log.d(TAG, "[$logid] Authenticator for account ${account?.id} (connectDb: $connectDb) is interception request ${chain.request().url}.")
-        val token: String? = synchronized(app){
-            runBlocking {
-                if (account == null) return@runBlocking null
-                try {
-                    if (connectDb) account = app.accountRepository.tryRefresh(account!!) // ensure token is valid
-                    account?.accessToken
-                } catch (_: LoginRequiredException) {
-                    null
-                }
+        val token: String? = runBlocking {
+            if (account == null) return@runBlocking null
+            try {
+                if (connectDb) account = app.accountRepository.tryRefresh(account!!) // ensure token is valid
+                account?.accessToken
+            } catch (_: LoginRequiredException) {
+                null
             }
         }
-        Log.d(TAG, "[$logid] Authenticator for account ${account?.id} (connectDb: $connectDb) is interception request ${chain.request().url}: Token length is: ${token?.length}.")
+        Log.d(TAG, "[$logid] Token length is: ${token?.length}.")
         if (!token.isNullOrBlank()) {
             val newRequest = chain.request().newBuilder()
                     .addHeader("Authorization", "Bearer $token")
                     .build()
-            Log.d(TAG, "[$logid] Authenticator for account ${account?.id} (connectDb: $connectDb) is interception request ${chain.request().url}: Token added.")
+            Log.d(TAG, "[$logid] Token added.")
             return chain.proceed(newRequest)
         }else{
             Log.w(TAG, "[$logid] Interceptor could not insert authentication header! access token is blank or empty")
