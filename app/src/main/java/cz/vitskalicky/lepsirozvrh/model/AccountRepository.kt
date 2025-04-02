@@ -1,5 +1,6 @@
 package cz.vitskalicky.lepsirozvrh.model
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
@@ -148,8 +149,10 @@ class AccountRepository(val app: MainApplication) {
             //make sure we are using up-to-data data
             val acc: Account = dao.loadAccount(account.id) ?: return account
             return if (acc.isAccessExpired()){
+                Log.d(TAG, "tryRefresh: refreshing")
                 _getAccount(acc.id, refreshTokens = true) ?: acc /*the account may have been deleted from database*/
             }else{
+                Log.d(TAG, "tryRefresh: not expired")
                 acc
             }
         }
@@ -497,6 +500,7 @@ class AccountRepository(val app: MainApplication) {
     }
 
     companion object{
+        private val TAG = AccountRepository::class.simpleName
         /**
          * Removes /next/login.aspx
          */
