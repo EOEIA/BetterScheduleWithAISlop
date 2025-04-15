@@ -33,7 +33,7 @@ data class Account(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
 ) : Parcelable {
-    fun isAccessExpired(): Boolean = accessExpires.isBefore(DateTime.now().plusMinutes(1))
+    fun isAccessExpired(): Boolean = accessExpires.isBefore(DateTime.now().plusSeconds(30))
     /**
      * Whether to show teacher's or students rozvrh (each is fetched and displayed slightly differently)
      * @return `true` if the user logged in is a teacher or `false` if not (then it is a student or a parent)
