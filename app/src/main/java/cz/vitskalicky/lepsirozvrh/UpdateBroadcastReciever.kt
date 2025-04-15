@@ -31,7 +31,7 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
             try{
                 val rozvrhKey = Utils.getNotificationRozvrhKey(application)
                 val account: Account? = rozvrhKey?.let { application.accountRepository.getAccount(it.account) }
-                val isTeacher = if (rozvrhKey == null) false else application.accountRepository.getAccount(rozvrhKey.account)?.isTeacher() ?: false
+                val isTeacher = account?.isTeacher() ?: false
                 if (account != null && application.repository.refreshNeeded(rozvrhKey, false)){
                     //If the rozvrh needs to be refreshed, then the network call might take a long time
                     // and there would be a significant delay between user clicking "next week"

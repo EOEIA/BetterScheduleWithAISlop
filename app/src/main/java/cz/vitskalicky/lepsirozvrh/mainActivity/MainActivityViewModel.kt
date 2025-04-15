@@ -253,5 +253,9 @@ class MainActivityViewModel(
         switchDayLD.removeObserver(switchDayObserver)
         super.onCleared()
     }
+
+    suspend fun refreshUserInfo(accountId: Long){
+        accountRepository.refreshAccountDetails(accountId);
+    }
 }
 

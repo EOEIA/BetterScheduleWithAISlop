@@ -257,7 +257,7 @@ class AccountRepository(val app: MainApplication) {
 
     /** Updates details for an account, saves the updated info into db and also returns it. Returns old account data
      * in case of a failure or null if id is invalid. Thread-safe, but do not call with [locks] locked. */
-    private suspend fun refreshAccountDetails(accountId: Long, force: Boolean = false): Account? {
+    suspend fun refreshAccountDetails(accountId: Long, force: Boolean = false): Account? {
         accountDetailsLock.withLock {
             // if you ever change this logic, don't forget to change in migration code too
             val oldAccount: Account = dao.loadAccount(accountId) ?: return null

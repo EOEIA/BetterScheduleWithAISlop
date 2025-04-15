@@ -50,6 +50,11 @@ class MainActivity : ComponentActivity() {
                     val intent = Intent(this@MainActivity, AccountPickerActivity::class.java)
                     startActivity(intent)
                     finish()
+                }else{
+                    // This should ensure user info is kept up-to date
+                    lifecycleScope.launch {
+                        viewModel.refreshUserInfo(it);
+                    }
                 }
             }
             setContent {
