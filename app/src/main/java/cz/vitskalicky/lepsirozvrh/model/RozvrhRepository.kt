@@ -1,6 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.model
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import cz.vitskalicky.lepsirozvrh.DebugUtils
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.Utils
+import cz.vitskalicky.lepsirozvrh.bakaAPI.login.TokenAuthenticator
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice.Companion.getSchedule
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Rozvrh3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.RozvrhConverter
@@ -35,6 +37,10 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
     private val currentWeekLD: HashMap<Long,LiveData<RozvrhRecord?>> = HashMap()
     private val currentMondayLD: MutableLiveData<LocalDate> = MutableLiveData(Utils.getCurrentMonday())
     val allCurrentWeekLD = currentMondayLD.distinctUntilChanged().switchMap { db.rozvrhDao().getAllRozvrhsOfWeekLive(it).distinctUntilChanged() }
+
+    companion object{
+        val TAG = RozvrhRepository::class.simpleName;
+    }
 
     fun getCurrentWeekLD(account: Long): LiveData<RozvrhRecord?>{
         val ld: LiveData<RozvrhRecord?> = currentWeekLD.getOrPut(account){
@@ -186,8 +192,11 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                     when (e) {
                         is HttpException -> if (e.code() == 401) { //unauthorized
                             withContext(Dispatchers.Main) {
+                                Log.d(TAG,"Logging out because rozvrh request returned 401")
                                 accountRep.logout(rozvrhId.account)
                             }
+                            return@async null
+                        }else if (e.code() == TokenAuthenticator.HTTP_NO_FRESH_TOKEN){
                             return@async null
                         }else
                             throw e
@@ -203,6 +212,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                         }
                         is LoginException -> {
                             withContext(Dispatchers.Main) {
+                                Log.d(TAG,"Logging out because of login exception")
                                 accountRep.logout(rozvrhId.account)
                             }
                             return@async null
@@ -283,10 +293,6 @@ withContext(NonCancellable) {
                 //conversion failed
                 application.sendReport(e)
                 StatusInfo.Rozvrh.unexpectedResponse()
-            }
-            is LoginRequiredException -> {
-                application.accountRepository.logout(rozvrhId.account)
-                StatusInfo.Rozvrh.loginFailed()
             }
             is HttpException -> {
                 application.sendReport(e);

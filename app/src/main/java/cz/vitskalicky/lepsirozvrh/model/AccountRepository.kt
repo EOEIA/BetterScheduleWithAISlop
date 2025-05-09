@@ -107,7 +107,7 @@ class AccountRepository(val app: MainApplication) {
      * Return account for the supplied [id]. If the access token is expired it will be refreshed. Returns `null` if account is not found.
      */
     suspend fun getAccount(id: Long): Account? {
-        return refreshAccount(id).account
+        return refreshAccount(id).account ?: dao.loadAccount(id)
     }
 
     private suspend fun handleException(e: Exception, whichAPI: String, url: String = "", isUrlManual: Boolean = false): LoginResultStatus {
@@ -164,6 +164,8 @@ class AccountRepository(val app: MainApplication) {
 
     /**
      * Refresh access token and account info if needed and return a fresh account. All is loaded from db and result is saved there. It is thread-safe.
+     * Note that if refresh fails (e.g. no internet), an error is returned. But in that case you can still get
+     * the known-to-be-not-fresh account from db.
      *
      * If access token is expired or is equal to [invalidateToken], it gets refreshed.
      * */
@@ -424,5 +426,4 @@ class AccountRepository(val app: MainApplication) {
 }
 
 open class LoginException(message: String?): RuntimeException(message)
-class LoginRequiredException: LoginException("You need to log in first to perform this action")
 
