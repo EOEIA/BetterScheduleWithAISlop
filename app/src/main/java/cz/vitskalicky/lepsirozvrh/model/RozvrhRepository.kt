@@ -197,6 +197,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                             }
                             return@async null
                         }else if (e.code() == TokenAuthenticator.HTTP_NO_FRESH_TOKEN){
+                            Log.d(TAG,"Could not get rozvrh, because authenticator could not get a fresh token")
                             return@async null
                         }else
                             throw e
