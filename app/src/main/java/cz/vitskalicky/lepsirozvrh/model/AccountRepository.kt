@@ -385,6 +385,16 @@ class AccountRepository(val app: MainApplication) {
         }
     }
 
+    /** Mark the access token of the account as expired. For debugging purposes. */
+    suspend fun debugExpireAccessTokens(){
+        for (id in dao.loadAllAccounts().map { it.id }){
+            locks.safeGetOrPut(id, Mutex()).withLock {
+                val acc = dao.loadAccount(id) ?: return@withLock;
+                dao.updateAccount(acc.copy(accessExpires = DateTime.now().minusMinutes(1)));
+            }
+        }
+    }
+
     companion object{
         private val TAG = AccountRepository::class.simpleName
         /**

@@ -198,6 +198,32 @@ fun RozvrhWithControlsStateless(
                                     contentDescription = stringResource(R.string.next_week)
                                 )
                             }
+
+                        if(BuildConfig.DEBUG){
+                            var expanded by remember { mutableStateOf(false) }
+                            val accountRepository = (LocalContext.current.applicationContext as MainApplication).accountRepository;
+
+                            IconButton({expanded = true}){
+                                Icon(Icons.Default.DeveloperMode, contentDescription = "Developer tools")
+                            }
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    content = { Text("Expire access tokens") },
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            accountRepository.debugExpireAccessTokens()
+                                        }
+                                    }
+                                )
+    //                            DropdownMenuItem(
+    //                                text = { Text("Option 2") },
+    //                                onClick = { /* Do something... */ }
+    //                            )
+                            }
+                        }
                     }
 
                     Box(Modifier.align(Alignment.CenterEnd)) {
