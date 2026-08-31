@@ -1,0 +1,3 @@
+Přepínač barevného označení změněných hodin: buňky se barví dle druhu změny (suplování, odpadnutí, přidání…)
+Kompaktní rozvrh: menší buňky, aby se na obrazovku vešlo více hodin
+2.0.10

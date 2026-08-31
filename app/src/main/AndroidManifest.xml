@@ -97,6 +97,30 @@
             android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
             android:theme="@style/AppTheme"/>
         <activity
+                android:name=".grades.GradesActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
+                android:theme="@style/AppTheme"/>
+        <activity
+                android:name=".settings.NotificationDiagnosticsActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
+                android:theme="@style/AppTheme"/>
+            <activity
+                android:name=".grades.homework.HomeworkActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
+                android:theme="@style/AppTheme"/>
+            <activity
+                android:name=".notification.ChangeHistoryActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                android:taskAffinity="cz.vitskalicky.lepsirozvrh.defaultAffinity"
+                android:theme="@style/AppTheme"/>
+        <activity
                 android:name=".login.LoginActivity"
                 android:exported="false"
                 android:launchMode="singleTask"

@@ -1,0 +1,2 @@
+2.0.13
+- Novinka: Upozornění na změny — oznámení při aktualizaci rozvrhu (odpadnutí, suplování, dny bez výuky). Zapnout v Nastavení → Upozornění na změny.

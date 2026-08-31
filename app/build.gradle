@@ -36,11 +36,11 @@ android {
 
     compileSdk 34
     defaultConfig {
-        applicationId "cz.vitskalicky.lepsirozvrh"
+        applicationId "cz.vitskalicky.lepsirozvrh.fork"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 48
-        versionName "2.0.2"
+        versionCode 68
+        versionName "2.0.22"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "GitHash", "\"${getGitHash()}\""
         /**

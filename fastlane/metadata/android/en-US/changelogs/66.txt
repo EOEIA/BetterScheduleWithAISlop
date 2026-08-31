@@ -1,0 +1,2 @@
+2.0.20
+- New: Change history — Settings → Change alerts → Change history logs every timetable-change alert that fired, so you can review past substitutions and cancellations.

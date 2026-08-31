@@ -1,0 +1,2 @@
+2.0.12
+- Upraveny barvy ikony aplikace, aby šla tato fork verze snáze odlišit od původní aplikace.

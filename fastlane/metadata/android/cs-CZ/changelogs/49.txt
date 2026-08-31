@@ -1,0 +1,2 @@
+- Rozvrh nyní při posouvání do stran ponechá viditelný kompaktní sloupec dnů. Lze změnit v nastavení.
+- Vylepšeno interní rozpoznávání změn v rozvrhu.

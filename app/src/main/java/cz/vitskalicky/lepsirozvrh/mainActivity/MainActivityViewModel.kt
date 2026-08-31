@@ -10,6 +10,7 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key
 import cz.vitskalicky.lepsirozvrh.model.StatusInfo
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.whatsnew.WhatsNew
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
 class MainActivityViewModel(
@@ -22,6 +23,9 @@ class MainActivityViewModel(
     override fun getAccountIdLD(): LiveData<Long?> = accountIdLD
     private val accountLD: LiveData<Account?> = accountIdLD.switchMap { it?.let { accountRepository.getAccountLD(it) } ?: MutableLiveData(null) }
     override fun getAccountLD(): LiveData<Account?> = accountLD
+    private val demoModeLD: LiveData<Boolean> =
+        SharedPrefsBooleanLiveData(application.prefs.sharedPreferences, PrefsConsts.DEBUG_DEMO_MODE, false)
+            .map { BuildConfig.DEBUG && it }
     private val displayLD: MediatorLiveData<RozvrhRecord?> = MediatorLiveData()
     override fun getDisplayLD(): LiveData<RozvrhRecord?> = displayLD
     private val statusLD: MediatorLiveData<StatusInfo> = MediatorLiveData()
@@ -51,6 +55,10 @@ class MainActivityViewModel(
 
     private val switchDayLD = SharedPrefsIntLiveData(application.prefs.sharedPreferences,PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX,0)
     private val switchDayObserver: Observer<Int> = Observer { _ ->
+        invalidateCache = true
+        weekPosition = weekPosition
+    }
+    private val demoModeObserver: Observer<Boolean> = Observer { _ ->
         invalidateCache = true
         weekPosition = weekPosition
     }
@@ -108,21 +116,39 @@ class MainActivityViewModel(
 
     /** Returns a live data for given week bound to account of this viewModel */
     private fun getRozvrhLD(monday: LocalDate): LiveData<RozvrhRecord?>{
-        return accountIdLD.switchMap { accntId ->
-            if (accntId != null) {
-                repository.getRozvrhLive(Key(accntId, monday), true)
+        return demoModeLD.switchMap { isDemoMode ->
+            if (isDemoMode) {
+                MutableLiveData(
+                    RozvrhRecord(
+                        Key(-1, monday),
+                        DateTime(0),
+                        DebugUtils.getDemoRozvrh(monday, app)
+                    )
+                )
             } else {
-                MutableLiveData<RozvrhRecord?>(null)
+                accountIdLD.switchMap { accntId ->
+                    if (accntId != null) {
+                        repository.getRozvrhLive(Key(accntId, monday), true)
+                    } else {
+                        MutableLiveData<RozvrhRecord?>(null)
+                    }
+                }
             }
         }
     }
     /** Returns a live data for given week bound to account of this viewModel */
     private fun getRozvrhStatusLD(monday: LocalDate): LiveData<StatusInfo>{
-        return accountIdLD.switchMap { accntId ->
-            if (accntId != null){
-                repository.getRozvrhStatusLiveData(Key(accntId,monday))
+        return demoModeLD.switchMap { isDemoMode ->
+            if (isDemoMode) {
+                MutableLiveData(StatusInfo.success())
             }else {
-                MutableLiveData<StatusInfo>(StatusInfo.unknown())
+                accountIdLD.switchMap { accntId ->
+                    if (accntId != null){
+                        repository.getRozvrhStatusLiveData(Key(accntId,monday))
+                    }else {
+                        MutableLiveData<StatusInfo>(StatusInfo.unknown())
+                    }
+                }
             }
         }
     }
@@ -245,12 +271,14 @@ class MainActivityViewModel(
         initThisAndPermLD()
 
         switchDayLD.observeForever(switchDayObserver)
+        demoModeLD.observeForever(demoModeObserver)
 
         weekPosition = weekPosition
     }
 
     override fun onCleared() {
         switchDayLD.removeObserver(switchDayObserver)
+        demoModeLD.removeObserver(demoModeObserver)
         super.onCleared()
     }
 
@@ -258,4 +286,3 @@ class MainActivityViewModel(
         accountRepository.refreshAccountDetails(accountId);
     }
 }
-

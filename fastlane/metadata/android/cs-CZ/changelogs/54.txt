@@ -1,0 +1,3 @@
+2.0.8:
+- Debug buildy mají viditelný demo režim pro testování rozvrhu bez skutečného účtu
+- Demo data nyní obsahují ukázky domácích úkolů, přidaných, odebraných, suplovaných a přesunutých hodin i dne bez výuky

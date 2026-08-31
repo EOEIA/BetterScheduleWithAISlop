@@ -25,6 +25,7 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRepository
 import cz.vitskalicky.lepsirozvrh.model.RozvrhStatusStore
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.notification.ChangeAlertNotification
 import cz.vitskalicky.lepsirozvrh.notification.NotificationState
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.schoolPicker.SchoolsDatabase
@@ -168,6 +169,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
+        ChangeAlertNotification.registerChannel(this)
 
         // initialize live data
         notificationAccountLD = PreferenceManager.getDefaultSharedPreferences(this).longLiveData(PrefsConsts.NOTIFICATION_ACCOUNT, -1).map { it.takeUnless { it == -1L || !PermanentNotification.isNotificationAccountValid(it) } }

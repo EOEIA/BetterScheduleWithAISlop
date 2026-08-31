@@ -1,0 +1,6 @@
+2.0.4:
+- App renamed to schdl with separate app ID (installs alongside original)
+- Gruvbox color theme (dark and light)
+- Grade viewer: tap the graduation-cap icon to see subject grades and averages
+- Lesson topic shown in each schedule cell
+- Homework indicator in cells (dot = one, circled number = multiple)

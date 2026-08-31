@@ -109,6 +109,7 @@ class SettingsActivity : ComponentActivity() {
             val areNotificationsEnabled: Boolean by app.areNotificationsEnabled.observeAsState(true)
             val dontShowNotiBanner: Boolean by viewModel.dontShowNotiBannerLD.observeAsState(true)
             val shouldNotifyAboutNew: Boolean by viewModel.shouldNotifyAboutNewLD.observeAsState(false)
+            val debugDemoMode: Boolean by viewModel.debugDemoModeLD.observeAsState(false)
 
 
             LepsirozvrhTheme {
@@ -142,7 +143,7 @@ class SettingsActivity : ComponentActivity() {
                             Spacer(Modifier.size(paddingValues.calculateTopPadding()))
 
                                 val account by viewModel.accountLD.observeAsState()
-                                if (viewModel.accountLD.isInitialized && account == null){
+                                if (viewModel.accountLD.isInitialized && account == null && (!BuildConfig.DEBUG || !debugDemoMode)){
                                     intent = Intent(this@SettingsActivity, AccountPickerActivity::class.java)
                                     startActivity(intent)
                                     finishAffinity()
@@ -197,18 +198,14 @@ class SettingsActivity : ComponentActivity() {
                             Preference(account?.fullName,account?.userTypeText){switchAccount()}
                             Preference(R.string.switch_account.str, null, Icons.Default.SwitchAccount.icon){ switchAccount() }
                             Preference(R.string.logout.str, null, Icons.Default.Logout.icon){ coroutinScope.launch { account?.let { logOut(it.id)} } }
+                            // ── Timetable ──────────────────────────────────────────────
                             Divider()
-                            PreferenceGroupHeader(R.string.look_and_behaviour.str)
-                            Preference(R.string.app_theme_screen.str, R.string.app_theme_screen_desc.str, Icons.Default.Palette.icon) {
-                                val intent = Intent(this@SettingsActivity, ThemeSettingsActivity::class.java);
-                                startActivity(intent)
-                            }
+                            PreferenceGroupHeader(R.string.settings_section_timetable.str)
                             SwitchPreference(R.string.info_line.str, R.string.info_line_desc.str,
                                 viewModel.showInfolineLD.observeAsState().value ?: true
                             ){
                                 newValue: Boolean -> viewModel.showInfoline = newValue
                             }
-
                                 val selectedIndex by viewModel.switchToNextWeekOptionIndexLD.observeAsState()
                                 val entries = resources.getStringArray(R.array.switch_to_next_week_entries).toList()
                                 val selectedEntry = entries[selectedIndex?:0]
@@ -225,7 +222,50 @@ class SettingsActivity : ComponentActivity() {
                             ) {newValue ->
                                 viewModel.centerToCurrentLesson = newValue
                             }
+                            SwitchPreference(R.string.sticky_day_column.str, R.string.sticky_day_column_desc.str,
+                                viewModel.stickyDayColumnLD.observeAsState().value ?: false
+                            ) {newValue ->
+                                viewModel.stickyDayColumn = newValue
+                            }
+                            SwitchPreference(R.string.highlight_current_day.str, R.string.highlight_current_day_desc.str,
+                                viewModel.highlightCurrentDayLD.observeAsState().value ?: false
+                            ) { newValue ->
+                                viewModel.highlightCurrentDay = newValue
+                            }
+                            SwitchPreference(R.string.changed_lesson_visuals.str, R.string.changed_lesson_visuals_desc.str,
+                                viewModel.changedLessonVisualsLD.observeAsState().value ?: true
+                            ) { newValue -> viewModel.changedLessonVisuals = newValue }
+                            SwitchPreference(R.string.compact_timetable.str, R.string.compact_timetable_desc.str,
+                                viewModel.compactTimetableLD.observeAsState().value ?: false
+                            ) { newValue -> viewModel.compactTimetable = newValue }
+                            SwitchPreference(R.string.transposed_timetable.str, R.string.transposed_timetable_desc.str,
+                                viewModel.transposedTimetableLD.observeAsState().value ?: false
+                            ) { newValue -> viewModel.transposedTimetable = newValue }
+                            SwitchPreference(R.string.show_next_lesson_card.str, R.string.show_next_lesson_card_desc.str,
+                                viewModel.showNextLessonCardLD.observeAsState().value ?: true
+                            ) { newValue -> viewModel.showNextLessonCard = newValue }
+                            if (BuildConfig.DEBUG) {
+                                SwitchPreference(
+                                    R.string.debug_demo_mode.str,
+                                    R.string.debug_demo_mode_desc.str,
+                                    debugDemoMode,
+                                    Icons.Default.DeveloperMode.icon
+                                ) { newValue ->
+                                    viewModel.debugDemoMode = newValue
+                                }
+                            }
 
+                            // ── Appearance ─────────────────────────────────────────────
+                            Divider()
+                            PreferenceGroupHeader(R.string.settings_section_appearance.str)
+                            Preference(R.string.app_theme_screen.str, R.string.app_theme_screen_desc.str, Icons.Default.Palette.icon) {
+                                val intent = Intent(this@SettingsActivity, ThemeSettingsActivity::class.java)
+                                startActivity(intent)
+                            }
+
+                            // ── Notifications ──────────────────────────────────────────
+                            Divider()
+                            PreferenceGroupHeader(R.string.settings_section_notifications.str)
                                 if (showNotiPermissionDialog){
                                     PermanentNotification.ShowNoPermissionDialog { showNotiPermissionDialogLD.value = false }
                                 }
@@ -242,17 +282,15 @@ class SettingsActivity : ComponentActivity() {
                                 optionIndex,
                                 { Column {
                                     Text(R.string.notification.str)
-                                    Text(R.string.notification_detials.str, style = MaterialTheme.typography.caption) //todo better details and styling
+                                    Text(R.string.notification_detials.str, style = MaterialTheme.typography.caption)
                                 } },
                                 Icons.Default.Notifications.icon
                             ){newOptionIndex ->
                                 val optIndex: Int? = (newOptionIndex -1).takeUnless { it == -1 }
                                 val selectedAccount = optIndex?.let { accounts[it].id }
-
-                                if (BuildConfig.DEBUG && optIndex == null && optionIndex == 0){ //for debugging purposes
-                                    app.prefs.putOne(PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, false);
+                                if (BuildConfig.DEBUG && optIndex == null && optionIndex == 0){
+                                    app.prefs.putOne(PrefsConsts.NOTIFICATION_DONT_SHOW_SETTINGS_BANNER, false)
                                 }
-
                                 setNotificationAccount(selectedAccount)
                                 lifecycleScope.launch {
                                     PermanentNotification.update(application as MainApplication)
@@ -267,6 +305,32 @@ class SettingsActivity : ComponentActivity() {
                                     startActivity(intent)
                             }
                                 }
+                            val changeAlertsEnabled by viewModel.changeAlertsEnabledLD.observeAsState(false)
+                            SwitchPreference(R.string.change_alerts.str, R.string.change_alerts_desc.str,
+                                changeAlertsEnabled
+                            ) { viewModel.changeAlertsEnabled = it }
+                            if (changeAlertsEnabled) {
+                                SwitchPreference(R.string.change_alert_lessons.str, R.string.change_alert_lessons_desc.str,
+                                    viewModel.changeAlertLessonsLD.observeAsState().value ?: true
+                                ) { viewModel.changeAlertLessons = it }
+                                SwitchPreference(R.string.change_alert_no_school.str, R.string.change_alert_no_school_desc.str,
+                                    viewModel.changeAlertNoSchoolLD.observeAsState().value ?: true
+                                ) { viewModel.changeAlertNoSchool = it }
+                            }
+                            Preference(R.string.change_history_title.str, R.string.change_history_desc.str) {
+                                startActivity(android.content.Intent(this@SettingsActivity, cz.vitskalicky.lepsirozvrh.notification.ChangeHistoryActivity::class.java))
+                            }
+                            SwitchPreference(R.string.grade_alerts.str, R.string.grade_alerts_desc.str,
+                                viewModel.gradeAlertsEnabledLD.observeAsState().value ?: false
+                            ) { viewModel.gradeAlertsEnabled = it }
+                            SwitchPreference(R.string.homework_alerts.str, R.string.homework_alerts_desc.str,
+                                viewModel.homeworkAlertsEnabledLD.observeAsState().value ?: false
+                            ) { viewModel.homeworkAlertsEnabled = it }
+                            Preference(R.string.notif_diagnostics_title.str, R.string.notif_diagnostics_desc.str) {
+                                startActivity(android.content.Intent(this@SettingsActivity, NotificationDiagnosticsActivity::class.java))
+                            }
+
+                            // ── About ──────────────────────────────────────────────────
                             Divider()
                             PreferenceGroupHeader(R.string.about.str)
 

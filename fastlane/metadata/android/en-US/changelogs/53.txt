@@ -1,0 +1,3 @@
+2.0.7:
+- Added a compact current/next lesson card to the main timetable screen with time and live countdown
+- The card shows homework or lesson-change indicators when relevant

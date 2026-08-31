@@ -36,6 +36,67 @@ data class Rozvrh(
         fun fromJsonString(value: String):Rozvrh = Json.decodeFromString<Rozvrh>(value);
     }
 
+    enum class RelativeLessonState {
+        CURRENT,
+        NEXT
+    }
+
+    data class RelativeLesson(
+        val block: RozvrhBlock,
+        val lesson: RozvrhLesson,
+        val state: RelativeLessonState,
+        val targetDateTime: LocalDateTime
+    )
+
+    /**
+     * Returns the current lesson if one is in progress, otherwise the next lesson in this
+     * timetable. Empty timetable blocks and no-school event days are skipped.
+     */
+    @JsonIgnore
+    fun getCurrentOrNextLesson(now: LocalDateTime = LocalDateTime.now()): RelativeLesson? {
+        val candidates = days
+            .filter { it.event == null }
+            .flatMap { day ->
+                val displayDate = displayDateForCurrentOrNextLesson(day.date, now)
+                captions.indices.mapNotNull { captionIndex ->
+                    val lesson = day.blocks.getOrNull(captionIndex)?.firstOrNull() ?: return@mapNotNull null
+                    val caption = captions[captionIndex]
+                    CandidateLesson(
+                        block = RozvrhBlock(day, caption, day.blocks[captionIndex]),
+                        lesson = lesson,
+                        begin = displayDate.toLocalDateTime(caption.beginTime),
+                        end = displayDate.toLocalDateTime(caption.endTime)
+                    )
+                }
+            }
+            .sortedBy { it.begin }
+
+        candidates.firstOrNull { !now.isBefore(it.begin) && now.isBefore(it.end) }?.let {
+            return RelativeLesson(it.block, it.lesson, RelativeLessonState.CURRENT, it.end)
+        }
+
+        candidates.firstOrNull { now.isBefore(it.begin) }?.let {
+            return RelativeLesson(it.block, it.lesson, RelativeLessonState.NEXT, it.begin)
+        }
+
+        return null
+    }
+
+    private data class CandidateLesson(
+        val block: RozvrhBlock,
+        val lesson: RozvrhLesson,
+        val begin: LocalDateTime,
+        val end: LocalDateTime
+    )
+
+    private fun displayDateForCurrentOrNextLesson(dayDate: LocalDate, now: LocalDateTime): LocalDate {
+        if (!permanent) return dayDate
+
+        val today = now.toLocalDate()
+        val dateThisWeek = today.withDayOfWeek(dayDate.dayOfWeek)
+        return if (dateThisWeek.isBefore(today)) dateThisWeek.plusWeeks(1) else dateThisWeek
+    }
+
     /**
      * returns the lesson block, which should be highlighted to the user as next or current lesson, or null
      * if the school is over or this is not the week.

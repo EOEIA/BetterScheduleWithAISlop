@@ -1,0 +1,2 @@
+2.0.14
+- New: Grade predictor — tap any subject in Grades to open the detail view, edit or exclude grades, and add hypothetical grades to see how your average would change.

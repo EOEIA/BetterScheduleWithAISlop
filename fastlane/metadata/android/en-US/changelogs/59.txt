@@ -1,0 +1,2 @@
+2.0.13
+- New: Change alerts — get notified when the timetable is updated (cancellations, substitutions, no-school days). Enable in Settings → Change alerts.

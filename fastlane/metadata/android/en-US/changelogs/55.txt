@@ -1,0 +1,4 @@
+2.0.9:
+- Added an optional setting to highlight today's row in the full timetable
+- Lesson details now show available homework information instead of only the count
+- Demo mode now includes sample grades

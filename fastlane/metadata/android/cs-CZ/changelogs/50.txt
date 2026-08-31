@@ -1,0 +1,6 @@
+2.0.4:
+- Aplikace přejmenována na schdl s vlastním ID (lze mít nainstalováno vedle originálu)
+- Gruvbox barevné téma (tmavé i světlé)
+- Přehled známek: klepněte na ikonu promoce v nástrojové liště
+- Téma hodiny zobrazeno přímo v buňce rozvrhu
+- Indikátor domácích úkolů v buňkách (tečka = jeden, číslo v kroužku = více)

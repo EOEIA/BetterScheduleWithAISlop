@@ -1,0 +1,2 @@
+2.0.16
+- Added notification diagnostics screen (Settings → School updates → Notification diagnostics).

@@ -1,5 +1,151 @@
 # Seznam změn / Changelog
 
+## 2.0.22
+
+- Nové nastavení: Otočená tabulka — přepne rozvrh tak, aby dny byly ve sloupcích a hodiny v řádcích (Nastavení → Rozvrh).
+
+---
+
+- New setting: Transposed table — flip the timetable so days run across the top and time slots down the side (Settings → Timetable).
+
+## 2.0.21
+
+- Nastavení přehledně rozdělena do čtyř sekcí: Rozvrh, Vzhled, Oznámení, O aplikaci.
+- Všechna oznámení na jednom místě.
+
+---
+
+- Settings reorganized into Timetable / Appearance / Notifications / About sections.
+- All notification settings in one place.
+
+## 2.0.20
+
+- Novinka: Historie změn — Nastavení → Oznámení → Upozornění na změny → Historie změn zaznamenává každé upozornění.
+
+---
+
+- New: Change history — Settings → Notifications → Change alerts → Change history logs every timetable-change alert.
+
+## 2.0.19
+
+- Zvýraznění nových známek: odznak „NEW" na kartě předmětu a v detailu; zmizí po 3 s prohlížení.
+
+---
+
+- New grade highlighting: "NEW" badge on subject card and in detail view; clears after 3 s.
+
+## 2.0.18
+
+- Domácí úkoly: seskupeny podle data (sticky hlavička), řazení nejnovější/nejstarší/předmět, zobrazení času hodiny.
+
+---
+
+- Homework screen: grouped by date with sticky header, sort by newest/oldest/subject, lesson time shown.
+
+## 2.0.17
+
+- Prediktor: výběr váhy (1–10) zobrazí potřebnou známku pro přechod do lepšího pásma. Sticky průměrová lišta. Hypotetické známky v samostatné sekci.
+
+---
+
+- Grade predictor: weight chips (1–10), sticky avg bar, hypothetical marks in their own section.
+
+## 2.0.16
+
+- Přidána obrazovka diagnostiky oznámení (Nastavení → Školní novinky → Diagnostika oznámení).
+
+---
+
+- Added notification diagnostics screen (Settings → School updates → Notification diagnostics).
+
+## 2.0.15
+
+- Opravena matematika prediktoru známek (správné hranice stupňů průměru: ≤1,49, ≤2,49, ≤3,49, ≤4,49).
+- Hypotetické úpravy se resetují při opuštění detailu předmětu.
+- Přidáno zobrazení "Podle data" v záložce Známky.
+- Nová obrazovka Domácí úkoly (dostupná ze Známek nebo hlavního panelu).
+- Oznámení o nových známkách a úkolech (zapnout v Nastavení → Školní novinky).
+
+---
+
+- Fixed grade predictor math (correct grade band boundaries: ≤1.49, ≤2.49, ≤3.49, ≤4.49).
+- Hypothetical grade edits now reset when leaving the subject detail.
+- Added "By date" view in Grades tab.
+- New Homework screen (reachable from Grades or main toolbar).
+- Grade and homework notifications (enable in Settings → School updates).
+
+## 2.0.14
+
+- Novinka: Prediktor známek — klepnutím na předmět ve Známkách otevřeš detail, kde lze upravit nebo vyřadit existující známky a přidat hypotetické, aby ses podíval/a, jak by se změnil průměr.
+
+---
+
+- New: Grade predictor — tap any subject in Grades to open the detail view, edit or exclude grades, and add hypothetical grades to see how your average would change.
+
+## 2.0.13
+
+- Nová funkce: Upozornění na změny — volitelná oznámení při aktualizaci rozvrhu (odpadnutí, suplování, dny bez výuky). Zapnout v Nastavení → Upozornění na změny.
+
+---
+
+- New: Change alerts — optional notifications when the timetable is updated (cancellations, substitutions, no-school days). Enable in Settings → Change alerts.
+
+## 2.0.11
+
+- Klepnutím na buňku hodiny se zobrazí čas a živý odpočet v detailu hodiny.
+- Klepnutím na kartu příští hodiny se otevře detail hodiny.
+- Karta příští hodiny se skryje při prohlížení minulých nebo budoucích týdnů.
+- Nové nastavení pro zobrazení nebo skrytí karty příští hodiny.
+
+---
+
+- Tapping a lesson cell now shows its time and a live countdown in the detail dialog.
+- Tapping the next-lesson card opens the lesson detail dialog.
+- Next-lesson card is hidden when browsing past or future weeks.
+- New setting to show or hide the next-lesson card.
+
+## 2.0.9
+
+- Přidáno volitelné zvýraznění řádku aktuálního dne v celém rozvrhu.
+- Detail hodiny nyní zobrazuje dostupné informace o domácím úkolu místo pouhého počtu.
+- Demo režim obsahuje ukázkové známky.
+
+---
+
+- Added an optional setting to highlight today's row in the full timetable.
+- Lesson details now show available homework information instead of only the count.
+- Demo mode now includes sample grades.
+
+## 2.0.8
+
+- Debug buildy mají viditelný demo režim pro testování rozvrhu bez skutečného účtu.
+- Demo data nyní obsahují ukázky domácích úkolů, přidaných, odebraných, suplovaných a přesunutých hodin i dne bez výuky.
+
+---
+
+- Debug builds now expose demo mode for testing the timetable without a real account.
+- Demo data now includes homework, added, removed, substituted, room-changed lessons, and a no-school day.
+
+## 2.0.7
+
+- Na hlavní obrazovku rozvrhu přibyla kompaktní karta s aktuální nebo další hodinou, časem a odpočtem.
+- Karta zobrazuje indikaci domácího úkolu nebo změny hodiny, pokud je relevantní.
+
+---
+
+- Added a compact current/next lesson card to the main timetable screen with time and live countdown.
+- The card shows homework or lesson-change indicators when relevant.
+
+## 2.0.3
+
+- Rozvrh nyní při posouvání do stran ponechá viditelný kompaktní sloupec dnů. Lze změnit v nastavení.
+- Vylepšeno interní rozpoznávání změn v rozvrhu.
+
+---
+
+- The timetable now keeps a compact day column visible while scrolling sideways. This can be changed in settings.
+- Improved internal recognition of schedule changes.
+
 ## 2.0 (21. 1. 2025)
 
 - Nyní se můžete přihlásit více účty najednou

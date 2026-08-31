@@ -1,0 +1,2 @@
+2.0.6:
+- Changed lessons now show a per-kind visual marker: strikethrough for cancelled/removed, + badge for added, accent bar for substitutions, dot for room changes

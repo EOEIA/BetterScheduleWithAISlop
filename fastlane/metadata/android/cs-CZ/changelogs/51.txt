@@ -1,0 +1,2 @@
+2.0.5:
+- Detail hodiny nyní zobrazuje lokalizovaný řádek Typ změny (Přidána, Odebrána, Zrušena, Suplování, Změna místnosti, Jiná změna), pokud je změna přítomna

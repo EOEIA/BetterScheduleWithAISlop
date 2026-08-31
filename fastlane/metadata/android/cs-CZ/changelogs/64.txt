@@ -1,0 +1,2 @@
+2.0.18
+- Domácí úkoly: seskupeny podle data (sticky hlavička), řazení nejnovější/nejstarší/předmět, zobrazení času hodiny, lepší prázdný stav.

@@ -1,0 +1,2 @@
+2.0.6:
+- Změněné hodiny nyní zobrazují vizuální indikátor podle typu: přeškrtnutí pro zrušené/odebrané, odznak + pro přidané, barevný pruh vlevo pro suplování, tečka pro změnu místnosti

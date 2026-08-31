@@ -1,0 +1,2 @@
+2.0.14
+- Novinka: Prediktor známek — klepnutím na předmět ve Známkách otevřeš detail, kde můžeš upravit nebo vyřadit existující známky a přidat hypotetické, aby ses podíval/a, jak by se změnil průměr.

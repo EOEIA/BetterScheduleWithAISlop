@@ -74,6 +74,29 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val SWITCH_TO_NEXT_WEEK_OPTION_INDEX = "int_switch_to_next_week_option_index"
     /** non-set is treated as true */
     const val CENTER_TO_CURRENT_LESSON = "prefs-center-to-current-lesson"
+    const val STICKY_DAY_COLUMN = "prefs-sticky-day-column"
+    const val HIGHLIGHT_CURRENT_DAY = "prefs-highlight-current-day"
+    const val CHANGED_LESSON_VISUALS = "prefs-color-changed-lessons"
+    /** non-set is treated as false */
+    const val COMPACT_TIMETABLE = "prefs-compact-timetable"
+    /** Transpose the timetable so days are columns and time slots are rows. non-set is treated as false */
+    const val TIMETABLE_TRANSPOSED = "prefs-timetable-transposed"
+    /** non-set is treated as true */
+    const val SHOW_NEXT_LESSON_CARD = "prefs-show-next-lesson-card"
+    /** Master switch for timetable-change alerts. non-set is treated as false (conservative default). */
+    const val CHANGE_ALERTS_ENABLED = "prefs-change-alerts-enabled"
+    /** Alert for individual lesson changes (substitutions, cancellations, additions…). non-set → true */
+    const val CHANGE_ALERT_LESSONS = "prefs-change-alert-lessons"
+    /** Alert for whole-day no-school events. non-set → true */
+    const val CHANGE_ALERT_NO_SCHOOL = "prefs-change-alert-no-school"
+    /** Debug-only demo data switch. Ignored outside debug builds. */
+    const val DEBUG_DEMO_MODE = "debug-demo-mode"
+    /** Notify when new grades are added. Default false. */
+    const val GRADE_ALERTS_ENABLED = "prefs-grade-alerts-enabled"
+    /** Notify when new homework is assigned. Default false. */
+    const val HOMEWORK_ALERTS_ENABLED = "prefs-homework-alerts-enabled"
+    /** Comma-separated mark IDs the user has already seen in the Grades UI. On first load, all IDs are written here to avoid false highlights. */
+    const val GRADES_SEEN_IDS = "grades-seen-ids"
     /**
      * Account id for which persistent notification is active. Invalid id or not set => the active account has been logged out. Id == [PermanentNotification.ACCOUNT_NOTIFICATION_DISABLED] => notifications have been intentionally disabled by the user. Always check using [PermanentNotification.isNotificationAccountValid] for special values.
      */
@@ -103,6 +126,18 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
         with(context.prefs){ edit {
             if (!contains(SHOW_INFO_LINE)) putBoolean(SHOW_INFO_LINE, true)
             if (!contains(CENTER_TO_CURRENT_LESSON)) putBoolean(CENTER_TO_CURRENT_LESSON, true)
+            if (!contains(STICKY_DAY_COLUMN)) putBoolean(STICKY_DAY_COLUMN, true)
+            if (!contains(HIGHLIGHT_CURRENT_DAY)) putBoolean(HIGHLIGHT_CURRENT_DAY, false)
+            if (!contains(CHANGED_LESSON_VISUALS)) putBoolean(CHANGED_LESSON_VISUALS, true)
+            if (!contains(COMPACT_TIMETABLE)) putBoolean(COMPACT_TIMETABLE, false)
+            if (!contains(TIMETABLE_TRANSPOSED)) putBoolean(TIMETABLE_TRANSPOSED, false)
+            if (!contains(SHOW_NEXT_LESSON_CARD)) putBoolean(SHOW_NEXT_LESSON_CARD, true)
+            if (!contains(CHANGE_ALERTS_ENABLED)) putBoolean(CHANGE_ALERTS_ENABLED, false)
+            if (!contains(CHANGE_ALERT_LESSONS)) putBoolean(CHANGE_ALERT_LESSONS, true)
+            if (!contains(CHANGE_ALERT_NO_SCHOOL)) putBoolean(CHANGE_ALERT_NO_SCHOOL, true)
+            if (!contains(DEBUG_DEMO_MODE)) putBoolean(DEBUG_DEMO_MODE, false)
+            if (!contains(GRADE_ALERTS_ENABLED)) putBoolean(GRADE_ALERTS_ENABLED, false)
+            if (!contains(HOMEWORK_ALERTS_ENABLED)) putBoolean(HOMEWORK_ALERTS_ENABLED, false)
             if (!contains(SWITCH_TO_NEXT_WEEK_OPTION_INDEX)) putInt(SWITCH_TO_NEXT_WEEK_OPTION_INDEX, 2)
             if (!contains(SELECTED_THEME)) putInt(SELECTED_THEME, SelectedTheme.FOLLOW_SYSTEM_THEME.index)
             if (!contains(NOTIFICATION_ACCOUNT)) putLong(NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT)

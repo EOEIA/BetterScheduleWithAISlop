@@ -11,35 +11,35 @@
         android:strokeAlpha="1"
         android:strokeWidth="5"
         android:fillColor="#00000000"
-        android:strokeColor="#ffffff"
+        android:strokeColor="#ebdbb2"
         android:fillAlpha="1"/>
     <path
         android:pathData="M0,0h200v50h-200z"
         android:strokeAlpha="1"
         android:strokeWidth="5"
         android:fillColor="#00000000"
-        android:strokeColor="#ffffff"
+        android:strokeColor="#ebdbb2"
         android:fillAlpha="1"/>
     <path
         android:pathData="M0,0h50v200h-50z"
         android:strokeAlpha="1"
         android:strokeWidth="5"
         android:fillColor="#00000000"
-        android:strokeColor="#ffffff"
+        android:strokeColor="#ebdbb2"
         android:fillAlpha="1"/>
     <path
         android:pathData="M50,100h150v50h-150z"
         android:strokeAlpha="1"
         android:strokeWidth="5"
         android:fillColor="#00000000"
-        android:strokeColor="#ffffff"
+        android:strokeColor="#ebdbb2"
         android:fillAlpha="1"/>
     <path
         android:pathData="M100,50h50v150h-50z"
         android:strokeAlpha="1"
         android:strokeWidth="5"
         android:fillColor="#00000000"
-        android:strokeColor="#ffffff"
+        android:strokeColor="#ebdbb2"
         android:fillAlpha="1"/>
   </group>
 </vector>

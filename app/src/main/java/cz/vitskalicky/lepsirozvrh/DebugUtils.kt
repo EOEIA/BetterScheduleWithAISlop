@@ -4,9 +4,14 @@ import android.content.Context
 import com.fasterxml.jackson.core.JsonProcessingException
 import cz.vitskalicky.lepsirozvrh.MainApplication.Companion.objectMapper
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Atom3
+import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Change3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Day3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.Rozvrh3
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.rozvrh3.RozvrhConverter.convert
+import cz.vitskalicky.lepsirozvrh.bakaAPI.marks.Mark
+import cz.vitskalicky.lepsirozvrh.bakaAPI.marks.MarkSubject
+import cz.vitskalicky.lepsirozvrh.bakaAPI.marks.SubjectRef
+import cz.vitskalicky.lepsirozvrh.grades.homework.HomeworkItem
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
@@ -19,9 +24,9 @@ class DebugUtils constructor(ctx: Context) {
     //demonstration mode
     private val demoRozvrh: Rozvrh? = null
     var isDemoMode: Boolean
-        get() = SharedPrefs.getBoolean(context, "demo-mode") && BuildConfig.DEBUG
+        get() = SharedPrefs.getBoolean(context, PrefsConsts.DEBUG_DEMO_MODE) && BuildConfig.DEBUG
         set(newDemoMode) {
-            SharedPrefs.setBoolean(context, "demo-mode", newDemoMode)
+            SharedPrefs.setBoolean(context, PrefsConsts.DEBUG_DEMO_MODE, newDemoMode)
         }
 
 
@@ -43,8 +48,35 @@ class DebugUtils constructor(ctx: Context) {
                 for (i in r3.days.indices) {
                     val item = r3.days[i]
                     val newDate = mondayDate.plusDays(i)
-                    val newAtoms: List<Atom3> = item.atoms.map { it.copy(change = it.change?.copy(day = dtf.print(newDate.toDateTimeAtStartOfDay()))) }
-                    newlist.add(item.copy(atoms = newAtoms, date = dtf.print(newDate.toDateTimeAtStartOfDay())))
+                    val newDayString = dtf.print(newDate.toDateTimeAtStartOfDay())
+                    val newAtoms: List<Atom3> = item.atoms.mapIndexed { atomIndex, atom ->
+                        val change = when {
+                            i == 2 && atomIndex == 3 -> Change3(
+                                changeSubject = null,
+                                day = newDayString,
+                                hours = "4. hod",
+                                changeType = "RoomChanged",
+                                description = "Demo: učebna přesunuta do č. 4",
+                                time = "10:55 - 11:40",
+                                typeAbbrev = null,
+                                typeName = null,
+                            )
+                            else -> atom.change?.copy(day = newDayString)
+                        }
+                        val roomId = if (i == 2 && atomIndex == 3) "0X" else atom.roomId
+                        atom.copy(change = change, roomId = roomId)
+                    }
+                    val demoDay = if (i == 4) {
+                        item.copy(
+                            atoms = emptyList(),
+                            date = newDayString,
+                            dayDescription = "Demo: projektový den mimo školu",
+                            dayType = "Holiday",
+                        )
+                    } else {
+                        item.copy(atoms = newAtoms, date = newDayString)
+                    }
+                    newlist.add(demoDay)
                 }
                 return r3.copy(days = newlist)
             } catch (e: JsonProcessingException) {
@@ -53,7 +85,71 @@ class DebugUtils constructor(ctx: Context) {
         }
 
         fun getDemoRozvrh(mondayDate: LocalDate, context: Context): Rozvrh {
-            return convert(getDemoRozvrh3(mondayDate), demoDate, context)
+            return convert(getDemoRozvrh3(mondayDate), mondayDate.takeUnless { it == Rozvrh.PERM }, context)
+                .withDemoHomeworkDescriptions()
+        }
+
+        fun getDemoGrades(): List<MarkSubject> = listOf(
+            MarkSubject(
+                Subject = SubjectRef("04", "MA", "Matematika a její aplikace"),
+                AverageText = "2.00",
+                Marks = listOf(
+                    Mark("demo-ma-1", "04", "Kvadratické funkce", "1", 2, "2026-08-24", true, "18/20"),
+                    Mark("demo-ma-2", "04", "Domácí příprava", "3", 1, "2026-08-20", false, null),
+                    Mark("demo-ma-3", "04", "Pololetní písemka", "2-", 3, "2026-08-10", false, "24/30"),
+                    Mark("demo-ma-4", "04", "Funkce — grafika", "2", 1, "2026-08-05", false, null),
+                )
+            ),
+            MarkSubject(
+                Subject = SubjectRef(" 4", "AJ", "Anglický jazyk"),
+                AverageText = "1.67",
+                Marks = listOf(
+                    Mark("demo-aj-1", " 4", "Vocabulary quiz U7", "2", 1, "2026-08-25", true, "14/16"),
+                    Mark("demo-aj-2", " 4", "Reading: The Hobbit", "1", 1, "2026-08-18", false, null),
+                    Mark("demo-aj-3", " 4", "Essay: Environment", "2+", 2, "2026-08-12", false, null),
+                )
+            ),
+            MarkSubject(
+                Subject = SubjectRef("12", "Ch", "Chemie"),
+                AverageText = "2.33",
+                Marks = listOf(
+                    Mark("demo-ch-1", "12", "Typy chemických reakcí", "1", 2, "2026-08-26", true, null),
+                    Mark("demo-ch-2", "12", "Laboratorní práce", "3", 1, "2026-08-15", false, null),
+                    Mark("demo-ch-3", "12", "Aktivita v hodině", "OM", 1, "2026-08-08", false, null),
+                )
+            ),
+            MarkSubject(
+                Subject = SubjectRef("07", "D", "Dějepis"),
+                AverageText = "3.50",
+                Marks = listOf(
+                    Mark("demo-d-1", "07", "Průmyslová revoluce — test", "3", 2, "2026-08-22", true, null),
+                    Mark("demo-d-2", "07", "Referát: Napoleonské války", "4", 1, "2026-08-14", false, null),
+                )
+            )
+        )
+
+        fun getDemoHomework(): List<HomeworkItem> = listOf(
+            HomeworkItem("Anglický jazyk", "AJ", "Workbook U7: exercises 3–5, prepare five vocabulary sentences.", LocalDate.parse("2026-09-01"), LocalTime(8, 0)),
+            HomeworkItem("Matematika a její aplikace", "MA", "Chapter 4, problems 12–18 (quadratic equations).", LocalDate.parse("2026-09-01"), LocalTime(9, 50)),
+            HomeworkItem("Chemie", "Ch", "Balance equations worksheet 1–8, bring lab notebook.", LocalDate.parse("2026-09-02"), LocalTime(11, 40)),
+            HomeworkItem("Informatika", "INF", "Finish the Python sorting exercise and push to the class repo.", LocalDate.parse("2026-09-02"), LocalTime(13, 30)),
+            HomeworkItem("Anglický jazyk", "AJ", "Read pages 42–46 in the textbook, summarise main points.", LocalDate.parse("2026-09-03"), LocalTime(8, 0)),
+            HomeworkItem("Dějepis", "D", "Timeline of WWI events — at least 10 entries with a short description each.", LocalDate.parse("2026-09-03"), LocalTime(10, 45)),
+        )
+
+        private fun Rozvrh.withDemoHomeworkDescriptions(): Rozvrh {
+            val descriptions = mapOf(
+                "ZXKCMFTK" to "Workbook U7: exercises 3-5, prepare five vocabulary sentences.",
+                "ZXWCGHOB" to "Chemistry worksheet: balance equations 1-8 and bring lab notebook.",
+            )
+            return copy(days = days.map { day ->
+                day.copy(blocks = day.blocks.map { block ->
+                    block.map { lesson ->
+                        val homeworkDescriptions = lesson.homeworkIds.mapNotNull { descriptions[it] }
+                        lesson.copy(homeworkDescriptions = homeworkDescriptions)
+                    }
+                })
+            })
         }
     }
 

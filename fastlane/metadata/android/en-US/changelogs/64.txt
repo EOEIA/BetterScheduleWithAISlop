@@ -1,0 +1,2 @@
+2.0.18
+- Homework screen: marks grouped by date (sticky header), sort by newest/oldest/subject, lesson time shown per item, improved empty state.

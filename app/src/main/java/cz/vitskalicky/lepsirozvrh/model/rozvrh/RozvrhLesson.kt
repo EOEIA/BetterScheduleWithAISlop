@@ -21,7 +21,16 @@ data class RozvrhLesson(
     /**
      * is `null` if [changeType] == [NO_CHANGE]
      */
-    val changeDescription: String?
+    val changeDescription: String?,
+    /**
+     * Finer-grained, semantic classification of the change reported by the API. Additive companion
+     * to the legacy [changeType] `Int`; see `RozvrhConverter.classifyChange`.
+     *
+     * Defaults to [LessonChangeType.NONE] so that schedules cached by older app versions (whose
+     * JSON does not contain this field) still deserialize.
+     */
+    val changeKind: LessonChangeType = LessonChangeType.NONE,
+    val homeworkDescriptions: List<String> = emptyList()
 ) {
     companion object {
         const val NO_CHANGE = 0;

@@ -22,8 +22,10 @@ import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
 import retrofit2.HttpException
 import java.io.IOException
-import kotlin.random.Random
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord.Key
+import cz.vitskalicky.lepsirozvrh.notification.ChangeAlertNotification
+import cz.vitskalicky.lepsirozvrh.notification.TimetableDiff
+import cz.vitskalicky.lepsirozvrh.notification.changeFingerprint
 import org.joda.time.LocalDate
 
 class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
@@ -177,7 +179,7 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                     //check for demo mode
                     if (application.debugUtils.isDemoMode) {
                         //simulate slow net
-                        delay(Random.nextLong(3000))
+                        delay(300)
                         //return demo rozvrh
                         DebugUtils.getDemoRozvrh3(rozvrhId.monday)
                     } else {
@@ -228,6 +230,26 @@ class RozvrhRepository(context: Context, scope: CoroutineScope? = null) {
                         rozvrhId.monday,
                         application
                     )
+                }
+                // Diff against cached version and fire a change alert if relevant
+                try {
+                    val oldRozvrh = db.rozvrhDao().loadRozvrh(rozvrhId)?.data
+                    if (oldRozvrh != null) {
+                        val newFp = rozvrh.changeFingerprint()
+                        val diff = TimetableDiff.between(oldRozvrh, rozvrh)
+                        if (diff.isNotEmpty) {
+                            ChangeAlertNotification.maybeNotify(
+                                context = application,
+                                accountId = rozvrhId.account,
+                                monday = rozvrhId.monday,
+                                diff = diff,
+                                captions = rozvrh.captions,
+                                newFingerprint = newFp
+                            )
+                        }
+                    }
+                } catch (_: Exception) {
+                    // Change alerting is best-effort; never block a cache update
                 }
                 db.rozvrhDao().insertRozvrh(RozvrhRecord(
                     rozvrhId,

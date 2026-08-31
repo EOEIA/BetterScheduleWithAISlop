@@ -22,6 +22,7 @@ public class CellView extends View {
     protected RozvrhTheme t;
 
     protected final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);;
+    protected final Paint rowHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected final Paint dividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected int dividerWidth;
 
@@ -33,6 +34,7 @@ public class CellView extends View {
     protected int paddingTop, paddingRight, paddingBottom, paddingLeft, textPadding;
 
     protected boolean drawDividerTop, drawDividerCorner, drawDividerLeft;
+    private boolean rowHighlighted = false;
 
     public CellView(Context context) {
         this(context, null);
@@ -63,6 +65,7 @@ public class CellView extends View {
     @CallSuper
     protected void updateTheme(){
         backgroundPaint.setColor(clr(t.cEmptyBg()));
+        rowHighlightPaint.setColor((clr(t.cHighlight()) & 0x00ffffff) | (0x22 << 24));
 
         dividerPaint.setColor(clr(t.cDivider()));
         dividerWidth = dp(t.dpDividerWidth());
@@ -97,6 +100,14 @@ public class CellView extends View {
         drawDividerTop = top;
         drawDividerCorner = corner;
         drawDividerLeft = left;
+    }
+
+    public void setRowHighlighted(boolean highlighted) {
+        if (rowHighlighted == highlighted) {
+            return;
+        }
+        rowHighlighted = highlighted;
+        invalidate();
     }
 
     /**
@@ -168,6 +179,9 @@ public class CellView extends View {
 
         //draw background
         canvas.drawRect(0, 0, w, h, backgroundPaint);
+        if (rowHighlighted) {
+            canvas.drawRect(0, 0, w, h, rowHighlightPaint);
+        }
 
         //# draw dividers
         //left

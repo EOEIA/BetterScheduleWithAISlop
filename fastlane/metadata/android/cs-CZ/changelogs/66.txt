@@ -1,0 +1,2 @@
+2.0.20
+- Novinka: Historie změn — Nastavení → Upozornění na změny → Historie změn zaznamenává každé upozornění na změnu rozvrhu, takže si můžeš zpětně projít suplování a odpadlé hodiny.

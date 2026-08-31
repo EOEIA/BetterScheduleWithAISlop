@@ -13,8 +13,10 @@ import android.widget.TextView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.LessonChangeType
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.isLegible
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.textColorFor
 import kotlin.math.max
 
 /** Custom view for cell with lesson */
@@ -32,6 +34,10 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     private val highlightPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val highlightedDividerPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val homeworkPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val homeworkCountPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val topicPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    /** 0 = off (existing changeType colors), 1 = colors per changeKind */
+    private var changeVisualMode: Int = 0
     private var highlightWidth: Int = 0
     private var homeworkSize: Int = 0
     private var topHighlighted = false
@@ -97,27 +103,7 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         event = null
         eventStart = 0
         eventWidth = 0
-        if (hodina == null) {
-            backgroundPaint.color = t.cEmptyBg.toArgb()
-            primaryTextPaint.color = t.cHPrimaryText.toArgb()
-            secondaryTextPaint.color = t.cHSecondaryText.toArgb()
-            mistPaint.color = t.cHRoomText.toArgb()
-        } else if (hodina.changeType == RozvrhLesson.CHANGED) {
-            backgroundPaint.color = t.cChngBg.toArgb()
-            primaryTextPaint.color = t.cChngPrimaryText.toArgb()
-            secondaryTextPaint.color = t.cChngSecondaryText.toArgb()
-            mistPaint.color = t.cChngRoomText.toArgb()
-        } else if (hodina.changeType == RozvrhLesson.CANCELLED) {
-            backgroundPaint.color = t.cABg.toArgb()
-            primaryTextPaint.color = t.cAPrimaryText.toArgb()
-            secondaryTextPaint.color = t.cASecondaryText.toArgb()
-            mistPaint.color = t.cARoomText.toArgb()
-        } else if (hodina.changeType == RozvrhLesson.NO_CHANGE) {
-            backgroundPaint.color = t.cHBg.toArgb()
-            primaryTextPaint.color = t.cHPrimaryText.toArgb()
-            secondaryTextPaint.color = t.cHSecondaryText.toArgb()
-            mistPaint.color = t.cHRoomText.toArgb()
-        }
+        applyColors(hodina)
         invalidate()
         requestLayout()
     }
@@ -146,6 +132,51 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         }
         invalidate()
         requestLayout()
+    }
+
+    private fun kindBgColor(kind: LessonChangeType): Color = when (kind) {
+        LessonChangeType.CANCELLED, LessonChangeType.REMOVED -> t.cError
+        LessonChangeType.ADDED -> t.cSecondary
+        LessonChangeType.SUBSTITUTION -> t.cPrimary
+        LessonChangeType.ROOM_CHANGED -> t.cHighlight
+        LessonChangeType.OTHER, LessonChangeType.NONE -> t.cChngBg
+    }
+
+    private fun applyColors(hodina: RozvrhLesson?) {
+        if (hodina == null) {
+            backgroundPaint.color = t.cEmptyBg.toArgb()
+            primaryTextPaint.color = t.cHPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cHSecondaryText.toArgb()
+            mistPaint.color = t.cHRoomText.toArgb()
+        } else if (changeVisualMode == 1 && hodina.changeKind != LessonChangeType.NONE) {
+            val bg = kindBgColor(hodina.changeKind)
+            val fg = textColorFor(bg)
+            backgroundPaint.color = bg.toArgb()
+            primaryTextPaint.color = fg.toArgb()
+            secondaryTextPaint.color = fg.toArgb()
+            mistPaint.color = fg.toArgb()
+        } else if (hodina.changeType == RozvrhLesson.CHANGED) {
+            backgroundPaint.color = t.cChngBg.toArgb()
+            primaryTextPaint.color = t.cChngPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cChngSecondaryText.toArgb()
+            mistPaint.color = t.cChngRoomText.toArgb()
+        } else if (hodina.changeType == RozvrhLesson.CANCELLED) {
+            backgroundPaint.color = t.cABg.toArgb()
+            primaryTextPaint.color = t.cAPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cASecondaryText.toArgb()
+            mistPaint.color = t.cARoomText.toArgb()
+        } else {
+            backgroundPaint.color = t.cHBg.toArgb()
+            primaryTextPaint.color = t.cHPrimaryText.toArgb()
+            secondaryTextPaint.color = t.cHSecondaryText.toArgb()
+            mistPaint.color = t.cHRoomText.toArgb()
+        }
+    }
+
+    fun setChangeVisualMode(mode: Int) {
+        changeVisualMode = mode
+        applyColors(hodina)
+        invalidate()
     }
 
     fun getHodina(): RozvrhLesson? {
@@ -251,14 +282,46 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
             secondaryTextPaint.textAlign = Paint.Align.LEFT
             canvas.drawText(zkruc, zkrucStart + xStart, secondaryBaseline + yStart, secondaryTextPaint)
 
-            //draw little dot if there is a homework
+            //draw topic (lesson theme) as a small third line if there is space
+            val topic = lesson.theme
+            if (topic.isNotBlank()) {
+                val topicSize = secondaryTextSize * 0.75f
+                val topicBaseline = secondaryBaseline + textPadding + topicSize
+                if (topicBaseline + yStart <= yEnd) {
+                    topicPaint.textSize = topicSize
+                    topicPaint.textAlign = Paint.Align.CENTER
+                    // truncate with ellipsis if needed
+                    val maxW = (w - 4).toFloat()
+                    val displayed = if (topicPaint.measureText(topic) > maxW) {
+                        var s = topic
+                        while (s.isNotEmpty() && topicPaint.measureText("$s…") > maxW) s = s.dropLast(1)
+                        "$s…"
+                    } else topic
+                    canvas.drawText(displayed, middle + xStart, topicBaseline + yStart, topicPaint)
+                }
+            }
+
+            //draw homework indicator: dot for 1, numbered badge for >1
             if (lesson.homeworkIds.isNotEmpty()) {
-                var use: Paint? = homeworkPaint
+                val count = lesson.homeworkIds.size
+                var use: Paint = homeworkPaint
                 if (!isLegible(Color(homeworkPaint.color), Color(backgroundPaint.color), 1.5)) {
                     use = primaryTextPaint
                 }
-                canvas.drawCircle((xEnd - homeworkSize).toFloat(), (yStart + homeworkSize).toFloat(), homeworkSize.toFloat(), use!!)
+                val cx = (xEnd - homeworkSize - 2).toFloat()
+                val cy = (yStart + homeworkSize + 2).toFloat()
+                if (count > 1) {
+                    val r = homeworkSize * 1.5f
+                    canvas.drawCircle(cx, cy, r, use)
+                    homeworkCountPaint.color = backgroundPaint.color
+                    homeworkCountPaint.textSize = r * 1.3f
+                    homeworkCountPaint.textAlign = Paint.Align.CENTER
+                    canvas.drawText(count.toString(), cx, cy + r * 0.45f, homeworkCountPaint)
+                } else {
+                    canvas.drawCircle(cx, cy, homeworkSize.toFloat(), use)
+                }
             }
+
 
             /*// draw cycle
             if (perm && hodina.getCycle() != null && !hodina.getCycle().isEmpty()){
@@ -351,6 +414,11 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         highlightedDividerPaint.strokeWidth = dividerWidth.toFloat()
         homeworkPaint.color = t.cHomework.toArgb()
         homeworkSize = dp(t.dpHomework)
+        homeworkCountPaint.typeface = Typeface.DEFAULT_BOLD
+        topicPaint.color = t.cHSecondaryText.toArgb()
+        topicPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
+        topicPaint.textAlign = Paint.Align.CENTER
+        applyColors(hodina)
     }
 
     init {

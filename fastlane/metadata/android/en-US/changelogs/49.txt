@@ -1,0 +1,2 @@
+- The timetable now keeps a compact day column visible while scrolling sideways. This can be changed in settings.
+- Improved internal recognition of schedule changes.

@@ -1,0 +1,3 @@
+Color-code changed lessons toggle: cells colored per change type (substitution, cancelled, added…)
+Compact timetable setting: smaller cells for more lessons on screen at once
+2.0.10

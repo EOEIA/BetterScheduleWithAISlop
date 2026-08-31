@@ -1,0 +1,6 @@
+2.0.15
+- Fixed grade predictor math (correct grade band boundaries).
+- Hypothetical grade edits now reset when leaving the subject detail.
+- Added "By date" view in Grades tab.
+- New Homework screen (reachable from Grades or main toolbar).
+- Grade and homework notifications (enable in Settings → School updates).

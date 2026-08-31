@@ -1,0 +1,2 @@
+2.0.5:
+- Lesson details dialog now shows a localized Change type row (Added, Removed, Cancelled, Substitution, Room changed, Other) when a change is present

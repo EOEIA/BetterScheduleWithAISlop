@@ -15,6 +15,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -22,7 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import cz.vitskalicky.lepsirozvrh.BuildConfig
+import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.R
+import cz.vitskalicky.lepsirozvrh.prefs
 import cz.vitskalicky.lepsirozvrh.login.LoginActivity
 import cz.vitskalicky.lepsirozvrh.mainActivity.MainActivity
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
@@ -54,7 +58,7 @@ class AccountPickerActivity : ComponentActivity() {
             val currentAccount by viewModel.currentAccountIdLD.observeAsState()
 
             //go to login if there are no accounts available
-            if (accounts?.size == 0){
+            if (accounts?.size == 0 && !BuildConfig.DEBUG){
                 intent = Intent(this, LoginActivity::class.java);
                 finishAffinity()
                 startActivity(intent)
@@ -141,6 +145,27 @@ class AccountPickerActivity : ComponentActivity() {
                                 }
                             )
                         }
+                        if (BuildConfig.DEBUG) {
+                            Surface(
+                                Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .clickable { enableDemoMode() },
+                                shape = MaterialTheme.shapes.medium,
+                            ) {
+                                ListItem(
+                                    text = { Text(stringResource(R.string.account_picker_demo_mode)) },
+                                    secondaryText = { Text(stringResource(R.string.account_picker_demo_mode_desc)) },
+                                    icon = {
+                                        Box(Modifier.size(40.dp), contentAlignment = Alignment.Center){
+                                            Icon(
+                                                Icons.Default.DeveloperMode,
+                                                null,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -161,6 +186,14 @@ class AccountPickerActivity : ComponentActivity() {
 
     private fun addAccount(){
         intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun enableDemoMode(){
+        prefs.putOne(PrefsConsts.DEBUG_DEMO_MODE, true)
+        intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        finishAffinity()
         startActivity(intent)
     }
 }

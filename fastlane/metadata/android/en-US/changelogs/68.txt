@@ -1,0 +1,1 @@
+New setting: Transposed table — flip the timetable so days run across the top and time slots down the side (Settings → Timetable).

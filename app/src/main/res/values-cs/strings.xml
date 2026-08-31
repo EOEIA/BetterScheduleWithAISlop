@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Lepší rozvrh</string>
+    <string name="app_name">schdl</string>
     <string name="app_moto">Rychlejší rozvrh pro Bakaláře. Od studentů, pro studenty.</string>
     <string name="start">Začínáme</string>
     <string name="prev_week">Předchozí týden</string>
@@ -63,6 +63,21 @@
     <string name="info_line_desc">Zobrazovat informační řádek</string>
     <string name="switch_to_next_week">Přepnout na další týden</string>
     <string name="center_to_current_lesson">Skočit na aktuální hodinu</string>
+    <string name="sticky_day_column">Připnutý sloupec dnů</string>
+    <string name="sticky_day_column_desc">Při posouvání do stran ponechá dny viditelné</string>
+    <string name="highlight_current_day">Zvýraznit aktuální den</string>
+    <string name="highlight_current_day_desc">Označí řádek dneška v celém rozvrhu</string>
+    <string name="changed_lesson_visuals">Barevně označit změněné hodiny</string>
+    <string name="changed_lesson_visuals_desc">Obarví buňky dle druhu změny (suplování, odpadnutí, přidání…)</string>
+    <string name="compact_timetable">Kompaktní rozvrh</string>
+    <string name="compact_timetable_desc">Menší buňky, aby se na obrazovku vešlo více hodin</string>
+    <string name="transposed_timetable">Otočená tabulka</string>
+    <string name="transposed_timetable_desc">Dny nahoře, hodiny v řádcích</string>
+    <string name="show_next_lesson_card">Karta příští hodiny</string>
+    <string name="show_next_lesson_card_desc">Spodní lišta zobrazující aktuální nebo příští hodinu s odpočtem</string>
+    <string name="lesson_time">Čas</string>
+    <string name="debug_demo_mode">Demo režim</string>
+    <string name="debug_demo_mode_desc">Zobrazí pevná ladicí data rozvrhu bez skutečného účtu</string>
     <string name="notification">Stálé upozornění</string>
     <string name="notification_desc">Zobrazuje tiché upozornění, které Vás informuje o další hodině</string>
     <string name="notification_detials">Stálé upozornění zobrazuje během školy právě probíhající nebo následující hodinu. První hodinu začne zobrazovat 1 hodinu před jejím začátkem a na další hodinu přepíná vždy 10 minut před koncem právě probíhající hodiny. Po skončení školy zmizí.\n\nTuto funkci lze vypnout v nastavení.</string>
@@ -162,6 +177,13 @@
     <string name="topic">Téma:</string>
     <string name="group">Skupina:</string>
     <string name="change">Změna:</string>
+    <string name="change_kind">Typ změny:</string>
+    <string name="change_kind_added">Přidána</string>
+    <string name="change_kind_removed">Odebrána</string>
+    <string name="change_kind_cancelled">Zrušena</string>
+    <string name="change_kind_substitution">Suplování</string>
+    <string name="change_kind_room_changed">Změna místnosti</string>
+    <string name="change_kind_other">Jiná změna</string>
     <string name="lesson_name">Název:</string>
     <string name="notice">Upozornění:</string>
     <string name="cycle">Cyklus:</string>
@@ -174,6 +196,14 @@
     <string name="prev_lesson">Předchozí hodina</string>
     <string name="lesson_cancelled">Zrušeno</string>
     <string name="nothing">Žádná hodina</string>
+    <string name="next_lesson_card_current">Aktuální hodina</string>
+    <string name="next_lesson_card_next">Další hodina</string>
+    <string name="next_lesson_card_starts_in">začíná za %1$s</string>
+    <string name="next_lesson_card_ends_in">končí za %1$s</string>
+    <string name="next_lesson_card_duration">%1$d d %2$d h %3$d min %4$d s</string>
+    <string name="next_lesson_card_school_over">vyučování skončilo</string>
+    <string name="next_lesson_card_homework_indicator">Úkol</string>
+    <string name="next_lesson_card_change_indicator">Změna</string>
 
     <string name="close">Zavřít</string>
     <string name="yes">Ano</string>
@@ -261,6 +291,8 @@
     <string name="account_picker_subtitle">Dostupné účty:</string>
     <string name="account_picker_selected">Tento účet je právě zvolen</string>
     <string name="account_picker_add">Přidat účet</string>
+    <string name="account_picker_demo_mode">Použít demo režim</string>
+    <string name="account_picker_demo_mode_desc">Otevře pevná ladicí data rozvrhu</string>
     <string name="login_add_title">Přidat účet</string>
 
     <string name="widget_account">Účet</string>
@@ -279,4 +311,121 @@
         <item quantity="many">%d týdnů vpřed</item>
         <item quantity="other">%d týdnů vpřed</item>
     </plurals>
+
+    <plurals name="change_notification_summary">
+        <item quantity="one">%d změna v rozvrhu</item>
+        <item quantity="few">%d změny v rozvrhu</item>
+        <item quantity="many">%d změn v rozvrhu</item>
+        <item quantity="other">%d změn v rozvrhu</item>
+    </plurals>
+
+    <string name="change_alerts">Upozornění na změny</string>
+    <string name="change_alerts_desc">Oznámení při aktualizaci rozvrhu na tento týden</string>
+    <string name="change_alert_lessons">Změny hodin</string>
+    <string name="change_alert_lessons_desc">Odpadnutí, suplování, přidané nebo přesunuté hodiny</string>
+    <string name="change_alert_no_school">Dny bez výuky</string>
+    <string name="change_alert_no_school_desc">Nové události nebo svátky, které ruší celý den</string>
+    <string name="change_notification_channel_name">Změny v rozvrhu</string>
+    <string name="change_notification_channel_desc">Upozornění při aktualizaci rozvrhu (odpadnutí, suplování…)</string>
+    <string name="change_notification_title">Aktualizace rozvrhu</string>
+    <string name="change_alert_event_line">Bez výuky: %1$s</string>
+
+    <!-- Prediktor známek -->
+    <string name="grades_title">Známky</string>
+    <string name="grades_no_grades">Žádné známky nejsou dostupné</string>
+    <string name="grades_sort_name">Název</string>
+    <string name="grades_sort_best">Nejlepší průměr</string>
+    <string name="grades_sort_worst">Nejhorší průměr</string>
+    <string name="predict_real_avg">Skutečný průměr</string>
+    <string name="predict_predicted">Předpovídaný</string>
+    <string name="predict_add_grade">Přidat hypotetickou</string>
+    <string name="predict_reset">Resetovat prediktor</string>
+    <string name="predict_band_excellent">1 (výborný)</string>
+    <string name="predict_band_good">2 (chvalitebný)</string>
+    <string name="predict_band_satisfactory">3 (dobrý)</string>
+    <string name="predict_band_sufficient">4 (dostatečný)</string>
+    <string name="predict_edit_grade_title">Upravit známku</string>
+    <string name="predict_add_grade_title">Přidat známku</string>
+    <string name="predict_grade_label">Známka</string>
+    <string name="predict_weight_label">Váha</string>
+    <string name="predict_caption_label">Popis</string>
+    <string name="predict_cancel">Zrušit</string>
+    <string name="predict_save">Uložit</string>
+    <string name="predict_delete">Odebrat</string>
+    <string name="predict_sort_newest">Nejnovější</string>
+    <string name="predict_sort_oldest">Nejstarší</string>
+    <string name="predict_sort_best">Nejlepší</string>
+    <string name="predict_sort_worst">Nejhorší</string>
+    <string name="predict_sort_heavy">Těžká váha</string>
+    <string name="predict_sort_light">Lehká váha</string>
+    <string name="predict_origin_edited">upraveno</string>
+    <string name="predict_origin_added">hypotetická</string>
+    <string name="predict_excluded_label">vyřazena</string>
+    <string name="predict_hint_weight_label">Váha přidané známky</string>
+    <string name="predict_section_hypothetical">Hypotetické známky</string>
+
+    <!-- Domácí úkoly -->
+    <string name="homework_title">Domácí úkoly</string>
+    <string name="homework_empty">Na tento týden žádné domácí úkoly</string>
+    <string name="homework_empty_hint">Úkoly jsou načítány z hodin aktuálního týdne rozvrhu</string>
+    <string name="change_history_title">Historie změn</string>
+    <string name="settings_section_timetable">Rozvrh</string>
+    <string name="settings_section_appearance">Vzhled</string>
+    <string name="settings_section_notifications">Oznámení</string>
+    <string name="change_history_desc">Zobrazit minulá upozornění na změny rozvrhu</string>
+    <string name="change_history_empty">Zatím žádná upozornění na změny</string>
+    <string name="homework_no_date">Bez data</string>
+    <string name="homework_sort_newest">Nejnovější</string>
+    <string name="homework_sort_oldest">Nejstarší</string>
+    <string name="homework_sort_subject">Podle předmětu</string>
+    <string name="homework_notification_title">Nový domácí úkol</string>
+    <plurals name="homework_notification_summary">
+        <item quantity="one">%d nový domácí úkol</item>
+        <item quantity="few">%d nové domácí úkoly</item>
+        <item quantity="many">%d nových domácích úkolů</item>
+        <item quantity="other">%d nových domácích úkolů</item>
+    </plurals>
+
+    <!-- Oznámení o známkách -->
+    <string name="grade_notification_title">Nová známka</string>
+    <plurals name="grade_notification_summary">
+        <item quantity="one">%d nová známka</item>
+        <item quantity="few">%d nové známky</item>
+        <item quantity="many">%d nových známek</item>
+        <item quantity="other">%d nových známek</item>
+    </plurals>
+    <string name="grade_notif_improve">pro %1$d: ≤%2$s (váha %3$d)</string>
+    <string name="grade_notif_grade1">pro jedničku: ≤%1$s (váha %2$d)</string>
+
+    <!-- Nastavení školních oznámení -->
+    <string name="school_updates_title">Školní novinky</string>
+    <string name="grade_alerts">Oznámení o známkách</string>
+    <string name="grade_alerts_desc">Oznámení při přidání nové známky</string>
+    <string name="homework_alerts">Oznámení o domácích úkolech</string>
+    <string name="homework_alerts_desc">Oznámení při zadání nového domácího úkolu</string>
+    <string name="notif_diagnostics_title">Diagnostika oznámení</string>
+    <string name="notif_diagnostics_desc">Ladění doručování oznámení a stavu sledovaných ID</string>
+    <string name="notif_diag_permission">Oprávnění k oznámením</string>
+    <string name="notif_diag_granted">✓ Uděleno</string>
+    <string name="notif_diag_denied">✗ Zamítnuto</string>
+    <string name="notif_diag_notif_account">Účet trvalého oznámení</string>
+    <string name="notif_diag_not_set">Nenastaveno</string>
+    <string name="notif_diag_user_disabled">Zakázáno uživatelem</string>
+    <string name="notif_diag_logged_out">Odhlášen</string>
+    <string name="notif_diag_grade_alerts">Oznámení o známkách</string>
+    <string name="notif_diag_homework_alerts">Oznámení o úkolech</string>
+    <string name="notif_diag_change_alerts">Upozornění na změny rozvrhu</string>
+    <string name="notif_diag_enabled">Zapnuto</string>
+    <string name="notif_diag_disabled_value">Vypnuto</string>
+    <string name="notif_diag_not_tracked">Zatím nesledováno</string>
+    <string name="notif_diag_last_refresh">Poslední aktualizace rozvrhu</string>
+    <string name="notif_diag_last_grade_notif">Poslední odeslaná notifikace o známce</string>
+    <string name="notif_diag_last_homework_notif">Poslední odeslaná notifikace o úkolu</string>
+    <string name="notif_diag_seen_grade_ids">Zaznamenaná ID známek (dedup)</string>
+    <string name="notif_diag_seen_homework_keys">Zaznamenané klíče úkolů (dedup)</string>
+    <string name="notif_diag_seen_count">%d zaznamenáno</string>
+
+    <!-- Zobrazení známek -->
+    <string name="grades_view_by_subject">Podle předmětu</string>
+    <string name="grades_view_by_date">Podle data</string>
 </resources>

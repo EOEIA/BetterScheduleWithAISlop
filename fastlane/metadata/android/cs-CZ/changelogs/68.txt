@@ -1,0 +1,1 @@
+Nové nastavení: Otočená tabulka — přepne rozvrh tak, aby dny byly ve sloupcích a hodiny v řádcích (Nastavení → Rozvrh).

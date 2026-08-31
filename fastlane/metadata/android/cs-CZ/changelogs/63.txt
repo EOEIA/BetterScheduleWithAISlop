@@ -1,0 +1,4 @@
+2.0.17
+- Prediktor: výběr váhy (1–10) zobrazí, jakou známku potřebuješ při dané váze pro přechod do lepšího pásma.
+- Průměr se zobrazí ve sticky liště viditelné při scrollování.
+- Hypotetické známky (přidané přes tlačítko +) mají nyní vlastní sekci pod skutečnými.

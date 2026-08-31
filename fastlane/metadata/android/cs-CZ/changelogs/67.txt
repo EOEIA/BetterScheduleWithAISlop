@@ -1,0 +1,3 @@
+2.0.21
+- Nastavení přehledně rozdělena do čtyř sekcí: Rozvrh, Vzhled, Oznámení, O aplikaci.
+- Všechna oznámení (trvalé, změny rozvrhu, známky/úkoly, diagnostika, historie) jsou nyní na jednom místě.

@@ -1,0 +1,2 @@
+2.0.19
+- Zvýraznění nových známek: známky přidané od posledního otevření Známek dostanou odznak „NEW" na kartě předmětu i v detailu; po 3 s prohlížení se sám odstraní.

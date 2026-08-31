@@ -1,0 +1,5 @@
+2.0.11
+- Klepnutím na buňku hodiny se zobrazí čas a živý odpočet v detailu hodiny.
+- Klepnutím na kartu příští hodiny se otevře detail hodiny.
+- Karta příští hodiny se skryje při prohlížení minulých nebo budoucích týdnů.
+- Nové nastavení pro zobrazení nebo skrytí karty příští hodiny.

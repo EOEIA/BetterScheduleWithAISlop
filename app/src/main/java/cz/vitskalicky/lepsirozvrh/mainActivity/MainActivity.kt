@@ -19,6 +19,7 @@ import cz.vitskalicky.lepsirozvrh.prefs
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.welcome.WelcomeActivity
 import kotlinx.coroutines.launch
+import cz.vitskalicky.lepsirozvrh.BuildConfig
 
 /** The main activity with schedule table*/
 class MainActivity : ComponentActivity() {
@@ -47,9 +48,11 @@ class MainActivity : ComponentActivity() {
             }
             viewModel.getAccountIdLD().observe(this@MainActivity){
                 if (it == null){
-                    val intent = Intent(this@MainActivity, AccountPickerActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                    if (!BuildConfig.DEBUG || !prefs.boolean(PrefsConsts.DEBUG_DEMO_MODE).orFalse()) {
+                        val intent = Intent(this@MainActivity, AccountPickerActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
                 }else{
                     // This should ensure user info is kept up-to date
                     lifecycleScope.launch {
@@ -103,3 +106,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+private fun Boolean?.orFalse(): Boolean = this ?: false

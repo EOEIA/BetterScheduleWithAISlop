@@ -1,0 +1,4 @@
+2.0.17
+- Grade predictor: weight chips (1–10) let you see what grade you need at a specific mark weight to cross into the next band.
+- Sticky compact average bar stays visible while scrolling through your marks.
+- Hypothetical marks (added via the + button) now appear in their own section below real marks.

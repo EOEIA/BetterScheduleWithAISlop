@@ -1,0 +1,6 @@
+2.0.15
+- Opravena matematika prediktoru známek (správné hranice stupňů průměru).
+- Hypotetické úpravy se resetují při opuštění detailu předmětu.
+- Přidáno zobrazení "Podle data" v záložce Známky.
+- Nová obrazovka Domácí úkoly (dostupná ze Známek nebo hlavního panelu).
+- Oznámení o nových známkách a úkolech (zapnout v Nastavení → Školní novinky).

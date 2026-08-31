@@ -1,0 +1,5 @@
+2.0.11
+- Tapping a lesson cell now shows its time and a live countdown in the detail dialog.
+- Tapping the next-lesson card opens the lesson detail dialog.
+- Next-lesson card is hidden when browsing past or future weeks.
+- New setting to show or hide the next-lesson card.

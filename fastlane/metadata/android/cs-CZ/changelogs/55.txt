@@ -1,0 +1,4 @@
+2.0.9:
+- Přidáno volitelné zvýraznění řádku aktuálního dne v celém rozvrhu
+- Detail hodiny nyní zobrazuje dostupné informace o domácím úkolu místo pouhého počtu
+- Demo režim obsahuje ukázkové známky

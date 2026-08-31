@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Better schedule</string>
+    <string name="app_name">schdl</string>
     <string name="app_moto">A faster schedule for Bakaláři. For students, by students.</string>
     <string name="start">Start</string>
     <string name="prev_week">Previous week</string>
@@ -66,6 +66,21 @@
     <string name="info_line_desc">Show information line</string>
     <string name="switch_to_next_week">Switch to the next week</string>
     <string name="center_to_current_lesson">Jump to the current lesson</string>
+    <string name="sticky_day_column">Sticky day column</string>
+    <string name="sticky_day_column_desc">Keep day labels visible while scrolling sideways</string>
+    <string name="highlight_current_day">Highlight current day</string>
+    <string name="highlight_current_day_desc">Mark today\'s row in the full timetable</string>
+    <string name="changed_lesson_visuals">Color-code changed lessons</string>
+    <string name="changed_lesson_visuals_desc">Color cells by change type (substitution, cancelled, added…)</string>
+    <string name="compact_timetable">Compact timetable</string>
+    <string name="compact_timetable_desc">Smaller cells so more lessons fit on screen</string>
+    <string name="transposed_timetable">Transposed table</string>
+    <string name="transposed_timetable_desc">Days across the top, time slots down the side</string>
+    <string name="show_next_lesson_card">Next lesson card</string>
+    <string name="show_next_lesson_card_desc">Bottom bar showing the current or upcoming lesson with countdown</string>
+    <string name="lesson_time">Time</string>
+    <string name="debug_demo_mode">Demo mode</string>
+    <string name="debug_demo_mode_desc">Show deterministic debug schedule data without a real account</string>
     <string name="notification">Persistent notification</string>
     <string name="notification_desc">Shows a silent notification with your next lesson</string>
     <string name="notification_detials">Persistent notification informs you about your current or next lesson during
@@ -178,6 +193,13 @@
     <string name="topic">Topic:</string>
     <string name="group">Group:</string>
     <string name="change">Change:</string>
+    <string name="change_kind">Change type:</string>
+    <string name="change_kind_added">Added</string>
+    <string name="change_kind_removed">Removed</string>
+    <string name="change_kind_cancelled">Cancelled</string>
+    <string name="change_kind_substitution">Substitution</string>
+    <string name="change_kind_room_changed">Room changed</string>
+    <string name="change_kind_other">Other</string>
     <string name="lesson_name">Name:</string>
     <string name="notice">Notice:</string>
     <string name="cycle">Cycle:</string>
@@ -190,6 +212,14 @@
     <string name="prev_lesson">Previous lesson</string>
     <string name="lesson_cancelled">Canceled</string>
     <string name="nothing">No lesson</string>
+    <string name="next_lesson_card_current">Current lesson</string>
+    <string name="next_lesson_card_next">Next lesson</string>
+    <string name="next_lesson_card_starts_in">starts in %1$s</string>
+    <string name="next_lesson_card_ends_in">ends in %1$s</string>
+    <string name="next_lesson_card_duration">%1$dd %2$dh %3$dm %4$ds</string>
+    <string name="next_lesson_card_school_over">school is over</string>
+    <string name="next_lesson_card_homework_indicator">Homework</string>
+    <string name="next_lesson_card_change_indicator">Change</string>
 
     <string name="close">Close</string>
     <string name="yes">Yes</string>
@@ -290,6 +320,8 @@
     <string name="account_picker_subtitle">Available accounts:</string>
     <string name="account_picker_selected">This account is active</string>
     <string name="account_picker_add">Add new account</string>
+    <string name="account_picker_demo_mode">Use demo mode</string>
+    <string name="account_picker_demo_mode_desc">Open deterministic debug timetable data</string>
     <string name="login_add_title">Add new account</string>
 
     <string name="widget_account">Account</string>
@@ -304,5 +336,116 @@
         <item quantity="one">%d week forward</item>
         <item quantity="other">%d weeks forward</item>
     </plurals>
+
+    <plurals name="change_notification_summary">
+        <item quantity="one">%d timetable change</item>
+        <item quantity="other">%d timetable changes</item>
+    </plurals>
+
+    <string name="change_alerts">Change alerts</string>
+    <string name="change_alerts_desc">Get notified when this week\'s timetable is updated</string>
+    <string name="change_alert_lessons">Lesson changes</string>
+    <string name="change_alert_lessons_desc">Cancellations, substitutions, added or moved lessons</string>
+    <string name="change_alert_no_school">No-school days</string>
+    <string name="change_alert_no_school_desc">New events or holidays that cancel a full day</string>
+    <string name="change_notification_channel_name">Timetable changes</string>
+    <string name="change_notification_channel_desc">Alerts when your timetable is updated (cancellations, substitutions…)</string>
+    <string name="change_notification_title">Timetable update</string>
+    <string name="change_alert_event_line">No school: %1$s</string>
+
+    <!-- Grade predictor -->
+    <string name="grades_title">Grades</string>
+    <string name="grades_no_grades">No grades available</string>
+    <string name="grades_sort_name">Name</string>
+    <string name="grades_sort_best">Best avg</string>
+    <string name="grades_sort_worst">Worst avg</string>
+    <string name="predict_real_avg">Real avg</string>
+    <string name="predict_predicted">Predicted</string>
+    <string name="predict_add_grade">Add hypothetical grade</string>
+    <string name="predict_reset">Reset predictor</string>
+    <string name="predict_band_excellent">1 (excellent)</string>
+    <string name="predict_band_good">2 (good)</string>
+    <string name="predict_band_satisfactory">3 (satisfactory)</string>
+    <string name="predict_band_sufficient">4 (sufficient)</string>
+    <string name="predict_edit_grade_title">Edit grade</string>
+    <string name="predict_add_grade_title">Add grade</string>
+    <string name="predict_grade_label">Grade</string>
+    <string name="predict_weight_label">Weight</string>
+    <string name="predict_caption_label">Description</string>
+    <string name="predict_cancel">Cancel</string>
+    <string name="predict_save">Save</string>
+    <string name="predict_delete">Remove</string>
+    <string name="predict_sort_newest">Newest</string>
+    <string name="predict_sort_oldest">Oldest</string>
+    <string name="predict_sort_best">Best</string>
+    <string name="predict_sort_worst">Worst</string>
+    <string name="predict_sort_heavy">Heavy</string>
+    <string name="predict_sort_light">Light</string>
+    <string name="predict_origin_edited">edited</string>
+    <string name="predict_origin_added">hypothetical</string>
+    <string name="predict_excluded_label">excluded</string>
+    <string name="predict_hint_weight_label">Weight of added mark</string>
+    <string name="predict_section_hypothetical">Hypothetical marks</string>
+
+    <!-- Homework -->
+    <string name="homework_title">Homework</string>
+    <string name="homework_empty">No homework for this week</string>
+    <string name="homework_empty_hint">Homework is pulled from lessons in the current timetable week</string>
+    <string name="change_history_title">Change history</string>
+    <string name="settings_section_timetable">Timetable</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="change_history_desc">View past timetable change alerts</string>
+    <string name="change_history_empty">No change alerts recorded yet</string>
+    <string name="homework_no_date">No date</string>
+    <string name="homework_sort_newest">Newest</string>
+    <string name="homework_sort_oldest">Oldest</string>
+    <string name="homework_sort_subject">By subject</string>
+    <string name="homework_notification_title">New homework</string>
+    <plurals name="homework_notification_summary">
+        <item quantity="one">%d new homework assignment</item>
+        <item quantity="other">%d new homework assignments</item>
+    </plurals>
+
+    <!-- Grade notifications -->
+    <string name="grade_notification_title">New grade</string>
+    <plurals name="grade_notification_summary">
+        <item quantity="one">%d new grade</item>
+        <item quantity="other">%d new grades</item>
+    </plurals>
+    <string name="grade_notif_improve">to reach grade %1$d: ≤%2$s (w%3$d)</string>
+    <string name="grade_notif_grade1">for grade 1: ≤%1$s (w%2$d)</string>
+
+    <!-- School updates settings -->
+    <string name="school_updates_title">School updates</string>
+    <string name="grade_alerts">Grade notifications</string>
+    <string name="grade_alerts_desc">Get notified when new grades are added</string>
+    <string name="homework_alerts">Homework notifications</string>
+    <string name="homework_alerts_desc">Get notified when new homework is assigned</string>
+    <string name="notif_diagnostics_title">Notification diagnostics</string>
+    <string name="notif_diagnostics_desc">Debug notification delivery and seen-ID state</string>
+    <string name="notif_diag_permission">Notification permission</string>
+    <string name="notif_diag_granted">✓ Granted</string>
+    <string name="notif_diag_denied">✗ Denied</string>
+    <string name="notif_diag_notif_account">Persistent notification account</string>
+    <string name="notif_diag_not_set">Not set</string>
+    <string name="notif_diag_user_disabled">Disabled by user</string>
+    <string name="notif_diag_logged_out">Logged out</string>
+    <string name="notif_diag_grade_alerts">Grade notifications</string>
+    <string name="notif_diag_homework_alerts">Homework notifications</string>
+    <string name="notif_diag_change_alerts">Timetable change alerts</string>
+    <string name="notif_diag_enabled">Enabled</string>
+    <string name="notif_diag_disabled_value">Disabled</string>
+    <string name="notif_diag_not_tracked">Not tracked yet</string>
+    <string name="notif_diag_last_refresh">Last timetable refresh</string>
+    <string name="notif_diag_last_grade_notif">Last grade notification sent</string>
+    <string name="notif_diag_last_homework_notif">Last homework notification sent</string>
+    <string name="notif_diag_seen_grade_ids">Seen grade IDs (dedup)</string>
+    <string name="notif_diag_seen_homework_keys">Seen homework keys (dedup)</string>
+    <string name="notif_diag_seen_count">%d tracked</string>
+
+    <!-- Grades date view -->
+    <string name="grades_view_by_subject">By subject</string>
+    <string name="grades_view_by_date">By date</string>
 
 </resources>

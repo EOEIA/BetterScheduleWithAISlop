@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.bakaAPI.login.*
+import cz.vitskalicky.lepsirozvrh.bakaAPI.marks.MarksWebservice
 import cz.vitskalicky.lepsirozvrh.bakaAPI.rozvrh.RozvrhWebservice
 import cz.vitskalicky.lepsirozvrh.database.RozvrhDatabase
 import cz.vitskalicky.lepsirozvrh.model.AccountRepository.LoginResultStatus.*
@@ -34,6 +35,7 @@ class AccountRepository(val app: MainApplication) {
 
     private val rozvrhWebservices: ConcurrentHashMap<Long, RozvrhWebservice> = ConcurrentHashMap()
     private val userWebservices: ConcurrentHashMap<Long, UserWebservice> = ConcurrentHashMap()
+    private val marksWebservices: ConcurrentHashMap<Long, MarksWebservice> = ConcurrentHashMap()
 
     /** Mutex which must be locked when updating account details to avoid pointless concurrent refreshed of it. It is
      * common to all accounts. */
@@ -98,6 +100,11 @@ class AccountRepository(val app: MainApplication) {
     fun getUserWebservice(account: Account): UserWebservice?{
         return userWebservices[account.id] ?: // try to simply get it first. if that fails, use getOrPut
             userWebservices.safeGetOrPut(account.id, createRetrofit(account)?.create(UserWebservice::class.java) ?: return null)
+    }
+
+    fun getMarksWebservice(account: Account): MarksWebservice? {
+        return marksWebservices[account.id] ?:
+            marksWebservices.safeGetOrPut(account.id, createRetrofit(account)?.create(MarksWebservice::class.java) ?: return null)
     }
 
     fun getAccountsLD(): LiveData<List<Account>> = dao.loadAllAccountsLD()

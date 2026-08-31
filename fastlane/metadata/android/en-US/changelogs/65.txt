@@ -1,0 +1,2 @@
+2.0.19
+- New grade highlighting: grades added since your last visit get a "NEW" badge on the subject card and in the detail view; disappears automatically after 3 s of viewing.

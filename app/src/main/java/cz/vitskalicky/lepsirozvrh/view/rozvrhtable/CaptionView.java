@@ -16,6 +16,13 @@ public class CaptionView extends CellView {
     private String startTime = "";
     private String endTime = "";
     private String captionText = "";
+    private boolean transposed = false;
+
+    public void setTransposed(boolean transposed) {
+        this.transposed = transposed;
+        invalidate();
+        requestLayout();
+    }
 
     public CaptionView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -58,6 +65,9 @@ public class CaptionView extends CellView {
 
     @Override
     public int getMinimumWidth() {
+        if (transposed) {
+            return (int) (super.getSuggestedMinimumWidth() + Math.max(secondaryTextPaint.measureText(startTime), secondaryTextPaint.measureText(endTime)));
+        }
         return (int) (super.getSuggestedMinimumWidth() + secondaryTextSize + primaryTextPaint.measureText(captionText) + secondaryTextSize);
     }
 
@@ -68,6 +78,25 @@ public class CaptionView extends CellView {
 
         int actualPrimaryTextSize = primaryTextSize;
         int actualSecondaryTextSize = secondaryTextSize;
+
+        if (transposed) {
+            // Row header: number on top, start time in middle, end time at bottom — stacked, no rotation
+            float third = h / 3f;
+            float cx = xStart + w / 2f;
+
+            float capSize = Math.min(actualPrimaryTextSize, third * 0.85f);
+            primaryTextPaint.setTextSize(capSize);
+            primaryTextPaint.setTextAlign(Paint.Align.CENTER);
+            float timeSize = Math.min(actualSecondaryTextSize, third * 0.85f);
+            secondaryTextPaint.setTextSize(timeSize);
+            secondaryTextPaint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawText(startTime, cx, yStart + third * 0.5f + timeSize * 0.5f, secondaryTextPaint);
+
+            canvas.drawText(captionText, cx, yStart + third + third * 0.5f + capSize * 0.5f, primaryTextPaint);
+
+            canvas.drawText(endTime,   cx, yStart + 2 * third + third * 0.5f + timeSize * 0.5f, secondaryTextPaint);
+            return;
+        }
 
         if (actualPrimaryTextSize > h){
             actualPrimaryTextSize = h;
@@ -87,8 +116,6 @@ public class CaptionView extends CellView {
         primaryTextPaint.setTextAlign(Paint.Align.CENTER);
         canvas.drawText(captionText, w/2f, (h + actualPrimaryTextSize)/2f, primaryTextPaint);
 
-        //canvas.save();
-
         canvas.rotate(-90);
 
         Rect startTimeBounds = new Rect();
@@ -97,7 +124,5 @@ public class CaptionView extends CellView {
         canvas.drawText(endTime, (yEnd) * -1,xEnd, secondaryTextPaint);
 
         canvas.rotate(90);
-
-        //canvas.restore();
     }
 }

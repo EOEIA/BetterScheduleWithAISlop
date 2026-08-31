@@ -181,6 +181,7 @@ object RozvrhConverter {
                         subjectName = atom.change.typeName ?: ""
                     }
                 }
+                val changeKind: LessonChangeType = classifyChange(atom.change)
 
                 val lessonGroups = ArrayList<RozvrhGroup>()
                 atom.groupIds.forEach {
@@ -221,7 +222,8 @@ object RozvrhConverter {
                         homeworkIds,
                         theme,
                         changeType,
-                        chngDesc
+                        chngDesc,
+                        changeKind
                 ))
             }
 
@@ -235,6 +237,33 @@ object RozvrhConverter {
         }
         
         return Rozvrh(monday, monday == Rozvrh.PERM, cycle,captions, days)
+    }
+
+    /**
+     * Classifies the change reported for a single lesson (atom) into a [LessonChangeType].
+     *
+     * Grounded in real Bakaláři API v3 payloads (see the demo data in `DebugUtils`), whose
+     * `changeType` values include `"Added"`, `"Removed"` and `"Substitution"`; `"Canceled"` and
+     * `"RoomChanged"` are the other documented values. Matching is case-insensitive to be
+     * defensive against server-side casing differences.
+     *
+     * When the API does not provide a recognisable `changeType` but the legacy cancellation signal
+     * ([Change3.typeAbbrev]) is present, the change is treated as [LessonChangeType.CANCELLED] so
+     * that this stays consistent with how the rest of the app already detects cancelled lessons
+     * (see the `typeAbbrev` branch in [convert]).
+     *
+     * Pure and Android-free so it can be unit-tested on the JVM.
+     */
+    fun classifyChange(change: Change3?): LessonChangeType {
+        if (change == null) return LessonChangeType.NONE
+        return when (change.changeType?.trim()?.lowercase()) {
+            "added" -> LessonChangeType.ADDED
+            "removed" -> LessonChangeType.REMOVED
+            "canceled", "cancelled" -> LessonChangeType.CANCELLED
+            "substitution" -> LessonChangeType.SUBSTITUTION
+            "roomchanged" -> LessonChangeType.ROOM_CHANGED
+            else -> if (!change.typeAbbrev.isNullOrBlank()) LessonChangeType.CANCELLED else LessonChangeType.OTHER
+        }
     }
 
     /**

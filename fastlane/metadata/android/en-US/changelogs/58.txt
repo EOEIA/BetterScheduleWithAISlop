@@ -1,0 +1,2 @@
+2.0.12
+- Updated the app icon colors so this fork is easier to tell apart from the original app.

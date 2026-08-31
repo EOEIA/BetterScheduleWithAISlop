@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.util.Locale;
+
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhDay;
 
 /** Custom view for cell with day */
@@ -17,6 +19,7 @@ public class DenView extends CellView {
     private RozvrhDay rozvrhDay = null;
     private String denText = "";
     private String datumText = "";
+    private boolean compact = false;
 
     public DenView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -33,7 +36,7 @@ public class DenView extends CellView {
 
     @Override
     public int getMinimumWidth() {
-        return (int) (super.getMinimumWidth() + Math.max(primaryTextPaint.measureText(denText), secondaryTextPaint.measureText(datumText)));
+        return (int) (super.getMinimumWidth() + Math.max(primaryTextPaint.measureText(getDisplayDenText()), secondaryTextPaint.measureText(datumText)));
     }
 
     @Override
@@ -79,7 +82,7 @@ public class DenView extends CellView {
         }
 
         primaryTextPaint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText(denText, middle + xStart, denBaseline + yStart, primaryTextPaint);
+        canvas.drawText(getDisplayDenText(), middle + xStart, denBaseline + yStart, primaryTextPaint);
 
         //draw secondary = teacher and room
         secondaryTextPaint.setTextAlign(Paint.Align.CENTER);
@@ -88,6 +91,22 @@ public class DenView extends CellView {
 
     public RozvrhDay getRozvrhDay() {
         return rozvrhDay;
+    }
+
+    private String getDisplayDenText() {
+        if (!compact || denText.isEmpty()) {
+            return denText;
+        }
+        return denText.toLowerCase(Locale.getDefault());
+    }
+
+    public void setCompact(boolean compact) {
+        if (this.compact == compact) {
+            return;
+        }
+        this.compact = compact;
+        invalidate();
+        requestLayout();
     }
 
     public void setRozvrhDay(RozvrhDay rozvrhDay) {
