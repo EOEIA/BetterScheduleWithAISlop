@@ -1,6 +1,6 @@
 ![icon](app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 
-> **This is a personal fork of [Lepší rozvrh](https://gitlab.com/vitSkalicky/lepsi-rozvrh) by Vít Skalický**, modified by EOEIA. Licensed under GPL v3.
+> **This is a personal fork of [Lepší rozvrh](https://gitlab.com/vitSkalicky/lepsi-rozvrh) by Vít Skalický.** Licensed under GPL v3.
 
 [<img alt='Nyní na Google Play' height="80px" src='https://play.google.com/intl/en_us/badges/static/images/badges/cs_badge_web_generic.png'/>](https://play.google.com/store/apps/details?id=cz.vitskalicky.lepsirozvrh&utm_source=github&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
 
