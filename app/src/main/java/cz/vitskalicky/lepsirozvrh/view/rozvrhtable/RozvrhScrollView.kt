@@ -60,6 +60,22 @@ class RozvrhScrollView : HorizontalScrollView {
         rozvrhLayout.setTransposed(transposed)
     }
 
+    fun setAlternatingRows(enabled: Boolean) {
+        rozvrhLayout.setAlternatingRows(enabled)
+    }
+
+    fun setAlternatingCols(enabled: Boolean) {
+        rozvrhLayout.setAlternatingCols(enabled)
+    }
+
+    fun setHideEmptyHours(enabled: Boolean) {
+        rozvrhLayout.setHideEmptyHours(enabled)
+    }
+
+    fun setNoteKeys(keys: Set<String>) {
+        rozvrhLayout.setNoteKeys(keys)
+    }
+
     fun setTheme(theme: RozvrhTheme) {
         setBackgroundColor(theme.cEmptyBg.toArgb())
         rozvrhLayout.setTheme(theme)

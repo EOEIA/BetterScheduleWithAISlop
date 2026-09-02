@@ -8,15 +8,7 @@ object GradePredictor {
     fun parseGrade(markText: String): Double? {
         val trimmed = markText.trim()
         if (trimmed.isEmpty()) return null
-        if (trimmed.endsWith('+')) {
-            val base = trimmed.dropLast(1).toDoubleOrNull() ?: return null
-            return base - 0.5
-        }
-        if (trimmed.endsWith('-')) {
-            val base = trimmed.dropLast(1).toDoubleOrNull() ?: return null
-            return base + 0.5
-        }
-        return trimmed.toDoubleOrNull()
+        return trimmed.trimEnd('+', '-').toDoubleOrNull()
     }
 
     /** Weighted average, or null for empty or zero-weight list. */
@@ -131,6 +123,29 @@ object GradePredictor {
         if (addedWeight <= 0) return null
         val needed = (targetAvg * (currentWeight + addedWeight) - currentSum) / addedWeight
         return if (needed in 1.0..5.0) needed else null
+    }
+
+    /**
+     * Returns the exact (fractional) weight needed to reach [targetAvg] when adding a mark
+     * of value [gradeValue]. Returns null if impossible (gradeValue >= targetAvg, or result ≤ 0).
+     */
+    fun exactWeightNeeded(currentSum: Double, currentWeight: Int, targetAvg: Double, gradeValue: Double): Double? {
+        // (currentSum + gradeValue * w) / (currentWeight + w) = targetAvg
+        // => w * (gradeValue - targetAvg) = targetAvg * currentWeight - currentSum
+        val denominator = gradeValue - targetAvg
+        if (kotlin.math.abs(denominator) < 0.0001) return null
+        val w = (targetAvg * currentWeight - currentSum) / denominator
+        return if (w > 0) w else null
+    }
+
+    /**
+     * Minimum integer weight at which adding a mark of value [gradeValue] brings the
+     * average to ≤ [targetAvg]. Returns null if unreachable within [maxWeight].
+     */
+    fun minIntWeightNeeded(currentSum: Double, currentWeight: Int, targetAvg: Double, gradeValue: Double, maxWeight: Int = 50): Int? {
+        val exact = exactWeightNeeded(currentSum, currentWeight, targetAvg, gradeValue) ?: return null
+        val ceil = kotlin.math.ceil(exact).toInt()
+        return if (ceil <= maxWeight) ceil else null
     }
 
     private fun buildSuggestions(currentSum: Double, currentWeight: Int, currentAvg: Double): Pair<List<Suggestion>, List<Suggestion>> {

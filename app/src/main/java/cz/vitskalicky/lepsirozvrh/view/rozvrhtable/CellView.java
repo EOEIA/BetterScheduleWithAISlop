@@ -35,6 +35,21 @@ public class CellView extends View {
 
     protected boolean drawDividerTop, drawDividerCorner, drawDividerLeft;
     private boolean rowHighlighted = false;
+    private boolean alternatingRow = false;
+    private boolean alternatingCol = false;
+    private final Paint alternatingRowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    public void setAlternatingRow(boolean alternating) {
+        if (this.alternatingRow == alternating) return;
+        this.alternatingRow = alternating;
+        invalidate();
+    }
+
+    public void setAlternatingCol(boolean alternating) {
+        if (this.alternatingCol == alternating) return;
+        this.alternatingCol = alternating;
+        invalidate();
+    }
 
     public CellView(Context context) {
         this(context, null);
@@ -57,6 +72,7 @@ public class CellView extends View {
         super(context, attrs);
 
         t = DefaultRozvrhThemes.INSTANCE.getUNSPECIFIED();
+        alternatingRowPaint.setColor(0x14FFFFFF); // ~8% white overlay
 
         setDrawDividers(true, true, true);
     }
@@ -179,6 +195,9 @@ public class CellView extends View {
 
         //draw background
         canvas.drawRect(0, 0, w, h, backgroundPaint);
+        if (alternatingRow || alternatingCol) {
+            canvas.drawRect(0, 0, w, h, alternatingRowPaint);
+        }
         if (rowHighlighted) {
             canvas.drawRect(0, 0, w, h, rowHighlightPaint);
         }

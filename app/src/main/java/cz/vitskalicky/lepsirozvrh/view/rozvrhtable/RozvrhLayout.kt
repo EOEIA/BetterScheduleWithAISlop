@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.ViewGroup
 import androidx.compose.ui.graphics.toArgb
 import cz.vitskalicky.lepsirozvrh.SharedPrefs
+import cz.vitskalicky.lepsirozvrh.database.lessonNoteKey
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.*
 import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
@@ -58,6 +59,11 @@ class RozvrhLayout : ViewGroup {
     private var changeVisualMode = 0
     private var compact = false
     private var transposed = false
+    private var alternatingRows = false
+    private var alternatingCols = false
+    private var hideEmptyHours = false
+    private var visibleCaptionIndexes: List<Int> = emptyList()
+    private var noteKeys: Set<String> = emptySet()
 
     private var onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit = {_,_,_,_ ->}
     fun setOnLessonPress(onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit){
@@ -196,8 +202,13 @@ class RozvrhLayout : ViewGroup {
                     measureChild(item, hodinaWidthMS, childHeightMS)
                     childState = combineMeasuredStates(childState, item.measuredState)
                     if (item.event != null){
-                        item.eventWidth = allHodinaCellsWidth
-                        item.eventStart = spaceToLeft
+                        if (!transposed) {
+                            item.eventWidth = allHodinaCellsWidth
+                            item.eventStart = spaceToLeft
+                        } else {
+                            item.eventWidth = rows * childHeight
+                            item.eventStart = j * childHeight
+                        }
                     }
                 }
             }
@@ -320,6 +331,7 @@ class RozvrhLayout : ViewGroup {
         for (i in 0 until expectedDenCount) {
             val denCell = DenView(context, null)
             denCell.setTheme(t)
+            denCell.setTransposed(transposed)
             denCell.setCompact(stickyDayColumn && !transposed)
             denCell.setRowHighlighted(false)
             denViews.add(denCell)
@@ -368,11 +380,12 @@ class RozvrhLayout : ViewGroup {
             empty()
             return
         }
+        visibleCaptionIndexes = getVisibleCaptionIndexes(rozvrh)
         if (!transposed) {
             rows = rozvrh.days.size
-            columns = rozvrh.captions.size
+            columns = visibleCaptionIndexes.size
         } else {
-            rows = rozvrh.captions.size
+            rows = visibleCaptionIndexes.size
             columns = rozvrh.days.size
         }
         perm = rozvrh.permanent
@@ -384,38 +397,42 @@ class RozvrhLayout : ViewGroup {
         cornerView?.text = rozvrh.cycle?.name ?: ""
         if (!transposed) {
             for (i in 0 until columns) {
-                captionViews[i].caption = rozvrh.captions[i]
+                captionViews[i].caption = rozvrh.captions[visibleCaptionIndexes[i]]
             }
             for (i in 0 until rows) {
                 val den: RozvrhDay = rozvrh.days[i]
                 denViews[i].rozvrhDay = den
 
                 if (den.event == null){
-                    den.blocks.forEachIndexed {index: Int, it ->
-                        it.forEach {
+                    visibleCaptionIndexes.forEachIndexed { visibleCaptionIndex: Int, captionIndex: Int ->
+                        val block = den.blocks.getOrNull(captionIndex) ?: emptyList()
+                        block.forEachIndexed { lessonIndex, lesson ->
                             val view = hodinaViewRecycler.retrieve()
+                            view.setTransposed(transposed)
                             view.setChangeVisualMode(changeVisualMode)
-                            view.setHodina(it, perm, isTeacher)
+                            view.setHodina(lesson, perm, isTeacher)
                             view.setRowHighlighted(false)
                             addView(view)
-                            hodinasByCaptions[index][i].add(view)
+                            hodinasByCaptions[visibleCaptionIndex][i].add(view)
                             view.setOnClickListener {_ ->
-                                onLessonPress(i,index,hodinasByCaptions[index][i].size - 1, it)
+                                onLessonPress(i, captionIndex, lessonIndex, lesson)
                             }
                         }
-                        it.ifEmpty {
+                        block.ifEmpty {
                             val view = hodinaViewRecycler.retrieve()
+                            view.setTransposed(transposed)
                             view.setChangeVisualMode(changeVisualMode)
                             view.setHodina(null, perm, isTeacher)
                             view.setRowHighlighted(false)
                             addView(view)
-                            hodinasByCaptions[index][i].add(view)
+                            hodinasByCaptions[visibleCaptionIndex][i].add(view)
                         }
                     }
                 }else{
                     for (j in 0 until columns){
                         val view = hodinaViewRecycler.retrieve()
                         view.setEvent(den.event)
+                        view.setTransposed(false)
                         view.setRowHighlighted(false)
                         addView(view)
                         hodinasByCaptions[j][i].add(view)
@@ -426,38 +443,42 @@ class RozvrhLayout : ViewGroup {
             // transposed: captionViews in left column, denViews in top row
             // hodinasByCaptions[dayIndex][captionIndex]
             for (i in 0 until rows) {
-                captionViews[i].caption = rozvrh.captions[i]
+                captionViews[i].caption = rozvrh.captions[visibleCaptionIndexes[i]]
             }
             for (dayIndex in 0 until columns) {
                 val den: RozvrhDay = rozvrh.days[dayIndex]
                 denViews[dayIndex].rozvrhDay = den
 
                 if (den.event == null) {
-                    den.blocks.forEachIndexed { captionIndex, block ->
-                        block.forEach { lesson ->
+                    visibleCaptionIndexes.forEachIndexed { visibleCaptionIndex, captionIndex ->
+                        val block = den.blocks.getOrNull(captionIndex) ?: emptyList()
+                        block.forEachIndexed { lessonIndex, lesson ->
                             val view = hodinaViewRecycler.retrieve()
+                            view.setTransposed(transposed)
                             view.setChangeVisualMode(changeVisualMode)
                             view.setHodina(lesson, perm, isTeacher)
                             view.setRowHighlighted(false)
                             addView(view)
-                            hodinasByCaptions[dayIndex][captionIndex].add(view)
+                            hodinasByCaptions[dayIndex][visibleCaptionIndex].add(view)
                             view.setOnClickListener { _ ->
-                                onLessonPress(dayIndex, captionIndex, hodinasByCaptions[dayIndex][captionIndex].size - 1, lesson)
+                                onLessonPress(dayIndex, captionIndex, lessonIndex, lesson)
                             }
                         }
                         block.ifEmpty {
                             val view = hodinaViewRecycler.retrieve()
+                            view.setTransposed(transposed)
                             view.setChangeVisualMode(changeVisualMode)
                             view.setHodina(null, perm, isTeacher)
                             view.setRowHighlighted(false)
                             addView(view)
-                            hodinasByCaptions[dayIndex][captionIndex].add(view)
+                            hodinasByCaptions[dayIndex][visibleCaptionIndex].add(view)
                         }
                     }
                 } else {
                     for (captionIndex in 0 until rows) {
                         val view = hodinaViewRecycler.retrieve()
                         view.setEvent(den.event)
+                        view.setTransposed(true)
                         view.setRowHighlighted(false)
                         addView(view)
                         hodinasByCaptions[dayIndex][captionIndex].add(view)
@@ -465,6 +486,9 @@ class RozvrhLayout : ViewGroup {
                 }
             }
         }
+        applyAlternatingRows()
+        applyAlternatingCols()
+        applyNoteKeys()
         updateCurrentDayHighlight()
         highlightCurrentLesson()
         invalidate()
@@ -477,6 +501,7 @@ class RozvrhLayout : ViewGroup {
         val indexes = rozvrh?.getHighlightBlockIndexes(false)
         val dayIndex = indexes?.first
         val captionIndex = indexes?.second
+        val visibleCaptionIndex = captionIndex?.let { visibleCaptionIndexes.indexOf(it) } ?: -1
         val toHighlight: RozvrhBlock? = if (dayIndex == null || captionIndex == null)
             null
         else rozvrh?.getAsRozvrhBlock(dayIndex, captionIndex);
@@ -493,52 +518,58 @@ class RozvrhLayout : ViewGroup {
         nextHodinaViewRight = null
         nextHodinaViewBottom = null
         nextHodinaViewCorner = null
-        if (toHighlight == null || dayIndex == null || captionIndex == null) {
+        if (toHighlight == null || dayIndex == null || captionIndex == null || visibleCaptionIndex == -1) {
             return
         }
 
         //fail-safe
-        if (captionIndex >= hodinasByCaptions.size || dayIndex >= hodinasByCaptions[captionIndex].size) {
+        val highlightOutOfBounds = if (!transposed) {
+            visibleCaptionIndex >= hodinasByCaptions.size || dayIndex >= hodinasByCaptions[visibleCaptionIndex].size
+        } else {
+            dayIndex >= hodinasByCaptions.size || visibleCaptionIndex >= hodinasByCaptions[dayIndex].size
+        }
+        if (highlightOutOfBounds) {
             // the rozvrh is very weird
             val msg = "There are more lessons than captions in a weekly schedule."
             Log.w(TAG, msg)
             Sentry.addBreadcrumb(msg)
             // todo: allow user to submit the weird schedule
+            return
         }
 
         nextHodinaView = if (!transposed) {
-            hodinasByCaptions[captionIndex][dayIndex].firstOrNull()
+            hodinasByCaptions[visibleCaptionIndex][dayIndex].firstOrNull()
         } else {
-            hodinasByCaptions[dayIndex][captionIndex].firstOrNull()
+            hodinasByCaptions[dayIndex][visibleCaptionIndex].firstOrNull()
         } ?: return //todo report error. this should not happen
 
         nextHodinaView?.hightlightEdges(true, true, true)
         nextHodinaView?.highlightEntire(true)
         if (!transposed) {
-            if (dayIndex + 1 < rows && captionIndex < columns) {
-                nextHodinaViewBottom = hodinasByCaptions[captionIndex][dayIndex + 1].firstOrNull()
+            if (dayIndex + 1 < rows && visibleCaptionIndex < columns) {
+                nextHodinaViewBottom = hodinasByCaptions[visibleCaptionIndex][dayIndex + 1].firstOrNull()
                 nextHodinaViewBottom?.hightlightEdges(true, false, true)
             }
-            if (dayIndex < rows && captionIndex + 1 < columns) {
-                nextHodinaViewRight = hodinasByCaptions[captionIndex + 1][dayIndex].firstOrNull()
+            if (dayIndex < rows && visibleCaptionIndex + 1 < columns) {
+                nextHodinaViewRight = hodinasByCaptions[visibleCaptionIndex + 1][dayIndex].firstOrNull()
                 nextHodinaViewRight?.hightlightEdges(false, true, true)
             }
-            if (dayIndex + 1 < rows && captionIndex + 1 < columns) {
-                nextHodinaViewCorner = hodinasByCaptions[captionIndex + 1][dayIndex + 1].firstOrNull()
+            if (dayIndex + 1 < rows && visibleCaptionIndex + 1 < columns) {
+                nextHodinaViewCorner = hodinasByCaptions[visibleCaptionIndex + 1][dayIndex + 1].firstOrNull()
                 nextHodinaViewCorner?.hightlightEdges(false, false, true)
             }
         } else {
             // transposed: columns=days, rows=captions; Right=next day, Bottom=next caption
-            if (dayIndex + 1 < columns && captionIndex < rows) {
-                nextHodinaViewRight = hodinasByCaptions[dayIndex + 1][captionIndex].firstOrNull()
+            if (dayIndex + 1 < columns && visibleCaptionIndex < rows) {
+                nextHodinaViewRight = hodinasByCaptions[dayIndex + 1][visibleCaptionIndex].firstOrNull()
                 nextHodinaViewRight?.hightlightEdges(false, true, true)
             }
-            if (dayIndex < columns && captionIndex + 1 < rows) {
-                nextHodinaViewBottom = hodinasByCaptions[dayIndex][captionIndex + 1].firstOrNull()
+            if (dayIndex < columns && visibleCaptionIndex + 1 < rows) {
+                nextHodinaViewBottom = hodinasByCaptions[dayIndex][visibleCaptionIndex + 1].firstOrNull()
                 nextHodinaViewBottom?.hightlightEdges(true, false, true)
             }
-            if (dayIndex + 1 < columns && captionIndex + 1 < rows) {
-                nextHodinaViewCorner = hodinasByCaptions[dayIndex + 1][captionIndex + 1].firstOrNull()
+            if (dayIndex + 1 < columns && visibleCaptionIndex + 1 < rows) {
+                nextHodinaViewCorner = hodinasByCaptions[dayIndex + 1][visibleCaptionIndex + 1].firstOrNull()
                 nextHodinaViewCorner?.hightlightEdges(false, false, true)
             }
         }
@@ -632,6 +663,116 @@ class RozvrhLayout : ViewGroup {
         }
     }
 
+    fun setAlternatingRows(enabled: Boolean) {
+        if (alternatingRows == enabled) return
+        alternatingRows = enabled
+        applyAlternatingRows()
+    }
+
+    private fun applyAlternatingRows() {
+        if (!transposed) {
+            denViews.forEachIndexed { dayIndex, denView ->
+                denView.setAlternatingRow(alternatingRows && dayIndex % 2 == 1)
+            }
+            hodinasByCaptions.forEach { captionCol ->
+                captionCol.forEachIndexed { dayIndex, views ->
+                    val stripe = alternatingRows && dayIndex % 2 == 1
+                    views.forEach { it.setAlternatingRow(stripe && it.hasLesson()) }
+                }
+            }
+        } else {
+            captionViews.forEachIndexed { captionIndex, captionView ->
+                captionView.setAlternatingRow(alternatingRows && captionIndex % 2 == 1)
+            }
+            hodinasByCaptions.forEach { dayCol ->
+                dayCol.forEachIndexed { captionIndex, views ->
+                    val stripe = alternatingRows && captionIndex % 2 == 1
+                    views.forEach { it.setAlternatingRow(stripe && it.hasLesson()) }
+                }
+            }
+        }
+    }
+
+    fun setAlternatingCols(enabled: Boolean) {
+        if (alternatingCols == enabled) return
+        alternatingCols = enabled
+        applyAlternatingCols()
+    }
+
+    private fun applyAlternatingCols() {
+        if (!transposed) {
+            captionViews.forEachIndexed { captionIndex, captionView ->
+                captionView.setAlternatingCol(alternatingCols && captionIndex % 2 == 1)
+            }
+            hodinasByCaptions.forEachIndexed { captionIndex, captionCol ->
+                captionCol.forEach { views ->
+                    val stripe = alternatingCols && captionIndex % 2 == 1
+                    views.forEach { it.setAlternatingCol(stripe && it.hasLesson()) }
+                }
+            }
+        } else {
+            denViews.forEachIndexed { dayIndex, denView ->
+                denView.setAlternatingCol(alternatingCols && dayIndex % 2 == 1)
+            }
+            hodinasByCaptions.forEachIndexed { dayIndex, dayCol ->
+                dayCol.forEach { views ->
+                    val stripe = alternatingCols && dayIndex % 2 == 1
+                    views.forEach { it.setAlternatingCol(stripe && it.hasLesson()) }
+                }
+            }
+        }
+    }
+
+    fun setNoteKeys(keys: Set<String>) {
+        if (noteKeys == keys) return
+        noteKeys = keys
+        applyNoteKeys()
+    }
+
+    private fun applyNoteKeys() {
+        val r = rozvrh ?: return
+        if (!transposed) {
+            // hodinasByCaptions[captionIndex][dayIndex]
+            for (dayIndex in r.days.indices) {
+                val date = r.days[dayIndex].date
+                visibleCaptionIndexes.forEachIndexed { visibleCaptionIndex, captionIndex ->
+                    val key = lessonNoteKey(date, r.captions[captionIndex].beginTime)
+                    val has = key in noteKeys
+                    if (visibleCaptionIndex < hodinasByCaptions.size && dayIndex < hodinasByCaptions[visibleCaptionIndex].size) {
+                        hodinasByCaptions[visibleCaptionIndex][dayIndex].forEach { it.setHasNote(has) }
+                    }
+                }
+            }
+        } else {
+            // hodinasByCaptions[dayIndex][captionIndex]
+            for (dayIndex in r.days.indices) {
+                val date = r.days[dayIndex].date
+                visibleCaptionIndexes.forEachIndexed { visibleCaptionIndex, captionIndex ->
+                    val key = lessonNoteKey(date, r.captions[captionIndex].beginTime)
+                    val has = key in noteKeys
+                    if (dayIndex < hodinasByCaptions.size && visibleCaptionIndex < hodinasByCaptions[dayIndex].size) {
+                        hodinasByCaptions[dayIndex][visibleCaptionIndex].forEach { it.setHasNote(has) }
+                    }
+                }
+            }
+        }
+    }
+
+    fun setHideEmptyHours(enabled: Boolean) {
+        if (hideEmptyHours == enabled) return
+        hideEmptyHours = enabled
+        rows = -1
+        columns = -1
+        naturalCellWidth = -1
+        val currentRozvrh = rozvrh
+        if (currentRozvrh != null) {
+            setRozvrh(currentRozvrh, isTeacher)
+        } else {
+            createViews()
+            requestLayout()
+        }
+    }
+
     fun setTransposed(transposed: Boolean) {
         if (this.transposed == transposed) return
         this.transposed = transposed
@@ -649,6 +790,35 @@ class RozvrhLayout : ViewGroup {
 
     private fun compactDayColumnWidth(): Int {
         return Math.ceil(48 * resources.displayMetrics.density.toDouble()).toInt()
+    }
+
+    private fun getVisibleCaptionIndexes(rozvrh: Rozvrh): List<Int> {
+        val allIndexes = rozvrh.captions.indices.toList()
+        if (!hideEmptyHours) return allIndexes
+
+        val visible = BooleanArray(rozvrh.captions.size)
+        var foundAnyLesson = false
+
+        rozvrh.days
+            .filter { it.event == null }
+            .forEach { day ->
+                val first = allIndexes.firstOrNull { captionIndex ->
+                    day.blocks.getOrNull(captionIndex)?.isNotEmpty() == true
+                }
+                val last = allIndexes.lastOrNull { captionIndex ->
+                    day.blocks.getOrNull(captionIndex)?.isNotEmpty() == true
+                }
+
+                if (first != null && last != null) {
+                    foundAnyLesson = true
+                    for (captionIndex in first..last) {
+                        visible[captionIndex] = true
+                    }
+                }
+            }
+
+        if (!foundAnyLesson) return allIndexes
+        return allIndexes.filter { visible[it] }
     }
 
     companion object {

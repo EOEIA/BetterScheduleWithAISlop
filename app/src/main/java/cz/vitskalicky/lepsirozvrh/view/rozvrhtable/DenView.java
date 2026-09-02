@@ -21,6 +21,16 @@ public class DenView extends CellView {
     private String datumText = "";
     private boolean compact = false;
 
+    private boolean transposed = false;
+
+    public void setTransposed(boolean transposed) {
+        this.transposed = transposed;
+        // normal: left column row header → top divider, no left divider
+        // transposed: top row column header → left divider, no top divider
+        setDrawDividers(!transposed, true, transposed);
+        invalidate();
+    }
+
     public DenView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setDrawDividers(true, true, false);

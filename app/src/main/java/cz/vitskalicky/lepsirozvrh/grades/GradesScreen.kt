@@ -305,9 +305,12 @@ fun SubjectCard(subject: MarkSubject, hasNew: Boolean = false, onClick: () -> Un
                         }
                     }
                 }
-                if (subject.AverageText.isNotBlank()) {
+                val avgText = GradePredictor.weightedAverage(
+                    subject.Marks.mapNotNull { m -> GradePredictor.parseGrade(m.MarkText)?.let { it to m.Weight } }
+                )?.let { "Ø ${"%.2f".format(it)}" }
+                if (avgText != null) {
                     Text(
-                        text = "Ø ${subject.AverageText}",
+                        text = avgText,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.primary,
                         fontSize = 16.sp

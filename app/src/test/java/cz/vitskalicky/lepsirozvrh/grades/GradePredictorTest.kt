@@ -18,15 +18,15 @@ class GradePredictorTest {
     }
 
     @Test
-    fun `parseGrade modified plus`() {
-        assertEquals(1.5, GradePredictor.parseGrade("2+")!!, 0.001)
-        assertEquals(2.5, GradePredictor.parseGrade("3+")!!, 0.001)
+    fun `parseGrade ignores plus modifier`() {
+        assertEquals(2.0, GradePredictor.parseGrade("2+")!!, 0.001)
+        assertEquals(3.0, GradePredictor.parseGrade("3+")!!, 0.001)
     }
 
     @Test
-    fun `parseGrade modified minus`() {
-        assertEquals(2.5, GradePredictor.parseGrade("2-")!!, 0.001)
-        assertEquals(3.5, GradePredictor.parseGrade("3-")!!, 0.001)
+    fun `parseGrade ignores minus modifier`() {
+        assertEquals(2.0, GradePredictor.parseGrade("2-")!!, 0.001)
+        assertEquals(3.0, GradePredictor.parseGrade("3-")!!, 0.001)
     }
 
     @Test

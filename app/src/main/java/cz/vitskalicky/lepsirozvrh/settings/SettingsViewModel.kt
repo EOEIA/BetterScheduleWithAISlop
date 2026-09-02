@@ -67,10 +67,30 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         set(value) = sp.edit { putBoolean(PrefsConsts.SHOW_NEXT_LESSON_CARD, value) }
     val showNextLessonCardLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.SHOW_NEXT_LESSON_CARD, true)
 
+    var showNextLessonCountdown: Boolean
+        get() = sp.boolean(PrefsConsts.SHOW_NEXT_LESSON_COUNTDOWN) ?: true
+        set(value) = sp.edit { putBoolean(PrefsConsts.SHOW_NEXT_LESSON_COUNTDOWN, value) }
+    val showNextLessonCountdownLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.SHOW_NEXT_LESSON_COUNTDOWN, true)
+
     var transposedTimetable: Boolean
         get() = sp.boolean(PrefsConsts.TIMETABLE_TRANSPOSED) ?: false
         set(value) = sp.edit { putBoolean(PrefsConsts.TIMETABLE_TRANSPOSED, value) }
     val transposedTimetableLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.TIMETABLE_TRANSPOSED, false)
+
+    var alternatingRows: Boolean
+        get() = sp.boolean(PrefsConsts.ALTERNATING_ROWS) ?: false
+        set(value) = sp.edit { putBoolean(PrefsConsts.ALTERNATING_ROWS, value) }
+    val alternatingRowsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ALTERNATING_ROWS, false)
+
+    var alternatingCols: Boolean
+        get() = sp.boolean(PrefsConsts.ALTERNATING_COLS) ?: false
+        set(value) = sp.edit { putBoolean(PrefsConsts.ALTERNATING_COLS, value) }
+    val alternatingColsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ALTERNATING_COLS, false)
+
+    var hideEmptyHours: Boolean
+        get() = sp.boolean(PrefsConsts.HIDE_EMPTY_HOURS) ?: false
+        set(value) = sp.edit { putBoolean(PrefsConsts.HIDE_EMPTY_HOURS, value) }
+    val hideEmptyHoursLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.HIDE_EMPTY_HOURS, false)
 
     var changeAlertsEnabled: Boolean
         get() = sp.boolean(PrefsConsts.CHANGE_ALERTS_ENABLED) ?: false

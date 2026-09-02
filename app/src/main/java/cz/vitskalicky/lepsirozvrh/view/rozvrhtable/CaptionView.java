@@ -20,6 +20,7 @@ public class CaptionView extends CellView {
 
     public void setTransposed(boolean transposed) {
         this.transposed = transposed;
+        setDrawDividers(transposed, true, true);  // top divider needed in transposed (row separators)
         invalidate();
         requestLayout();
     }

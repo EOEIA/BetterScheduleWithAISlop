@@ -88,7 +88,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
                 applicationContext,
                 RozvrhDatabase::class.java, "rozvrh-database"
         )
-            .addMigrations(Migrations.MIGRATION_1_2)
+            .addMigrations(Migrations.MIGRATION_1_2, Migrations.MIGRATION_2_3, Migrations.MIGRATION_3_4)
             .build()
     }
 

@@ -74,10 +74,18 @@
     <string name="changed_lesson_visuals_desc">Color cells by change type (substitution, cancelled, added…)</string>
     <string name="compact_timetable">Compact timetable</string>
     <string name="compact_timetable_desc">Smaller cells so more lessons fit on screen</string>
+    <string name="hide_empty_hours">Hide empty hours</string>
+    <string name="hide_empty_hours_desc">Hide timetable rows or columns that contain no lessons</string>
     <string name="transposed_timetable">Transposed table</string>
     <string name="transposed_timetable_desc">Days across the top, time slots down the side</string>
+    <string name="alternating_rows">Alternating rows</string>
+    <string name="alternating_rows_desc">Subtle shade difference between rows for easier reading</string>
+    <string name="alternating_cols">Alternating columns</string>
+    <string name="alternating_cols_desc">Subtle shade difference between columns for easier reading</string>
     <string name="show_next_lesson_card">Next lesson card</string>
     <string name="show_next_lesson_card_desc">Bottom bar showing the current or upcoming lesson with countdown</string>
+    <string name="show_next_lesson_countdown">Next lesson countdown</string>
+    <string name="show_next_lesson_countdown_desc">Show countdown in the next lesson card</string>
     <string name="lesson_time">Time</string>
     <string name="debug_demo_mode">Demo mode</string>
     <string name="debug_demo_mode_desc">Show deterministic debug schedule data without a real account</string>
@@ -359,7 +367,7 @@
     <string name="grades_sort_name">Name</string>
     <string name="grades_sort_best">Best avg</string>
     <string name="grades_sort_worst">Worst avg</string>
-    <string name="predict_real_avg">Real avg</string>
+    <string name="predict_real_avg">Average</string>
     <string name="predict_predicted">Predicted</string>
     <string name="predict_add_grade">Add hypothetical grade</string>
     <string name="predict_reset">Reset predictor</string>
@@ -389,6 +397,22 @@
 
     <!-- Homework -->
     <string name="homework_title">Homework</string>
+    <string name="tab_both">Both</string>
+    <string name="tab_homework">Homework</string>
+    <string name="tab_tasks">Tasks</string>
+    <string name="tasks_empty">No tasks yet. Tap + to add one.</string>
+    <string name="add_task">Add task</string>
+    <string name="task_title">Title</string>
+    <string name="task_subject_optional">Subject (optional)</string>
+    <string name="task_due_date_optional">Due date (YYYY-MM-DD)</string>
+    <string name="task_due_time_optional">Due time (HH:mm)</string>
+    <string name="task_due_date_invalid">Use date format YYYY-MM-DD.</string>
+    <string name="task_due_time_invalid">Use time format HH:mm.</string>
+    <string name="task_attached_to_lesson">Lesson</string>
+    <string name="add">Add</string>
+    <string name="lesson_note">Note</string>
+    <string name="lesson_tasks">Tasks</string>
+    <string name="lesson_task">Task</string>
     <string name="homework_empty">No homework for this week</string>
     <string name="homework_empty_hint">Homework is pulled from lessons in the current timetable week</string>
     <string name="change_history_title">Change history</string>

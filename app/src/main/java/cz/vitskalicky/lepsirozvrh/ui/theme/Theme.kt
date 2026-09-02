@@ -60,17 +60,14 @@ fun LepsirozvrhTheme(darkTheme: Boolean = isSystemInDarkTheme(), hasAppBar: Bool
             content = {
                 if (tintStatusBar) {
                     val suiController = rememberSystemUiController()
-                    suiController.setStatusBarColor(
-                        if (hasAppBar) {
-                            MaterialTheme.colors.primarySurface.darker()
-                        } else {
-                            if (isRozvrhScreen){
-                                rozvrhTheme.cHeaderBg.darker()
-                            }else {
-                                MaterialTheme.colors.surface.darker()
-                            }
-                        }
-                    )
+                    val statusBarColor = if (hasAppBar) {
+                        MaterialTheme.colors.primarySurface.darker()
+                    } else {
+                        if (isRozvrhScreen) rozvrhTheme.cHeaderBg.darker()
+                        else MaterialTheme.colors.surface.darker()
+                    }
+                    suiController.setStatusBarColor(statusBarColor)
+                    suiController.setNavigationBarColor(MaterialTheme.colors.surface)
                 }
                 content()
             }

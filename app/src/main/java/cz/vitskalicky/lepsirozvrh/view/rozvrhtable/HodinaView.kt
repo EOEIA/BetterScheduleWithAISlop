@@ -36,10 +36,12 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     private val homeworkPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val homeworkCountPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val topicPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val noteDotPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.color = 0xFFFFC107.toInt() }
     /** 0 = off (existing changeType colors), 1 = colors per changeKind */
     private var changeVisualMode: Int = 0
     private var highlightWidth: Int = 0
     private var homeworkSize: Int = 0
+    private var hasNote = false
     private var topHighlighted = false
     private var leftHighlighted = false
     private var cornerHighlighted = false
@@ -92,6 +94,17 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
      */
     val minimalComfortableHeight: Int
         get() = (primaryTextSize / 2 + textPadding + secondaryTextSize) * 2 + super.getMinimumHeight()
+
+    fun hasLesson(): Boolean = hodina != null || event != null
+
+    fun setHasNote(has: Boolean) {
+        if (has == hasNote) return
+        hasNote = has
+        invalidate()
+    }
+
+    private var transposed = false
+    fun setTransposed(transposed: Boolean) { this.transposed = transposed }
 
     /**
      * Updates the content to display a lesson
@@ -195,7 +208,9 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     }
 
     override fun onDraw(canvas: Canvas) {
-        setDrawDividers(!topHighlighted, !cornerHighlighted, !leftHighlighted && (event == null || eventStart == 0) )
+        // In transposed mode, draw row separators through normal lesson cells. Event rows stay visually merged.
+        val drawTop = !topHighlighted && (!transposed || event == null)
+        setDrawDividers(drawTop, !cornerHighlighted, !leftHighlighted && (event == null || eventStart == 0))
         super.onDraw(canvas)
         val w = width
         val h = height
@@ -301,6 +316,12 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
                 }
             }
 
+            //draw note indicator dot in bottom-right corner
+            if (hasNote) {
+                val noteR = (homeworkSize * 0.85f).coerceAtLeast(3f)
+                canvas.drawCircle((xEnd - noteR - 2).toFloat(), (yEnd - noteR - 2).toFloat(), noteR, noteDotPaint)
+            }
+
             //draw homework indicator: dot for 1, numbered badge for >1
             if (lesson.homeworkIds.isNotEmpty()) {
                 val count = lesson.homeworkIds.size
@@ -330,29 +351,48 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
                 canvas.drawText(hodina.getCycle(), middle, cycleBaseline, secondaryTextPaint);
             }*/
         } else if (event != null){
-            var actualPrimaryTextSize: Float = primaryTextSize.toFloat()
-            var textPaddingLeft: Float = 20 * context.resources.displayMetrics.density
-            val drawableEventWidth: Float = eventWidth.toFloat() - dividerWidth - paddingLeft - textPaddingLeft - paddingRight
-            //correct height
-            if (h < actualPrimaryTextSize){
-                actualPrimaryTextSize = h.toFloat()
-            }
-            primaryTextPaint.textSize = actualPrimaryTextSize
-            var textWidth: Float = primaryTextPaint.measureText(event)
-            if (textWidth > drawableEventWidth){
-                // the text is too long
-                val overflow: Float = textWidth - drawableEventWidth
-                actualPrimaryTextSize *= overflow / textWidth
+            if (transposed) {
+                // Vertical event spanning: rotate 90° and span downward across cells
+                var actualPrimaryTextSize: Float = primaryTextSize.toFloat()
+                if (w < actualPrimaryTextSize) actualPrimaryTextSize = w.toFloat()
+                val totalH = eventWidth.toFloat()
                 primaryTextPaint.textSize = actualPrimaryTextSize
-                @Suppress("UNUSED_VALUE")
-                textWidth = primaryTextPaint.measureText(event)
+                val textWidth = primaryTextPaint.measureText(event)
+                if (textWidth > totalH * 0.85f) {
+                    actualPrimaryTextSize *= totalH * 0.85f / textWidth
+                    primaryTextPaint.textSize = actualPrimaryTextSize
+                }
+                val textPaddingV: Float = 20 * context.resources.displayMetrics.density
+                // After canvas.rotate(90°): canvas +X = screen +Y (downward), canvas +Y = screen -X
+                // canvas (tx, ty) → screen (-ty, tx)
+                // tx = screen Y of text start = textPaddingV - eventStart (spans across cells)
+                // ty = -(screen X center) + textSize/2 → centers text horizontally in cell
+                val cx = xStart + w / 2f
+                primaryTextPaint.textAlign = Paint.Align.LEFT
+                canvas.save()
+                canvas.rotate(90f)
+                canvas.drawText(event!!, textPaddingV - eventStart + yStart, -cx + actualPrimaryTextSize / 2f, primaryTextPaint)
+                canvas.restore()
+            } else {
+                var actualPrimaryTextSize: Float = primaryTextSize.toFloat()
+                val textPaddingLeft: Float = 20 * context.resources.displayMetrics.density
+                val drawableEventWidth: Float = eventWidth.toFloat() - dividerWidth - paddingLeft - textPaddingLeft - paddingRight
+                if (h < actualPrimaryTextSize) actualPrimaryTextSize = h.toFloat()
+                primaryTextPaint.textSize = actualPrimaryTextSize
+                var textWidth: Float = primaryTextPaint.measureText(event)
+                if (textWidth > drawableEventWidth){
+                    val overflow: Float = textWidth - drawableEventWidth
+                    actualPrimaryTextSize *= overflow / textWidth
+                    primaryTextPaint.textSize = actualPrimaryTextSize
+                    @Suppress("UNUSED_VALUE")
+                    textWidth = primaryTextPaint.measureText(event)
+                }
+                primaryTextPaint.textAlign = Paint.Align.LEFT
+                val xTextStart = dividerWidth + paddingLeft + textPaddingLeft
+                val realXTextStart = xTextStart - eventStart
+                val baseline = h / 2f + actualPrimaryTextSize / 2f
+                canvas.drawText(event!!, realXTextStart, baseline, primaryTextPaint)
             }
-
-            primaryTextPaint.textAlign = Paint.Align.LEFT
-            val xTextStart = dividerWidth + paddingLeft + textPaddingLeft
-            val realXTextStart = xTextStart - eventStart
-            val baseline = h /2f + actualPrimaryTextSize /2f
-            canvas.drawText(event!!, realXTextStart, baseline, primaryTextPaint)
         }
     }
 

@@ -105,7 +105,6 @@ fun SubjectDetailScreen(
                 if (marks.isNotEmpty()) {
                     item {
                         PredictionCard(
-                            subject = subject,
                             marks = marks,
                             prediction = prediction,
                             isActive = predictionState.isActive
@@ -115,7 +114,10 @@ fun SubjectDetailScreen(
 
                 // Sticky compact summary that stays visible while scrolling
                 stickyHeader {
-                    CompactSummaryBar(prediction = prediction, isActive = predictionState.isActive)
+                    CompactSummaryBar(
+                        prediction = prediction,
+                        isActive = predictionState.isActive
+                    )
                 }
 
                 // Sort row
@@ -247,6 +249,7 @@ private fun CompactSummaryBar(
     isActive: Boolean
 ) {
     val realAvg = prediction.realAverage ?: return
+    val displayedRealAverage = "%.2f".format(realAvg)
     Surface(
         color = MaterialTheme.colors.surface,
         elevation = 2.dp,
@@ -258,7 +261,7 @@ private fun CompactSummaryBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                "%.2f".format(realAvg),
+                displayedRealAverage,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -281,7 +284,6 @@ private fun CompactSummaryBar(
 
 @Composable
 private fun PredictionCard(
-    subject: MarkSubject,
     marks: List<Mark>,
     prediction: GradePredictor.PredictionResult,
     isActive: Boolean
@@ -295,13 +297,6 @@ private fun PredictionCard(
     val currentGrade = prediction.realRoundedGrade
     val bandTargets = mapOf(2 to 1.49, 3 to 2.49, 4 to 3.49, 5 to 4.49)
     val improveTarget = if (currentGrade != null && currentGrade > 1) bandTargets[currentGrade] else null
-
-    // Selected weight for "what you need" hints — defaults to 1, local state
-    var selectedWeight by remember { mutableStateOf(1) }
-
-    val improveNeeded = improveTarget?.let { GradePredictor.neededGrade(realSum, realWeight, it, selectedWeight) }
-    val grade1Needed = if (improveTarget != null && improveTarget > 1.49 + 0.001)
-        GradePredictor.neededGrade(realSum, realWeight, 1.49, selectedWeight) else null
 
     Card(
         modifier = Modifier
@@ -323,7 +318,7 @@ private fun PredictionCard(
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                     )
                     Text(
-                        subject.AverageText.ifBlank { prediction.realAverage?.let { "%.2f".format(it) } ?: "—" },
+                        prediction.realAverage?.let { "%.2f".format(it) } ?: "—",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
@@ -362,55 +357,33 @@ private fun PredictionCard(
                 }
             }
 
-            // Weight selector + hints (only when there is a target to improve toward)
+            // What you need hints (no buttons — computed automatically for grade 1)
             if (improveTarget != null) {
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    stringResource(R.string.predict_hint_weight_label),
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                )
-                Spacer(Modifier.height(4.dp))
-                // Weight chips 1–10
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    for (w in 1..10) {
-                        val sel = selectedWeight == w
-                        Surface(
-                            color = if (sel) MaterialTheme.colors.primary else MaterialTheme.colors.surface,
-                            contentColor = if (sel) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface,
-                            shape = MaterialTheme.shapes.small,
-                            border = BorderStroke(1.dp, if (sel) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(0.25f)),
-                            modifier = Modifier.clickable { selectedWeight = w }
-                        ) {
-                            Text(
-                                "$w",
-                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.caption
-                            )
-                        }
-                    }
-                }
+                Spacer(Modifier.height(8.dp))
+                Divider()
                 Spacer(Modifier.height(6.dp))
-                // Improve hint
-                val improveLabel = improveNeeded?.let { worstAcceptableGrade(it) } ?: "—"
-                Text(
-                    "w$selectedWeight: $improveLabel → grade ${(currentGrade ?: 2) - 1}",
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.55f)
-                )
-                // Grade-1 hint (only when improve target ≠ grade-1 target)
-                if (grade1Needed != null || (improveTarget > 1.49 + 0.001)) {
-                    val grade1Label = grade1Needed?.let { worstAcceptableGrade(it) } ?: "—"
+
+                // Helper: one hint line for a target band
+                @Composable
+                fun HintLine(targetGrade: Int, targetAvg: Double) {
+                    val exactW = GradePredictor.exactWeightNeeded(realSum, realWeight, targetAvg, 1.0)
+                    val minW   = exactW?.let { kotlin.math.ceil(it).toInt() }
+                    val text = when {
+                        exactW == null -> "→ grade $targetGrade: not reachable with grade 1"
+                        minW != null   -> "→ grade $targetGrade: add 1 · w≥$minW (exact ${"%.2f".format(exactW)})"
+                        else           -> "→ grade $targetGrade: —"
+                    }
                     Text(
-                        "w$selectedWeight: $grade1Label for a 1",
+                        text,
                         style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.55f)
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                     )
+                }
+
+                val improveGrade = (currentGrade ?: 2) - 1
+                HintLine(improveGrade, improveTarget)
+                if (improveTarget > 1.49 + 0.001) {
+                    HintLine(1, 1.49)
                 }
             }
         }

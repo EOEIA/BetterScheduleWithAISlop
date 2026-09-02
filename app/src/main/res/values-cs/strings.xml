@@ -71,10 +71,18 @@
     <string name="changed_lesson_visuals_desc">Obarví buňky dle druhu změny (suplování, odpadnutí, přidání…)</string>
     <string name="compact_timetable">Kompaktní rozvrh</string>
     <string name="compact_timetable_desc">Menší buňky, aby se na obrazovku vešlo více hodin</string>
+    <string name="hide_empty_hours">Skrýt prázdné hodiny</string>
+    <string name="hide_empty_hours_desc">Skryje řádky nebo sloupce rozvrhu, kde nejsou žádné hodiny</string>
     <string name="transposed_timetable">Otočená tabulka</string>
     <string name="transposed_timetable_desc">Dny nahoře, hodiny v řádcích</string>
+    <string name="alternating_rows">Střídání řádků</string>
+    <string name="alternating_rows_desc">Lehce odlišné odstíny řádků pro snazší čtení tabulky</string>
+    <string name="alternating_cols">Střídání sloupců</string>
+    <string name="alternating_cols_desc">Lehce odlišné odstíny sloupců pro snazší čtení tabulky</string>
     <string name="show_next_lesson_card">Karta příští hodiny</string>
     <string name="show_next_lesson_card_desc">Spodní lišta zobrazující aktuální nebo příští hodinu s odpočtem</string>
+    <string name="show_next_lesson_countdown">Odpočet příští hodiny</string>
+    <string name="show_next_lesson_countdown_desc">Zobrazovat odpočet v kartě příští hodiny</string>
     <string name="lesson_time">Čas</string>
     <string name="debug_demo_mode">Demo režim</string>
     <string name="debug_demo_mode_desc">Zobrazí pevná ladicí data rozvrhu bez skutečného účtu</string>
@@ -336,7 +344,7 @@
     <string name="grades_sort_name">Název</string>
     <string name="grades_sort_best">Nejlepší průměr</string>
     <string name="grades_sort_worst">Nejhorší průměr</string>
-    <string name="predict_real_avg">Skutečný průměr</string>
+    <string name="predict_real_avg">Průměr</string>
     <string name="predict_predicted">Předpovídaný</string>
     <string name="predict_add_grade">Přidat hypotetickou</string>
     <string name="predict_reset">Resetovat prediktor</string>
@@ -366,6 +374,22 @@
 
     <!-- Domácí úkoly -->
     <string name="homework_title">Domácí úkoly</string>
+    <string name="tab_both">Vše</string>
+    <string name="tab_homework">Domácí úkoly</string>
+    <string name="tab_tasks">Úkoly</string>
+    <string name="tasks_empty">Žádné úkoly. Přidej první tlačítkem +.</string>
+    <string name="add_task">Přidat úkol</string>
+    <string name="task_title">Název</string>
+    <string name="task_subject_optional">Předmět (nepovinné)</string>
+    <string name="task_due_date_optional">Datum (YYYY-MM-DD)</string>
+    <string name="task_due_time_optional">Čas (HH:mm)</string>
+    <string name="task_due_date_invalid">Použij formát data YYYY-MM-DD.</string>
+    <string name="task_due_time_invalid">Použij formát času HH:mm.</string>
+    <string name="task_attached_to_lesson">Hodina</string>
+    <string name="add">Přidat</string>
+    <string name="lesson_note">Poznámka</string>
+    <string name="lesson_tasks">Úkoly</string>
+    <string name="lesson_task">Úkol</string>
     <string name="homework_empty">Na tento týden žádné domácí úkoly</string>
     <string name="homework_empty_hint">Úkoly jsou načítány z hodin aktuálního týdne rozvrhu</string>
     <string name="change_history_title">Historie změn</string>
