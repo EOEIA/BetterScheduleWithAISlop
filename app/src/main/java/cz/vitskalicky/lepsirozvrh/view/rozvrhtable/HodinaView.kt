@@ -3,6 +3,7 @@ package cz.vitskalicky.lepsirozvrh.view.rozvrhtable
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -36,12 +37,15 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     private val homeworkPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val homeworkCountPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val topicPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val noteDotPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.color = 0xFFFFC107.toInt() }
+    private val noteIndicatorPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.color = 0xFFFFB300.toInt() }
+    private val taskIndicatorPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.color = 0xFF4FC3F7.toInt() }
+    private val indicatorGlyphPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     /** 0 = off (existing changeType colors), 1 = colors per changeKind */
     private var changeVisualMode: Int = 0
     private var highlightWidth: Int = 0
     private var homeworkSize: Int = 0
     private var hasNote = false
+    private var hasTask = false
     private var topHighlighted = false
     private var leftHighlighted = false
     private var cornerHighlighted = false
@@ -97,9 +101,10 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
 
     fun hasLesson(): Boolean = hodina != null || event != null
 
-    fun setHasNote(has: Boolean) {
-        if (has == hasNote) return
-        hasNote = has
+    fun setLessonIndicators(hasNote: Boolean, hasTask: Boolean) {
+        if (hasNote == this.hasNote && hasTask == this.hasTask) return
+        this.hasNote = hasNote
+        this.hasTask = hasTask
         invalidate()
     }
 
@@ -259,8 +264,12 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
                 zkruc = lesson.groups.joinToString(", ") { it.abbrev.ifBlank { it.name } }
             }
 
-            var actualSecondaryTextSize: Float = if ((zkrmist + zkruc).isEmpty()) 0.0f else secondaryTextSize.toFloat()
+            val hasSecondaryText = (zkrmist + zkruc).isNotEmpty()
+            val topic = lesson.theme
+            val hasTopic = topic.isNotBlank()
+            var actualSecondaryTextSize: Float = if (hasSecondaryText) secondaryTextSize.toFloat() else 0.0f
             var actualPrimaryTextSize = primaryTextSize.toFloat()
+            var actualTopicTextSize = if (hasTopic) secondaryTextSize * 0.75f else 0f
             if (canvas.height < minimumHeight) {
                 var overflow = actualPrimaryTextSize + textPadding + actualSecondaryTextSize - h
                 if (overflow < 0) {
@@ -274,17 +283,60 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
             primaryTextPaint.textSize = actualPrimaryTextSize
             secondaryTextPaint.textSize = actualSecondaryTextSize
             mistPaint.textSize = actualSecondaryTextSize
-            var zkrprBaseline = h / 2f + actualPrimaryTextSize / 2f
+            topicPaint.textSize = actualTopicTextSize
             val middle = w / 2f
-            var secondaryBaseline = zkrprBaseline + textPadding + actualSecondaryTextSize
-            val secondaryTextWidth = secondaryTextPaint.measureText("$zkruc $zkrmist")
-            val zkrucStart = middle - secondaryTextWidth / 2f
-            val zkrmistStart = zkrucStart + secondaryTextPaint.measureText("$zkruc ")
-            if (canvas.height < minimalComfortableHeight - (secondaryTextSize - actualSecondaryTextSize)) {
-                //do not align zkrpr to center (vertically)
-                //secondary text will be aligned to the bottom and zkrpr to the center of the remaining space
-                secondaryBaseline = h.toFloat()
-                zkrprBaseline = (secondaryBaseline - actualSecondaryTextSize) / 2 + actualPrimaryTextSize / 2f
+            val indicatorReservedHeight = if (hasLessonIndicators()) lessonIndicatorSize() + 3f else 0f
+            val availableTextHeight = (h - indicatorReservedHeight).coerceAtLeast(actualPrimaryTextSize)
+            val topicPadding = if (hasTopic) (textPadding / 2f).coerceAtLeast(1f) else 0f
+            var textStackHeight = actualPrimaryTextSize +
+                if (hasSecondaryText) textPadding + actualSecondaryTextSize else 0f
+            if (hasTopic) textStackHeight += topicPadding + actualTopicTextSize
+
+            if (hasTopic && textStackHeight > availableTextHeight) {
+                val scale = (availableTextHeight / textStackHeight).coerceAtMost(1f)
+                actualPrimaryTextSize *= scale
+                actualSecondaryTextSize *= scale
+                actualTopicTextSize *= scale
+                primaryTextPaint.textSize = actualPrimaryTextSize
+                secondaryTextPaint.textSize = actualSecondaryTextSize
+                mistPaint.textSize = actualSecondaryTextSize
+                topicPaint.textSize = actualTopicTextSize
+                textStackHeight = actualPrimaryTextSize +
+                    if (hasSecondaryText) textPadding + actualSecondaryTextSize else 0f
+                textStackHeight += topicPadding + actualTopicTextSize
+            }
+
+            var zkrprBaseline: Float
+            var secondaryBaseline: Float
+            var topicBaseline: Float? = null
+
+            if (hasTopic) {
+                var cursor = ((availableTextHeight - textStackHeight) / 2f).coerceAtLeast(0f)
+                zkrprBaseline = cursor + actualPrimaryTextSize
+                cursor = zkrprBaseline
+                secondaryBaseline = if (hasSecondaryText) {
+                    cursor + textPadding + actualSecondaryTextSize
+                } else {
+                    zkrprBaseline
+                }
+                cursor = secondaryBaseline
+                topicBaseline = cursor + topicPadding + actualTopicTextSize
+            } else {
+                zkrprBaseline = h / 2f + actualPrimaryTextSize / 2f
+                secondaryBaseline = zkrprBaseline + textPadding + actualSecondaryTextSize
+                if (canvas.height < minimalComfortableHeight - (secondaryTextSize - actualSecondaryTextSize)) {
+                    //do not align zkrpr to center (vertically)
+                    //secondary text will be aligned to the bottom and zkrpr to the center of the remaining space
+                    secondaryBaseline = h.toFloat()
+                    zkrprBaseline = (secondaryBaseline - actualSecondaryTextSize) / 2 + actualPrimaryTextSize / 2f
+                }
+                if (hasLessonIndicators() && actualSecondaryTextSize > 0f) {
+                    val indicatorTop = h - lessonIndicatorSize() - 3f
+                    if (secondaryBaseline > indicatorTop) {
+                        secondaryBaseline = indicatorTop
+                        zkrprBaseline = (secondaryBaseline - actualSecondaryTextSize) / 2 + actualPrimaryTextSize / 2f
+                    }
+                }
             }
 
             // zkrpr
@@ -292,35 +344,27 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
             canvas.drawText(zkrpr, middle + xStart, zkrprBaseline + yStart, primaryTextPaint)
 
             //draw secondary = teacher and room
-            mistPaint.textAlign = Paint.Align.LEFT
-            canvas.drawText(zkrmist, zkrmistStart + xStart, secondaryBaseline + yStart, mistPaint)
-            secondaryTextPaint.textAlign = Paint.Align.LEFT
-            canvas.drawText(zkruc, zkrucStart + xStart, secondaryBaseline + yStart, secondaryTextPaint)
-
-            //draw topic (lesson theme) as a small third line if there is space
-            val topic = lesson.theme
-            if (topic.isNotBlank()) {
-                val topicSize = secondaryTextSize * 0.75f
-                val topicBaseline = secondaryBaseline + textPadding + topicSize
-                if (topicBaseline + yStart <= yEnd) {
-                    topicPaint.textSize = topicSize
-                    topicPaint.textAlign = Paint.Align.CENTER
-                    // truncate with ellipsis if needed
-                    val maxW = (w - 4).toFloat()
-                    val displayed = if (topicPaint.measureText(topic) > maxW) {
-                        var s = topic
-                        while (s.isNotEmpty() && topicPaint.measureText("$s…") > maxW) s = s.dropLast(1)
-                        "$s…"
-                    } else topic
-                    canvas.drawText(displayed, middle + xStart, topicBaseline + yStart, topicPaint)
-                }
+            if (hasSecondaryText) {
+                val secondaryTextWidth = secondaryTextPaint.measureText("$zkruc $zkrmist")
+                val zkrucStart = middle - secondaryTextWidth / 2f
+                val zkrmistStart = zkrucStart + secondaryTextPaint.measureText("$zkruc ")
+                mistPaint.textAlign = Paint.Align.LEFT
+                canvas.drawText(zkrmist, zkrmistStart + xStart, secondaryBaseline + yStart, mistPaint)
+                secondaryTextPaint.textAlign = Paint.Align.LEFT
+                canvas.drawText(zkruc, zkrucStart + xStart, secondaryBaseline + yStart, secondaryTextPaint)
             }
 
-            //draw note indicator dot in bottom-right corner
-            if (hasNote) {
-                val noteR = (homeworkSize * 0.85f).coerceAtLeast(3f)
-                canvas.drawCircle((xEnd - noteR - 2).toFloat(), (yEnd - noteR - 2).toFloat(), noteR, noteDotPaint)
+            topicBaseline?.takeIf { it + yStart <= yEnd }?.let { baseline ->
+                topicPaint.textAlign = Paint.Align.CENTER
+                canvas.drawText(
+                    ellipsize(topic, topicPaint, (w - 4).toFloat()),
+                    middle + xStart,
+                    baseline + yStart,
+                    topicPaint
+                )
             }
+
+            drawLessonIndicators(canvas, xEnd, yEnd)
 
             //draw homework indicator: dot for 1, numbered badge for >1
             if (lesson.homeworkIds.isNotEmpty()) {
@@ -393,6 +437,74 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
                 val baseline = h / 2f + actualPrimaryTextSize / 2f
                 canvas.drawText(event!!, realXTextStart, baseline, primaryTextPaint)
             }
+        }
+    }
+
+    private fun drawLessonIndicators(canvas: Canvas, xEnd: Int, yEnd: Int) {
+        if (!hasLessonIndicators()) return
+
+        val size = lessonIndicatorSize()
+        val gap = 3f
+        val bottom = yEnd - 2f
+        var right = xEnd - 2f
+
+        if (hasTask) {
+            drawTaskIndicator(canvas, right - size, bottom - size, size)
+            right -= size + gap
+        }
+        if (hasNote) {
+            drawNoteIndicator(canvas, right - size, bottom - size, size)
+        }
+    }
+
+    private fun hasLessonIndicators(): Boolean = hasNote || hasTask
+
+    private fun lessonIndicatorSize(): Float = (homeworkSize * 2.5f).coerceAtLeast(12f)
+
+    private fun ellipsize(text: String, paint: Paint, maxWidth: Float): String {
+        if (paint.measureText(text) <= maxWidth) return text
+
+        var shortened = text
+        while (shortened.isNotEmpty() && paint.measureText("$shortened…") > maxWidth) {
+            shortened = shortened.dropLast(1)
+        }
+        return "$shortened…"
+    }
+
+    private fun drawNoteIndicator(canvas: Canvas, left: Float, top: Float, size: Float) {
+        val paint = legibleIndicatorPaint(noteIndicatorPaint)
+        val radius = size * 0.16f
+        val rect = RectF(left, top, left + size, top + size)
+        canvas.drawRoundRect(rect, radius, radius, paint)
+
+        indicatorGlyphPaint.color = backgroundPaint.color
+        indicatorGlyphPaint.strokeWidth = (size * 0.11f).coerceAtLeast(1.2f)
+        val inset = size * 0.22f
+        canvas.drawLine(left + inset, top + size * 0.4f, left + size - inset, top + size * 0.4f, indicatorGlyphPaint)
+        canvas.drawLine(left + inset, top + size * 0.6f, left + size * 0.72f, top + size * 0.6f, indicatorGlyphPaint)
+    }
+
+    private fun drawTaskIndicator(canvas: Canvas, left: Float, top: Float, size: Float) {
+        val paint = legibleIndicatorPaint(taskIndicatorPaint)
+        val radius = size * 0.16f
+        val rect = RectF(left, top, left + size, top + size)
+        canvas.drawRoundRect(rect, radius, radius, paint)
+
+        indicatorGlyphPaint.color = backgroundPaint.color
+        indicatorGlyphPaint.style = Paint.Style.STROKE
+        indicatorGlyphPaint.strokeWidth = (size * 0.13f).coerceAtLeast(1.5f)
+        indicatorGlyphPaint.strokeCap = Paint.Cap.ROUND
+        canvas.drawLine(left + size * 0.28f, top + size * 0.54f, left + size * 0.43f, top + size * 0.69f, indicatorGlyphPaint)
+        canvas.drawLine(left + size * 0.43f, top + size * 0.69f, left + size * 0.74f, top + size * 0.34f, indicatorGlyphPaint)
+        indicatorGlyphPaint.style = Paint.Style.FILL
+        indicatorGlyphPaint.strokeCap = Paint.Cap.BUTT
+    }
+
+    private fun legibleIndicatorPaint(preferred: Paint): Paint {
+        return if (isLegible(Color(preferred.color), Color(backgroundPaint.color), 1.5)) {
+            preferred
+        } else {
+            primaryTextPaint
         }
     }
 

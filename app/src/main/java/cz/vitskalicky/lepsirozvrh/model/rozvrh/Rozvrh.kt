@@ -59,7 +59,9 @@ data class Rozvrh(
             .flatMap { day ->
                 val displayDate = displayDateForCurrentOrNextLesson(day.date, now)
                 captions.indices.mapNotNull { captionIndex ->
-                    val lesson = day.blocks.getOrNull(captionIndex)?.firstOrNull() ?: return@mapNotNull null
+                    val lesson = day.blocks.getOrNull(captionIndex)
+                        ?.firstOrNull { it.takesPlace() }
+                        ?: return@mapNotNull null
                     val caption = captions[captionIndex]
                     CandidateLesson(
                         block = RozvrhBlock(day, caption, day.blocks[captionIndex]),
@@ -88,6 +90,11 @@ data class Rozvrh(
         val begin: LocalDateTime,
         val end: LocalDateTime
     )
+
+    private fun RozvrhLesson.takesPlace(): Boolean =
+        changeType != RozvrhLesson.CANCELLED &&
+            changeKind != LessonChangeType.CANCELLED &&
+            changeKind != LessonChangeType.REMOVED
 
     private fun displayDateForCurrentOrNextLesson(dayDate: LocalDate, now: LocalDateTime): LocalDate {
         if (!permanent) return dayDate

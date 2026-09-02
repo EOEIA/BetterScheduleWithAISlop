@@ -2,6 +2,8 @@
 <resources>
     <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
 <!--        <item name="android:statusBarColor">#f57f17</item>-->
+        <item name="android:windowBackground">@color/launchBackground</item>
+        <item name="android:colorBackground">@color/launchBackground</item>
     </style>
 
     <style name="AppTheme.WallpaperBg" parent="android:Theme.Material.Light.NoActionBar">

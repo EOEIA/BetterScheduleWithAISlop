@@ -4,6 +4,7 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCaption
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhDay
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
+import cz.vitskalicky.lepsirozvrh.model.rozvrh.LessonChangeType
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
 import org.junit.Assert.assertEquals
@@ -83,6 +84,37 @@ class CurrentOrNextLessonTest {
     }
 
     @Test
+    fun skipsCancelledCurrentLesson() {
+        val rozvrh = rozvrh(
+            listOf(
+                listOf(lesson("Math", changeKind = LessonChangeType.CANCELLED)),
+                listOf(lesson("English"))
+            )
+        )
+
+        val result = rozvrh.getCurrentOrNextLesson(date.toLocalDateTime(LocalTime(8, 15)))
+
+        assertEquals(Rozvrh.RelativeLessonState.NEXT, result?.state)
+        assertEquals("English", result?.lesson?.subjectName)
+    }
+
+    @Test
+    fun skipsCancelledNextLesson() {
+        val rozvrh = rozvrh(
+            listOf(
+                emptyList(),
+                listOf(lesson("English", changeType = RozvrhLesson.CANCELLED)),
+                listOf(lesson("Physics"))
+            )
+        )
+
+        val result = rozvrh.getCurrentOrNextLesson(date.toLocalDateTime(LocalTime(8, 15)))
+
+        assertEquals(Rozvrh.RelativeLessonState.NEXT, result?.state)
+        assertEquals("Physics", result?.lesson?.subjectName)
+    }
+
+    @Test
     fun permanentScheduleWrapsPastDaysToNextWeek() {
         val rozvrh = rozvrh(
             days = listOf(
@@ -103,7 +135,8 @@ class CurrentOrNextLessonTest {
         cycle = null,
         captions = listOf(
             RozvrhCaption("", LocalTime(8, 0), LocalTime(8, 45)),
-            RozvrhCaption("", LocalTime(9, 0), LocalTime(9, 45))
+            RozvrhCaption("", LocalTime(9, 0), LocalTime(9, 45)),
+            RozvrhCaption("", LocalTime(10, 0), LocalTime(10, 45))
         ).take(blocks.size),
         days = listOf(RozvrhDay(date, null, blocks))
     )
@@ -118,7 +151,11 @@ class CurrentOrNextLessonTest {
         days = days
     )
 
-    private fun lesson(subject: String) = RozvrhLesson(
+    private fun lesson(
+        subject: String,
+        changeType: Int = RozvrhLesson.NO_CHANGE,
+        changeKind: LessonChangeType = LessonChangeType.NONE
+    ) = RozvrhLesson(
         subjectName = subject,
         subjectAbbrev = subject.take(2),
         teacherName = "Teacher",
@@ -129,7 +166,8 @@ class CurrentOrNextLessonTest {
         cycles = emptyList(),
         homeworkIds = emptyList(),
         theme = "",
-        changeType = RozvrhLesson.NO_CHANGE,
-        changeDescription = null
+        changeType = changeType,
+        changeDescription = null,
+        changeKind = changeKind
     )
 }

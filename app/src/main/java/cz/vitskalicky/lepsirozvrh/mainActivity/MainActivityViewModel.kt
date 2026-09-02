@@ -52,6 +52,7 @@ class MainActivityViewModel(
     private var thisWeekStatusLD: LiveData<StatusInfo>? = null
 
     private var invalidateCache = false
+    private var didInitializeVisibleWeek = false
 
     private val switchDayLD = SharedPrefsIntLiveData(application.prefs.sharedPreferences,PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX,0)
     private val switchDayObserver: Observer<Int> = Observer { _ ->
@@ -223,7 +224,7 @@ class MainActivityViewModel(
                     currentlyUsedStatusLD = getRozvrhStatusLD(monday)
                 }
 
-                if (field != PERM){
+                if (field != PERM && didInitializeVisibleWeek){
                     val prevLDs = prepareLD(field - 1)
                     prevLD = prevLDs.first
                     prevStatusLD = prevLDs.second
@@ -236,7 +237,7 @@ class MainActivityViewModel(
             //soft refresh in case the data has expired (there is no expiration check when just switching live data)
             accountIdLD.value?.let {
                 repository.refresh(Key(it, monday), true, force = false)
-                if (field != PERM){
+                if (field != PERM && didInitializeVisibleWeek){
                     repository.refresh(Key(it, monday.plusWeeks(1)),true, force = false)
                     repository.refresh(Key(it, monday.plusWeeks(-1)),true, force = false)
                 }
@@ -246,6 +247,7 @@ class MainActivityViewModel(
             statusLD.addSource(currentlyUsedStatusLD!!) {statusLD.value = it}
 
             showError = false
+            didInitializeVisibleWeek = true
         }
 
     override fun forceRefresh(){
@@ -259,12 +261,10 @@ class MainActivityViewModel(
     override var centerToCurrentLessonLD: MutableLiveData<Boolean?> = MutableLiveData(null)
 
     private fun initThisAndPermLD(){
-        val thisWeekLDs = prepareLD( 0)
-        thisWeekLD = thisWeekLDs.first
-        thisWeekStatusLD = thisWeekLDs.second
-        val permLDs = prepareLD( PERM)
-        permLD = permLDs.first
-        permStatusLD = permLDs.second
+        thisWeekLD = getRozvrhLD(weekToMonday(0))
+        thisWeekStatusLD = getRozvrhStatusLD(weekToMonday(0))
+        permLD = getRozvrhLD(weekToMonday(PERM))
+        permStatusLD = getRozvrhStatusLD(weekToMonday(PERM))
     }
 
     init {

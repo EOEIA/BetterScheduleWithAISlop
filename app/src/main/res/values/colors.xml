@@ -4,4 +4,5 @@
     <color name="widgetLightBackground">#FFFFFFFF</color>
     <color name="widgetDarkText">#dedede</color>
     <color name="widgetDarkBackground">#FF000000</color>
+    <color name="launchBackground">#FF000000</color>
 </resources>

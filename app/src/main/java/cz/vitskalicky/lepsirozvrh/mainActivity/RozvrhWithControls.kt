@@ -326,7 +326,7 @@ fun RozvrhWithControlsStateless(
                                 key?.let { noteMap[it] } ?: ""
                             )
                         }
-                        rozvrhScrollView.setNoteKeys(noteMap.keys + lessonTaskMap.keys)
+                        rozvrhScrollView.setLessonIndicatorKeys(noteMap.keys, lessonTaskMap.keys)
                         rozvrhScrollView.setStickyDayColumn(stickyDayColumn)
                         rozvrhScrollView.setHighlightCurrentDay(highlightCurrentDay)
                         rozvrhScrollView.setChangeVisualMode(if (colorChangedLessons) 1 else 0)
@@ -467,6 +467,8 @@ fun LessonDialog(
 ){
     var currentNote by remember(noteText) { mutableStateOf(noteText) }
     var newTaskTitle by remember { mutableStateOf("") }
+    var showNoteEditor by remember { mutableStateOf(false) }
+    var showTasksEditor by remember { mutableStateOf(false) }
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     if (caption != null) {
         LaunchedEffect(caption, lessonDate) {
@@ -497,6 +499,28 @@ fun LessonDialog(
         onNoteSave?.invoke(currentNote.trim())
         onDismiss()
     }
+    if (showNoteEditor && onNoteSave != null) {
+        LessonNoteEditorDialog(
+            note = currentNote,
+            onNoteChange = { currentNote = it },
+            onDismiss = { showNoteEditor = false },
+            onSave = {
+                onNoteSave(currentNote.trim())
+                showNoteEditor = false
+            }
+        )
+    }
+    if (showTasksEditor && (onTaskAdd != null || tasks.isNotEmpty())) {
+        LessonTasksEditorDialog(
+            tasks = tasks,
+            newTaskTitle = newTaskTitle,
+            onNewTaskTitleChange = { newTaskTitle = it },
+            onTaskAdd = onTaskAdd,
+            onTaskToggle = onTaskToggle,
+            onTaskDelete = onTaskDelete,
+            onDismiss = { showTasksEditor = false }
+        )
+    }
     AlertDialog(
         onDismissRequest = dismiss,
         buttons = {
@@ -517,6 +541,13 @@ fun LessonDialog(
                 } else {
                     Spacer(Modifier.weight(1F))
                 }
+                LessonActionButtons(
+                    showNoteButton = onNoteSave != null,
+                    showTasksButton = onTaskAdd != null || tasks.isNotEmpty(),
+                    taskCount = tasks.size,
+                    onNoteClick = { showNoteEditor = true },
+                    onTasksClick = { showTasksEditor = true }
+                )
                 TextButton(onClick = dismiss){ Text(stringResource(R.string.close)) }
                 Spacer(Modifier.size(8.dp))
             }
@@ -561,92 +592,243 @@ fun LessonDialog(
                         Text(item.second, modifier = Modifier.weight(0.6F))
                     }
                 }
-                if (onNoteSave != null) {
-                    Spacer(Modifier.height(8.dp))
-                    Divider()
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = currentNote,
-                        onValueChange = { currentNote = it },
-                        label = { Text(stringResource(R.string.lesson_note)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = 4,
-                        singleLine = false,
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = MaterialTheme.colors.primary,
-                            cursorColor = MaterialTheme.colors.primary
-                        )
-                    )
-                }
-                if (onTaskAdd != null || tasks.isNotEmpty()) {
-                    Spacer(Modifier.height(8.dp))
-                    Divider()
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        stringResource(R.string.lesson_tasks),
-                        style = MaterialTheme.typography.subtitle2,
-                        fontWeight = FontWeight.Bold
-                    )
-                    tasks.forEach { task ->
-                        val alpha = if (task.isDone) 0.5f else 1f
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = task.isDone,
-                                onCheckedChange = { onTaskToggle(task) },
-                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.secondary)
-                            )
-                            Text(
-                                task.title,
-                                modifier = Modifier.weight(1f),
-                                style = MaterialTheme.typography.body2,
-                                textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                                color = MaterialTheme.colors.onSurface.copy(alpha = alpha)
-                            )
-                            IconButton(onClick = { onTaskDelete(task) }) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.45f)
-                                )
-                            }
-                        }
-                    }
-                    if (onTaskAdd != null) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedTextField(
-                                value = newTaskTitle,
-                                onValueChange = { newTaskTitle = it },
-                                label = { Text(stringResource(R.string.lesson_task)) },
-                                modifier = Modifier.weight(1f),
-                                singleLine = true,
-                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                    focusedBorderColor = MaterialTheme.colors.primary,
-                                    cursorColor = MaterialTheme.colors.primary
-                                )
-                            )
-                            TextButton(
-                                onClick = {
-                                    val title = newTaskTitle.trim()
-                                    if (title.isNotBlank()) {
-                                        onTaskAdd(title)
-                                        newTaskTitle = ""
-                                    }
-                                }
-                            ) {
-                                Text(stringResource(R.string.add))
-                            }
-                        }
-                    }
-                }
+                LessonExtrasSummary(
+                    note = currentNote,
+                    tasks = tasks,
+                    onTaskToggle = onTaskToggle
+                )
             }
         }
     )
+}
+
+@Composable
+private fun LessonExtrasSummary(
+    note: String,
+    tasks: List<PersonalTask>,
+    onTaskToggle: (PersonalTask) -> Unit
+) {
+    val trimmedNote = note.trim()
+    if (trimmedNote.isBlank() && tasks.isEmpty()) return
+
+    Spacer(Modifier.height(8.dp))
+    Divider()
+    Spacer(Modifier.height(4.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (trimmedNote.isNotBlank()) {
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.lesson_note),
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colors.primary
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    trimmedNote,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.body2
+                )
+            }
+        }
+        tasks.forEach { task ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = task.isDone,
+                    onCheckedChange = { onTaskToggle(task) },
+                    modifier = Modifier.size(32.dp),
+                    colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.secondary)
+                )
+                Spacer(Modifier.size(4.dp))
+                Text(
+                    task.title,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.body2,
+                    textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = if (task.isDone) 0.5f else 1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LessonNoteEditorDialog(
+    note: String,
+    onNoteChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.lesson_note)) },
+        text = {
+            OutlinedTextField(
+                value = note,
+                onValueChange = onNoteChange,
+                label = { Text(stringResource(R.string.lesson_note)) },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 4,
+                singleLine = false,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colors.primary,
+                    cursorColor = MaterialTheme.colors.primary
+                )
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onSave) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun LessonTasksEditorDialog(
+    tasks: List<PersonalTask>,
+    newTaskTitle: String,
+    onNewTaskTitleChange: (String) -> Unit,
+    onTaskAdd: ((String) -> Unit)?,
+    onTaskToggle: (PersonalTask) -> Unit,
+    onTaskDelete: (PersonalTask) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.lesson_tasks)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                tasks.forEach { task ->
+                    LessonTaskRow(
+                        task = task,
+                        onTaskToggle = onTaskToggle,
+                        onTaskDelete = onTaskDelete
+                    )
+                }
+                if (onTaskAdd != null) {
+                    LessonTaskInput(
+                        title = newTaskTitle,
+                        onTitleChange = onNewTaskTitleChange,
+                        onAdd = {
+                            val title = newTaskTitle.trim()
+                            if (title.isNotBlank()) {
+                                onTaskAdd(title)
+                                onNewTaskTitleChange("")
+                            }
+                        }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
+}
+
+@Composable
+private fun LessonTaskRow(
+    task: PersonalTask,
+    onTaskToggle: (PersonalTask) -> Unit,
+    onTaskDelete: (PersonalTask) -> Unit
+) {
+    val alpha = if (task.isDone) 0.5f else 1f
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = task.isDone,
+            onCheckedChange = { onTaskToggle(task) },
+            colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.secondary)
+        )
+        Text(
+            task.title,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.body2,
+            textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
+            color = MaterialTheme.colors.onSurface.copy(alpha = alpha)
+        )
+        IconButton(onClick = { onTaskDelete(task) }) {
+            Icon(
+                Icons.Default.Delete,
+                contentDescription = null,
+                tint = MaterialTheme.colors.onSurface.copy(alpha = 0.45f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LessonTaskInput(
+    title: String,
+    onTitleChange: (String) -> Unit,
+    onAdd: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.End
+    ) {
+        OutlinedTextField(
+            value = title,
+            onValueChange = onTitleChange,
+            label = { Text(stringResource(R.string.lesson_task)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp),
+            singleLine = true,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = MaterialTheme.colors.primary,
+                cursorColor = MaterialTheme.colors.primary
+            )
+        )
+        TextButton(onClick = onAdd) {
+            Text(stringResource(R.string.add))
+        }
+    }
+}
+
+@Composable
+private fun LessonActionButtons(
+    showNoteButton: Boolean,
+    showTasksButton: Boolean,
+    taskCount: Int,
+    onNoteClick: () -> Unit,
+    onTasksClick: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (showNoteButton) {
+            IconButton(onClick = onNoteClick) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.lesson_note)
+                )
+            }
+        }
+        if (showTasksButton) {
+            IconButton(onClick = onTasksClick) {
+                Icon(
+                    Icons.Default.Assignment,
+                    contentDescription = if (taskCount == 0) {
+                        stringResource(R.string.lesson_tasks)
+                    } else {
+                        "${stringResource(R.string.lesson_tasks)} ($taskCount)"
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable

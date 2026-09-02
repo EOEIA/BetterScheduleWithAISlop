@@ -76,8 +76,8 @@ class RozvrhScrollView : HorizontalScrollView {
         rozvrhLayout.setHideEmptyHours(enabled)
     }
 
-    fun setNoteKeys(keys: Set<String>) {
-        rozvrhLayout.setNoteKeys(keys)
+    fun setLessonIndicatorKeys(noteKeys: Set<String>, taskKeys: Set<String>) {
+        rozvrhLayout.setLessonIndicatorKeys(noteKeys, taskKeys)
     }
 
     fun setTheme(theme: RozvrhTheme) {

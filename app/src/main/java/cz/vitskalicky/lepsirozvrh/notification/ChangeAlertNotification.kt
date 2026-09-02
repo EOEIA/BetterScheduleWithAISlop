@@ -74,19 +74,27 @@ object ChangeAlertNotification {
 
         if (!PermanentNotification.areNotificationEnabled(context)) return
 
+        val dateFormatter = DateTimeFormat.shortDate()
         val timeFormatter = DateTimeFormat.shortTime()
         val lines = mutableListOf<String>()
         for (ev in events) {
-            lines.add(context.getString(R.string.change_alert_event_line, ev.event))
+            val dateStr = monday.plusDays(ev.dayIndex).toString(dateFormatter)
+            lines.add("$dateStr ${context.getString(R.string.change_alert_event_line, ev.event)}")
         }
         for (cl in lessons) {
             val caption = captions.getOrNull(cl.captionIndex)
+            val dateStr = monday.plusDays(cl.dayIndex).toString(dateFormatter)
             val timeStr = caption?.let {
                 "${it.beginTime.toString(timeFormatter)}–${it.endTime.toString(timeFormatter)}"
             } ?: ""
             val subject = cl.lesson.subjectName.ifBlank { cl.lesson.subjectAbbrev }
             val kindStr = context.getString(cl.changeKind.labelRes())
-            lines.add(if (timeStr.isNotBlank()) "$timeStr $subject ($kindStr)" else "$subject ($kindStr)")
+            val lessonLine = if (timeStr.isNotBlank()) {
+                "$timeStr $subject ($kindStr)"
+            } else {
+                "$subject ($kindStr)"
+            }
+            lines.add("$dateStr $lessonLine")
         }
 
         val title = context.getString(R.string.change_notification_title)

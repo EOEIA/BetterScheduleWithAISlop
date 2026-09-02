@@ -64,6 +64,7 @@ class RozvrhLayout : ViewGroup {
     private var hideEmptyHours = false
     private var visibleCaptionIndexes: List<Int> = emptyList()
     private var noteKeys: Set<String> = emptySet()
+    private var taskKeys: Set<String> = emptySet()
 
     private var onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit = {_,_,_,_ ->}
     fun setOnLessonPress(onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit){
@@ -359,6 +360,9 @@ class RozvrhLayout : ViewGroup {
     }
 
     fun setRozvrh(rozvrh: Rozvrh?, isTeacher: Boolean) {
+        if (this.rozvrh == rozvrh && this.isTeacher == isTeacher && rows >= 0 && columns >= 0) {
+            return
+        }
         //debug timing: Log.d(TAG_TIMER, "populate start " + Utils.getDebugTime());
         //todo sentry extra
         /*if (rozvrh != null) {
@@ -488,7 +492,7 @@ class RozvrhLayout : ViewGroup {
         }
         applyAlternatingRows()
         applyAlternatingCols()
-        applyNoteKeys()
+        applyLessonIndicatorKeys()
         updateCurrentDayHighlight()
         highlightCurrentLesson()
         invalidate()
@@ -610,17 +614,20 @@ class RozvrhLayout : ViewGroup {
     }
 
     fun setChangeVisualMode(mode: Int) {
+        if (changeVisualMode == mode) return
         changeVisualMode = mode
         hodinasByCaptions.forEach { it.forEach { it.forEach { it.setChangeVisualMode(mode) } } }
     }
 
     fun setCompact(compact: Boolean) {
+        if (this.compact == compact) return
         this.compact = compact
         naturalCellWidth = -1
         requestLayout()
     }
 
     fun setTheme(theme: RozvrhTheme){
+        if (t == theme) return
         this.t = theme
 
         setBackgroundColor(theme.cEmptyBg.toArgb())
@@ -723,13 +730,14 @@ class RozvrhLayout : ViewGroup {
         }
     }
 
-    fun setNoteKeys(keys: Set<String>) {
-        if (noteKeys == keys) return
-        noteKeys = keys
-        applyNoteKeys()
+    fun setLessonIndicatorKeys(noteKeys: Set<String>, taskKeys: Set<String>) {
+        if (this.noteKeys == noteKeys && this.taskKeys == taskKeys) return
+        this.noteKeys = noteKeys
+        this.taskKeys = taskKeys
+        applyLessonIndicatorKeys()
     }
 
-    private fun applyNoteKeys() {
+    private fun applyLessonIndicatorKeys() {
         val r = rozvrh ?: return
         if (!transposed) {
             // hodinasByCaptions[captionIndex][dayIndex]
@@ -737,9 +745,10 @@ class RozvrhLayout : ViewGroup {
                 val date = r.days[dayIndex].date
                 visibleCaptionIndexes.forEachIndexed { visibleCaptionIndex, captionIndex ->
                     val key = lessonNoteKey(date, r.captions[captionIndex].beginTime)
-                    val has = key in noteKeys
+                    val hasNote = key in noteKeys
+                    val hasTask = key in taskKeys
                     if (visibleCaptionIndex < hodinasByCaptions.size && dayIndex < hodinasByCaptions[visibleCaptionIndex].size) {
-                        hodinasByCaptions[visibleCaptionIndex][dayIndex].forEach { it.setHasNote(has) }
+                        hodinasByCaptions[visibleCaptionIndex][dayIndex].forEach { it.setLessonIndicators(hasNote, hasTask) }
                     }
                 }
             }
@@ -749,9 +758,10 @@ class RozvrhLayout : ViewGroup {
                 val date = r.days[dayIndex].date
                 visibleCaptionIndexes.forEachIndexed { visibleCaptionIndex, captionIndex ->
                     val key = lessonNoteKey(date, r.captions[captionIndex].beginTime)
-                    val has = key in noteKeys
+                    val hasNote = key in noteKeys
+                    val hasTask = key in taskKeys
                     if (dayIndex < hodinasByCaptions.size && visibleCaptionIndex < hodinasByCaptions[dayIndex].size) {
-                        hodinasByCaptions[dayIndex][visibleCaptionIndex].forEach { it.setHasNote(has) }
+                        hodinasByCaptions[dayIndex][visibleCaptionIndex].forEach { it.setLessonIndicators(hasNote, hasTask) }
                     }
                 }
             }
