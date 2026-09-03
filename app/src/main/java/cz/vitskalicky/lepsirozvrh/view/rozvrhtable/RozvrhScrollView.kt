@@ -19,7 +19,12 @@ class RozvrhScrollView : HorizontalScrollView {
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
     init {
-        isFillViewport = false
+        // Stretch the table across the viewport when it would otherwise be
+        // narrower than the window (large tablets, desktop-sized windows) —
+        // HorizontalScrollView only re-measures the child when its natural
+        // width is *smaller* than the viewport, so on a phone, where the week
+        // never fits, this changes nothing and horizontal scrolling stays.
+        isFillViewport = true
         isHorizontalScrollBarEnabled = false
         overScrollMode = OVER_SCROLL_IF_CONTENT_SCROLLS
         rozvrhLayout = RozvrhLayout(context)
@@ -56,7 +61,6 @@ class RozvrhScrollView : HorizontalScrollView {
     }
 
     fun setTransposed(transposed: Boolean) {
-        isFillViewport = transposed
         rozvrhLayout.setTransposed(transposed)
     }
 
