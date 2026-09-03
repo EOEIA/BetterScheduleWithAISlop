@@ -1,3 +1,25 @@
+> ## ⚠️ Toto je fork / This is a fork
+>
+> **CS:** Toto je **neoficiální fork** aplikace *Lepší rozvrh*, jejímž autorem je
+> **Vít Skalický** — původní projekt najdete na
+> [gitlab.com/vitSkalicky/lepsi-rozvrh](https://gitlab.com/vitSkalicky/lepsi-rozvrh).
+> Tento fork s ním **není nijak spojen** a původní autor za něj neodpovídá.
+> Chyby z tohoto buildu **nehlaste** do původního projektu.
+> Odznaky Google Play a F-Droid níže vedou na **původní** aplikaci, ne na tento fork
+> (ten má vlastní `applicationId` `cz.vitskalicky.lepsirozvrh.fork`, takže je můžete
+> mít nainstalované vedle sebe).
+>
+> **EN:** This is an **unofficial fork** of *Lepší rozvrh* by **Vít Skalický** — the
+> original project lives at
+> [gitlab.com/vitSkalicky/lepsi-rozvrh](https://gitlab.com/vitSkalicky/lepsi-rozvrh).
+> This fork is **not affiliated with** the original author and is not supported by them.
+> Do **not** report issues from this build upstream.
+> The Google Play and F-Droid badges below point at the **original** app, not this fork
+> (which uses its own `applicationId` `cz.vitskalicky.lepsirozvrh.fork` and installs
+> alongside it).
+>
+> Licensed under GPLv3, same as upstream. The text below is the original README.
+
 ![icon](app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 
 [<img alt='Nyní na Google Play' height="80px" src='https://play.google.com/intl/en_us/badges/static/images/badges/cs_badge_web_generic.png'/>](https://play.google.com/store/apps/details?id=cz.vitskalicky.lepsirozvrh&utm_source=github&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
