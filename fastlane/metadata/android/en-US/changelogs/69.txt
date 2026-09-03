@@ -1,0 +1,1 @@
+Timetable now fills the whole window on tablets and large screens instead of staying at phone width. Phone layout is unchanged.

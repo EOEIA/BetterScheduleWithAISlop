@@ -1,0 +1,1 @@
+Rozvrh nyní na tabletech a velkých obrazovkách vyplní celé okno, místo aby zůstal v šířce telefonu. Na telefonu se nic nemění.
