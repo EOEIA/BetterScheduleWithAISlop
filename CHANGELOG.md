@@ -4,10 +4,6 @@
 
 - Rozvrh nyní na tabletech a velkých obrazovkách vyplní celé okno, místo aby zůstal v šířce telefonu. Na telefonu se nic nemění.
 
----
-
-- Timetable now fills the whole window on tablets and large screens instead of staying at phone width. Phone layout is unchanged.
-
 ## 2.0.22
 
 - Nové nastavení: Otočená tabulka — přepne rozvrh tak, aby dny byly ve sloupcích a hodiny v řádcích (Nastavení → Rozvrh).
