@@ -50,7 +50,3 @@ secrets.properties
 
 # scan temporary files
 **/fastlane/test_output
-
-# AI assistant guidance, kept local
-CLAUDE.md
-AGENTS.md
