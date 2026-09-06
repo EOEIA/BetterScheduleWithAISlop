@@ -76,7 +76,7 @@ public class Utils {
         if (!PermanentNotification.INSTANCE.isNotificationAccountValid(accountid)){
             return null;
         }
-        return new RozvrhRecord.Key(SharedPrefs.getLong(context, PrefsConsts.NOTIFICATION_ACCOUNT), getCurrentMonday());
+        return new RozvrhRecord.Key(SharedPrefs.getLong(context, PrefsConsts.NOTIFICATION_ACCOUNT), getDisplayWeekMonday(context));
     }
 
     /**

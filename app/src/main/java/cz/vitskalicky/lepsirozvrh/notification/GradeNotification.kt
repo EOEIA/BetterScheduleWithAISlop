@@ -7,14 +7,20 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.FLAG_IMMUTABLE
+import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.SharedPrefsKt
+import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.bakaAPI.marks.MarkSubject
 import cz.vitskalicky.lepsirozvrh.grades.GradePredictor
 import cz.vitskalicky.lepsirozvrh.grades.PredictionState
 import cz.vitskalicky.lepsirozvrh.grades.homework.HomeworkItem
+import cz.vitskalicky.lepsirozvrh.grades.homework.extractHomework
+import cz.vitskalicky.lepsirozvrh.grades.homework.fetchHomeworkDescriptions
 import cz.vitskalicky.lepsirozvrh.mainActivity.MainActivity
+import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
+import cz.vitskalicky.lepsirozvrh.prefs
 
 object GradeNotification {
 
@@ -71,6 +77,30 @@ object GradeNotification {
                 val summary = context.resources.getQuantityString(R.plurals.homework_notification_summary, newItems.size, newItems.size)
                 postNotification(context, NOTIF_ID_HOMEWORK, title, summary, lines)
             }
+        } catch (_: Exception) { }
+    }
+
+    /**
+     * Fetches grades/homework for [accountId] and posts a notification for anything new. Used by
+     * the periodic background check in [cz.vitskalicky.lepsirozvrh.UpdateBroadcastReciever] so
+     * these alerts don't depend on the user having the Grades/Homework screen open.
+     */
+    suspend fun checkAndNotifyGrades(application: MainApplication, accountId: Long) {
+        if (application.prefs.boolean(PrefsConsts.GRADE_ALERTS_ENABLED) != true) return
+        try {
+            val account = application.accountRepository.getAccount(accountId) ?: return
+            val webservice = application.accountRepository.getMarksWebservice(account) ?: return
+            maybeNotifyNewGrades(application, webservice.getMarks().Subjects)
+        } catch (_: Exception) { }
+    }
+
+    suspend fun checkAndNotifyHomework(application: MainApplication, accountId: Long) {
+        if (application.prefs.boolean(PrefsConsts.HOMEWORK_ALERTS_ENABLED) != true) return
+        try {
+            val monday = Utils.getDisplayWeekMonday(application)
+            val rozvrh = application.repository.getRozvrh(RozvrhRecord.Key(accountId, monday), false) ?: return
+            val descriptionsById = fetchHomeworkDescriptions(application, accountId)
+            maybeNotifyNewHomework(application, rozvrh.extractHomework(descriptionsById))
         } catch (_: Exception) { }
     }
 

@@ -58,6 +58,9 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     companion object {
         private val TAG = MainApplication::class.java.simpleName
 
+        /** How often [schedulePeriodicCheck] re-checks for new grades/homework/schedule changes in the background. */
+        const val PERIODIC_CHECK_INTERVAL_MS = 15 * 60 * 1000L
+
         /** Object mapper for (de)serialization of objects with app-wide settings*/
         public val objectMapper: ObjectMapper by lazy {
             val objectMapper = ObjectMapper()
@@ -170,6 +173,7 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
             notificationManager.createNotificationChannel(channel)
         }
         ChangeAlertNotification.registerChannel(this)
+        schedulePeriodicCheck()
 
         // initialize live data
         notificationAccountLD = PreferenceManager.getDefaultSharedPreferences(this).longLiveData(PrefsConsts.NOTIFICATION_ACCOUNT, -1).map { it.takeUnless { it == -1L || !PermanentNotification.isNotificationAccountValid(it) } }
@@ -285,6 +289,23 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         alarmManager.setRepeating(type, triggerTime!!.toDate().time, (60 * 60000).toLong(), pendingIntent)
         Log.d(TAG, "Scheduled an update on " + triggerTime.toString("MM-dd HH:mm:ss"))
         updateTime = triggerTime
+    }
+
+    /**
+     * Independent of [scheduleUpdate] (which fires at content-driven lesson-boundary times):
+     * schedules a single check for new grades/homework/schedule changes [PERIODIC_CHECK_INTERVAL_MS]
+     * from now. Self-reschedules from [UpdateBroadcastReciever] on every firing so it keeps going.
+     *
+     * Uses `setAndAllowWhileIdle` (not exact) so it still wakes during Doze without requiring the
+     * user to grant the special "exact alarms" permission - not truly instant, but reliable.
+     */
+    fun schedulePeriodicCheck() {
+        val intent = Intent(this, UpdateBroadcastReciever::class.java).apply {
+            action = UpdateBroadcastReciever.ACTION_PERIODIC_CHECK
+        }
+        val pendingIntent = PendingIntent.getBroadcast(this, UpdateBroadcastReciever.PERIODIC_REQUEST_CODE, intent, FLAG_IMMUTABLE)
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + PERIODIC_CHECK_INTERVAL_MS, pendingIntent)
     }
 
     /**

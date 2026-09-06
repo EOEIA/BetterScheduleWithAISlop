@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
+import cz.vitskalicky.lepsirozvrh.notification.GradeNotification
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
 import cz.vitskalicky.lepsirozvrh.widget.WidgetProvider
 import kotlinx.coroutines.CoroutineScope
@@ -48,9 +49,16 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
                 }else {
                     val rozvrh: Rozvrh? = application.repository.getRozvrh(rozvrhKey, false)
                     PermanentNotification.update(application, rozvrh, isTeacher, account.id)
+                    // Grades/homework have no periodic check of their own (unlike the schedule
+                    // fetch above, which already triggers change alerts) - piggyback on every
+                    // wakeup of this receiver so they don't depend on the user opening those screens.
+                    GradeNotification.checkAndNotifyGrades(application, account.id)
+                    GradeNotification.checkAndNotifyHomework(application, account.id)
                 }
                 WidgetProvider.updateAll(application)
                 application.updateUpdateTime()
+                // Keep the periodic check alive regardless of what triggered this particular wakeup.
+                application.schedulePeriodicCheck()
             }finally {
                 pendingResult.finish()
             }
@@ -61,11 +69,14 @@ class UpdateBroadcastReciever : BroadcastReceiver() {
     companion object {
         private val TAG = UpdateBroadcastReciever::class.java.simpleName
         const val REQUEST_CODE = 64857
+        const val PERIODIC_REQUEST_CODE = 64858
 
         /**
          * +1 for next, -1 for prev
          */
         const val EXTRA_NEXT_PREV = BuildConfig.APPLICATION_ID + ".extra-next-or-prev-lesson"
         const val ACTION_NEXT_PREV = BuildConfig.APPLICATION_ID + ".action-next-or-prev-lesson"
+        /** Fired by the self-rescheduling periodic alarm set up in [MainApplication.schedulePeriodicCheck]. */
+        const val ACTION_PERIODIC_CHECK = BuildConfig.APPLICATION_ID + ".action-periodic-check"
     }
 }

@@ -102,16 +102,18 @@ class HomeworkViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private suspend fun fetchHomeworkDescriptions(application: MainApplication, accountId: Long): Map<String, String> {
-        return try {
-            val account = application.accountRepository.getAccount(accountId) ?: return emptyMap()
-            val webservice = application.accountRepository.getHomeworkWebservice(account) ?: return emptyMap()
-            webservice.getHomeworks().Homeworks
-                .filter { it.Content.isNotBlank() }
-                .associate { it.ID to Html.fromHtml(it.Content, Html.FROM_HTML_MODE_LEGACY).toString().trim() }
-        } catch (e: Exception) {
-            emptyMap()
-        }
+}
+
+/** Shared with the background periodic check in [cz.vitskalicky.lepsirozvrh.UpdateBroadcastReciever]. */
+suspend fun fetchHomeworkDescriptions(application: MainApplication, accountId: Long): Map<String, String> {
+    return try {
+        val account = application.accountRepository.getAccount(accountId) ?: return emptyMap()
+        val webservice = application.accountRepository.getHomeworkWebservice(account) ?: return emptyMap()
+        webservice.getHomeworks().Homeworks
+            .filter { it.Content.isNotBlank() }
+            .associate { it.ID to Html.fromHtml(it.Content, Html.FROM_HTML_MODE_LEGACY).toString().trim() }
+    } catch (e: Exception) {
+        emptyMap()
     }
 }
 
