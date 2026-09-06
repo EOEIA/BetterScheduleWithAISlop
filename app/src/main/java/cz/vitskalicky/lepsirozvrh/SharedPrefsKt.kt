@@ -102,6 +102,9 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val GRADE_ALERTS_ENABLED = "prefs-grade-alerts-enabled"
     /** Notify when new homework is assigned. Default false. */
     const val HOMEWORK_ALERTS_ENABLED = "prefs-homework-alerts-enabled"
+    /** Index into R.array.periodic_check_interval_minutes/_entries for how often the background
+     * check for grades/homework/schedule changes runs. Default index 1 (10 minutes). */
+    const val PERIODIC_CHECK_INTERVAL_INDEX = "int_periodic_check_interval_index"
     /** Comma-separated mark IDs the user has already seen in the Grades UI. On first load, all IDs are written here to avoid false highlights. */
     const val GRADES_SEEN_IDS = "grades-seen-ids"
     /**
@@ -149,6 +152,7 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
             if (!contains(DEBUG_DEMO_MODE)) putBoolean(DEBUG_DEMO_MODE, false)
             if (!contains(GRADE_ALERTS_ENABLED)) putBoolean(GRADE_ALERTS_ENABLED, false)
             if (!contains(HOMEWORK_ALERTS_ENABLED)) putBoolean(HOMEWORK_ALERTS_ENABLED, false)
+            if (!contains(PERIODIC_CHECK_INTERVAL_INDEX)) putInt(PERIODIC_CHECK_INTERVAL_INDEX, 1)
             if (!contains(SWITCH_TO_NEXT_WEEK_OPTION_INDEX)) putInt(SWITCH_TO_NEXT_WEEK_OPTION_INDEX, 2)
             if (!contains(SELECTED_THEME)) putInt(SELECTED_THEME, SelectedTheme.FOLLOW_SYSTEM_THEME.index)
             if (!contains(NOTIFICATION_ACCOUNT)) putLong(NOTIFICATION_ACCOUNT, PermanentNotification.ACCOUNT_NOTIFICATION_LOGGED_OUT)

@@ -605,9 +605,20 @@ fun LessonDialog(
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 for (item in data.filterNotNull().filter { it.second.isNotBlank() }){
                     Row {
-                        Text(item.first, modifier = Modifier.weight(0.4F), textAlign = TextAlign.Right, fontWeight = FontWeight.Bold )
+                        Text(
+                            item.first,
+                            modifier = Modifier.weight(0.4F),
+                            textAlign = TextAlign.Right,
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
                         Spacer(Modifier.size(4.dp))
-                        Text(item.second, modifier = Modifier.weight(0.6F))
+                        Text(
+                            item.second,
+                            modifier = Modifier.weight(0.6F),
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colors.onSurface
+                        )
                     }
                 }
                 LessonExtrasSummary(

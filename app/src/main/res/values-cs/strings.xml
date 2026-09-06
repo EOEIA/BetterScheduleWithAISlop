@@ -428,6 +428,7 @@
     <string name="grade_alerts_desc">Oznámení při přidání nové známky</string>
     <string name="homework_alerts">Oznámení o domácích úkolech</string>
     <string name="homework_alerts_desc">Oznámení při zadání nového domácího úkolu</string>
+    <string name="periodic_check_interval">Kontrolovat aktualizace každých</string>
     <string name="notif_diagnostics_title">Diagnostika oznámení</string>
     <string name="notif_diagnostics_desc">Ladění doručování oznámení a stavu sledovaných ID</string>
     <string name="notif_diag_permission">Oprávnění k oznámením</string>

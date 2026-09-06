@@ -58,9 +58,6 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
     companion object {
         private val TAG = MainApplication::class.java.simpleName
 
-        /** How often [schedulePeriodicCheck] re-checks for new grades/homework/schedule changes in the background. */
-        const val PERIODIC_CHECK_INTERVAL_MS = 15 * 60 * 1000L
-
         /** Object mapper for (de)serialization of objects with app-wide settings*/
         public val objectMapper: ObjectMapper by lazy {
             val objectMapper = ObjectMapper()
@@ -293,8 +290,9 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
 
     /**
      * Independent of [scheduleUpdate] (which fires at content-driven lesson-boundary times):
-     * schedules a single check for new grades/homework/schedule changes [PERIODIC_CHECK_INTERVAL_MS]
-     * from now. Self-reschedules from [UpdateBroadcastReciever] on every firing so it keeps going.
+     * schedules a single check for new grades/homework/schedule changes, [KotlinUtils.getPeriodicCheckIntervalMinutes]
+     * (user-configurable, see [PrefsConsts.PERIODIC_CHECK_INTERVAL_INDEX]) minutes from now.
+     * Self-reschedules from [UpdateBroadcastReciever] on every firing so it keeps going.
      *
      * Uses `setAndAllowWhileIdle` (not exact) so it still wakes during Doze without requiring the
      * user to grant the special "exact alarms" permission - not truly instant, but reliable.
@@ -305,7 +303,8 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
         }
         val pendingIntent = PendingIntent.getBroadcast(this, UpdateBroadcastReciever.PERIODIC_REQUEST_CODE, intent, FLAG_IMMUTABLE)
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + PERIODIC_CHECK_INTERVAL_MS, pendingIntent)
+        val intervalMs = KotlinUtils.getPeriodicCheckIntervalMinutes(this) * 60_000L
+        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + intervalMs, pendingIntent)
     }
 
     /**

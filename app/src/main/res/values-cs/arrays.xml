@@ -5,6 +5,13 @@
         <item>V neděli</item>
         <item>V sobotu</item>
     </string-array>
+    <string-array name="periodic_check_interval_entries">
+        <item>5 minut</item>
+        <item>10 minut</item>
+        <item>15 minut</item>
+        <item>30 minut</item>
+        <item>60 minut</item>
+    </string-array>
     <string-array name="widget_style_entries">
         <item>Světlý</item>
         <item>Tmavý</item>

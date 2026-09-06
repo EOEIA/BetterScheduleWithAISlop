@@ -117,6 +117,17 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         set(value) = sp.edit { putBoolean(PrefsConsts.HOMEWORK_ALERTS_ENABLED, value) }
     val homeworkAlertsEnabledLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.HOMEWORK_ALERTS_ENABLED, false)
 
+    /**
+     * The index of the selected option. See [R.array.periodic_check_interval_entries]
+     */
+    var periodicCheckIntervalIndex: Int
+        get() = sp.int(PrefsConsts.PERIODIC_CHECK_INTERVAL_INDEX) ?: 1
+        set(value) {
+            sp.edit { putInt(PrefsConsts.PERIODIC_CHECK_INTERVAL_INDEX, value) }
+            app.schedulePeriodicCheck()
+        }
+    val periodicCheckIntervalIndexLD: LiveData<Int> = SharedPrefsIntLiveData(sp.sharedPreferences, PrefsConsts.PERIODIC_CHECK_INTERVAL_INDEX, 1)
+
     var debugDemoMode: Boolean
         get() = BuildConfig.DEBUG && (sp.boolean(PrefsConsts.DEBUG_DEMO_MODE) ?: false)
         set(value) = sp.edit { putBoolean(PrefsConsts.DEBUG_DEMO_MODE, value) }

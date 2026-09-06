@@ -447,6 +447,7 @@
     <string name="grade_alerts_desc">Get notified when new grades are added</string>
     <string name="homework_alerts">Homework notifications</string>
     <string name="homework_alerts_desc">Get notified when new homework is assigned</string>
+    <string name="periodic_check_interval">Check for updates every</string>
     <string name="notif_diagnostics_title">Notification diagnostics</string>
     <string name="notif_diagnostics_desc">Debug notification delivery and seen-ID state</string>
     <string name="notif_diag_permission">Notification permission</string>

@@ -62,6 +62,13 @@ object KotlinUtils {
         return calculateWeekSwitchOffset(context, context.prefs.int(PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX) ?: 0)
     }
 
+    /** How often the background check for grades/homework/schedule changes should run, in minutes. */
+    fun getPeriodicCheckIntervalMinutes(context: Context): Int {
+        val index = context.prefs.int(PrefsConsts.PERIODIC_CHECK_INTERVAL_INDEX) ?: 1
+        val minutes = context.resources.getIntArray(R.array.periodic_check_interval_minutes)
+        return minutes.getOrElse(index) { minutes[1] }
+    }
+
     /** Converts [Color] represented as its value (may be in various color spaced etc.) to ARGB int.*/
     @JvmStatic
     fun composeColorLongToARGB(value: Long): Int = Color(value = value.toULong()).toArgb()

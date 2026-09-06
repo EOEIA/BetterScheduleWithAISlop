@@ -338,6 +338,16 @@ class SettingsActivity : ComponentActivity() {
                             SwitchPreference(R.string.homework_alerts.str, R.string.homework_alerts_desc.str,
                                 viewModel.homeworkAlertsEnabledLD.observeAsState().value ?: false
                             ) { viewModel.homeworkAlertsEnabled = it }
+                                val checkIntervalIndex by viewModel.periodicCheckIntervalIndexLD.observeAsState()
+                                val checkIntervalEntries = resources.getStringArray(R.array.periodic_check_interval_entries).toList()
+                                val checkIntervalSelected = checkIntervalEntries[checkIntervalIndex ?: 1]
+                            RadioPreference(R.string.periodic_check_interval.str,
+                                checkIntervalSelected,
+                                checkIntervalEntries, checkIntervalIndex,
+                                {Text(R.string.periodic_check_interval.str)}
+                            ){
+                                newOptionIndex -> viewModel.periodicCheckIntervalIndex = newOptionIndex
+                            }
                             Preference(R.string.notif_diagnostics_title.str, R.string.notif_diagnostics_desc.str) {
                                 startActivity(android.content.Intent(this@SettingsActivity, NotificationDiagnosticsActivity::class.java))
                             }

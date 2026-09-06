@@ -10,6 +10,20 @@
         <item>1</item>
         <item>2</item>
     </integer-array>
+    <string-array name="periodic_check_interval_entries">
+        <item>5 minutes</item>
+        <item>10 minutes</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>60 minutes</item>
+    </string-array>
+    <integer-array name="periodic_check_interval_minutes">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+    </integer-array>
     <!-- must match WidgetConfigActivity.LIGHT, DARK, CUSTOM-->
     <string-array name="widget_style_entries">
         <item>Light</item>
