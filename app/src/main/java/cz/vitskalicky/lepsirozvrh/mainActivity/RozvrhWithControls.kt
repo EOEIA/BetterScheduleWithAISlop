@@ -35,6 +35,7 @@ import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhCaption
 import cz.vitskalicky.lepsirozvrh.grades.GradesActivity
 import cz.vitskalicky.lepsirozvrh.grades.homework.HomeworkActivity
+import cz.vitskalicky.lepsirozvrh.grades.homework.fetchHomeworkDescriptions
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.LessonChangeType
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.labelRes
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -151,6 +152,14 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
 
     val isCenterToCurrentLessonEnabled: () -> Boolean = {SharedPrefsKt(context).boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON)?:true}
     val centerToCurrentLesson by viewModel.centerToCurrentLessonLD.observeAsState()
+
+    // Real homework descriptions for the lesson-detail dialog (the timetable API only gives opaque
+    // IDs per lesson - same fetch the Homework screen uses to resolve them to actual text).
+    var homeworkDescriptionsById by remember { mutableStateOf(emptyMap<String, String>()) }
+    LaunchedEffect(accountId) {
+        accountId?.let { homeworkDescriptionsById = fetchHomeworkDescriptions(app, it) }
+    }
+
     RozvrhWithControlsStateless(
         rozvrh = rozvrh?.data,
         isTeacher = account?.isTeacher() ?: false,
@@ -173,7 +182,10 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
             val intent = Intent(context, HomeworkActivity::class.java)
             context.startActivity(intent)
         },
-        onRefreshPress = {viewModel.forceRefresh()},
+        onRefreshPress = {
+            viewModel.forceRefresh()
+            accountId?.let { id -> coroutineScope.launch { homeworkDescriptionsById = fetchHomeworkDescriptions(app, id) } }
+        },
         centerToCurrentLesson = centerToCurrentLesson ?: isCenterToCurrentLessonEnabled(),
         onCenterCompleted = {viewModel.centerToCurrentLessonLD.value = false},
         showSettingsBadge = showSettingsBadge ?: false,
@@ -226,7 +238,8 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
             coroutineScope.launch {
                 app.rozvrhDb.personalTaskDao().delete(task.id)
             }
-        }
+        },
+        homeworkDescriptionsById = homeworkDescriptionsById
     )
 }
 
@@ -266,7 +279,8 @@ fun RozvrhWithControlsStateless(
     onNoteSave: (lessonKey: String, text: String) -> Unit = { _, _ -> },
     onTaskAdd: (lessonKey: String, title: String, subject: String, dueDate: LocalDate?, dueTime: LocalTime?) -> Unit = { _, _, _, _, _ -> },
     onTaskToggle: (PersonalTask) -> Unit = {},
-    onTaskDelete: (PersonalTask) -> Unit = {}
+    onTaskDelete: (PersonalTask) -> Unit = {},
+    homeworkDescriptionsById: Map<String, String> = emptyMap()
 ){
     // the lesson which is shown in dialog or null
     var dialogInfo by remember { mutableStateOf(null as LessonDialogInfo?) }
@@ -294,7 +308,8 @@ fun RozvrhWithControlsStateless(
                 }
             },
             onTaskToggle = onTaskToggle,
-            onTaskDelete = onTaskDelete
+            onTaskDelete = onTaskDelete,
+            homeworkDescriptionsById = homeworkDescriptionsById
         )
     }
     Surface(color = MaterialTheme.colors.surface) {
@@ -463,7 +478,8 @@ fun LessonDialog(
     tasks: List<PersonalTask> = emptyList(),
     onTaskAdd: ((String) -> Unit)? = null,
     onTaskToggle: (PersonalTask) -> Unit = {},
-    onTaskDelete: (PersonalTask) -> Unit = {}
+    onTaskDelete: (PersonalTask) -> Unit = {},
+    homeworkDescriptionsById: Map<String, String> = emptyMap()
 ){
     var currentNote by remember(noteText) { mutableStateOf(noteText) }
     var newTaskTitle by remember { mutableStateOf("") }
@@ -572,7 +588,9 @@ fun LessonDialog(
             }
         },
         text = {
-            val homeworkText = lesson.homeworkDescriptions
+            val homeworkText = lesson.homeworkIds
+                .mapNotNull { homeworkDescriptionsById[it] }
+                .ifEmpty { lesson.homeworkDescriptions }
                 .ifEmpty { if (lesson.homeworkIds.isNotEmpty()) listOf(stringResource(R.string.homework_no_description)) else emptyList() }
                 .joinToString("\n")
             val data = listOf<Pair<String, String>?>(
