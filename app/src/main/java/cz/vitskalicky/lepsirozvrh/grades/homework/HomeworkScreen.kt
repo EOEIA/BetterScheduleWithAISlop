@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -374,7 +375,11 @@ private fun HomeworkCard(
                 }
             }
             Column(Modifier.weight(1f)) {
-                Text(hw.description, style = MaterialTheme.typography.body2)
+                Text(
+                    hw.description ?: stringResource(R.string.homework_no_description),
+                    style = MaterialTheme.typography.body2,
+                    color = if (hw.description == null) MaterialTheme.colors.onSurface.copy(alpha = 0.5f) else Color.Unspecified
+                )
                 if (hw.lessonBeginTime != null) {
                     Spacer(Modifier.height(3.dp))
                     Text(

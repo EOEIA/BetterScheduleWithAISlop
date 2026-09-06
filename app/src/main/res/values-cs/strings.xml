@@ -392,6 +392,7 @@
     <string name="lesson_task">Úkol</string>
     <string name="homework_empty">Na tento týden žádné domácí úkoly</string>
     <string name="homework_empty_hint">Úkoly jsou načítány z hodin aktuálního týdne rozvrhu</string>
+    <string name="homework_no_description">Zadán domácí úkol, popis není k dispozici</string>
     <string name="change_history_title">Historie změn</string>
     <string name="settings_section_timetable">Rozvrh</string>
     <string name="settings_section_appearance">Vzhled</string>

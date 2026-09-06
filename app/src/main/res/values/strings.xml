@@ -415,6 +415,7 @@
     <string name="lesson_task">Task</string>
     <string name="homework_empty">No homework for this week</string>
     <string name="homework_empty_hint">Homework is pulled from lessons in the current timetable week</string>
+    <string name="homework_no_description">Homework assigned, no description available</string>
     <string name="change_history_title">Change history</string>
     <string name="settings_section_timetable">Timetable</string>
     <string name="settings_section_appearance">Appearance</string>

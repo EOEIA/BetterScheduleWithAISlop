@@ -57,7 +57,7 @@ object GradeNotification {
             if (prefs.boolean(PrefsConsts.HOMEWORK_ALERTS_ENABLED) != true) return
             if (!PermanentNotification.areNotificationEnabled(context)) return
 
-            val toKey: (HomeworkItem) -> String = { "${it.description.take(40)}|${it.date}" }
+            val toKey: (HomeworkItem) -> String = { "${it.description.orEmpty().take(40)}|${it.date}" }
             val seenIds = prefs.string(SEEN_HOMEWORK_IDS_KEY)
                 ?.split("||")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
             val newItems = items.filter { toKey(it) !in seenIds }
@@ -66,7 +66,7 @@ object GradeNotification {
             prefs.putOne(SEEN_HOMEWORK_IDS_KEY, allKeys.joinToString("||"))
 
             if (newItems.isNotEmpty()) {
-                val lines = newItems.map { "${it.subjectAbbrev}: ${it.description.take(60)}" }
+                val lines = newItems.map { "${it.subjectAbbrev}: ${it.description.orEmpty().take(60)}" }
                 val title = context.getString(R.string.homework_notification_title)
                 val summary = context.resources.getQuantityString(R.plurals.homework_notification_summary, newItems.size, newItems.size)
                 postNotification(context, NOTIF_ID_HOMEWORK, title, summary, lines)

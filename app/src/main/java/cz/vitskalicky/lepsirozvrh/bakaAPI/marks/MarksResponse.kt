@@ -1,10 +1,15 @@
 package cz.vitskalicky.lepsirozvrh.bakaAPI.marks
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class MarksResponse(
-    val Subjects: List<MarkSubject> = emptyList()
+data class MarksResponse @JsonCreator(mode = JsonCreator.Mode.PROPERTIES) constructor(
+    // single-property data class + a List default value is a known jackson-module-kotlin trap:
+    // without forcing PROPERTIES creator mode it gets misdetected as a delegating creator, falls
+    // back to bean-style deserialization, and crashes trying to .add() onto the immutable emptyList()
+    @JsonProperty("Subjects") val Subjects: List<MarkSubject> = emptyList()
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

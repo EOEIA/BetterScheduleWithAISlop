@@ -573,7 +573,7 @@ fun LessonDialog(
         },
         text = {
             val homeworkText = lesson.homeworkDescriptions
-                .ifEmpty { lesson.homeworkIds }
+                .ifEmpty { if (lesson.homeworkIds.isNotEmpty()) listOf(stringResource(R.string.homework_no_description)) else emptyList() }
                 .joinToString("\n")
             val data = listOf<Pair<String, String>?>(
                 timeText?.let { Pair(stringResource(R.string.lesson_time), it) },

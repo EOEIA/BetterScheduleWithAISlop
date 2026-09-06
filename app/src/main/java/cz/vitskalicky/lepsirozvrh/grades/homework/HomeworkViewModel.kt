@@ -1,6 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.grades.homework
 
 import android.app.Application
+import android.text.Html
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -82,29 +83,47 @@ class HomeworkViewModel(app: Application) : AndroidViewModel(app) {
             isLoading.value = false
             return
         }
-        val accountId = application.prefs.long(PrefsConsts.ACTIVE_ACCOUNT_ID) ?: return
+        val accountId = application.prefs.long(PrefsConsts.ACTIVE_ACCOUNT_ID) ?: run {
+            isLoading.value = false
+            return
+        }
 
         viewModelScope.launch {
             isLoading.value = true
-            val monday = Utils.getCurrentMonday()
-            val rozvrh = application.repository.getCachedRozvrh(RozvrhRecord.Key(accountId, monday))
-            items.value = rozvrh?.extractHomework() ?: emptyList()
+            // matches the week the main schedule is currently showing (respects the
+            // "switch to next week" preference), not the strict calendar week
+            val monday = Utils.getDisplayWeekMonday(application)
+            // real network fetch (falls back to cache only if the request fails) instead of cache-only,
+            // so the screen doesn't go empty just because nothing has been cached yet this session
+            val rozvrh = application.repository.getRozvrh(RozvrhRecord.Key(accountId, monday), true)
+            val descriptionsById = fetchHomeworkDescriptions(application, accountId)
+            items.value = rozvrh?.extractHomework(descriptionsById) ?: emptyList()
             isLoading.value = false
+        }
+    }
+
+    private suspend fun fetchHomeworkDescriptions(application: MainApplication, accountId: Long): Map<String, String> {
+        return try {
+            val account = application.accountRepository.getAccount(accountId) ?: return emptyMap()
+            val webservice = application.accountRepository.getHomeworkWebservice(account) ?: return emptyMap()
+            webservice.getHomeworks().Homeworks
+                .filter { it.Content.isNotBlank() }
+                .associate { it.ID to Html.fromHtml(it.Content, Html.FROM_HTML_MODE_LEGACY).toString().trim() }
+        } catch (e: Exception) {
+            emptyMap()
         }
     }
 }
 
-fun Rozvrh.extractHomework(): List<HomeworkItem> =
+fun Rozvrh.extractHomework(descriptionsById: Map<String, String> = emptyMap()): List<HomeworkItem> =
     days.flatMap { day ->
         captions.indices.flatMap { ci ->
             val caption: RozvrhCaption? = captions.getOrNull(ci)
             (day.blocks.getOrNull(ci) ?: emptyList()).flatMap { lesson ->
                 if (lesson.homeworkIds.isEmpty()) emptyList()
-                else {
-                    val descs = lesson.homeworkDescriptions.takeIf { it.isNotEmpty() } ?: lesson.homeworkIds
-                    descs.map { desc ->
-                        HomeworkItem(lesson.subjectName, lesson.subjectAbbrev, desc, day.date, caption?.beginTime)
-                    }
+                else lesson.homeworkIds.map { id ->
+                    val desc = descriptionsById[id] ?: lesson.homeworkDescriptions.firstOrNull()
+                    HomeworkItem(lesson.subjectName, lesson.subjectAbbrev, desc, day.date, caption?.beginTime)
                 }
             }
         }
