@@ -1,0 +1,1 @@
+Homework screen now shows real assignment text instead of raw codes, pulled fresh from Bakaláři and matched to the week actually being displayed. Grade and homework alerts now check periodically in the background instead of only when you open those screens, with a configurable interval (Settings → Notifications). Lesson-detail dialog restyled so the useful info stands out more.

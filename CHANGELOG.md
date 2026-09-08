@@ -1,5 +1,17 @@
 # Seznam změn / Changelog
 
+## 2.0.24
+
+- Domácí úkoly nyní zobrazují skutečný text zadání místo kódů, načtený z Bakalářů a přiřazený ke skutečně zobrazenému týdnu.
+- Upozornění na známky a úkoly se nyní kontrolují pravidelně na pozadí, ne jen při otevření dané obrazovky, s nastavitelným intervalem (Nastavení → Oznámení).
+- Dialog s detailem hodiny má upravený vzhled, aby lépe vynikly důležité informace.
+
+---
+
+- Homework screen now shows real assignment text instead of raw codes, pulled fresh from Bakaláři and matched to the week actually being displayed.
+- Grade and homework alerts now check periodically in the background instead of only when you open those screens, with a configurable interval (Settings → Notifications).
+- Lesson-detail dialog restyled so the useful info stands out more.
+
 ## 2.0.23
 
 - Rozvrh nyní na tabletech a velkých obrazovkách vyplní celé okno, místo aby zůstal v šířce telefonu. Na telefonu se nic nemění.
