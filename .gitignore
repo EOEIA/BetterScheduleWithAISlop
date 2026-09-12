@@ -38,6 +38,11 @@ obj/
 
 # secrets
 secrets.properties
+# release signing keys - losing these means never being able to update the app again,
+# committing them means anyone can publish as you. Keep them backed up outside the repo.
+*.jks
+*.keystore
+*.jks.base64
 
 # fastlane specific
 **/fastlane/report.xml
