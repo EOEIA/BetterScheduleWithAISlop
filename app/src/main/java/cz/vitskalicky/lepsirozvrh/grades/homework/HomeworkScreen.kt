@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.database.PersonalTask
+import cz.vitskalicky.lepsirozvrh.mainActivity.CopyTextButton
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
@@ -132,14 +134,18 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                         onDelete = { viewModel.deleteTask(it.id) }
                     )
                     HomeworkTab.BOTH -> when {
-                        isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                        allItems.isEmpty() && personalTasks.isEmpty() -> EmptyState()
+                        // only block the whole tab while there is genuinely nothing to show yet -
+                        // personal tasks are local and ready immediately, homework is not
+                        isLoading && allItems.isEmpty() && personalTasks.isEmpty() ->
+                            CircularProgressIndicator(Modifier.align(Alignment.Center))
+                        !isLoading && allItems.isEmpty() && personalTasks.isEmpty() -> EmptyState()
                         else -> HomeworkAndTasksList(
                             sortOrder = sortOrder,
                             grouped = grouped,
                             dateFmt = dateFmt,
                             timeFmt = timeFmt,
                             tasks = personalTasks,
+                            isLoadingHomework = isLoading,
                             onSortChange = { sortOrder = it },
                             onToggleTask = { viewModel.toggleTaskDone(it) },
                             onDeleteTask = { viewModel.deleteTask(it.id) }
@@ -173,32 +179,63 @@ private fun HomeworkAndTasksList(
     dateFmt: org.joda.time.format.DateTimeFormatter,
     timeFmt: org.joda.time.format.DateTimeFormatter,
     tasks: List<PersonalTask>,
+    isLoadingHomework: Boolean,
     onSortChange: (HwSortOrder) -> Unit,
     onToggleTask: (PersonalTask) -> Unit,
     onDeleteTask: (PersonalTask) -> Unit
 ) {
+    // Both halves are always announced with a section band, even when empty. Previously the tasks
+    // half reused the plain date header, so with homework present the two sections ran together and
+    // "Tasks" read like just another date group.
     LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
-        if (grouped.isNotEmpty()) {
-            homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange)
+        item { SectionHeader(stringResource(R.string.tab_homework)) }
+        when {
+            grouped.isNotEmpty() -> homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange)
+            isLoadingHomework -> item { SectionPlaceholder(stringResource(R.string.homework_loading)) }
+            else -> item { SectionPlaceholder(stringResource(R.string.homework_empty)) }
         }
-        stickyHeader {
-            DateHeader(stringResource(R.string.tab_tasks))
-        }
+
+        item { SectionHeader(stringResource(R.string.tab_tasks)) }
         if (tasks.isEmpty()) {
-            item {
-                Text(
-                    stringResource(R.string.tasks_empty),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                )
-            }
+            item { SectionPlaceholder(stringResource(R.string.tasks_empty)) }
         } else {
             items(tasks, key = { it.id }) { task ->
                 TaskCard(task = task, onToggle = onToggleTask, onDelete = onDeleteTask)
             }
         }
     }
+}
+
+/**
+ * Band that separates the two halves of the combined tab. Deliberately heavier than [DateHeader] -
+ * it must not be mistaken for one of the date groups inside a section.
+ */
+@Composable
+private fun SectionHeader(label: String) {
+    Surface(
+        color = MaterialTheme.colors.primary,
+        contentColor = MaterialTheme.colors.onPrimary,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+    ) {
+        Text(
+            label.uppercase(),
+            style = MaterialTheme.typography.subtitle2,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+        )
+    }
+}
+
+@Composable
+private fun SectionPlaceholder(label: String) {
+    Text(
+        label,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        style = MaterialTheme.typography.body2,
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -375,11 +412,13 @@ private fun HomeworkCard(
                 }
             }
             Column(Modifier.weight(1f)) {
-                Text(
-                    hw.description ?: stringResource(R.string.homework_no_description),
-                    style = MaterialTheme.typography.body2,
-                    color = if (hw.description == null) MaterialTheme.colors.onSurface.copy(alpha = 0.5f) else Color.Unspecified
-                )
+                SelectionContainer {
+                    Text(
+                        hw.description ?: stringResource(R.string.homework_no_description),
+                        style = MaterialTheme.typography.body2,
+                        color = if (hw.description == null) MaterialTheme.colors.onSurface.copy(alpha = 0.5f) else Color.Unspecified
+                    )
+                }
                 if (hw.lessonBeginTime != null) {
                     Spacer(Modifier.height(3.dp))
                     Text(
@@ -388,6 +427,12 @@ private fun HomeworkCard(
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.55f)
                     )
                 }
+            }
+            hw.description?.let { description ->
+                CopyTextButton(
+                    label = hw.subjectName.ifBlank { hw.subjectAbbrev },
+                    text = description
+                )
             }
         }
     }

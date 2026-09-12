@@ -72,20 +72,10 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         set(value) = sp.edit { putBoolean(PrefsConsts.SHOW_NEXT_LESSON_COUNTDOWN, value) }
     val showNextLessonCountdownLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.SHOW_NEXT_LESSON_COUNTDOWN, true)
 
-    var transposedTimetable: Boolean
-        get() = sp.boolean(PrefsConsts.TIMETABLE_TRANSPOSED) ?: false
-        set(value) = sp.edit { putBoolean(PrefsConsts.TIMETABLE_TRANSPOSED, value) }
-    val transposedTimetableLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.TIMETABLE_TRANSPOSED, false)
-
-    var alternatingRows: Boolean
-        get() = sp.boolean(PrefsConsts.ALTERNATING_ROWS) ?: false
-        set(value) = sp.edit { putBoolean(PrefsConsts.ALTERNATING_ROWS, value) }
-    val alternatingRowsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ALTERNATING_ROWS, false)
-
-    var alternatingCols: Boolean
-        get() = sp.boolean(PrefsConsts.ALTERNATING_COLS) ?: false
-        set(value) = sp.edit { putBoolean(PrefsConsts.ALTERNATING_COLS, value) }
-    val alternatingColsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ALTERNATING_COLS, false)
+    var compactNextLessonCard: Boolean
+        get() = sp.boolean(PrefsConsts.COMPACT_NEXT_LESSON_CARD) ?: false
+        set(value) = sp.edit { putBoolean(PrefsConsts.COMPACT_NEXT_LESSON_CARD, value) }
+    val compactNextLessonCardLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.COMPACT_NEXT_LESSON_CARD, false)
 
     var hideEmptyHours: Boolean
         get() = sp.boolean(PrefsConsts.HIDE_EMPTY_HOURS) ?: false
@@ -128,9 +118,7 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         }
     val periodicCheckIntervalIndexLD: LiveData<Int> = SharedPrefsIntLiveData(sp.sharedPreferences, PrefsConsts.PERIODIC_CHECK_INTERVAL_INDEX, 1)
 
-    var debugDemoMode: Boolean
-        get() = BuildConfig.DEBUG && (sp.boolean(PrefsConsts.DEBUG_DEMO_MODE) ?: false)
-        set(value) = sp.edit { putBoolean(PrefsConsts.DEBUG_DEMO_MODE, value) }
+    /** Read-only: demo mode is turned on from the account picker and off by switching to a real account. */
     val debugDemoModeLD: LiveData<Boolean> =
         SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.DEBUG_DEMO_MODE, false)
             .map { BuildConfig.DEBUG && it }

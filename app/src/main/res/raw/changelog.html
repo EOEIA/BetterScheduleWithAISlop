@@ -4,6 +4,57 @@
         <meta charset="UTF-8">
     </head>
     <body>
+        <h3>2.0.25</h3>
+        - Homework text can now be copied: a copy button on every homework card and in the lesson detail, and all lesson-detail text is selectable.<br>
+        - Fixed the current-lesson highlight getting stuck on a lesson that was already over - it now moves on by itself.<br>
+        - Fixed weeks getting mixed up when the app was left open across midnight or across the "switch to the next week" moment.<br>
+        - New themes: <b>Nord</b>, <b>Dracula</b>, <b>Solarized Light</b> and <b>Catppuccin Latte</b>.<br>
+        - <b>Website</b> and <b>Report an issue</b> now point at this fork's GitHub page instead of the original author's.<br>
+        - The combined Homework tab now clearly separates school homework from your own tasks.<br>
+        - New optional <b>Compact next lesson card</b> (Settings → Timetable): two lines instead of three, with the weekday shown when the lesson is not today. The original three-line card stays the default.<br>
+        - Timetable columns are now all the same width, and the hour column no longer takes up as much room as a whole school day.<br>
+        - Both cards now sit evenly clear of the timetable and the info line — the card used to be glued to the grid with a gap only underneath it.<br>
+        - The countdown now matches how far away the lesson is — <b>starts in 2 days</b> rather than <b>1d 21h 6m 46s</b>. Seconds only appear in the final minute, and the card stops redrawing once a second when nothing on it changes that fast.<br>
+        - The info line now uses the text size defined by your theme; it had been ignoring it and rendering at the default size.<br>
+        - The transpose button no longer glows orange — its arrows now turn to match the axis of the table.<br>
+        - Removed the Transposed table, Alternating rows and Alternating columns <b>settings</b>. Transposing itself stays - use the toggle button in the timetable toolbar.<br>
+
+        <br>
+        <h3>2.0.24</h3>
+        - Homework screen now shows real assignment text instead of raw codes, pulled fresh from Bakaláři and matched to the week actually being displayed.<br>
+        - Grade and homework alerts now check periodically in the background instead of only when you open those screens, with a configurable interval (Settings → Notifications).<br>
+        - Lesson-detail dialog restyled so the useful info stands out more.<br>
+
+        <br>
+        <h3>2.0.23</h3>
+        - The timetable now fills the whole window on tablets and large screens instead of staying phone-width. Nothing changes on a phone.<br>
+
+        <br>
+        <h3>2.0.22</h3>
+        - New setting: Transposed table — flip the timetable so days run across the top and time slots down the side. (Setting removed in 2.0.25; the toolbar toggle remains.)<br>
+
+        <br>
+        <h3>2.0.21</h3>
+        - Settings reorganized into Timetable / Appearance / Notifications / About sections.<br>
+        - All notification settings in one place.<br>
+
+        <br>
+        <h3>2.0.20</h3>
+        - New: <b>Change history</b> — Settings → Notifications → Change alerts → Change history logs every timetable-change alert.<br>
+
+        <br>
+        <h3>2.0.19</h3>
+        - New grade highlighting: “NEW” badge on the subject card and in the detail view; clears after 3 s of viewing.<br>
+
+        <br>
+        <h3>2.0.18</h3>
+        - Homework screen: grouped by date with a sticky header, sort by newest/oldest/subject, lesson time shown.<br>
+
+        <br>
+        <h3>2.0.17</h3>
+        - Grade predictor: weight chips (1–10) show the mark needed to move up a band. Sticky average bar. Hypothetical marks in their own section.<br>
+
+        <br>
         <h3>2.0.16</h3>
         - New: <b>Notification diagnostics</b> — Settings → School updates → Notification diagnostics shows permission status, alert toggles, and seen-ID counts to help debug why notifications did or did not fire.<br>
 

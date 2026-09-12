@@ -9,13 +9,21 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 
 android {
+    // Falls back to "unknown" instead of failing the whole build when this is not a git checkout
+    // (source archive, exported copy) or git is not installed.
     def getGitHash = { ->
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', '--short', 'HEAD'
-            standardOutput = stdout
+        try {
+            def stdout = new ByteArrayOutputStream()
+            def result = exec {
+                commandLine 'git', 'rev-parse', '--short', 'HEAD'
+                standardOutput = stdout
+                errorOutput = new ByteArrayOutputStream()
+                ignoreExitValue = true
+            }
+            return result.exitValue == 0 ? stdout.toString().trim() : "unknown"
+        } catch (Exception ignored) {
+            return "unknown"
         }
-        return stdout.toString().trim()
     }
 
     // Try reading secrets from file
@@ -39,8 +47,8 @@ android {
         applicationId "cz.vitskalicky.lepsirozvrh.fork"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 70
-        versionName "2.0.24"
+        versionCode 71
+        versionName "2.0.25"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "GitHash", "\"${getGitHash()}\""
         /**
@@ -64,24 +72,42 @@ android {
             useSupportLibrary true
         }
     }
+    // Only wire up release signing when a keystore is actually there. Unset env vars come through
+    // as the literal string "null", which used to make release builds die on a missing file rather
+    // than simply producing an unsigned APK.
+    def keystorePath = secretProperties.getProperty("signing_keystore_location")
+    def keystoreFile = (keystorePath != null && keystorePath != "null" && !keystorePath.trim().isEmpty()) ? file(keystorePath) : null
+    def hasReleaseKeystore = keystoreFile != null && keystoreFile.exists()
+
     signingConfigs {
         release {
-            storeFile file(secretProperties.getProperty("signing_keystore_location"))
-            storePassword secretProperties.getProperty("signing_keystore_password")
-            keyAlias secretProperties.getProperty("signing_key_alias")
-            keyPassword secretProperties.getProperty("signing_key_password")
+            if (hasReleaseKeystore) {
+                storeFile keystoreFile
+                storePassword secretProperties.getProperty("signing_keystore_password")
+                keyAlias secretProperties.getProperty("signing_key_alias")
+                keyPassword secretProperties.getProperty("signing_key_password")
+            }
         }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            // Every published build must carry the same signature or Android refuses to update the
+            // previous one. Unsigned is better than half-configured: it fails loudly at install
+            // time instead of shipping an APK signed with a throwaway key.
+            signingConfig hasReleaseKeystore ? signingConfigs.release : null
         }
         debug {
             debuggable true
             buildConfigField "Boolean", "ALLOW_SENTRY", "false"
             versionNameSuffix ".debug_${getGitHash()}"
+            // Debug builds are signed with the local debug keystore, release ones with the project
+            // key. Sharing one applicationId meant they could never replace each other - Android
+            // refuses an update signed with a different key - so every debug install needed the
+            // release build (or the previous machine's debug build) uninstalled first. Giving debug
+            // its own package lets the two sit side by side and update independently.
+            applicationIdSuffix ".debug"
         }
     }
     flavorDimensions "version"

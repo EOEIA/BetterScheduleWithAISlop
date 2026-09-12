@@ -20,6 +20,12 @@ interface RozvrhViewModel {
     val showError: Boolean
     fun forceRefresh()
 
+    /**
+     * Re-checks which week counts as "this week" and reloads if it has moved (midnight rollover or
+     * the "switch to the next week" threshold being crossed while the app is open). No-op otherwise.
+     */
+    fun refreshDisplayWeek() {}
+
     /** Keeps track of whether to jump to current lesson as soon as possible. After successful jump, it is set to false again. */
     var centerToCurrentLessonLD: MutableLiveData<Boolean?>
 

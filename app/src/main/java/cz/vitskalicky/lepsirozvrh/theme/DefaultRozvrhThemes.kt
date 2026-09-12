@@ -128,6 +128,175 @@ object DefaultRozvrhThemes {
         customizationLevel = 0,
     )
 
+
+    // Nord
+    final val NORD = RozvrhTheme(
+        isLight = false,
+        cABg = Color(0xFF434C5E),            // nord2
+        cAPrimaryText = Color(0xFFECEFF4),   // nord6
+        cARoomText = Color(0xFFA9B1C0),
+        cASecondaryText = Color(0xFFD8DEE9), // nord4
+        cChngBg = Color(0xFF434C5E),
+        cChngPrimaryText = Color(0xFFECEFF4),
+        cChngRoomText = Color(0xFFA9B1C0),
+        cChngSecondaryText = Color(0xFFD8DEE9),
+        cDivider = Color(0xFF242933),
+        cEmptyBg = Color(0xFF242933),
+        cError = Color(0xFFBF616A),          // nord11
+        cHBg = Color(0xFF3B4252),            // nord1
+        cHPrimaryText = Color(0xFFECEFF4),
+        cHRoomText = Color(0xFFA9B1C0),
+        cHSecondaryText = Color(0xFFD8DEE9),
+        cHeaderBg = Color(0xFF353C4A),
+        cHeaderPrimaryText = Color(0xFFECEFF4),
+        cHeaderSecondaryText = Color(0xFFA9B1C0),
+        cHighlight = Color(0xFF88C0D0),      // nord8
+        cHomework = Color(0xFFEBCB8B),       // nord13
+        cInfolineBg = Color(0xFF242933),
+        cInfolineText = Color(0xFFECEFF4),
+        cPrimary = Color(0xFF88C0D0),        // nord8
+        cSecondary = Color(0xFFB48EAD),      // nord15
+        cSurface = Color(0xFF2E3440),        // nord0
+        dpDividerWidth = 1.0f,
+        dpHighlightWidth = 1.0f,
+        dpHomework = 5.0f,
+        dpPaddingBottom = 3.0f,
+        dpPaddingLeft = 3.0f,
+        dpPaddingRight = 3.0f,
+        dpPaddingTop = 3.0f,
+        dpTextPadding = 2.0f,
+        spInfolineTextSize = 12.0f,
+        spPrimaryText = 18.0f,
+        spSecondaryText = 12.0f,
+        customizationLevel = 0,
+    )
+
+    // Dracula
+    final val DRACULA = RozvrhTheme(
+        isLight = false,
+        cABg = Color(0xFF44475A),            // current line
+        cAPrimaryText = Color(0xFFF8F8F2),   // foreground
+        cARoomText = Color(0xFF9FA3B8),
+        cASecondaryText = Color(0xFFE4E4DE),
+        cChngBg = Color(0xFF44475A),
+        cChngPrimaryText = Color(0xFFF8F8F2),
+        cChngRoomText = Color(0xFF9FA3B8),
+        cChngSecondaryText = Color(0xFFE4E4DE),
+        cDivider = Color(0xFF1E2029),
+        cEmptyBg = Color(0xFF1E2029),
+        cError = Color(0xFFFF5555),          // red
+        cHBg = Color(0xFF343746),
+        cHPrimaryText = Color(0xFFF8F8F2),
+        cHRoomText = Color(0xFF9FA3B8),
+        cHSecondaryText = Color(0xFFE4E4DE),
+        cHeaderBg = Color(0xFF21222C),
+        cHeaderPrimaryText = Color(0xFFF8F8F2),
+        cHeaderSecondaryText = Color(0xFF9FA3B8),
+        cHighlight = Color(0xFFFF79C6),      // pink
+        cHomework = Color(0xFFF1FA8C),       // yellow
+        cInfolineBg = Color(0xFF1E2029),
+        cInfolineText = Color(0xFFF8F8F2),
+        cPrimary = Color(0xFFBD93F9),        // purple
+        cSecondary = Color(0xFF8BE9FD),      // cyan
+        cSurface = Color(0xFF282A36),        // background
+        dpDividerWidth = 1.0f,
+        dpHighlightWidth = 1.0f,
+        dpHomework = 5.0f,
+        dpPaddingBottom = 3.0f,
+        dpPaddingLeft = 3.0f,
+        dpPaddingRight = 3.0f,
+        dpPaddingTop = 3.0f,
+        dpTextPadding = 2.0f,
+        spInfolineTextSize = 12.0f,
+        spPrimaryText = 18.0f,
+        spSecondaryText = 12.0f,
+        customizationLevel = 0,
+    )
+
+    // Solarized Light
+    final val SOLARIZED_LIGHT = RozvrhTheme(
+        isLight = true,
+        cABg = Color(0xFFEEE8D5),            // base2
+        cAPrimaryText = Color(0xFF073642),   // base02
+        cARoomText = Color(0xFF657B83),      // base00
+        cASecondaryText = Color(0xFF586E75), // base01
+        cChngBg = Color(0xFFEEE8D5),
+        cChngPrimaryText = Color(0xFF073642),
+        cChngRoomText = Color(0xFF657B83),
+        cChngSecondaryText = Color(0xFF586E75),
+        cDivider = Color(0xFFDDD6C1),
+        cEmptyBg = Color(0xFFEEE8D5),
+        cError = Color(0xFFDC322F),          // red
+        cHBg = Color(0xFFFDF6E3),            // base3
+        cHPrimaryText = Color(0xFF073642),
+        cHRoomText = Color(0xFF657B83),
+        cHSecondaryText = Color(0xFF586E75),
+        cHeaderBg = Color(0xFFEEE8D5),
+        cHeaderPrimaryText = Color(0xFF073642),
+        cHeaderSecondaryText = Color(0xFF586E75),
+        cHighlight = Color(0xFFCB4B16),      // orange
+        cHomework = Color(0xFFDC322F),       // red
+        cInfolineBg = Color(0xFF073642),     // base02 (dark bar)
+        cInfolineText = Color(0xFFFDF6E3),   // base3
+        cPrimary = Color(0xFF268BD2),        // blue
+        cSecondary = Color(0xFF2AA198),      // cyan
+        cSurface = Color(0xFFFDF6E3),        // base3
+        dpDividerWidth = 1.0f,
+        dpHighlightWidth = 1.0f,
+        dpHomework = 5.0f,
+        dpPaddingBottom = 3.0f,
+        dpPaddingLeft = 3.0f,
+        dpPaddingRight = 3.0f,
+        dpPaddingTop = 3.0f,
+        dpTextPadding = 2.0f,
+        spInfolineTextSize = 12.0f,
+        spPrimaryText = 18.0f,
+        spSecondaryText = 12.0f,
+        customizationLevel = 0,
+    )
+
+    // Catppuccin Latte
+    final val CATPPUCCIN_LATTE = RozvrhTheme(
+        isLight = true,
+        cABg = Color(0xFFCCD0DA),            // surface0
+        cAPrimaryText = Color(0xFF4C4F69),   // text
+        cARoomText = Color(0xFF6C6F85),      // subtext0
+        cASecondaryText = Color(0xFF5C5F77), // subtext1
+        cChngBg = Color(0xFFE6E9EF),         // mantle
+        cChngPrimaryText = Color(0xFF4C4F69),
+        cChngRoomText = Color(0xFF6C6F85),
+        cChngSecondaryText = Color(0xFF5C5F77),
+        cDivider = Color(0xFFBCC0CC),        // surface1
+        cEmptyBg = Color(0xFFDCE0E8),        // crust
+        cError = Color(0xFFD20F39),          // red
+        cHBg = Color(0xFFEFF1F5),            // base
+        cHPrimaryText = Color(0xFF4C4F69),
+        cHRoomText = Color(0xFF6C6F85),
+        cHSecondaryText = Color(0xFF5C5F77),
+        cHeaderBg = Color(0xFFDCE0E8),
+        cHeaderPrimaryText = Color(0xFF4C4F69),
+        cHeaderSecondaryText = Color(0xFF6C6F85),
+        cHighlight = Color(0xFFFE640B),      // peach
+        cHomework = Color(0xFFD20F39),       // red
+        cInfolineBg = Color(0xFF4C4F69),
+        cInfolineText = Color(0xFFEFF1F5),
+        cPrimary = Color(0xFF8839EF),        // mauve
+        cSecondary = Color(0xFF1E66F5),      // blue
+        cSurface = Color(0xFFEFF1F5),        // base
+        dpDividerWidth = 1.0f,
+        dpHighlightWidth = 1.0f,
+        dpHomework = 5.0f,
+        dpPaddingBottom = 3.0f,
+        dpPaddingLeft = 3.0f,
+        dpPaddingRight = 3.0f,
+        dpPaddingTop = 3.0f,
+        dpTextPadding = 2.0f,
+        spInfolineTextSize = 12.0f,
+        spPrimaryText = 18.0f,
+        spSecondaryText = 12.0f,
+        customizationLevel = 0,
+    )
+
     // as visible as possible if debug, hope it is unnoticed in production
     final val UNSPECIFIED = if (BuildConfig.DEBUG)
         RozvrhTheme(

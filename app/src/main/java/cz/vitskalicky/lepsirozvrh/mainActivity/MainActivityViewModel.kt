@@ -55,13 +55,33 @@ class MainActivityViewModel(
     private var didInitializeVisibleWeek = false
 
     private val switchDayLD = SharedPrefsIntLiveData(application.prefs.sharedPreferences,PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX,0)
-    private val switchDayObserver: Observer<Int> = Observer { _ ->
+    private val switchDayObserver: Observer<Int> = Observer { _ -> rebuildWeekCache() }
+    private val demoModeObserver: Observer<Boolean> = Observer { _ -> rebuildWeekCache() }
+
+    /**
+     * Monday that [weekPosition] is counted from. It is *not* recomputed on every use on purpose:
+     * the cached per-week LiveData below are built for a concrete monday, so if the base silently
+     * moved (midnight rollover, or crossing the "switch to the next week" threshold while the app
+     * is open) the table would keep showing the old week while the infoline and the refresh calls
+     * already talked about the new one. See [refreshDisplayWeek].
+     */
+    private var baseMonday: LocalDate = Utils.getDisplayWeekMonday(application)
+
+    /** Throws away every cached week LiveData and rebuilds them against the current [baseMonday]. */
+    private fun rebuildWeekCache() {
+        baseMonday = Utils.getDisplayWeekMonday(getApplication())
         invalidateCache = true
         weekPosition = weekPosition
     }
-    private val demoModeObserver: Observer<Boolean> = Observer { _ ->
-        invalidateCache = true
-        weekPosition = weekPosition
+
+    /**
+     * Re-checks which week is "this week" and rebuilds the cached LiveData if it has moved. Call
+     * whenever the UI comes back to the foreground - the app may have been open across the change.
+     */
+    override fun refreshDisplayWeek() {
+        if (Utils.getDisplayWeekMonday(getApplication()) == baseMonday) return
+        rebuildWeekCache()
+        repository.updateTime()
     }
 
     /**
@@ -82,7 +102,7 @@ class MainActivityViewModel(
     private fun weekToMonday(week: Int): LocalDate = if(week == PERM) {
         Rozvrh.PERM
     }else{
-        Utils.getDisplayWeekMonday(getApplication()).plusWeeks(week)
+        baseMonday.plusWeeks(week)
     }
 
     /**

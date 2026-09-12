@@ -94,6 +94,30 @@ enum class SelectedTheme(val index: Int){
     DARK(2),
     BLACK(3),
     CUSTOM(4),
+    NORD(5),
+    DRACULA(6),
+    SOLARIZED_LIGHT(7),
+    CATPPUCCIN_LATTE(8),
+    ;
+
+    companion object {
+        /**
+         * Order the themes are offered in the picker. Separate from [index] because [index] is the
+         * persisted value and cannot be reshuffled - new presets have to get new indexes, but
+         * "Custom" still belongs at the end of the list rather than in the middle of the presets.
+         */
+        val displayOrder: List<SelectedTheme> = listOf(
+            FOLLOW_SYSTEM_THEME,
+            LIGHT,
+            DARK,
+            BLACK,
+            NORD,
+            DRACULA,
+            SOLARIZED_LIGHT,
+            CATPPUCCIN_LATTE,
+            CUSTOM,
+        )
+    }
 }
 
 object ThemeGenerator{

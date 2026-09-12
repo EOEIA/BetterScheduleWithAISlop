@@ -23,5 +23,9 @@
         <item>Tmavý</item>
         <item>Černý</item>
         <item>Vlastní</item>
+        <item>Nord</item>
+        <item>Dracula</item>
+        <item>Solarized Light</item>
+        <item>Catppuccin Latte</item>
     </string-array>
 </resources>

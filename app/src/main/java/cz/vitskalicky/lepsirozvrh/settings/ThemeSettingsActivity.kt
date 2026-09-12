@@ -82,6 +82,22 @@ class ThemeSettingsActivity: ComponentActivity() {
                                             viewModel.customTheme = DefaultRozvrhThemes.BLACK
                                             viewModel.selectedTheme = it
                                         }
+                                        SelectedTheme.NORD -> {
+                                            viewModel.customTheme = DefaultRozvrhThemes.NORD
+                                            viewModel.selectedTheme = it
+                                        }
+                                        SelectedTheme.DRACULA -> {
+                                            viewModel.customTheme = DefaultRozvrhThemes.DRACULA
+                                            viewModel.selectedTheme = it
+                                        }
+                                        SelectedTheme.SOLARIZED_LIGHT -> {
+                                            viewModel.customTheme = DefaultRozvrhThemes.SOLARIZED_LIGHT
+                                            viewModel.selectedTheme = it
+                                        }
+                                        SelectedTheme.CATPPUCCIN_LATTE -> {
+                                            viewModel.customTheme = DefaultRozvrhThemes.CATPPUCCIN_LATTE
+                                            viewModel.selectedTheme = it
+                                        }
                                         SelectedTheme.FOLLOW_SYSTEM_THEME -> {
                                             viewModel.customTheme = DefaultRozvrhThemes.LIGHT
                                             viewModel.selectedTheme = it
@@ -135,16 +151,19 @@ private fun GeneralStateless(
 ) {
     PreferenceGroupHeader(R.string.theme_general_settings.str)
 
+    // themes_entries is indexed by SelectedTheme.index (the persisted value); the picker shows them
+    // in SelectedTheme.displayOrder instead, so "Custom" stays at the bottom as presets are added.
     val themeEntries = stringArrayResource(R.array.themes_entries);
-    val selectedThemeName = themeEntries[selectedTheme.index]
+    val order = SelectedTheme.displayOrder
+    val selectedPosition = order.indexOf(selectedTheme).coerceAtLeast(0)
     RadioPreference(
         title = R.string.app_theme.str,
-        description = selectedThemeName,
-        options = themeEntries.toList(),
-        selectedOptionIndex = selectedTheme.index,
+        description = themeEntries[selectedTheme.index],
+        options = order.map { themeEntries[it.index] },
+        selectedOptionIndex = selectedPosition,
         dialogTitle = { Text(R.string.app_theme.str)},
         icon = Icons.Default.Palette.icon,
-    ){ newValue: Int -> onThemeChange(SelectedTheme.values().first { it.index == newValue }) }
+    ){ newPosition: Int -> onThemeChange(order[newPosition]) }
 
     Preference(R.string.more_themes.str, null, Icons.Default.Add.icon,){onGetMoreThemesClicked()}
 

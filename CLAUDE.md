@@ -19,7 +19,8 @@ Much of the code (packages, models, comments) uses Czech terms. Key vocabulary: 
 ```
 
 - Use the **`development`** product flavor for all local work. The `official` and `play` flavors enable Sentry crash reporting managed by the upstream author — do not build/submit crashes from those.
-- Build variants combine flavor + type, e.g. `assembleOfficialRelease`. Release builds require signing secrets in `secrets.properties` (or env vars in CI); you won't have these.
+- Build variants combine flavor + type, e.g. `assembleOfficialRelease`. Release builds are signed from `secrets.properties` (or the `signing_*` env vars in CI); without a keystore the release variant still builds, just unsigned.
+- Public releases of this fork are `developmentRelease` (Sentry off), built and published by `.github/workflows/build.yml` on a `v*` tag, signed with the fork's own key from repo secrets. Every release must use that same key or Android will refuse to update the previous install.
 - Requires JDK 17. `compileSdk`/`targetSdk` 34, `minSdk` 21.
 - CI is GitLab (`.gitlab-ci.yml`) using Fastlane; the canonical remote is GitLab, mirrored to GitHub.
 

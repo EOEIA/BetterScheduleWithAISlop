@@ -22,18 +22,56 @@ jobs:
           java-version: 17
           cache: gradle
 
+      # Debug builds are for checking branches and pull requests only. They install as a separate
+      # app (applicationIdSuffix ".debug") and are signed with whatever throwaway debug key the
+      # runner generates, so they are never published as a release.
       - name: Build debug APK
+        if: "!startsWith(github.ref, 'refs/tags/')"
         run: ./gradlew assembleDevelopmentDebug
 
-      - name: Upload APK artifact
+      - name: Upload debug APK artifact
+        if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4
         with:
-          name: lepsi-rozvrh-apk
+          name: lepsi-rozvrh-debug-apk
           path: app/build/outputs/apk/development/debug/*.apk
+
+      # Tagged builds are the ones people install. They must all carry the same signature, or
+      # Android refuses to update the previous one - which is why the release key lives in repo
+      # secrets rather than being generated per run.
+      - name: Restore signing keystore
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$SIGNING_KEYSTORE_BASE64" ]; then
+            echo "::error::SIGNING_KEYSTORE_BASE64 is not set. A tagged build must be signed with the release key, otherwise the APK cannot update any previous install."
+            exit 1
+          fi
+          printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: Build release APK
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          signing_keystore_location: ${{ runner.temp }}/release.jks
+          signing_keystore_password: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+          signing_key_alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          signing_key_password: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: ./gradlew assembleDevelopmentRelease
+
+      - name: Verify the APK is signed
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
+          "$APKSIGNER" verify --print-certs app/build/outputs/apk/development/release/*.apk
+
+      - name: Remove the keystore
+        if: always() && startsWith(github.ref, 'refs/tags/')
+        run: rm -f "$RUNNER_TEMP/release.jks"
 
       - name: Create GitHub release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/development/debug/*.apk
+          files: app/build/outputs/apk/development/release/*.apk
           generate_release_notes: true
