@@ -81,6 +81,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // The app may have been left open across midnight or across the "switch to the next week"
+        // threshold, in which case "this week" now means a different week than the cached one.
+        viewModel.refreshDisplayWeek()
+    }
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent != null){

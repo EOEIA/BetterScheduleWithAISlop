@@ -9,13 +9,21 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 
 android {
+    // Falls back to "unknown" instead of failing the whole build when this is not a git checkout
+    // (source archive, exported copy) or git is not installed.
     def getGitHash = { ->
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', '--short', 'HEAD'
-            standardOutput = stdout
+        try {
+            def stdout = new ByteArrayOutputStream()
+            def result = exec {
+                commandLine 'git', 'rev-parse', '--short', 'HEAD'
+                standardOutput = stdout
+                errorOutput = new ByteArrayOutputStream()
+                ignoreExitValue = true
+            }
+            return result.exitValue == 0 ? stdout.toString().trim() : "unknown"
+        } catch (Exception ignored) {
+            return "unknown"
         }
-        return stdout.toString().trim()
     }
 
     // Try reading secrets from file
@@ -39,8 +47,8 @@ android {
         applicationId "cz.vitskalicky.lepsirozvrh.fork"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 70
-        versionName "2.0.24"
+        versionCode 71
+        versionName "2.0.25"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "GitHash", "\"${getGitHash()}\""
         /**

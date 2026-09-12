@@ -241,32 +241,15 @@ class SettingsActivity : ComponentActivity() {
                             SwitchPreference(R.string.hide_empty_hours.str, R.string.hide_empty_hours_desc.str,
                                 viewModel.hideEmptyHoursLD.observeAsState().value ?: false
                             ) { newValue -> viewModel.hideEmptyHours = newValue }
-                            SwitchPreference(R.string.transposed_timetable.str, R.string.transposed_timetable_desc.str,
-                                viewModel.transposedTimetableLD.observeAsState().value ?: false
-                            ) { newValue -> viewModel.transposedTimetable = newValue }
-                            SwitchPreference(R.string.alternating_rows.str, R.string.alternating_rows_desc.str,
-                                viewModel.alternatingRowsLD.observeAsState().value ?: false
-                            ) { newValue -> viewModel.alternatingRows = newValue }
-                            SwitchPreference(R.string.alternating_cols.str, R.string.alternating_cols_desc.str,
-                                viewModel.alternatingColsLD.observeAsState().value ?: false
-                            ) { newValue -> viewModel.alternatingCols = newValue }
                             SwitchPreference(R.string.show_next_lesson_card.str, R.string.show_next_lesson_card_desc.str,
                                 viewModel.showNextLessonCardLD.observeAsState().value ?: true
                             ) { newValue -> viewModel.showNextLessonCard = newValue }
                             SwitchPreference(R.string.show_next_lesson_countdown.str, R.string.show_next_lesson_countdown_desc.str,
                                 viewModel.showNextLessonCountdownLD.observeAsState().value ?: true
                             ) { newValue -> viewModel.showNextLessonCountdown = newValue }
-                            if (BuildConfig.DEBUG) {
-                                SwitchPreference(
-                                    R.string.debug_demo_mode.str,
-                                    R.string.debug_demo_mode_desc.str,
-                                    debugDemoMode,
-                                    Icons.Default.DeveloperMode.icon
-                                ) { newValue ->
-                                    viewModel.debugDemoMode = newValue
-                                }
-                            }
-
+                            SwitchPreference(R.string.compact_next_lesson_card.str, R.string.compact_next_lesson_card_desc.str,
+                                viewModel.compactNextLessonCardLD.observeAsState().value ?: false
+                            ) { newValue -> viewModel.compactNextLessonCard = newValue }
                             // ── Appearance ─────────────────────────────────────────────
                             Divider()
                             PreferenceGroupHeader(R.string.settings_section_appearance.str)

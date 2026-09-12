@@ -4,12 +4,55 @@
         <meta charset="UTF-8">
     </head>
     <body>
-        <h3>2.0.15</h3>
-        - Opravena matematika prediktoru známek (správné hranice: ≤1,49, ≤2,49, ≤3,49, ≤4,49).<br>
-        - Hypotetické úpravy se resetují při opuštění detailu předmětu.<br>
-        - Nové zobrazení <b>Podle data</b> v záložce Známky — všechny známky seřazené od nejnovějších.<br>
-        - Nová obrazovka <b>Domácí úkoly</b> zobrazující úkoly z aktuálního týdne.<br>
-        - Oznámení o nových známkách a úkolech — zapnout v Nastavení → Školní novinky.<br>
+        <h3>2.0.25</h3>
+        - Text domácího úkolu lze nyní kopírovat: tlačítko kopírování u každého úkolu i v detailu hodiny, a text v detailu hodiny jde označit.<br>
+        - Opraveno zvýraznění aktuální hodiny, které zůstávalo viset na již skončené hodině — nyní se posouvá samo.<br>
+        - Opraveno pletení týdnů, když byla aplikace otevřená přes půlnoc nebo přes okamžik přepnutí na další týden.<br>
+        - Nové motivy: <b>Nord</b>, <b>Dracula</b>, <b>Solarized Light</b> a <b>Catppuccin Latte</b>.<br>
+        - <b>Webová stránka</b> a <b>Nahlásit problém</b> nyní míří na GitHub této fork verze místo na stránky původního autora.<br>
+        - Společná záložka úkolů nyní jasně odděluje školní domácí úkoly od vlastních úkolů.<br>
+        - Nová volitelná <b>Kompaktní karta příští hodiny</b> (Nastavení → Rozvrh): dva řádky místo tří, s dnem v týdnu, pokud hodina není dnes. Výchozí zůstává původní třířádková karta.<br>
+        - Sloupce rozvrhu mají nyní všechny stejnou šířku a sloupec s hodinami už nezabírá tolik místa jako celý školní den.<br>
+        - Obě karty nyní mají stejný odstup od rozvrhu i od informačního řádku — dříve byla karta přilepená k tabulce a mezera byla jen pod ní.<br>
+        - Odpočet se řídí tím, jak daleko hodina je — <b>začíná za 2 dny</b> místo <b>1d 21h 6m 46s</b>. Sekundy se objeví až v poslední minutě a karta se přestala překreslovat každou sekundu, když se na ní nic tak rychle nemění.<br>
+        - Informační řádek nyní používá velikost písma z motivu; dosud ji ignoroval a kreslil se ve výchozí velikosti.<br>
+        - Tlačítko otočení tabulky už nesvítí oranžově — jeho šipky se natočí podle osy tabulky.<br>
+        - Odstraněna <b>nastavení</b> Otočená tabulka, Střídání řádků a Střídání sloupců. Otočení tabulky zůstává — použijte tlačítko v liště rozvrhu.<br>
+
+        <br>
+        <h3>2.0.24</h3>
+        - Domácí úkoly nyní zobrazují skutečný text zadání místo kódů, načtený z Bakalářů a přiřazený ke skutečně zobrazenému týdnu.<br>
+        - Upozornění na známky a úkoly se nyní kontrolují pravidelně na pozadí, ne jen při otevření dané obrazovky, s nastavitelným intervalem (Nastavení → Oznámení).<br>
+        - Dialog s detailem hodiny má upravený vzhled, aby lépe vynikly důležité informace.<br>
+
+        <br>
+        <h3>2.0.23</h3>
+        - Rozvrh nyní na tabletech a velkých obrazovkách vyplní celé okno, místo aby zůstal v šířce telefonu. Na telefonu se nic nemění.<br>
+
+        <br>
+        <h3>2.0.22</h3>
+        - Nové nastavení: Otočená tabulka — přepne rozvrh tak, aby dny byly ve sloupcích a hodiny v řádcích. (Ve 2.0.25 odstraněno nastavení, tlačítko v liště zůstává.)<br>
+
+        <br>
+        <h3>2.0.21</h3>
+        - Nastavení přehledně rozdělena do čtyř sekcí: Rozvrh, Vzhled, Oznámení, O aplikaci.<br>
+        - Všechna oznámení na jednom místě.<br>
+
+        <br>
+        <h3>2.0.20</h3>
+        - Novinka: <b>Historie změn</b> — Nastavení → Oznámení → Upozornění na změny → Historie změn zaznamenává každé upozornění.<br>
+
+        <br>
+        <h3>2.0.19</h3>
+        - Zvýraznění nových známek: odznak „NEW“ na kartě předmětu i v detailu; zmizí po 3 s prohlížení.<br>
+
+        <br>
+        <h3>2.0.18</h3>
+        - Domácí úkoly: seskupeny podle data (sticky hlavička), řazení nejnovější/nejstarší/předmět, zobrazení času hodiny.<br>
+
+        <br>
+        <h3>2.0.17</h3>
+        - Prediktor: výběr váhy (1–10) zobrazí potřebnou známku pro přechod do lepšího pásma. Sticky průměrová lišta. Hypotetické známky v samostatné sekci.<br>
 
         <br>
         <h3>2.0.16</h3>

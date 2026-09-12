@@ -1,7 +1,13 @@
 package cz.vitskalicky.lepsirozvrh.mainActivity
 
 import android.content.Intent
+import android.os.Build
+import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.DisableSelection
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -11,7 +17,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -19,6 +31,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.quantityStringResource
@@ -51,6 +64,39 @@ import org.joda.time.LocalTime
 import org.joda.time.Seconds
 import org.joda.time.format.DateTimeFormat
 import kotlin.math.max
+
+private data class LessonDetailRow(
+    val label: String,
+    val value: String,
+    val copyable: Boolean = false
+)
+
+/**
+ * Small icon button that puts [text] on the clipboard. Android 13+ shows its own clipboard
+ * confirmation popup, so only older versions get a toast.
+ */
+@Composable
+fun CopyTextButton(label: String, text: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
+    val copiedMessage = stringResource(R.string.copied_to_clipboard)
+    IconButton(
+        onClick = {
+            clipboard.setText(AnnotatedString(text))
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
+            }
+        },
+        modifier = modifier.size(28.dp)
+    ) {
+        Icon(
+            Icons.Default.ContentCopy,
+            contentDescription = "${stringResource(R.string.copy_to_clipboard)}: $label",
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+        )
+    }
+}
 
 private data class LessonDialogInfo(
     val lesson: RozvrhLesson,
@@ -89,18 +135,6 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.COMPACT_TIMETABLE, false)
     }
     val compactTimetable by compactTimetableLD.observeAsState(false)
-    val transposedTimetableLD = remember {
-        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.TIMETABLE_TRANSPOSED, false)
-    }
-    val transposedTimetable by transposedTimetableLD.observeAsState(false)
-    val alternatingRowsLD = remember {
-        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.ALTERNATING_ROWS, false)
-    }
-    val alternatingRows by alternatingRowsLD.observeAsState(false)
-    val alternatingColsLD = remember {
-        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.ALTERNATING_COLS, false)
-    }
-    val alternatingCols by alternatingColsLD.observeAsState(false)
     val showNextLessonCardLD = remember {
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.SHOW_NEXT_LESSON_CARD, true)
     }
@@ -109,6 +143,14 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.SHOW_NEXT_LESSON_COUNTDOWN, true)
     }
     val showNextLessonCountdown by showNextLessonCountdownLD.observeAsState(true)
+    val transposedTimetableLD = remember {
+        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.TIMETABLE_TRANSPOSED, false)
+    }
+    val transposedTimetable by transposedTimetableLD.observeAsState(false)
+    val compactNextLessonCardLD = remember {
+        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.COMPACT_NEXT_LESSON_CARD, false)
+    }
+    val compactNextLessonCard by compactNextLessonCardLD.observeAsState(false)
     val hideEmptyHoursLD = remember {
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.HIDE_EMPTY_HOURS, false)
     }
@@ -148,6 +190,15 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
     }.observeAsState(emptyList())
     val lessonTaskMap = remember(taskList) {
         taskList.filter { it.lessonKey != null }.groupBy { it.lessonKey!! }
+    }
+
+    // Catches the week rolling over while the app is simply left open in the foreground;
+    // MainActivity.onResume() covers the case of it having been in the background.
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000)
+            viewModel.refreshDisplayWeek()
+        }
     }
 
     val isCenterToCurrentLessonEnabled: () -> Boolean = {SharedPrefsKt(context).boolean(PrefsConsts.CENTER_TO_CURRENT_LESSON)?:true}
@@ -197,11 +248,10 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         onTransposeToggle = {
             SharedPrefsKt(context).edit { putBoolean(PrefsConsts.TIMETABLE_TRANSPOSED, !transposedTimetable) }
         },
-        alternatingRows = alternatingRows,
-        alternatingCols = alternatingCols,
         hideEmptyHours = hideEmptyHours,
         showNextLessonCard = showNextLessonCard,
         showNextLessonCountdown = showNextLessonCountdown,
+        compactNextLessonCard = compactNextLessonCard,
         noteMap = noteMap,
         lessonTaskMap = lessonTaskMap,
         onNoteSave = { key, text ->
@@ -269,11 +319,10 @@ fun RozvrhWithControlsStateless(
     compactTimetable: Boolean = false,
     transposedTimetable: Boolean = false,
     onTransposeToggle: () -> Unit = {},
-    alternatingRows: Boolean = false,
-    alternatingCols: Boolean = false,
     hideEmptyHours: Boolean = false,
     showNextLessonCard: Boolean = true,
     showNextLessonCountdown: Boolean = true,
+    compactNextLessonCard: Boolean = false,
     noteMap: Map<String, String> = emptyMap(),
     lessonTaskMap: Map<String, List<PersonalTask>> = emptyMap(),
     onNoteSave: (lessonKey: String, text: String) -> Unit = { _, _ -> },
@@ -284,6 +333,18 @@ fun RozvrhWithControlsStateless(
 ){
     // the lesson which is shown in dialog or null
     var dialogInfo by remember { mutableStateOf(null as LessonDialogInfo?) }
+    // The current-lesson highlight and the today's-row highlight depend on the wall clock, but the
+    // table only recomputes them when the schedule data itself changes - so without this tick the
+    // highlight would stay stuck on a lesson that is already over. Only the current week has a
+    // highlight at all, so don't tick on any other.
+    var highlightTick by remember { mutableStateOf(0) }
+    LaunchedEffect(weekPosition) {
+        if (weekPosition != 0) return@LaunchedEffect
+        while (true) {
+            delay(30_000)
+            highlightTick++
+        }
+    }
     dialogInfo?.let { info ->
         val saveCallback = info.lessonKey?.let { key -> { text: String -> onNoteSave(key, text) } }
         LessonDialog(
@@ -348,10 +409,11 @@ fun RozvrhWithControlsStateless(
                         rozvrhScrollView.setCompact(compactTimetable)
                         rozvrhScrollView.setTheme(if (compactTimetable) rozvrhTheme.compact() else rozvrhTheme)
                         rozvrhScrollView.setTransposed(transposedTimetable)
-                        rozvrhScrollView.setAlternatingRows(alternatingRows)
-                        rozvrhScrollView.setAlternatingCols(alternatingCols)
                         rozvrhScrollView.setHideEmptyHours(hideEmptyHours)
                         rozvrhScrollView.setRozvrh(rozvrh, isTeacher)
+                        @Suppress("UNUSED_EXPRESSION")
+                        highlightTick // read here so the tick re-runs this update block
+                        rozvrhScrollView.refreshTimeDependentHighlights()
                         if (centerToCurrentLesson) {
                             rozvrhScrollView.centerToCurrentLesson(screenWidth, onCenterCompleted)
                         }
@@ -363,6 +425,7 @@ fun RozvrhWithControlsStateless(
                     rozvrh = rozvrh,
                     isTeacher = isTeacher,
                     showCountdown = showNextLessonCountdown,
+                    compact = compactNextLessonCard,
                     onLessonClick = { lesson, caption, date ->
                         val key = date?.let { lessonNoteKey(it, caption.beginTime) }
                         dialogInfo = LessonDialogInfo(
@@ -378,12 +441,23 @@ fun RozvrhWithControlsStateless(
             //todo shadow
 
             if (statusLineText != null) {
+                val infolineTheme = LocalRozvrhTheme.current
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    color = LocalRozvrhTheme.current.cInfolineBg,
-                    contentColor = LocalRozvrhTheme.current.cInfolineText
+                    color = infolineTheme.cInfolineBg,
+                    contentColor = infolineTheme.cInfolineText
                 ) {
-                    Text(statusLineText, textAlign = TextAlign.Center)
+                    Text(
+                        statusLineText,
+                        // spInfolineTextSize is part of every theme and is user-customizable, but
+                        // nothing read it - the band rendered at the default body1 size instead.
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 5.dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = infolineTheme.spInfolineTextSize.sp,
+                        lineHeight = (infolineTheme.spInfolineTextSize * 1.35f).sp
+                    )
                 }
             }
             Surface(
@@ -438,12 +512,27 @@ fun RozvrhWithControlsStateless(
 
                     }
 
-                    Row(Modifier.align(Alignment.CenterEnd)) {
+                    Row(Modifier.align(Alignment.CenterEnd), verticalAlignment = Alignment.CenterVertically) {
+                        // separates the view/refresh actions from the week navigation next to them
+                        Box(
+                            Modifier
+                                .width(1.dp)
+                                .height(20.dp)
+                                .background(LocalContentColor.current.copy(alpha = 0.16f))
+                        )
                         IconButton(onTransposeToggle) {
+                            // State is carried by the axis the arrows point along, which mirrors the
+                            // table's own axis. No second accent colour in the bar: cPrimary at low
+                            // alpha over the elevated surface composites to mud, and at full chroma
+                            // it makes a view preference the loudest thing on the screen.
+                            val axis by animateFloatAsState(
+                                targetValue = if (transposedTimetable) 90f else 0f,
+                                label = "transpose axis"
+                            )
                             Icon(
                                 Icons.Default.SwapHoriz,
-                                contentDescription = "Transpose timetable",
-                                tint = if (transposedTimetable) MaterialTheme.colors.primary else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                                contentDescription = stringResource(R.string.transposed_timetable),
+                                modifier = Modifier.rotate(axis)
                             )
                         }
                         if (status == StatusInfo.Status.LOADING) {
@@ -487,9 +576,15 @@ fun LessonDialog(
     var showTasksEditor by remember { mutableStateOf(false) }
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     if (caption != null) {
-        LaunchedEffect(caption, lessonDate) {
+        // same granularity policy as the next-lesson card, so the dialog does not redraw once a
+        // second to restate a figure that only changes once a minute
+        val dialogTarget = lessonDate?.toLocalDateTime(caption.endTime)
+        val dialogTick = countdownTickMillis(
+            dialogTarget?.let { max(0, Seconds.secondsBetween(now, it).seconds) } ?: Int.MAX_VALUE
+        )
+        LaunchedEffect(caption, lessonDate, dialogTick) {
             while (true) {
-                delay(1_000)
+                delay(dialogTick)
                 now = LocalDateTime.now()
             }
         }
@@ -593,32 +688,46 @@ fun LessonDialog(
                 .ifEmpty { lesson.homeworkDescriptions }
                 .ifEmpty { if (lesson.homeworkIds.isNotEmpty()) listOf(stringResource(R.string.homework_no_description)) else emptyList() }
                 .joinToString("\n")
-            val data = listOf<Pair<String, String>?>(
-                timeText?.let { Pair(stringResource(R.string.lesson_time), it) },
-                if (homeworkText.isNotBlank()) Pair(stringResource(R.string.homework), homeworkText) else null,
-                if (isPerm) Pair(stringResource(R.string.cycle), lesson.cycles.joinToString(", "){ it.abbrev.ifBlank { it.name }}) else null,
-                Pair(stringResource(R.string.group), lesson.groups.joinToString(", "){ it.abbrev.ifBlank { it.name }}),
-                Pair(stringResource(R.string.lesson_teacher), lesson.teacherName.ifBlank { lesson.teacherAbbrev }),
-                Pair(stringResource(R.string.room), lesson.roomName.ifBlank { lesson.roomAbbrev }),
-                Pair(stringResource(R.string.topic), lesson.theme),
+            // `copyable` marks the rows worth a one-tap copy button - the homework assignment is the
+            // whole reason this dialog gets opened, and retyping it by hand is the thing to avoid.
+            val data = listOf<LessonDetailRow?>(
+                timeText?.let { LessonDetailRow(stringResource(R.string.lesson_time), it) },
+                if (homeworkText.isNotBlank()) LessonDetailRow(stringResource(R.string.homework), homeworkText, copyable = true) else null,
+                if (isPerm) LessonDetailRow(stringResource(R.string.cycle), lesson.cycles.joinToString(", "){ it.abbrev.ifBlank { it.name }}) else null,
+                LessonDetailRow(stringResource(R.string.group), lesson.groups.joinToString(", "){ it.abbrev.ifBlank { it.name }}),
+                LessonDetailRow(stringResource(R.string.lesson_teacher), lesson.teacherName.ifBlank { lesson.teacherAbbrev }),
+                LessonDetailRow(stringResource(R.string.room), lesson.roomName.ifBlank { lesson.roomAbbrev }),
+                LessonDetailRow(stringResource(R.string.topic), lesson.theme, copyable = true),
             )
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                for (item in data.filterNotNull().filter { it.second.isNotBlank() }){
-                    Row {
-                        Text(
-                            item.first,
-                            modifier = Modifier.weight(0.4F),
-                            textAlign = TextAlign.Right,
-                            style = MaterialTheme.typography.caption,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                        )
-                        Spacer(Modifier.size(4.dp))
-                        Text(
-                            item.second,
-                            modifier = Modifier.weight(0.6F),
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colors.onSurface
-                        )
+                // lets the user drag-select any of the detail text, not just use the copy buttons
+                SelectionContainer {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        for (item in data.filterNotNull().filter { it.value.isNotBlank() }) {
+                            Row(verticalAlignment = Alignment.Top) {
+                                Text(
+                                    item.label,
+                                    modifier = Modifier.weight(0.4F),
+                                    textAlign = TextAlign.Right,
+                                    style = MaterialTheme.typography.caption,
+                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                )
+                                Spacer(Modifier.size(4.dp))
+                                Text(
+                                    item.value,
+                                    modifier = Modifier.weight(0.6F),
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colors.onSurface
+                                )
+                                if (item.copyable) {
+                                    // SelectionContainer swallows clicks on its children, so the
+                                    // button has to sit outside the selectable text itself.
+                                    DisableSelection {
+                                        CopyTextButton(item.label, item.value)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 LessonExtrasSummary(
@@ -885,17 +994,27 @@ fun NextLessonCard(
     rozvrh: Rozvrh?,
     isTeacher: Boolean,
     showCountdown: Boolean = true,
+    /** Two-line layout with a state badge and the weekday, instead of the three-line captioned one. */
+    compact: Boolean = false,
     onLessonClick: ((RozvrhLesson, RozvrhCaption, LocalDate?) -> Unit)? = null
 ) {
     var now by remember(rozvrh) { mutableStateOf(LocalDateTime.now()) }
-    LaunchedEffect(rozvrh) {
+    val relativeLesson = rozvrh?.getCurrentOrNextLesson(now)
+    val secondsAway = relativeLesson
+        ?.let { max(0, Seconds.secondsBetween(now, it.targetDateTime).seconds) }
+        ?: Int.MAX_VALUE
+    val tickMillis = countdownTickMillis(secondsAway)
+    LaunchedEffect(rozvrh, tickMillis) {
         while (true) {
-            delay(1_000)
+            delay(tickMillis)
             now = LocalDateTime.now()
         }
     }
 
-    val relativeLesson = rozvrh?.getCurrentOrNextLesson(now)
+    // The compact card floats, so it is rounded; the classic one kept its square edges. Both get
+    // the same even inset - without top padding the card sits glued to the grid with a strip of
+    // surface showing only underneath it.
+    val cardShape = if (compact) RoundedCornerShape(10.dp) else RectangleShape
     val clickableModifier = if (relativeLesson != null && onLessonClick != null) {
         Modifier.clickable { onLessonClick(relativeLesson.lesson, relativeLesson.block.caption, relativeLesson.block.day.date) }
     } else Modifier
@@ -903,8 +1022,11 @@ fun NextLessonCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            // clip before clickable so the ripple follows the corners
+            .clip(cardShape)
             .then(clickableModifier),
+        shape = cardShape,
         elevation = 2.dp,
         color = MaterialTheme.colors.surface,
         contentColor = MaterialTheme.colors.onSurface
@@ -912,7 +1034,7 @@ fun NextLessonCard(
         if (relativeLesson == null) {
             Text(
                 text = stringResource(R.string.next_lesson_card_school_over),
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                 style = MaterialTheme.typography.body2,
                 fontWeight = FontWeight.SemiBold
             )
@@ -921,12 +1043,18 @@ fun NextLessonCard(
 
         val block = relativeLesson.block
         val lesson = relativeLesson.lesson
+        val isCurrent = relativeLesson.state == Rozvrh.RelativeLessonState.CURRENT
         val timeFormatter = DateTimeFormat.shortTime()
-        val time = "${block.caption.beginTime.toString(timeFormatter)} - ${block.caption.endTime.toString(timeFormatter)}"
-        val durationText = durationText(max(0, Seconds.secondsBetween(now, relativeLesson.targetDateTime).seconds))
-        val countdown = when (relativeLesson.state) {
-            Rozvrh.RelativeLessonState.CURRENT -> stringResource(R.string.next_lesson_card_ends_in, durationText)
-            Rozvrh.RelativeLessonState.NEXT -> stringResource(R.string.next_lesson_card_starts_in, durationText)
+        val beginText = block.caption.beginTime.toString(timeFormatter)
+        val endText = block.caption.endTime.toString(timeFormatter)
+        val isToday = block.day.date == now.toLocalDate()
+        // Same short weekday form the grid header uses (see DenView). Only the compact card shows
+        // it; without it a lesson two days out reads as if it were about to start.
+        val dayLabel = if (isToday) null else block.day.date.toString("E")
+        val countdown = if (isCurrent) {
+            stringResource(R.string.next_lesson_card_ends_in, durationText(secondsAway))
+        } else {
+            stringResource(R.string.next_lesson_card_starts_in, durationText(secondsAway))
         }
         val subject = lesson.subjectName.ifBlank {
             lesson.subjectAbbrev.ifBlank { stringResource(R.string.lesson_cancelled) }
@@ -937,81 +1065,229 @@ fun NextLessonCard(
             lesson.teacherName.ifBlank { lesson.teacherAbbrev }
         }
         val room = lesson.roomName.ifBlank { lesson.roomAbbrev }
+        val details = listOf(room, teacher).filter { it.isNotBlank() }.joinToString(" \u2022 ")
         val indicators = listOfNotNull(
             stringResource(R.string.next_lesson_card_homework_indicator).takeIf { lesson.homeworkIds.isNotEmpty() },
             stringResource(R.string.next_lesson_card_change_indicator)
                 .takeIf { lesson.changeKind != LessonChangeType.NONE || lesson.changeType != RozvrhLesson.NO_CHANGE }
         )
 
-        Row(
+        if (compact) {
+            CompactLessonRow(
+                isCurrent = isCurrent,
+                subject = subject,
+                details = details,
+                indicators = indicators,
+                dayLabel = dayLabel,
+                timeText = if (isToday) beginText + "\u2013" + endText else beginText,
+                countdown = countdown,
+                showCountdown = showCountdown
+            )
+        } else {
+            ClassicLessonRow(
+                isCurrent = isCurrent,
+                subject = subject,
+                details = details,
+                indicators = indicators,
+                timeText = "$beginText - $endText",
+                countdown = countdown,
+                showCountdown = showCountdown
+            )
+        }
+    }
+}
+
+/** Two lines: the "next lesson / current lesson" caption becomes a badge, freeing a whole row. */
+@Composable
+private fun CompactLessonRow(
+    isCurrent: Boolean,
+    subject: String,
+    details: String,
+    indicators: List<String>,
+    dayLabel: String?,
+    timeText: String,
+    countdown: String,
+    showCountdown: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // solid while a lesson is running, tinted while one is merely coming up
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(
+                    if (isCurrent) MaterialTheme.colors.primary
+                    else MaterialTheme.colors.primary.copy(alpha = 0.15f)
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Column(Modifier.weight(1F)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = if (relativeLesson.state == Rozvrh.RelativeLessonState.CURRENT) {
-                            stringResource(R.string.next_lesson_card_current)
-                        } else {
-                            stringResource(R.string.next_lesson_card_next)
-                        },
-                        style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
-                    )
-                    if (indicators.isNotEmpty()) {
-                        Spacer(Modifier.size(8.dp))
-                        Text(
-                            text = indicators.joinToString(" • "),
-                            style = MaterialTheme.typography.caption,
-                            color = MaterialTheme.colors.primary
-                        )
-                    }
-                }
+            Icon(
+                Icons.Default.Schedule,
+                contentDescription = stringResource(
+                    if (isCurrent) R.string.next_lesson_card_current else R.string.next_lesson_card_next
+                ),
+                modifier = Modifier.size(16.dp),
+                tint = if (isCurrent) MaterialTheme.colors.onPrimary else MaterialTheme.colors.primary
+            )
+        }
+        Spacer(Modifier.size(10.dp))
+        Column(Modifier.weight(1F)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = subject,
                     style = MaterialTheme.typography.body1,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1F, fill = false)
                 )
-                Text(
-                    text = listOf(room, teacher).filter { it.isNotBlank() }.joinToString(" • "),
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.75f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (indicators.isNotEmpty()) {
+                    Spacer(Modifier.size(6.dp))
+                    Text(
+                        text = indicators.joinToString(" "),
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.primary,
+                        maxLines = 1
+                    )
+                }
             }
-            Spacer(Modifier.size(8.dp))
-            Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = details,
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.75f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(Modifier.size(8.dp))
+        Column(horizontalAlignment = Alignment.End) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (dayLabel != null) {
+                    Text(
+                        text = dayLabel,
+                        style = MaterialTheme.typography.caption,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colors.primary
+                    )
+                    Spacer(Modifier.size(4.dp))
+                }
                 Text(
-                    text = time,
+                    text = timeText,
                     style = MaterialTheme.typography.caption,
                     textAlign = TextAlign.End
                 )
-                if (showCountdown) {
-                    Text(
-                        text = countdown,
-                        style = MaterialTheme.typography.body2,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.End
-                    )
-                }
+            }
+            if (showCountdown) {
+                Text(
+                    text = countdown,
+                    style = MaterialTheme.typography.body2,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.End
+                )
             }
         }
     }
 }
 
+/** The original three-line card, kept as an option while the compact one is being evaluated. */
 @Composable
-private fun durationText(totalSeconds: Int): String {
-    val days = totalSeconds / 86_400
-    val hours = (totalSeconds % 86_400) / 3_600
-    val minutes = (totalSeconds % 3_600) / 60
-    val seconds = totalSeconds % 60
-    return stringResource(R.string.next_lesson_card_duration, days, hours, minutes, seconds)
+private fun ClassicLessonRow(
+    isCurrent: Boolean,
+    subject: String,
+    details: String,
+    indicators: List<String>,
+    timeText: String,
+    countdown: String,
+    showCountdown: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1F)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(
+                        if (isCurrent) R.string.next_lesson_card_current else R.string.next_lesson_card_next
+                    ),
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                )
+                if (indicators.isNotEmpty()) {
+                    Spacer(Modifier.size(8.dp))
+                    Text(
+                        text = indicators.joinToString(" \u2022 "),
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.primary
+                    )
+                }
+            }
+            Text(
+                text = subject,
+                style = MaterialTheme.typography.body1,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = details,
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.75f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(Modifier.size(8.dp))
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = timeText,
+                style = MaterialTheme.typography.caption,
+                textAlign = TextAlign.End
+            )
+            if (showCountdown) {
+                Text(
+                    text = countdown,
+                    style = MaterialTheme.typography.body2,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.End
+                )
+            }
+        }
+    }
 }
+
+/**
+ * Duration at a granularity that matches how far away it is. Seconds only appear in the final
+ * minute, where they are the only part still changing; past a day the weekday shown beside the
+ * time carries the detail, so this rounds to whole days. Pairs with [countdownTickMillis], which
+ * only redraws as often as the chosen granularity actually needs.
+ */
+@Composable
+private fun durationText(totalSeconds: Int): String = when {
+    totalSeconds >= 86_400 -> {
+        val days = (totalSeconds + 43_200) / 86_400
+        quantityStringResource(R.plurals.duration_days, days, days)
+    }
+    totalSeconds >= 3_600 ->
+        stringResource(R.string.duration_hm, totalSeconds / 3_600, (totalSeconds % 3_600) / 60)
+    totalSeconds >= 60 -> stringResource(R.string.duration_m, totalSeconds / 60)
+    else -> stringResource(R.string.duration_s, totalSeconds)
+}
+
+/**
+ * How often a countdown to something [secondsAway] needs redrawing. A second only buys anything
+ * while the seconds digit is on screen or a current/next flip is imminent - everything further out
+ * is displayed at minute granularity or coarser, so redrawing it every second just burns battery.
+ */
+private fun countdownTickMillis(secondsAway: Int): Long =
+    if (secondsAway <= 90) 1_000L else 60_000L
 
 @Composable
 fun Rozvrhpreview(){

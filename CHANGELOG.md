@@ -1,5 +1,39 @@
 # Seznam změn / Changelog
 
+## 2.0.25
+
+- Text domácího úkolu lze nyní kopírovat: tlačítko kopírování u každého úkolu i v detailu hodiny, text v detailu hodiny jde označit.
+- Opraveno zvýraznění aktuální hodiny, které zůstávalo viset na již skončené hodině.
+- Opraveno pletení týdnů, když byla aplikace otevřená přes půlnoc nebo přes okamžik přepnutí na další týden.
+- Nové motivy: Nord, Dracula, Solarized Light a Catppuccin Latte.
+- Webová stránka a Nahlásit problém nyní míří na GitHub této fork verze místo na stránky původního autora.
+- Společná záložka úkolů nyní jasně odděluje školní domácí úkoly od vlastních úkolů.
+- Nová volitelná „Kompaktní karta příští hodiny“ (Nastavení → Rozvrh): dva řádky místo tří, s dnem v týdnu. Výchozí zůstává původní karta.
+- Sloupce rozvrhu mají všechny stejnou šířku; sloupec s hodinami se změnšil na šířku svého obsahu a místo připadlo dnům.
+- Obě karty mají stejný odstup od rozvrhu i od informačního řádku; dříve byla karta přilepená k tabulce.
+- Odpočet se řídí tím, jak daleko hodina je („začíná za 2 dny“ místo „1d 21h 6m 46s“); sekundy až v poslední minutě, bez překreslování každou sekundu.
+- Informační řádek nyní respektuje velikost písma z motivu, kterou dosud ignoroval.
+- Tlačítko otočení tabulky ukazuje stav natočením šipek podle osy tabulky místo oranžové ikony.
+- Odstraněna nastavení Otočená tabulka, Střídání řádků a Střídání sloupců. Otočení tabulky zůstává dostupné přes tlačítko v liště rozvrhu.
+- Demo režim se nyní zapíná jen ve výběru účtu; přepnutím na skutečný účet se vypíná.
+
+---
+
+- Homework text can now be copied: a copy button on every homework card and in the lesson detail, and lesson-detail text is selectable.
+- Fixed the current-lesson highlight getting stuck on a lesson that was already over.
+- Fixed weeks getting mixed up when the app was left open across midnight or across the "switch to the next week" moment.
+- New themes: Nord, Dracula, Solarized Light and Catppuccin Latte.
+- Website and Report an issue now point at this fork's GitHub page instead of the original author's.
+- The combined Homework tab now clearly separates school homework from your own tasks.
+- New optional "Compact next lesson card" (Settings → Timetable): two lines instead of three, with the weekday shown. The original three-line card stays the default.
+- Timetable columns are all the same width; the hour column shrank to the width of its own contents and the space went to the days.
+- Both cards sit evenly clear of the timetable and the info line; the card used to be glued to the grid with a gap only underneath.
+- Countdown now matches how far away the lesson is ("starts in 2 days" rather than "1d 21h 6m 46s"); seconds only in the final minute, and no more redrawing once a second when nothing changes that fast.
+- Info line now honours the text size defined by the theme, which it had been ignoring.
+- Transpose button shows its state by turning its arrows to match the table’s axis, instead of an orange icon.
+- Removed the Transposed table, Alternating rows and Alternating columns settings. Transposing stays available via the toolbar toggle.
+- Demo mode is now turned on only from the account picker and turned off by switching to a real account.
+
 ## 2.0.24
 
 - Domácí úkoly nyní zobrazují skutečný text zadání místo kódů, načtený z Bakalářů a přiřazený ke skutečně zobrazenému týdnu.

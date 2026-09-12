@@ -121,18 +121,28 @@ class RozvrhLayout : ViewGroup {
 
         //calculate width of every column
         if (!transposed) {
-            columnSizes[0] = if (stickyDayColumn) compactDayColumnWidth() else naturalCellWidth
+            // Same reasoning as the transposed branch below: the day column holds day names, not
+            // lessons, so DenView's own minimum is the right floor either way.
+            columnSizes[0] = compactDayColumnWidth()
             for (i in denViews.indices) {
                 columnSizes[0] = Math.max(columnSizes[0], denViews[i].minimumWidth)
             }
         } else {
-            columnSizes[0] = naturalCellWidth
+            // The hour column only has to fit "07:10" and "07:55", not a whole lesson. Starting it
+            // at naturalCellWidth (an example lesson cell) made it as wide as a school day for
+            // nothing; its own content minimum, with a floor, is as narrow as it goes without
+            // clipping.
+            columnSizes[0] = compactDayColumnWidth()
             for (i in captionViews.indices) {
                 columnSizes[0] = Math.max(columnSizes[0], captionViews[i].minimumWidth)
             }
         }
+        // Every lesson column gets the same width - the widest requirement wins for all of them.
+        // Sized per column, the grid came out uneven for a reason no reader can act on: it only
+        // encoded which day happened to hold the longest teacher abbreviation.
+        var lessonColumnWidth = 0
         for (i in 1 until columnSizes.size) {
-            columnSizes[i] = if (!transposed) {
+            var required = if (!transposed) {
                 Math.max(naturalCellWidth, captionViews[i - 1].minimumWidth)
             } else {
                 Math.max(naturalCellWidth, denViews[i - 1].minimumWidth)
@@ -144,8 +154,12 @@ class RozvrhLayout : ViewGroup {
                     max = Math.max(max, item.minimumWidth)
                     count++
                 }
-                columnSizes[i] = Math.max(columnSizes[i], max * count)
+                required = Math.max(required, max * count)
             }
+            lessonColumnWidth = Math.max(lessonColumnWidth, required)
+        }
+        for (i in 1 until columnSizes.size) {
+            columnSizes[i] = lessonColumnWidth
         }
         var prefferedWidth = 0
         for (columnSize in columnSizes) {
@@ -154,9 +168,21 @@ class RozvrhLayout : ViewGroup {
         if (specWM == MeasureSpec.UNSPECIFIED || specWM == MeasureSpec.AT_MOST && prefferedWidth <= specWS) {
             width = prefferedWidth
         } else {
-            val widthRatio = specWS / prefferedWidth.toFloat()
-            for (i in columnSizes.indices) {
-                columnSizes[i] = Math.floor((columnSizes[i] * widthRatio).toDouble()).toInt()
+            // Hold the header column at its own content width and split everything left over
+            // equally between the lesson columns. Scaling every column proportionally made the
+            // header grow and shrink for reasons unrelated to the labels in it, and - because each
+            // column was floored independently while onLayout stretches the last one to the right
+            // edge - every rounded-away pixel used to pile up as extra width on the final day.
+            val headerWidth = Math.min(columnSizes[0], specWS / 3)
+            val lessonColumns = columnSizes.size - 1
+            columnSizes[0] = headerWidth
+            var placedWidth = headerWidth
+            var exactEdge = headerWidth.toFloat()
+            for (i in 1 until columnSizes.size) {
+                exactEdge += (specWS - headerWidth).toFloat() / lessonColumns
+                val edge = Math.round(exactEdge)
+                columnSizes[i] = edge - placedWidth
+                placedWidth = edge
             }
             width = specWS
         }
@@ -499,6 +525,18 @@ class RozvrhLayout : ViewGroup {
         requestLayout()
 
         //debug timing: Log.d(TAG_TIMER, "populate end " + Utils.getDebugTime());
+    }
+
+    /**
+     * Recomputes the highlights that depend on the current time - the current/next lesson border and
+     * today's row. [setRozvrh] already does this, but it short-circuits when the schedule data has
+     * not changed, so nothing would move the highlight while the app just sits open. The UI has to
+     * call this periodically instead.
+     */
+    fun refreshTimeDependentHighlights() {
+        highlightCurrentLesson()
+        updateCurrentDayHighlight()
+        invalidate()
     }
 
     fun highlightCurrentLesson() {

@@ -37,6 +37,10 @@
         <item>Dark</item>
         <item>Black</item>
         <item>Custom</item>
+        <item>Nord</item>
+        <item>Dracula</item>
+        <item>Solarized Light</item>
+        <item>Catppuccin Latte</item>
     </string-array>
     <string-array name="themes_values">
         <item>0</item>
@@ -44,6 +48,10 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
     </string-array>
     <string-array name="theme_url_bases">
         <item>https://vitskalicky.github.io/lepsi-rozvrh/motiv-info</item>

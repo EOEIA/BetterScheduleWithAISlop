@@ -393,7 +393,12 @@ class AccountRepository(val app: MainApplication) {
 
     suspend fun switchToAccount(accountId: Long){
         if (dao.accountExists(accountId)){
-            app.prefs.edit { putLong(PrefsConsts.ACTIVE_ACCOUNT_ID, accountId) }
+            // Switching to a real account always leaves demo mode - the account picker is the only
+            // place that turns demo mode on, so this is the way back out of it.
+            app.prefs.edit {
+                putLong(PrefsConsts.ACTIVE_ACCOUNT_ID, accountId)
+                putBoolean(PrefsConsts.DEBUG_DEMO_MODE, false)
+            }
         }else{
             app.prefs.edit { remove(PrefsConsts.ACTIVE_ACCOUNT_ID) }
         }

@@ -56,6 +56,9 @@ class AccountPickerActivity : ComponentActivity() {
             val composableScope = rememberCoroutineScope()
             val accounts by viewModel.accountsLD.observeAsState();
             val currentAccount by viewModel.currentAccountIdLD.observeAsState()
+            // This screen is the only place demo mode can be switched on, and picking a real
+            // account is the way back out of it - so while it is on, no account counts as selected.
+            val demoMode = BuildConfig.DEBUG && (prefs.boolean(PrefsConsts.DEBUG_DEMO_MODE) ?: false)
 
             //go to login if there are no accounts available
             if (accounts?.size == 0 && !BuildConfig.DEBUG){
@@ -92,14 +95,14 @@ class AccountPickerActivity : ComponentActivity() {
                         Spacer(Modifier.size(16.dp))
 
                         for (item in accounts?: emptyList()){
-                            val isSelected = item.id == currentAccount
+                            val isSelected = item.id == currentAccount && !demoMode
                             Surface(
                                 color = if (isSelected) MaterialTheme.colors.primarySurface else MaterialTheme.colors.surface,
                                 shape = MaterialTheme.shapes.medium,
                                 modifier = Modifier.padding(horizontal = 16.dp)
                                     .clickable {
                                         composableScope.launch {
-                                            switchAccount(item.id, currentAccount)
+                                            switchAccount(item.id, currentAccount, demoMode)
                                         }
                                     }
                             ) {
@@ -147,8 +150,9 @@ class AccountPickerActivity : ComponentActivity() {
                         }
                         if (BuildConfig.DEBUG) {
                             Surface(
-                                Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                    .clickable { enableDemoMode() },
+                                color = if (demoMode) MaterialTheme.colors.primarySurface else MaterialTheme.colors.surface,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .clickable { if (demoMode) finish() else enableDemoMode() },
                                 shape = MaterialTheme.shapes.medium,
                             ) {
                                 ListItem(
@@ -157,8 +161,8 @@ class AccountPickerActivity : ComponentActivity() {
                                     icon = {
                                         Box(Modifier.size(40.dp), contentAlignment = Alignment.Center){
                                             Icon(
-                                                Icons.Default.DeveloperMode,
-                                                null,
+                                                if (demoMode) Icons.Default.Check else Icons.Default.DeveloperMode,
+                                                if (demoMode) stringResource(R.string.account_picker_selected) else null,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }
@@ -172,8 +176,10 @@ class AccountPickerActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun switchAccount(newId: Long, oldId: Long?){
-        if (oldId != newId) {
+    private suspend fun switchAccount(newId: Long, oldId: Long?, leavingDemoMode: Boolean = false){
+        // Picking the already-active account still has to go through the switch when demo mode is
+        // on - that is what turns demo mode back off (see AccountRepository.switchToAccount).
+        if (oldId != newId || leavingDemoMode) {
             viewModel.switchToAccount(newId);
             intent = Intent(this, MainActivity::class.java);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)

@@ -91,6 +91,11 @@ class RozvrhScrollView : HorizontalScrollView {
         rozvrhLayout.setHighlightCurrentDay(highlightCurrentDay)
     }
 
+    /** See [RozvrhLayout.refreshTimeDependentHighlights] */
+    fun refreshTimeDependentHighlights() {
+        rozvrhLayout.refreshTimeDependentHighlights()
+    }
+
     fun centerToCurrentLesson(screenWidth: Int, onCompleted: () -> Unit) {
         post {
             smoothScrollTo(max(0, (rozvrhLayout.currentLessonPosition() ?: 0) - screenWidth / 2), 0)
