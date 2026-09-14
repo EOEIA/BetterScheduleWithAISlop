@@ -1,0 +1,1 @@
+Zvýraznění aktuální hodiny se už nezasekne - posouvá se samo i při otevřené aplikaci. Nové nastavení: Čára aktuálního času, která se v dnešku posouvá spolu s časem (Nastavení -> Rozvrh). Text v detailu hodiny a na obrazovce domácích úkolů lze označit a zkopírovat. Opraveno nezobrazování domácích úkolů u škol, jejichž kódy úkolů neodpovídaly očekávanému tvaru.

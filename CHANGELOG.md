@@ -1,5 +1,19 @@
 # Seznam změn / Changelog
 
+## 2.0.25
+
+- Zvýraznění aktuální hodiny se už nezasekne — posouvá se samo i při otevřené aplikaci.
+- Nové nastavení: Čára aktuálního času — v dnešku se vykreslí čára, která se posouvá spolu s časem (Nastavení → Rozvrh).
+- Text v detailu hodiny a na obrazovce domácích úkolů lze označit a zkopírovat.
+- Opraveno nezobrazování domácích úkolů u škol, jejichž kódy úkolů neodpovídaly očekávanému tvaru.
+
+---
+
+- The current-lesson highlight no longer gets stuck — it keeps moving on its own while the app stays open.
+- New setting: Current time line — draws a line through today that slides along with the clock (Settings → Timetable).
+- Text in the lesson-detail dialog and on the homework screen can now be selected and copied.
+- Fixed homework not showing up at all at schools whose homework IDs don't follow the layout the app expected.
+
 ## 2.0.24
 
 - Domácí úkoly nyní zobrazují skutečný text zadání místo kódů, načtený z Bakalářů a přiřazený ke skutečně zobrazenému týdnu.
