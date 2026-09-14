@@ -51,6 +51,10 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         get() = sp.boolean(PrefsConsts.HIGHLIGHT_CURRENT_DAY) ?: false
         set(value) = sp.edit { putBoolean(PrefsConsts.HIGHLIGHT_CURRENT_DAY, value) }
     val highlightCurrentDayLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.HIGHLIGHT_CURRENT_DAY, false)
+    var currentTimeLine: Boolean
+        get() = sp.boolean(PrefsConsts.CURRENT_TIME_LINE) ?: false
+        set(value) = sp.edit { putBoolean(PrefsConsts.CURRENT_TIME_LINE, value) }
+    val currentTimeLineLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.CURRENT_TIME_LINE, false)
 
     var changedLessonVisuals: Boolean
         get() = sp.boolean(PrefsConsts.CHANGED_LESSON_VISUALS) ?: true

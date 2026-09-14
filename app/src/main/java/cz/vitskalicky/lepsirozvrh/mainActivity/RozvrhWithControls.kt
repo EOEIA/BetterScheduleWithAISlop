@@ -19,6 +19,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.selection.DisableSelection
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.ui.viewinterop.AndroidView
 import cz.vitskalicky.lepsirozvrh.*
 import cz.vitskalicky.lepsirozvrh.KotlinUtils.quantityStringResource
@@ -81,6 +83,10 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.HIGHLIGHT_CURRENT_DAY, false)
     }
     val highlightCurrentDay by highlightCurrentDayLD.observeAsState(false)
+    val currentTimeLineLD = remember {
+        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.CURRENT_TIME_LINE, false)
+    }
+    val currentTimeLine by currentTimeLineLD.observeAsState(false)
     val colorChangedLessonsLD = remember {
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.CHANGED_LESSON_VISUALS, true)
     }
@@ -191,6 +197,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         showSettingsBadge = showSettingsBadge ?: false,
         stickyDayColumn = stickyDayColumn,
         highlightCurrentDay = highlightCurrentDay,
+        currentTimeLine = currentTimeLine,
         colorChangedLessons = colorChangedLessons,
         compactTimetable = compactTimetable,
         transposedTimetable = transposedTimetable,
@@ -265,6 +272,7 @@ fun RozvrhWithControlsStateless(
     showSettingsBadge: Boolean,
     stickyDayColumn: Boolean = true,
     highlightCurrentDay: Boolean = false,
+    currentTimeLine: Boolean = false,
     colorChangedLessons: Boolean = true,
     compactTimetable: Boolean = false,
     transposedTimetable: Boolean = false,
@@ -344,6 +352,7 @@ fun RozvrhWithControlsStateless(
                         rozvrhScrollView.setLessonIndicatorKeys(noteMap.keys, lessonTaskMap.keys)
                         rozvrhScrollView.setStickyDayColumn(stickyDayColumn)
                         rozvrhScrollView.setHighlightCurrentDay(highlightCurrentDay)
+                        rozvrhScrollView.setCurrentTimeLine(currentTimeLine)
                         rozvrhScrollView.setChangeVisualMode(if (colorChangedLessons) 1 else 0)
                         rozvrhScrollView.setCompact(compactTimetable)
                         rozvrhScrollView.setTheme(if (compactTimetable) rozvrhTheme.compact() else rozvrhTheme)
@@ -570,7 +579,9 @@ fun LessonDialog(
         },
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(lesson.subjectName, modifier = Modifier.weight(1f, fill = false))
+                SelectionContainer(modifier = Modifier.weight(1f, fill = false)) {
+                    Text(lesson.subjectName)
+                }
                 if (changeLabel != null) {
                     Spacer(Modifier.size(8.dp))
                     Surface(
@@ -602,30 +613,32 @@ fun LessonDialog(
                 Pair(stringResource(R.string.room), lesson.roomName.ifBlank { lesson.roomAbbrev }),
                 Pair(stringResource(R.string.topic), lesson.theme),
             )
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                for (item in data.filterNotNull().filter { it.second.isNotBlank() }){
-                    Row {
-                        Text(
-                            item.first,
-                            modifier = Modifier.weight(0.4F),
-                            textAlign = TextAlign.Right,
-                            style = MaterialTheme.typography.caption,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                        )
-                        Spacer(Modifier.size(4.dp))
-                        Text(
-                            item.second,
-                            modifier = Modifier.weight(0.6F),
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colors.onSurface
-                        )
+            SelectionContainer {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    for (item in data.filterNotNull().filter { it.second.isNotBlank() }){
+                        Row {
+                            Text(
+                                item.first,
+                                modifier = Modifier.weight(0.4F),
+                                textAlign = TextAlign.Right,
+                                style = MaterialTheme.typography.caption,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                            )
+                            Spacer(Modifier.size(4.dp))
+                            Text(
+                                item.second,
+                                modifier = Modifier.weight(0.6F),
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colors.onSurface
+                            )
+                        }
                     }
+                    LessonExtrasSummary(
+                        note = currentNote,
+                        tasks = tasks,
+                        onTaskToggle = onTaskToggle
+                    )
                 }
-                LessonExtrasSummary(
-                    note = currentNote,
-                    tasks = tasks,
-                    onTaskToggle = onTaskToggle
-                )
             }
         }
     )
@@ -662,12 +675,14 @@ private fun LessonExtrasSummary(
         }
         tasks.forEach { task ->
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = task.isDone,
-                    onCheckedChange = { onTaskToggle(task) },
-                    modifier = Modifier.size(32.dp),
-                    colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.secondary)
-                )
+                DisableSelection {
+                    Checkbox(
+                        checked = task.isDone,
+                        onCheckedChange = { onTaskToggle(task) },
+                        modifier = Modifier.size(32.dp),
+                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.secondary)
+                    )
+                }
                 Spacer(Modifier.size(4.dp))
                 Text(
                     task.title,
@@ -1032,6 +1047,7 @@ fun Rozvrhpreview(){
         onRefreshPress = {},
         showSettingsBadge = true,
         stickyDayColumn = true,
-        highlightCurrentDay = false
+        highlightCurrentDay = false,
+        currentTimeLine = false
     )
 }

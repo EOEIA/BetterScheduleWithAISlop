@@ -67,6 +67,8 @@
     <string name="sticky_day_column_desc">Při posouvání do stran ponechá dny viditelné</string>
     <string name="highlight_current_day">Zvýraznit aktuální den</string>
     <string name="highlight_current_day_desc">Označí řádek dneška v celém rozvrhu</string>
+    <string name="current_time_line">Čára aktuálního času</string>
+    <string name="current_time_line_desc">Vykreslí v dnešku čáru, která se posouvá s časem</string>
     <string name="changed_lesson_visuals">Barevně označit změněné hodiny</string>
     <string name="changed_lesson_visuals_desc">Obarví buňky dle druhu změny (suplování, odpadnutí, přidání…)</string>
     <string name="compact_timetable">Kompaktní rozvrh</string>

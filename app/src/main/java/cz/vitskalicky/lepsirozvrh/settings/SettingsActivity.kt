@@ -232,6 +232,11 @@ class SettingsActivity : ComponentActivity() {
                             ) { newValue ->
                                 viewModel.highlightCurrentDay = newValue
                             }
+                            SwitchPreference(R.string.current_time_line.str, R.string.current_time_line_desc.str,
+                                viewModel.currentTimeLineLD.observeAsState().value ?: false
+                            ) { newValue ->
+                                viewModel.currentTimeLine = newValue
+                            }
                             SwitchPreference(R.string.changed_lesson_visuals.str, R.string.changed_lesson_visuals_desc.str,
                                 viewModel.changedLessonVisualsLD.observeAsState().value ?: true
                             ) { newValue -> viewModel.changedLessonVisuals = newValue }

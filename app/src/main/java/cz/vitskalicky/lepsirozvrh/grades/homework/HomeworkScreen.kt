@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -375,18 +376,24 @@ private fun HomeworkCard(
                 }
             }
             Column(Modifier.weight(1f)) {
-                Text(
-                    hw.description ?: stringResource(R.string.homework_no_description),
-                    style = MaterialTheme.typography.body2,
-                    color = if (hw.description == null) MaterialTheme.colors.onSurface.copy(alpha = 0.5f) else Color.Unspecified
-                )
-                if (hw.lessonBeginTime != null) {
-                    Spacer(Modifier.height(3.dp))
-                    Text(
-                        hw.lessonBeginTime.toString(timeFmt),
-                        style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.55f)
-                    )
+                // per-card rather than around the whole list: selection across a LazyColumn breaks
+                // as soon as an item scrolls out and is recycled
+                SelectionContainer {
+                    Column {
+                        Text(
+                            hw.description ?: stringResource(R.string.homework_no_description),
+                            style = MaterialTheme.typography.body2,
+                            color = if (hw.description == null) MaterialTheme.colors.onSurface.copy(alpha = 0.5f) else Color.Unspecified
+                        )
+                        if (hw.lessonBeginTime != null) {
+                            Spacer(Modifier.height(3.dp))
+                            Text(
+                                hw.lessonBeginTime.toString(timeFmt),
+                                style = MaterialTheme.typography.caption,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.55f)
+                            )
+                        }
+                    }
                 }
             }
         }

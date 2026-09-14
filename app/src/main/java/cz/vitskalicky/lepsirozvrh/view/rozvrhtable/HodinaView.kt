@@ -202,13 +202,18 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     }
 
     fun hightlightEdges(top: Boolean, left: Boolean, corner: Boolean) {
+        if (topHighlighted == top && leftHighlighted == left && cornerHighlighted == corner) return
         topHighlighted = top
         leftHighlighted = left
         cornerHighlighted = corner
+        invalidate()
     }
 
     fun highlightEntire(highlight: Boolean) {
-        entireHighlighted = highlight
+        if (entireHighlighted != highlight) {
+            entireHighlighted = highlight
+            invalidate()
+        }
         hightlightEdges(highlight, highlight, highlight)
     }
 

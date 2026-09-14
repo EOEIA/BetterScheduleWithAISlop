@@ -1,6 +1,8 @@
 package cz.vitskalicky.lepsirozvrh.view.rozvrhtable
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.ViewGroup
@@ -12,6 +14,7 @@ import cz.vitskalicky.lepsirozvrh.theme.DefaultRozvrhThemes
 import cz.vitskalicky.lepsirozvrh.theme.RozvrhTheme
 import io.sentry.Sentry
 import org.joda.time.LocalDate
+import org.joda.time.LocalTime
 
 /** Custom layout for the schedule table */
 class RozvrhLayout : ViewGroup {
@@ -56,6 +59,8 @@ class RozvrhLayout : ViewGroup {
     private var stickyDayColumn = false
     private var horizontalScrollOffset = 0
     private var highlightCurrentDay = false
+    private var showCurrentTimeLine = false
+    private val timeLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.strokeCap = Paint.Cap.ROUND }
     private var changeVisualMode = 0
     private var compact = false
     private var transposed = false
@@ -105,6 +110,14 @@ class RozvrhLayout : ViewGroup {
         }
         highlightCurrentDay = enabled
         updateCurrentDayHighlight()
+    }
+
+    fun setCurrentTimeLine(enabled: Boolean) {
+        if (showCurrentTimeLine == enabled) {
+            return
+        }
+        showCurrentTimeLine = enabled
+        invalidate()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -501,6 +514,58 @@ class RozvrhLayout : ViewGroup {
         //debug timing: Log.d(TAG_TIMER, "populate end " + Utils.getDebugTime());
     }
 
+    /**
+     * Both the current-lesson and the current-day highlight are derived from the wall clock, but
+     * [setRozvrh] early-returns whenever the schedule object itself hasn't changed - so nothing
+     * re-evaluates them while the app just sits open. This ticker does, which is what keeps the
+     * highlight from getting stuck on whichever lesson was current when the table was first shown
+     * (and moves the day highlight over midnight).
+     */
+    private val highlightTicker = object : Runnable {
+        override fun run() {
+            refreshTimeHighlight()
+            postDelayed(this, HIGHLIGHT_TICK_MS)
+        }
+    }
+    private var highlightTickerRunning = false
+
+    /** Re-evaluates everything that depends on the current time. */
+    fun refreshTimeHighlight() {
+        highlightCurrentLesson()
+        updateCurrentDayHighlight()
+        if (showCurrentTimeLine) {
+            invalidate() // the line is drawn by us, not by a child, so nothing else repaints it
+        }
+    }
+
+    private fun startHighlightTicker() {
+        if (highlightTickerRunning) return
+        highlightTickerRunning = true
+        refreshTimeHighlight() // the clock may have moved a lot while we weren't ticking
+        postDelayed(highlightTicker, HIGHLIGHT_TICK_MS)
+    }
+
+    private fun stopHighlightTicker() {
+        if (!highlightTickerRunning) return
+        highlightTickerRunning = false
+        removeCallbacks(highlightTicker)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (windowVisibility == VISIBLE) startHighlightTicker()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        stopHighlightTicker()
+    }
+
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        super.onWindowVisibilityChanged(visibility)
+        if (visibility == VISIBLE) startHighlightTicker() else stopHighlightTicker()
+    }
+
     fun highlightCurrentLesson() {
         val indexes = rozvrh?.getHighlightBlockIndexes(false)
         val dayIndex = indexes?.first
@@ -578,6 +643,98 @@ class RozvrhLayout : ViewGroup {
             }
         }
     }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        super.dispatchDraw(canvas)
+        if (showCurrentTimeLine) {
+            drawCurrentTimeLine(canvas)
+        }
+    }
+
+    /**
+     * Draws a line through today at the current time, moving through the current lesson's cell as
+     * it elapses.
+     *
+     * Note that the columns are lesson *periods*, not a time axis - breaks have no width at all, so
+     * the position is interpolated per lesson and the line rests on the divider between two cells
+     * while a break is running.
+     */
+    private fun drawCurrentTimeLine(canvas: Canvas) {
+        val currentRozvrh = rozvrh ?: return
+        if (rows <= 0 || columns <= 0 || visibleCaptionIndexes.isEmpty()) return
+
+        val today = LocalDate.now()
+        val dayIndex = currentRozvrh.days.indexOfFirst {
+            if (currentRozvrh.permanent) it.date.dayOfWeek == today.dayOfWeek else it.date == today
+        }
+        if (dayIndex < 0) return
+
+        val nowMillis = LocalTime.now().millisOfDay
+        val firstCaption = currentRozvrh.captions.getOrNull(visibleCaptionIndexes.first()) ?: return
+        val lastCaption = currentRozvrh.captions.getOrNull(visibleCaptionIndexes.last()) ?: return
+        // outside school hours there is nothing sensible to point at
+        if (nowMillis < firstCaption.beginTime.millisOfDay || nowMillis > lastCaption.endTime.millisOfDay) return
+
+        var slot = -1
+        var fraction = 0f
+        for (i in visibleCaptionIndexes.indices) {
+            val caption = currentRozvrh.captions.getOrNull(visibleCaptionIndexes[i]) ?: continue
+            val begin = caption.beginTime.millisOfDay
+            val end = caption.endTime.millisOfDay
+            if (nowMillis < begin) {
+                // in the break before this lesson - sit on its leading edge
+                slot = i
+                fraction = 0f
+                break
+            }
+            if (nowMillis <= end) {
+                slot = i
+                fraction = if (end <= begin) 0f else (nowMillis - begin).toFloat() / (end - begin)
+                break
+            }
+        }
+        if (slot < 0) return
+
+        val views = if (!transposed) {
+            hodinasByCaptions.getOrNull(slot)?.getOrNull(dayIndex)
+        } else {
+            hodinasByCaptions.getOrNull(dayIndex)?.getOrNull(slot)
+        }
+        if (views.isNullOrEmpty()) return
+        val firstView = views.first()
+        val lastView = views.last()
+
+        timeLinePaint.color = t.cHighlight.toArgb()
+        val lineWidth = Math.max(2f, dp(t.dpHighlightWidth) * 2f)
+        timeLinePaint.strokeWidth = lineWidth
+        val dotRadius = lineWidth * 1.5f
+
+        // the day/caption column is drawn on top of the cells when sticky, so stay clear of it
+        val leftColumnSticky = stickyDayColumn || transposed
+        val stickyRight = if (leftColumnSticky) horizontalScrollOffset + columnSizes[0] else 0
+
+        if (!transposed) {
+            val blockLeft = firstView.left.toFloat()
+            val blockRight = lastView.right.toFloat()
+            val x = blockLeft + fraction * (blockRight - blockLeft)
+            if (x < stickyRight) return
+            val top = firstView.top.toFloat()
+            val bottom = firstView.bottom.toFloat()
+            canvas.drawLine(x, top, x, bottom, timeLinePaint)
+            canvas.drawCircle(x, top + dotRadius, dotRadius, timeLinePaint)
+        } else {
+            val blockTop = firstView.top.toFloat()
+            val blockBottom = firstView.bottom.toFloat()
+            val y = blockTop + fraction * (blockBottom - blockTop)
+            val left = Math.max(firstView.left, stickyRight).toFloat()
+            val right = lastView.right.toFloat()
+            if (left >= right) return
+            canvas.drawLine(left, y, right, y, timeLinePaint)
+            canvas.drawCircle(left + dotRadius, y, dotRadius, timeLinePaint)
+        }
+    }
+
+    private fun dp(value: Float): Float = value * resources.displayMetrics.density
 
     // we want to center when: the user opens the app, user taps current week
     // we don't want to center when: a fresh schedule with minor changes loads, user switches to the schedule using arrows.
@@ -833,5 +990,7 @@ class RozvrhLayout : ViewGroup {
 
     companion object {
         val TAG = RozvrhLayout::class.java.simpleName
+        /** How often the time-derived highlights are re-evaluated while the table is on screen. */
+        private const val HIGHLIGHT_TICK_MS = 30_000L
     }
 }

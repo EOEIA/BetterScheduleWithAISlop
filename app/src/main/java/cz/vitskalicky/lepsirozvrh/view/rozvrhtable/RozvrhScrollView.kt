@@ -44,6 +44,10 @@ class RozvrhScrollView : HorizontalScrollView {
         rozvrhLayout.setHighlightCurrentDay(enabled)
     }
 
+    fun setCurrentTimeLine(enabled: Boolean) {
+        rozvrhLayout.setCurrentTimeLine(enabled)
+    }
+
     fun setOnLessonPress(onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit) {
         rozvrhLayout.setOnLessonPress(onLessonPress)
     }

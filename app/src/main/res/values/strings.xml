@@ -70,6 +70,8 @@
     <string name="sticky_day_column_desc">Keep day labels visible while scrolling sideways</string>
     <string name="highlight_current_day">Highlight current day</string>
     <string name="highlight_current_day_desc">Mark today\'s row in the full timetable</string>
+    <string name="current_time_line">Current time line</string>
+    <string name="current_time_line_desc">Draw a line through today that moves with the clock</string>
     <string name="changed_lesson_visuals">Color-code changed lessons</string>
     <string name="changed_lesson_visuals_desc">Color cells by change type (substitution, cancelled, added…)</string>
     <string name="compact_timetable">Compact timetable</string>
