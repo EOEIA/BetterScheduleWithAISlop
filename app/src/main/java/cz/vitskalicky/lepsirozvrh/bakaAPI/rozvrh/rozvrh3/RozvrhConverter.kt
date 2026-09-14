@@ -197,18 +197,15 @@ object RozvrhConverter {
                     }
                 }
 
-                val homeworkIds = ArrayList<String>()
-                atom.homeworkIds.map {
-                    if (it.length > 3){
-                        val id = it.substring(2, 4)
-                        for (grp in atom.groupIds) {
-                            if (grp == id) {
-                                homeworkIds.add(it)
-                                break
-                            }
-                        }
-                    }
+                // Bakaláři repeats every homework id of the whole class on each atom, so prefer the
+                // ones whose id encodes one of this lesson's groups - ids are laid out as
+                // <classId(2)><groupId(2)><rest>. Schools whose ids don't follow that layout matched
+                // nothing and silently lost *all* homework (no indicator, empty homework screen), so
+                // fall back to the unfiltered list instead of dropping it.
+                val groupMatchedHomeworkIds = atom.homeworkIds.filter { id ->
+                    id.length > 3 && atom.groupIds.any { it == id.substring(2, 4) }
                 }
+                val homeworkIds = ArrayList(groupMatchedHomeworkIds.ifEmpty { atom.homeworkIds })
 
                 lessons[captionIndex].add(RozvrhLesson(
                         subjectName,
