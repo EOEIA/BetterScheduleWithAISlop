@@ -26,8 +26,12 @@ import java.io.InputStreamReader
 object WhatsNew {
     private val TAG = WhatsNew::class.simpleName!!
 
-    /** If last version seen is older than this, notify the user that there has been an update */
-    private const val INTERESTING_VERSION = 46
+    /**
+     * If last version seen is older than this, notify the user that there has been an update.
+     * Bump this whenever [R.raw.changelog] gains an entry worth pointing at - it was left at 46
+     * for 25 releases, which silently disabled the badge and the "what's new" banner for everyone.
+     */
+    private const val INTERESTING_VERSION = 71
 
     /** Shows a dialog with new features in the app */
     @Composable
