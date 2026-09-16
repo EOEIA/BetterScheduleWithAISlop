@@ -11,11 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # the repo's default GITHUB_TOKEN is read-only, so the release step below
-    # fails with "Resource not accessible by integration" without this
-    permissions:
-      contents: write
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,10 +30,3 @@ jobs:
         with:
           name: lepsi-rozvrh-apk
           path: app/build/outputs/apk/development/debug/*.apk
-
-      - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: app/build/outputs/apk/development/debug/*.apk
-          generate_release_notes: true
