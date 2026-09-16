@@ -1,6 +1,7 @@
 package cz.vitskalicky.lepsirozvrh.settings
 
 import android.content.*
+import android.net.Uri
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,8 @@ import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 import kotlinx.coroutines.*
 
-// UI and logic for "send feedback" button. Asks the user whether to include their current schedule in the feedback and then send an email.
+// UI and logic for the "send feedback" button. Asks whether to include the current schedule,
+// then copies the report to the clipboard and opens this fork's issue tracker.
 
 @Composable
 fun FeedbackDialog(onDismissed: () -> Unit, scaffoldState: ScaffoldState){
@@ -78,20 +80,13 @@ private suspend fun sendFeedback(includeRozvrh: Boolean, scaffoldState: Scaffold
         sendJob = launch {
             val body = prepareBody(context, includeRozvrh)
             val successful = sendEmail(body, context)
-            if (!successful) {
-                toastJob.cancel()
-                val result = scaffoldState.snackbarHostState.showSnackbar(
-                    context.getString(R.string.no_email_client),
-                    actionLabel = context.getString(R.string.copy_address),
-                    duration = SnackbarDuration.Long)
-                if (result == SnackbarResult.ActionPerformed){
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val address = context.getString(R.string.CONTACT_MAIL)
-                    val clip = ClipData.newPlainText(address, address)
-                    clipboard.setPrimaryClip(clip)
-                    scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.copied_to_clipboard))
-                }
-            }
+            toastJob.cancel()
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(
+                    if (successful) R.string.feedback_copied_opening else R.string.feedback_copied_no_browser
+                ),
+                duration = SnackbarDuration.Long
+            )
         }
 
         sendJob.join()
@@ -100,17 +95,22 @@ private suspend fun sendFeedback(includeRozvrh: Boolean, scaffoldState: Scaffold
 }
 
 /**
- * tries to send an email, returns true if successful, false if no suitable email app found
+ * Copies the report to the clipboard and opens this fork's issue tracker.
+ *
+ * This used to mail R.string.CONTACT_MAIL, which is the upstream author's address - bug reports
+ * about a fork he does not maintain should not land in his inbox. The body is put on the clipboard
+ * rather than into the URL because it can include whole serialized schedules, well past what a URL
+ * can carry.
+ *
+ * Returns false if there is no browser to open the tracker with; the report is on the clipboard
+ * either way.
  */
-private suspend fun sendEmail(body: String, context: Context): Boolean{
-    val intent = Intent(Intent.ACTION_SEND)
-    intent.type = "message/rfc822"
-    val address = context.getString(R.string.CONTACT_MAIL)
-    intent.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
-    intent.putExtra(Intent.EXTRA_SUBJECT, "")
-    intent.putExtra(Intent.EXTRA_TEXT, body)
+private fun sendEmail(body: String, context: Context): Boolean {
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.feedback), body))
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.issues_link)))
     return try {
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)))
+        context.startActivity(intent)
         true
     } catch (ex: ActivityNotFoundException) {
         false

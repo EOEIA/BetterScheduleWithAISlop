@@ -64,8 +64,6 @@ class RozvrhLayout : ViewGroup {
     private var changeVisualMode = 0
     private var compact = false
     private var transposed = false
-    private var alternatingRows = false
-    private var alternatingCols = false
     private var hideEmptyHours = false
     private var visibleCaptionIndexes: List<Int> = emptyList()
     private var noteKeys: Set<String> = emptySet()
@@ -503,8 +501,6 @@ class RozvrhLayout : ViewGroup {
                 }
             }
         }
-        applyAlternatingRows()
-        applyAlternatingCols()
         applyLessonIndicatorKeys()
         updateCurrentDayHighlight()
         highlightCurrentLesson()
@@ -827,65 +823,9 @@ class RozvrhLayout : ViewGroup {
         }
     }
 
-    fun setAlternatingRows(enabled: Boolean) {
-        if (alternatingRows == enabled) return
-        alternatingRows = enabled
-        applyAlternatingRows()
-    }
 
-    private fun applyAlternatingRows() {
-        if (!transposed) {
-            denViews.forEachIndexed { dayIndex, denView ->
-                denView.setAlternatingRow(alternatingRows && dayIndex % 2 == 1)
-            }
-            hodinasByCaptions.forEach { captionCol ->
-                captionCol.forEachIndexed { dayIndex, views ->
-                    val stripe = alternatingRows && dayIndex % 2 == 1
-                    views.forEach { it.setAlternatingRow(stripe && it.hasLesson()) }
-                }
-            }
-        } else {
-            captionViews.forEachIndexed { captionIndex, captionView ->
-                captionView.setAlternatingRow(alternatingRows && captionIndex % 2 == 1)
-            }
-            hodinasByCaptions.forEach { dayCol ->
-                dayCol.forEachIndexed { captionIndex, views ->
-                    val stripe = alternatingRows && captionIndex % 2 == 1
-                    views.forEach { it.setAlternatingRow(stripe && it.hasLesson()) }
-                }
-            }
-        }
-    }
 
-    fun setAlternatingCols(enabled: Boolean) {
-        if (alternatingCols == enabled) return
-        alternatingCols = enabled
-        applyAlternatingCols()
-    }
 
-    private fun applyAlternatingCols() {
-        if (!transposed) {
-            captionViews.forEachIndexed { captionIndex, captionView ->
-                captionView.setAlternatingCol(alternatingCols && captionIndex % 2 == 1)
-            }
-            hodinasByCaptions.forEachIndexed { captionIndex, captionCol ->
-                captionCol.forEach { views ->
-                    val stripe = alternatingCols && captionIndex % 2 == 1
-                    views.forEach { it.setAlternatingCol(stripe && it.hasLesson()) }
-                }
-            }
-        } else {
-            denViews.forEachIndexed { dayIndex, denView ->
-                denView.setAlternatingCol(alternatingCols && dayIndex % 2 == 1)
-            }
-            hodinasByCaptions.forEachIndexed { dayIndex, dayCol ->
-                dayCol.forEach { views ->
-                    val stripe = alternatingCols && dayIndex % 2 == 1
-                    views.forEach { it.setAlternatingCol(stripe && it.hasLesson()) }
-                }
-            }
-        }
-    }
 
     fun setLessonIndicatorKeys(noteKeys: Set<String>, taskKeys: Set<String>) {
         if (this.noteKeys == noteKeys && this.taskKeys == taskKeys) return

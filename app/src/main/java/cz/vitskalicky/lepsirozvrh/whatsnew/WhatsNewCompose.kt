@@ -31,7 +31,7 @@ object WhatsNew {
      * Bump this whenever [R.raw.changelog] gains an entry worth pointing at - it was left at 46
      * for 25 releases, which silently disabled the badge and the "what's new" banner for everyone.
      */
-    private const val INTERESTING_VERSION = 71
+    private const val INTERESTING_VERSION = 72
 
     /** Shows a dialog with new features in the app */
     @Composable

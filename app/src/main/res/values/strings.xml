@@ -78,12 +78,6 @@
     <string name="compact_timetable_desc">Smaller cells so more lessons fit on screen</string>
     <string name="hide_empty_hours">Hide empty hours</string>
     <string name="hide_empty_hours_desc">Hide timetable rows or columns that contain no lessons</string>
-    <string name="transposed_timetable">Transposed table</string>
-    <string name="transposed_timetable_desc">Days across the top, time slots down the side</string>
-    <string name="alternating_rows">Alternating rows</string>
-    <string name="alternating_rows_desc">Subtle shade difference between rows for easier reading</string>
-    <string name="alternating_cols">Alternating columns</string>
-    <string name="alternating_cols_desc">Subtle shade difference between columns for easier reading</string>
     <string name="show_next_lesson_card">Next lesson card</string>
     <string name="show_next_lesson_card_desc">Bottom bar showing the current or upcoming lesson with countdown</string>
     <string name="show_next_lesson_countdown">Next lesson countdown</string>
@@ -242,7 +236,7 @@
     <string name="website">Website</string>
     <string name="website_desc">Visit the website of this app</string>
     <string name="feedback">Send feedback</string>
-    <string name="feedback_desc">Report a bug, ask a question, etc.</string>
+    <string name="feedback_desc">Report a bug or ask a question on GitHub</string>
     <string name="send_crash">Send crash reports</string>
     <string name="send_crash_desc">Automatically report crashes to the developers so that they can be fixed</string>
     <string name="welcome_send_crash">Automatically report crashes to the developers so that they can be fixed</string>
@@ -262,7 +256,7 @@
     <string name="include_schedule_desc">Attach your schedule to the message?\n\nDefinitely choose \'yes\' if reporting
         a visual bug.
     </string>
-    <string name="feedback_loading">Preparing e-mail…</string>
+    <string name="feedback_loading">Preparing report…</string>
 
     <string name="notification_channel_name">Persistent notification</string>
 
@@ -324,7 +318,7 @@
     <string name="wtf_rozvrh_later">Not now</string>
     <string name="wtf_not_fot_month">Not for a month</string>
 
-    <string name="website_link">https://vitskalicky.gitlab.io/lepsi-rozvrh/en</string>
+    <string name="website_link">https://github.com/EOEIA/BetterScheduleWithAISlop</string>
 
     <string name="account_picker_title">Choose account</string>
     <string name="account_picker_subtitle">Available accounts:</string>
@@ -476,4 +470,8 @@
     <string name="grades_view_by_subject">By subject</string>
     <string name="grades_view_by_date">By date</string>
 
+    <string name="homework_copy">Copy assignment text</string>
+    <string name="issues_link">https://github.com/EOEIA/BetterScheduleWithAISlop/issues/new</string>
+    <string name="feedback_copied_opening">Report copied — paste it into the new issue.</string>
+    <string name="feedback_copied_no_browser">Report copied to the clipboard, but no browser could be opened.</string>
 </resources>

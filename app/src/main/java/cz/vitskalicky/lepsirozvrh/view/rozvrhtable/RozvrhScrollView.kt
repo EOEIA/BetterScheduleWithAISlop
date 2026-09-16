@@ -68,13 +68,7 @@ class RozvrhScrollView : HorizontalScrollView {
         rozvrhLayout.setTransposed(transposed)
     }
 
-    fun setAlternatingRows(enabled: Boolean) {
-        rozvrhLayout.setAlternatingRows(enabled)
-    }
 
-    fun setAlternatingCols(enabled: Boolean) {
-        rozvrhLayout.setAlternatingCols(enabled)
-    }
 
     fun setHideEmptyHours(enabled: Boolean) {
         rozvrhLayout.setHideEmptyHours(enabled)

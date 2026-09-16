@@ -99,14 +99,6 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.TIMETABLE_TRANSPOSED, false)
     }
     val transposedTimetable by transposedTimetableLD.observeAsState(false)
-    val alternatingRowsLD = remember {
-        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.ALTERNATING_ROWS, false)
-    }
-    val alternatingRows by alternatingRowsLD.observeAsState(false)
-    val alternatingColsLD = remember {
-        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.ALTERNATING_COLS, false)
-    }
-    val alternatingCols by alternatingColsLD.observeAsState(false)
     val showNextLessonCardLD = remember {
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.SHOW_NEXT_LESSON_CARD, true)
     }
@@ -204,8 +196,6 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         onTransposeToggle = {
             SharedPrefsKt(context).edit { putBoolean(PrefsConsts.TIMETABLE_TRANSPOSED, !transposedTimetable) }
         },
-        alternatingRows = alternatingRows,
-        alternatingCols = alternatingCols,
         hideEmptyHours = hideEmptyHours,
         showNextLessonCard = showNextLessonCard,
         showNextLessonCountdown = showNextLessonCountdown,
@@ -277,8 +267,6 @@ fun RozvrhWithControlsStateless(
     compactTimetable: Boolean = false,
     transposedTimetable: Boolean = false,
     onTransposeToggle: () -> Unit = {},
-    alternatingRows: Boolean = false,
-    alternatingCols: Boolean = false,
     hideEmptyHours: Boolean = false,
     showNextLessonCard: Boolean = true,
     showNextLessonCountdown: Boolean = true,
@@ -357,8 +345,6 @@ fun RozvrhWithControlsStateless(
                         rozvrhScrollView.setCompact(compactTimetable)
                         rozvrhScrollView.setTheme(if (compactTimetable) rozvrhTheme.compact() else rozvrhTheme)
                         rozvrhScrollView.setTransposed(transposedTimetable)
-                        rozvrhScrollView.setAlternatingRows(alternatingRows)
-                        rozvrhScrollView.setAlternatingCols(alternatingCols)
                         rozvrhScrollView.setHideEmptyHours(hideEmptyHours)
                         rozvrhScrollView.setRozvrh(rozvrh, isTeacher)
                         if (centerToCurrentLesson) {

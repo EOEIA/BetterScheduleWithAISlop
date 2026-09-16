@@ -23,5 +23,8 @@
         <item>Tmavý</item>
         <item>Černý</item>
         <item>Vlastní</item>
+        <item>Nord</item>
+        <item>Solarized Light</item>
+        <item>Dracula</item>
     </string-array>
 </resources>

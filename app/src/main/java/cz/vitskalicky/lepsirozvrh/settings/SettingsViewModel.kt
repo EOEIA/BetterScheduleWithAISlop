@@ -81,15 +81,7 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         set(value) = sp.edit { putBoolean(PrefsConsts.TIMETABLE_TRANSPOSED, value) }
     val transposedTimetableLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.TIMETABLE_TRANSPOSED, false)
 
-    var alternatingRows: Boolean
-        get() = sp.boolean(PrefsConsts.ALTERNATING_ROWS) ?: false
-        set(value) = sp.edit { putBoolean(PrefsConsts.ALTERNATING_ROWS, value) }
-    val alternatingRowsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ALTERNATING_ROWS, false)
 
-    var alternatingCols: Boolean
-        get() = sp.boolean(PrefsConsts.ALTERNATING_COLS) ?: false
-        set(value) = sp.edit { putBoolean(PrefsConsts.ALTERNATING_COLS, value) }
-    val alternatingColsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.ALTERNATING_COLS, false)
 
     var hideEmptyHours: Boolean
         get() = sp.boolean(PrefsConsts.HIDE_EMPTY_HOURS) ?: false

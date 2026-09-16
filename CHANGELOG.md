@@ -1,5 +1,23 @@
 # Seznam změn / Changelog
 
+## 2.0.26
+
+- Nová témata: Nord, Solarized Light a Dracula (Nastavení → Vzhled).
+- Tlačítko pro zkopírování textu úkolu na obrazovce domácích úkolů.
+- Společná záložka nyní jasně odděluje domácí úkoly od vlastních úkolů.
+- Opraveno posouvání týdnů, když aplikace zůstala otevřená přes přelom týdne.
+- Odstraněna nastavení Otočená tabulka, Střídání řádků a Střídání sloupců — otočení zůstává jako tlačítko v horní liště.
+- Web a zpětná vazba nyní míří na tento fork, ne na původního autora.
+
+---
+
+- New themes: Nord, Solarized Light and Dracula (Settings → Appearance).
+- Copy button for the assignment text on the homework screen.
+- The combined tab now clearly separates homework from your own tasks.
+- Fixed weeks drifting by one when the app was left open across a week boundary.
+- Removed the Transposed table, Alternating rows and Alternating columns settings — transposing stays as the top-bar button.
+- The website and feedback links now point at this fork instead of the original author.
+
 ## 2.0.25
 
 - Zvýraznění aktuální hodiny se už nezasekne — posouvá se samo i při otevřené aplikaci.

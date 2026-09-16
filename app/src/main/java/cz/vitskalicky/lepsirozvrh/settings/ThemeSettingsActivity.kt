@@ -82,6 +82,18 @@ class ThemeSettingsActivity: ComponentActivity() {
                                             viewModel.customTheme = DefaultRozvrhThemes.BLACK
                                             viewModel.selectedTheme = it
                                         }
+                                        SelectedTheme.NORD -> {
+                                            viewModel.customTheme = DefaultRozvrhThemes.NORD
+                                            viewModel.selectedTheme = it
+                                        }
+                                        SelectedTheme.SOLARIZED -> {
+                                            viewModel.customTheme = DefaultRozvrhThemes.SOLARIZED
+                                            viewModel.selectedTheme = it
+                                        }
+                                        SelectedTheme.DRACULA -> {
+                                            viewModel.customTheme = DefaultRozvrhThemes.DRACULA
+                                            viewModel.selectedTheme = it
+                                        }
                                         SelectedTheme.FOLLOW_SYSTEM_THEME -> {
                                             viewModel.customTheme = DefaultRozvrhThemes.LIGHT
                                             viewModel.selectedTheme = it

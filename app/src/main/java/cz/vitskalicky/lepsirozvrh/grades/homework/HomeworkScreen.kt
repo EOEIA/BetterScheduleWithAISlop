@@ -9,6 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -30,6 +33,9 @@ import cz.vitskalicky.lepsirozvrh.database.PersonalTask
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import org.joda.time.format.DateTimeFormat
 
 private enum class HwSortOrder { DATE_NEWEST, DATE_OLDEST, SUBJECT }
@@ -45,6 +51,11 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
     var selectedTab by remember { mutableStateOf(HomeworkTab.BOTH) }
     var sortOrder by remember { mutableStateOf(HwSortOrder.DATE_NEWEST) }
     var showAddTaskDialog by remember { mutableStateOf(false) }
+    val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
+    val onCopied: (String) -> Unit = { message ->
+        coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message) }
+    }
 
     if (showAddTaskDialog) {
         AddTaskDialog(
@@ -78,6 +89,7 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
 
     LepsirozvrhTheme(tintStatusBar = true, hasAppBar = true) {
         Scaffold(
+            scaffoldState = scaffoldState,
             topBar = {
                 Column {
                     TopAppBar(
@@ -125,7 +137,7 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                     HomeworkTab.HOMEWORK -> when {
                         isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                         allItems.isEmpty() -> EmptyState()
-                        else -> HomeworkList(sortOrder, grouped, dateFmt, timeFmt) { sortOrder = it }
+                        else -> HomeworkList(sortOrder, grouped, dateFmt, timeFmt, { sortOrder = it }, onCopied)
                     }
                     HomeworkTab.TASKS -> TasksTab(
                         tasks = personalTasks,
@@ -143,7 +155,8 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                             tasks = personalTasks,
                             onSortChange = { sortOrder = it },
                             onToggleTask = { viewModel.toggleTaskDone(it) },
-                            onDeleteTask = { viewModel.deleteTask(it.id) }
+                            onDeleteTask = { viewModel.deleteTask(it.id) },
+                            onCopied = onCopied
                         )
                     }
                 }
@@ -159,10 +172,11 @@ private fun HomeworkList(
     grouped: List<Pair<LocalDate?, List<HomeworkItem>>>,
     dateFmt: org.joda.time.format.DateTimeFormatter,
     timeFmt: org.joda.time.format.DateTimeFormatter,
-    onSortChange: (HwSortOrder) -> Unit
+    onSortChange: (HwSortOrder) -> Unit,
+    onCopied: (String) -> Unit
 ) {
     LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
-        homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange)
+        homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange, onCopied)
     }
 }
 
@@ -176,15 +190,17 @@ private fun HomeworkAndTasksList(
     tasks: List<PersonalTask>,
     onSortChange: (HwSortOrder) -> Unit,
     onToggleTask: (PersonalTask) -> Unit,
-    onDeleteTask: (PersonalTask) -> Unit
+    onDeleteTask: (PersonalTask) -> Unit,
+    onCopied: (String) -> Unit
 ) {
     LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
         if (grouped.isNotEmpty()) {
-            homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange)
+            // the two halves used to run together: homework had no heading of its own and the
+            // tasks heading reused DateHeader, so it read as just another date
+            item { SectionHeader(stringResource(R.string.tab_homework)) }
+            homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange, onCopied)
         }
-        stickyHeader {
-            DateHeader(stringResource(R.string.tab_tasks))
-        }
+        item { SectionHeader(stringResource(R.string.tab_tasks)) }
         if (tasks.isEmpty()) {
             item {
                 Text(
@@ -208,7 +224,8 @@ private fun LazyListScope.homeworkContent(
     grouped: List<Pair<LocalDate?, List<HomeworkItem>>>,
     dateFmt: org.joda.time.format.DateTimeFormatter,
     timeFmt: org.joda.time.format.DateTimeFormatter,
-    onSortChange: (HwSortOrder) -> Unit
+    onSortChange: (HwSortOrder) -> Unit,
+    onCopied: (String) -> Unit
 ) {
     item {
         SortRow(sortOrder) { onSortChange(it) }
@@ -220,7 +237,7 @@ private fun LazyListScope.homeworkContent(
                 SubjectHeader(subject.subjectName, subject.subjectAbbrev)
             }
             items(subjectItems) { hw ->
-                HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = false)
+                HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = false, onCopied = onCopied)
             }
         }
     } else {
@@ -229,7 +246,7 @@ private fun LazyListScope.homeworkContent(
                 DateHeader(date?.toString(dateFmt) ?: stringResource(R.string.homework_no_date))
             }
             items(dateItems) { hw ->
-                HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = true)
+                HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = true, onCopied = onCopied)
             }
         }
     }
@@ -254,6 +271,23 @@ private fun EmptyState() {
             stringResource(R.string.homework_empty_hint),
             style = MaterialTheme.typography.caption,
             color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
+        )
+    }
+}
+
+/** Separates the two halves of the combined tab - deliberately unlike [DateHeader]. */
+@Composable
+private fun SectionHeader(label: String) {
+    Surface(
+        color = MaterialTheme.colors.primary,
+        contentColor = MaterialTheme.colors.onPrimary,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            label.uppercase(),
+            style = MaterialTheme.typography.caption,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
         )
     }
 }
@@ -348,7 +382,8 @@ private fun SortRow(current: HwSortOrder, onSelect: (HwSortOrder) -> Unit) {
 private fun HomeworkCard(
     hw: HomeworkItem,
     timeFmt: org.joda.time.format.DateTimeFormatter,
-    showSubjectChip: Boolean
+    showSubjectChip: Boolean,
+    onCopied: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -394,6 +429,24 @@ private fun HomeworkCard(
                             )
                         }
                     }
+                }
+            }
+            if (hw.description != null) {
+                val clipboard = LocalClipboardManager.current
+                val copiedMessage = stringResource(R.string.copied_to_clipboard)
+                IconButton(
+                    onClick = {
+                        clipboard.setText(AnnotatedString(hw.description))
+                        onCopied(copiedMessage)
+                    },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ContentCopy,
+                        contentDescription = stringResource(R.string.homework_copy),
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colors.onSurface.copy(alpha = 0.55f)
+                    )
                 }
             }
         }

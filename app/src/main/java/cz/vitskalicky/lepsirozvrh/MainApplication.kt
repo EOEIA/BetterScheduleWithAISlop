@@ -227,6 +227,9 @@ class MainApplication : MultiDexApplication(), LifecycleOwner {
                     SelectedTheme.LIGHT -> MutableLiveData(DefaultRozvrhThemes.LIGHT)
                     SelectedTheme.BLACK -> MutableLiveData(DefaultRozvrhThemes.BLACK) //todo black theme
                     SelectedTheme.DARK -> MutableLiveData(DefaultRozvrhThemes.DARK)
+                    SelectedTheme.NORD -> MutableLiveData(DefaultRozvrhThemes.NORD)
+                    SelectedTheme.SOLARIZED -> MutableLiveData(DefaultRozvrhThemes.SOLARIZED)
+                    SelectedTheme.DRACULA -> MutableLiveData(DefaultRozvrhThemes.DRACULA)
                     SelectedTheme.CUSTOM -> prefs.sharedPreferences.stringLiveData(PrefsConsts.CUSTOM_THEME, "")
                         .map {
                             if (it.isBlank()) null else Json.decodeFromString<RozvrhTheme>(it)

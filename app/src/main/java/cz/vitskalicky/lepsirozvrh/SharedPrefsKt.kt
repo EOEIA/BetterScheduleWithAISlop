@@ -83,9 +83,6 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val COMPACT_TIMETABLE = "prefs-compact-timetable"
     /** Transpose the timetable so days are columns and time slots are rows. non-set is treated as false */
     const val TIMETABLE_TRANSPOSED = "prefs-timetable-transposed"
-    /** Alternate row shading for easier reading. non-set is treated as false */
-    const val ALTERNATING_ROWS = "prefs-alternating-rows"
-    const val ALTERNATING_COLS = "prefs-alternating-cols"
     /** Hide hour rows/columns that contain no lessons in the whole timetable. non-set is treated as false */
     const val HIDE_EMPTY_HOURS = "prefs-hide-empty-hours"
     /** non-set is treated as true */
@@ -144,8 +141,6 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
             if (!contains(CHANGED_LESSON_VISUALS)) putBoolean(CHANGED_LESSON_VISUALS, true)
             if (!contains(COMPACT_TIMETABLE)) putBoolean(COMPACT_TIMETABLE, false)
             if (!contains(TIMETABLE_TRANSPOSED)) putBoolean(TIMETABLE_TRANSPOSED, false)
-            if (!contains(ALTERNATING_ROWS)) putBoolean(ALTERNATING_ROWS, false)
-            if (!contains(ALTERNATING_COLS)) putBoolean(ALTERNATING_COLS, false)
             if (!contains(HIDE_EMPTY_HOURS)) putBoolean(HIDE_EMPTY_HOURS, false)
             if (!contains(SHOW_NEXT_LESSON_CARD)) putBoolean(SHOW_NEXT_LESSON_CARD, true)
             if (!contains(SHOW_NEXT_LESSON_COUNTDOWN)) putBoolean(SHOW_NEXT_LESSON_COUNTDOWN, true)

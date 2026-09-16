@@ -81,6 +81,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // the app may have been in the background across midnight or across a week boundary
+        viewModel.refreshWeekIfDateChanged()
+    }
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent != null){

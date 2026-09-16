@@ -94,6 +94,11 @@ enum class SelectedTheme(val index: Int){
     DARK(2),
     BLACK(3),
     CUSTOM(4),
+    // appended after CUSTOM on purpose: the stored value is the index, and the settings list maps
+    // array position straight to it, so existing indices must not move
+    NORD(5),
+    SOLARIZED(6),
+    DRACULA(7),
 }
 
 object ThemeGenerator{

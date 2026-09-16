@@ -265,6 +265,29 @@ class MainActivityViewModel(
         thisWeekStatusLD = getRozvrhStatusLD(weekToMonday(0))
         permLD = getRozvrhLD(weekToMonday(PERM))
         permStatusLD = getRozvrhStatusLD(weekToMonday(PERM))
+        lastKnownDisplayMonday = Utils.getDisplayWeekMonday(getApplication())
+    }
+
+    /** Which Monday "week 0" meant when the LiveData below were built. */
+    private var lastKnownDisplayMonday: LocalDate = Utils.getDisplayWeekMonday(application)
+
+    /**
+     * "This week" is resolved once, when the view model is built, so leaving the app open across a
+     * week boundary (or across the "switch to next week" day) left every week one off: the Home
+     * button went to last week, arrows counted from it, and the repository's own current-week
+     * LiveData never rolled over either because updateTime() is only called from refresh().
+     *
+     * Call this whenever the app comes back to the foreground; it rebuilds only when the date
+     * actually moved, so it is cheap to call often. Takes the same path as a change to the
+     * switch-to-next-week preference, which already had to handle exactly this.
+     */
+    fun refreshWeekIfDateChanged() {
+        repository.updateTime()
+        val current = Utils.getDisplayWeekMonday(getApplication())
+        if (current == lastKnownDisplayMonday) return
+        invalidateCache = true
+        initThisAndPermLD()
+        weekPosition = weekPosition
     }
 
     init {
