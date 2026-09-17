@@ -23,6 +23,25 @@ Much of the code (packages, models, comments) uses Czech terms. Key vocabulary: 
 - Requires JDK 17. `compileSdk`/`targetSdk` 34, `minSdk` 21.
 - CI is GitLab (`.gitlab-ci.yml`) using Fastlane; the canonical remote is GitLab, mirrored to GitHub.
 
+## Releasing
+
+**Every APK published to a GitHub release must be built with `assembleDevelopmentRelease`**, which
+signs with the keystore named in `secrets.properties` (`CN=EOEIA, OU=lepsi-rozvrh-fork`, SHA-256
+`0242715a…`). Android only allows an in-place update when the signing key is identical, so a
+release signed with anything else cannot update an existing install - it fails with *"App not
+installed as package conflicts with an existing package"* and the only way out is uninstalling,
+which destroys the user's tasks, notes and logins.
+
+This has bitten this repo before: the 2.0.24 asset was a debug build signed by some other machine's
+`~/.android/debug.keystore`, and every later release was uninstallable for anyone who had it.
+
+- Never attach a `*Debug` APK to a release. Debug builds carry `applicationIdSuffix ".debug"`, so
+  they install side by side and are safe for testing, but they are a different app.
+- CI has no keystore, so it deliberately does not publish releases - it only builds and keeps the
+  APK as a workflow artifact. Do not re-add a release step to `.github/workflows/build.yml`.
+- Before uploading, verify: `apksigner verify --print-certs <apk>` must show that SHA-256, and the
+  versionCode must be higher than the previous release's.
+
 ## Architecture
 
 ### Multi-account, repository-driven data flow
