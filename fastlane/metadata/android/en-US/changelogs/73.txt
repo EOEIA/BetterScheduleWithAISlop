@@ -1,0 +1,1 @@
+The transpose button now changes its icon to match which way the table runs — ⇄ arrows when days are columns, ↕ when they are rows.

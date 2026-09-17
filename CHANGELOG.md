@@ -1,5 +1,13 @@
 # Seznam změn / Changelog
 
+## 2.0.27
+
+- Tlačítko pro otočení rozvrhu nyní mění ikonu podle toho, jak je tabulka otočená — šipky ⇄ když jsou dny ve sloupcích, ↕ když jsou v řádcích.
+
+---
+
+- The transpose button now changes its icon to match which way the table runs — ⇄ arrows when days are columns, ↕ when they are rows.
+
 ## 2.0.26
 
 - Nová témata: Nord, Solarized Light a Dracula (Nastavení → Vzhled).

@@ -1,0 +1,1 @@
+Tlačítko pro otočení rozvrhu nyní mění ikonu podle toho, jak je tabulka otočená — šipky ⇄ když jsou dny ve sloupcích, ↕ když jsou v řádcích.

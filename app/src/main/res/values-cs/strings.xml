@@ -454,4 +454,5 @@
     <string name="issues_link">https://github.com/EOEIA/BetterScheduleWithAISlop/issues/new</string>
     <string name="feedback_copied_opening">Hlášení zkopírováno — vložte ho do nového issue.</string>
     <string name="feedback_copied_no_browser">Hlášení zkopírováno do schránky, ale nepodařilo se otevřít prohlížeč.</string>
+    <string name="transpose_timetable">Otočit rozvrh</string>
 </resources>

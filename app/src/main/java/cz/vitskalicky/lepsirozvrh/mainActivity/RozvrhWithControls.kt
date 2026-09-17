@@ -435,9 +435,11 @@ fun RozvrhWithControlsStateless(
 
                     Row(Modifier.align(Alignment.CenterEnd)) {
                         IconButton(onTransposeToggle) {
+                            // the icon shows which way time runs in the table right now, so pressing
+                            // it visibly flips - a tint change alone was easy to miss
                             Icon(
-                                Icons.Default.SwapHoriz,
-                                contentDescription = "Transpose timetable",
+                                if (transposedTimetable) Icons.Default.SwapVert else Icons.Default.SwapHoriz,
+                                contentDescription = stringResource(R.string.transpose_timetable),
                                 tint = if (transposedTimetable) MaterialTheme.colors.primary else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
                             )
                         }

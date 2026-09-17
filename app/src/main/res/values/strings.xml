@@ -474,4 +474,5 @@
     <string name="issues_link">https://github.com/EOEIA/BetterScheduleWithAISlop/issues/new</string>
     <string name="feedback_copied_opening">Report copied — paste it into the new issue.</string>
     <string name="feedback_copied_no_browser">Report copied to the clipboard, but no browser could be opened.</string>
+    <string name="transpose_timetable">Transpose timetable</string>
 </resources>
