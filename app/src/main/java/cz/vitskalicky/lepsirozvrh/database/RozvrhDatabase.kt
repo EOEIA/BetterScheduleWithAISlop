@@ -7,8 +7,8 @@ import cz.vitskalicky.lepsirozvrh.model.*
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
 
 @Database(
-    entities = [RozvrhRecord::class, Account::class, LessonNote::class, PersonalTask::class],
-    version = 4,
+    entities = [RozvrhRecord::class, Account::class, LessonNote::class, PersonalTask::class, HomeworkDone::class],
+    version = 5,
 )
 @TypeConverters(*[LocalDateConverters::class, LocalTimeConverters::class, DateTimeConverters::class, Rozvrh.Converter::class])
 abstract class RozvrhDatabase : RoomDatabase() {
@@ -16,6 +16,7 @@ abstract class RozvrhDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun lessonNoteDao(): LessonNoteDao
     abstract fun personalTaskDao(): PersonalTaskDao
+    abstract fun homeworkDoneDao(): HomeworkDoneDao
 }
 
 object Migrations{
@@ -44,6 +45,13 @@ object Migrations{
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE `personal_task` ADD COLUMN `due_time` INTEGER")
             database.execSQL("ALTER TABLE `personal_task` ADD COLUMN `lesson_key` TEXT")
+        }
+    }
+
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            // purely additive - nothing existing is touched, so no risk to account data
+            database.execSQL("CREATE TABLE IF NOT EXISTS `homework_done` (`accountId` INTEGER NOT NULL, `homeworkId` TEXT NOT NULL, `is_done` INTEGER NOT NULL, PRIMARY KEY(`accountId`, `homeworkId`))")
         }
     }
 }

@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import cz.vitskalicky.lepsirozvrh.BuildConfig
 import cz.vitskalicky.lepsirozvrh.DebugUtils
@@ -13,6 +14,7 @@ import cz.vitskalicky.lepsirozvrh.MainApplication
 import cz.vitskalicky.lepsirozvrh.PrefsConsts
 import cz.vitskalicky.lepsirozvrh.Utils
 import cz.vitskalicky.lepsirozvrh.bakaAPI.homework.Homework
+import cz.vitskalicky.lepsirozvrh.database.HomeworkDone
 import cz.vitskalicky.lepsirozvrh.database.PersonalTask
 import cz.vitskalicky.lepsirozvrh.model.RozvrhRecord
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.Rozvrh
@@ -28,6 +30,8 @@ class HomeworkViewModel(app: Application) : AndroidViewModel(app) {
     val isLoading = MutableLiveData(false)
 
     val personalTasks: LiveData<List<PersonalTask>>
+    /** homework id -> the user's explicit override of Bakaláři's Done flag */
+    val homeworkDone: LiveData<Map<String, Boolean>>
 
     private val activeAccountId: Long?
 
@@ -38,6 +42,12 @@ class HomeworkViewModel(app: Application) : AndroidViewModel(app) {
             application.rozvrhDb.personalTaskDao().getAllForAccount(activeAccountId)
         } else {
             MutableLiveData(emptyList())
+        }
+        homeworkDone = if (activeAccountId != null) {
+            application.rozvrhDb.homeworkDoneDao().getAllForAccount(activeAccountId)
+                .map { rows -> rows.associate { it.homeworkId to it.isDone } }
+        } else {
+            MutableLiveData(emptyMap())
         }
         loadHomework()
     }
@@ -62,6 +72,14 @@ class HomeworkViewModel(app: Application) : AndroidViewModel(app) {
                     lessonKey = lessonKey
                 )
             )
+        }
+    }
+
+    fun setHomeworkDone(homeworkId: String, done: Boolean) {
+        val accountId = activeAccountId ?: return
+        val application = getApplication<MainApplication>()
+        viewModelScope.launch {
+            application.rozvrhDb.homeworkDoneDao().upsert(HomeworkDone(accountId, homeworkId, done))
         }
     }
 
@@ -140,11 +158,13 @@ fun List<Homework>.toHomeworkItems(rozvrh: Rozvrh?): List<HomeworkItem> {
     }
     return map { hw ->
         HomeworkItem(
+            id = hw.ID,
             subjectName = hw.Subject.Name.ifBlank { hw.Subject.Abbrev },
             subjectAbbrev = hw.Subject.Abbrev.ifBlank { hw.Subject.Name },
             description = hw.Content.takeIf { it.isNotBlank() },
             date = parseHomeworkDate(hw.DateEnd),
-            lessonBeginTime = beginTimesById[hw.ID]
+            lessonBeginTime = beginTimesById[hw.ID],
+            isDone = hw.Done
         )
     }.sortedByDescending { it.date }
 }
@@ -181,7 +201,7 @@ fun Rozvrh.extractHomework(descriptionsById: Map<String, String> = emptyMap()): 
                 if (lesson.homeworkIds.isEmpty()) emptyList()
                 else lesson.homeworkIds.map { id ->
                     val desc = descriptionsById[id] ?: lesson.homeworkDescriptions.firstOrNull()
-                    HomeworkItem(lesson.subjectName, lesson.subjectAbbrev, desc, day.date, caption?.beginTime)
+                    HomeworkItem(id, lesson.subjectName, lesson.subjectAbbrev, desc, day.date, caption?.beginTime)
                 }
             }
         }

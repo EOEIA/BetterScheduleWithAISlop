@@ -53,6 +53,8 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
     var showAddTaskDialog by remember { mutableStateOf(false) }
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
+    val doneMap by viewModel.homeworkDone.observeAsState(emptyMap())
+    val onToggleHomework: (HomeworkItem, Boolean) -> Unit = { hw, done -> viewModel.setHomeworkDone(hw.id, done) }
     val onCopied: (String) -> Unit = { message ->
         coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message) }
     }
@@ -137,7 +139,7 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                     HomeworkTab.HOMEWORK -> when {
                         isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                         allItems.isEmpty() -> EmptyState()
-                        else -> HomeworkList(sortOrder, grouped, dateFmt, timeFmt, { sortOrder = it }, onCopied)
+                        else -> HomeworkList(sortOrder, grouped, dateFmt, timeFmt, { sortOrder = it }, doneMap, onToggleHomework, onCopied)
                     }
                     HomeworkTab.TASKS -> TasksTab(
                         tasks = personalTasks,
@@ -149,13 +151,15 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                         allItems.isEmpty() && personalTasks.isEmpty() -> EmptyState()
                         else -> HomeworkAndTasksList(
                             sortOrder = sortOrder,
-                            grouped = grouped,
+                            items = sorted,
                             dateFmt = dateFmt,
                             timeFmt = timeFmt,
                             tasks = personalTasks,
                             onSortChange = { sortOrder = it },
                             onToggleTask = { viewModel.toggleTaskDone(it) },
                             onDeleteTask = { viewModel.deleteTask(it.id) },
+                            doneMap = doneMap,
+                            onToggleHomework = onToggleHomework,
                             onCopied = onCopied
                         )
                     }
@@ -173,10 +177,81 @@ private fun HomeworkList(
     dateFmt: org.joda.time.format.DateTimeFormatter,
     timeFmt: org.joda.time.format.DateTimeFormatter,
     onSortChange: (HwSortOrder) -> Unit,
+    doneMap: Map<String, Boolean>,
+    onToggleHomework: (HomeworkItem, Boolean) -> Unit,
     onCopied: (String) -> Unit
 ) {
     LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
-        homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange, onCopied)
+        homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange, doneMap, onToggleHomework, onCopied)
+    }
+}
+
+/** One row of the combined tab - either a real assignment or one of the user's own tasks. */
+private sealed class CombinedEntry {
+    abstract val date: LocalDate?
+    abstract val time: LocalTime?
+    abstract val subject: String
+    abstract val key: String
+
+    data class Hw(val item: HomeworkItem) : CombinedEntry() {
+        override val date get() = item.date
+        override val time get() = item.lessonBeginTime
+        override val subject get() = item.subjectAbbrev.ifBlank { item.subjectName }
+        override val key get() = "hw-${item.subjectName}-${item.date}-${item.description?.take(24)}"
+    }
+
+    data class Task(val task: PersonalTask) : CombinedEntry() {
+        override val date get() = task.dueDate
+        override val time get() = task.dueTime
+        override val subject get() = task.subject
+        override val key get() = "task-${task.id}"
+    }
+}
+
+/** A local tick overrides whatever Bakaláři reported. */
+private fun HomeworkItem.doneWith(doneMap: Map<String, Boolean>): Boolean = doneMap[id] ?: isDone
+
+private sealed class GroupKey {
+    data class ByDate(val date: LocalDate?) : GroupKey()
+    data class BySubject(val subject: String) : GroupKey()
+}
+
+/**
+ * Groups assignments and personal tasks together, so a date that has both shows both under the one
+ * heading rather than splitting the tab into a homework half and a tasks half.
+ */
+private fun groupCombined(
+    items: List<HomeworkItem>,
+    tasks: List<PersonalTask>,
+    sortOrder: HwSortOrder
+): List<Pair<GroupKey, List<CombinedEntry>>> {
+    val all: List<CombinedEntry> = items.map { CombinedEntry.Hw(it) } + tasks.map { CombinedEntry.Task(it) }
+    if (all.isEmpty()) return emptyList()
+
+    // within a group, order by time of day; entries without a time sink to the bottom
+    val byTime = compareBy<CombinedEntry>({ it.time == null }, { it.time?.millisOfDay ?: 0 })
+
+    return if (sortOrder == HwSortOrder.SUBJECT) {
+        all.groupBy { it.subject }
+            .toList()
+            .sortedBy { it.first.lowercase() }
+            .map { (subject, entries) -> GroupKey.BySubject(subject) to entries.sortedWith(byTime) }
+    } else {
+        val newestFirst = sortOrder == HwSortOrder.DATE_NEWEST
+        all.groupBy { it.date }
+            .toList()
+            // undated entries always last, whichever direction the dates run
+            .sortedWith(compareBy<Pair<LocalDate?, List<CombinedEntry>>> { it.first == null }
+                .thenComparator { a, b ->
+                    val x = a.first
+                    val y = b.first
+                    when {
+                        x == null || y == null -> 0
+                        newestFirst -> y.compareTo(x)
+                        else -> x.compareTo(y)
+                    }
+                })
+            .map { (date, entries) -> GroupKey.ByDate(date) to entries.sortedWith(byTime) }
     }
 }
 
@@ -184,35 +259,44 @@ private fun HomeworkList(
 @Composable
 private fun HomeworkAndTasksList(
     sortOrder: HwSortOrder,
-    grouped: List<Pair<LocalDate?, List<HomeworkItem>>>,
+    items: List<HomeworkItem>,
     dateFmt: org.joda.time.format.DateTimeFormatter,
     timeFmt: org.joda.time.format.DateTimeFormatter,
     tasks: List<PersonalTask>,
     onSortChange: (HwSortOrder) -> Unit,
     onToggleTask: (PersonalTask) -> Unit,
     onDeleteTask: (PersonalTask) -> Unit,
+    doneMap: Map<String, Boolean>,
+    onToggleHomework: (HomeworkItem, Boolean) -> Unit,
     onCopied: (String) -> Unit
 ) {
+    val groups = remember(items, tasks, sortOrder) { groupCombined(items, tasks, sortOrder) }
+    val noDateLabel = stringResource(R.string.homework_no_date)
     LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
-        if (grouped.isNotEmpty()) {
-            // the two halves used to run together: homework had no heading of its own and the
-            // tasks heading reused DateHeader, so it read as just another date
-            item { SectionHeader(stringResource(R.string.tab_homework)) }
-            homeworkContent(sortOrder, grouped, dateFmt, timeFmt, onSortChange, onCopied)
-        }
-        item { SectionHeader(stringResource(R.string.tab_tasks)) }
-        if (tasks.isEmpty()) {
-            item {
-                Text(
-                    stringResource(R.string.tasks_empty),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                )
+        item { SortRow(sortOrder) { onSortChange(it) } }
+        groups.forEach { (groupKey, entries) ->
+            stickyHeader {
+                when (groupKey) {
+                    is GroupKey.ByDate -> DateHeader(groupKey.date?.toString(dateFmt) ?: noDateLabel)
+                    is GroupKey.BySubject -> SubjectHeader(groupKey.subject, groupKey.subject)
+                }
             }
-        } else {
-            items(tasks, key = { it.id }) { task ->
-                TaskCard(task = task, onToggle = onToggleTask, onDelete = onDeleteTask)
+            items(entries, key = { it.key }) { entry ->
+                when (entry) {
+                    is CombinedEntry.Hw -> HomeworkCard(
+                        entry.item,
+                        timeFmt = timeFmt,
+                        showSubjectChip = groupKey is GroupKey.ByDate,
+                        isDone = entry.item.doneWith(doneMap),
+                        onToggleDone = { onToggleHomework(entry.item, it) },
+                        onCopied = onCopied
+                    )
+                    is CombinedEntry.Task -> TaskCard(
+                        task = entry.task,
+                        onToggle = onToggleTask,
+                        onDelete = onDeleteTask
+                    )
+                }
             }
         }
     }
@@ -225,6 +309,8 @@ private fun LazyListScope.homeworkContent(
     dateFmt: org.joda.time.format.DateTimeFormatter,
     timeFmt: org.joda.time.format.DateTimeFormatter,
     onSortChange: (HwSortOrder) -> Unit,
+    doneMap: Map<String, Boolean>,
+    onToggleHomework: (HomeworkItem, Boolean) -> Unit,
     onCopied: (String) -> Unit
 ) {
     item {
@@ -237,7 +323,7 @@ private fun LazyListScope.homeworkContent(
                 SubjectHeader(subject.subjectName, subject.subjectAbbrev)
             }
             items(subjectItems) { hw ->
-                HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = false, onCopied = onCopied)
+                HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = false, isDone = hw.doneWith(doneMap), onToggleDone = { onToggleHomework(hw, it) }, onCopied = onCopied)
             }
         }
     } else {
@@ -246,7 +332,7 @@ private fun LazyListScope.homeworkContent(
                 DateHeader(date?.toString(dateFmt) ?: stringResource(R.string.homework_no_date))
             }
             items(dateItems) { hw ->
-                HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = true, onCopied = onCopied)
+                HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = true, isDone = hw.doneWith(doneMap), onToggleDone = { onToggleHomework(hw, it) }, onCopied = onCopied)
             }
         }
     }
@@ -271,23 +357,6 @@ private fun EmptyState() {
             stringResource(R.string.homework_empty_hint),
             style = MaterialTheme.typography.caption,
             color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
-        )
-    }
-}
-
-/** Separates the two halves of the combined tab - deliberately unlike [DateHeader]. */
-@Composable
-private fun SectionHeader(label: String) {
-    Surface(
-        color = MaterialTheme.colors.primary,
-        contentColor = MaterialTheme.colors.onPrimary,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            label.uppercase(),
-            style = MaterialTheme.typography.caption,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
         )
     }
 }
@@ -383,6 +452,8 @@ private fun HomeworkCard(
     hw: HomeworkItem,
     timeFmt: org.joda.time.format.DateTimeFormatter,
     showSubjectChip: Boolean,
+    isDone: Boolean,
+    onToggleDone: (Boolean) -> Unit,
     onCopied: (String) -> Unit
 ) {
     Card(
@@ -395,6 +466,15 @@ private fun HomeworkCard(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.Top
         ) {
+            Checkbox(
+                checked = isDone,
+                onCheckedChange = onToggleDone,
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(end = 4.dp),
+                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.secondary)
+            )
+            Spacer(Modifier.size(6.dp))
             if (showSubjectChip) {
                 Surface(
                     color = MaterialTheme.colors.primary.copy(alpha = 0.12f),
@@ -418,7 +498,12 @@ private fun HomeworkCard(
                         Text(
                             hw.description ?: stringResource(R.string.homework_no_description),
                             style = MaterialTheme.typography.body2,
-                            color = if (hw.description == null) MaterialTheme.colors.onSurface.copy(alpha = 0.5f) else Color.Unspecified
+                            textDecoration = if (isDone) TextDecoration.LineThrough else TextDecoration.None,
+                            color = when {
+                                isDone -> MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                                hw.description == null -> MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                                else -> Color.Unspecified
+                            }
                         )
                         if (hw.lessonBeginTime != null) {
                             Spacer(Modifier.height(3.dp))

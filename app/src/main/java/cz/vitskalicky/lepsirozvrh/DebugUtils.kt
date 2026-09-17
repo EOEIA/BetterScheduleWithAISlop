@@ -129,12 +129,12 @@ class DebugUtils constructor(ctx: Context) {
         )
 
         fun getDemoHomework(): List<HomeworkItem> = listOf(
-            HomeworkItem("Anglický jazyk", "AJ", "Workbook U7: exercises 3–5, prepare five vocabulary sentences.", LocalDate.parse("2026-09-01"), LocalTime(8, 0)),
-            HomeworkItem("Matematika a její aplikace", "MA", "Chapter 4, problems 12–18 (quadratic equations).", LocalDate.parse("2026-09-01"), LocalTime(9, 50)),
-            HomeworkItem("Chemie", "Ch", "Balance equations worksheet 1–8, bring lab notebook.", LocalDate.parse("2026-09-02"), LocalTime(11, 40)),
-            HomeworkItem("Informatika", "INF", "Finish the Python sorting exercise and push to the class repo.", LocalDate.parse("2026-09-02"), LocalTime(13, 30)),
-            HomeworkItem("Anglický jazyk", "AJ", "Read pages 42–46 in the textbook, summarise main points.", LocalDate.parse("2026-09-03"), LocalTime(8, 0)),
-            HomeworkItem("Dějepis", "D", "Timeline of WWI events — at least 10 entries with a short description each.", LocalDate.parse("2026-09-03"), LocalTime(10, 45)),
+            HomeworkItem("demo-1", "Anglický jazyk", "AJ", "Workbook U7: exercises 3–5, prepare five vocabulary sentences.", LocalDate.parse("2026-09-01"), LocalTime(8, 0)),
+            HomeworkItem("demo-2", "Matematika a její aplikace", "MA", "Chapter 4, problems 12–18 (quadratic equations).", LocalDate.parse("2026-09-01"), LocalTime(9, 50)),
+            HomeworkItem("demo-3", "Chemie", "Ch", "Balance equations worksheet 1–8, bring lab notebook.", LocalDate.parse("2026-09-02"), LocalTime(11, 40)),
+            HomeworkItem("demo-4", "Informatika", "INF", "Finish the Python sorting exercise and push to the class repo.", LocalDate.parse("2026-09-02"), LocalTime(13, 30)),
+            HomeworkItem("demo-5", "Anglický jazyk", "AJ", "Read pages 42–46 in the textbook, summarise main points.", LocalDate.parse("2026-09-03"), LocalTime(8, 0)),
+            HomeworkItem("demo-6", "Dějepis", "D", "Timeline of WWI events — at least 10 entries with a short description each.", LocalDate.parse("2026-09-03"), LocalTime(10, 45)),
         )
 
         private fun Rozvrh.withDemoHomeworkDescriptions(): Rozvrh {
