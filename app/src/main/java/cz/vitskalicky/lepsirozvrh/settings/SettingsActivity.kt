@@ -237,6 +237,11 @@ class SettingsActivity : ComponentActivity() {
                             ) { newValue ->
                                 viewModel.currentTimeLine = newValue
                             }
+                            SwitchPreference(R.string.grid_in_empty_cells.str, R.string.grid_in_empty_cells_desc.str,
+                                viewModel.gridInEmptyCellsLD.observeAsState().value ?: true
+                            ) { newValue ->
+                                viewModel.gridInEmptyCells = newValue
+                            }
                             SwitchPreference(R.string.changed_lesson_visuals.str, R.string.changed_lesson_visuals_desc.str,
                                 viewModel.changedLessonVisualsLD.observeAsState().value ?: true
                             ) { newValue -> viewModel.changedLessonVisuals = newValue }

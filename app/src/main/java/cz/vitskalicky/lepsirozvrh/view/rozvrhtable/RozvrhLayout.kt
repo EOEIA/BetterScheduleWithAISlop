@@ -60,6 +60,7 @@ class RozvrhLayout : ViewGroup {
     private var horizontalScrollOffset = 0
     private var highlightCurrentDay = false
     private var showCurrentTimeLine = false
+    private var gridInEmptyCells = true
     private val timeLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.strokeCap = Paint.Cap.ROUND }
     private var changeVisualMode = 0
     private var compact = false
@@ -108,6 +109,12 @@ class RozvrhLayout : ViewGroup {
         }
         highlightCurrentDay = enabled
         updateCurrentDayHighlight()
+    }
+
+    fun setGridInEmptyCells(enabled: Boolean) {
+        if (gridInEmptyCells == enabled) return
+        gridInEmptyCells = enabled
+        hodinasByCaptions.forEach { it.forEach { views -> views.forEach { v -> v.setGridInEmptyCells(enabled) } } }
     }
 
     fun setCurrentTimeLine(enabled: Boolean) {
@@ -502,6 +509,7 @@ class RozvrhLayout : ViewGroup {
             }
         }
         applyLessonIndicatorKeys()
+        hodinasByCaptions.forEach { it.forEach { views -> views.forEach { v -> v.setGridInEmptyCells(gridInEmptyCells) } } }
         updateCurrentDayHighlight()
         highlightCurrentLesson()
         invalidate()
@@ -700,7 +708,9 @@ class RozvrhLayout : ViewGroup {
         val firstView = views.first()
         val lastView = views.last()
 
-        timeLinePaint.color = t.cHighlight.toArgb()
+        // the line sits on top of a cell, and cHighlight can be that cell's own background colour
+        // (a room-changed lesson is painted cHighlight), so ask the cell what will actually show
+        timeLinePaint.color = firstView.contrastingHighlightColor()
         val lineWidth = Math.max(2f, dp(t.dpHighlightWidth) * 2f)
         timeLinePaint.strokeWidth = lineWidth
         val dotRadius = lineWidth * 1.5f

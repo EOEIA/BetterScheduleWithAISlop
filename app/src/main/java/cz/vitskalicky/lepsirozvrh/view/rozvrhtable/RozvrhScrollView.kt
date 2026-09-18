@@ -48,6 +48,10 @@ class RozvrhScrollView : HorizontalScrollView {
         rozvrhLayout.setCurrentTimeLine(enabled)
     }
 
+    fun setGridInEmptyCells(enabled: Boolean) {
+        rozvrhLayout.setGridInEmptyCells(enabled)
+    }
+
     fun setOnLessonPress(onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit) {
         rozvrhLayout.setOnLessonPress(onLessonPress)
     }

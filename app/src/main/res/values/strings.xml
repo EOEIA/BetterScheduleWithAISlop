@@ -475,4 +475,6 @@
     <string name="feedback_copied_opening">Report copied — paste it into the new issue.</string>
     <string name="feedback_copied_no_browser">Report copied to the clipboard, but no browser could be opened.</string>
     <string name="transpose_timetable">Transpose timetable</string>
+    <string name="grid_in_empty_cells">Grid in empty cells</string>
+    <string name="grid_in_empty_cells_desc">Draw grid lines through free periods instead of leaving them blank</string>
 </resources>

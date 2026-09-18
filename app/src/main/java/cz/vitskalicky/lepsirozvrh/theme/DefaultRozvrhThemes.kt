@@ -15,7 +15,8 @@ object DefaultRozvrhThemes {
         cChngPrimaryText = Color(0xFF3c3836),
         cChngRoomText = Color(0xFF665c54),
         cChngSecondaryText = Color(0xFF3c3836),
-        cDivider = Color(0xFFd5c4a1),        // gruvbox bg2
+        cDivider = Color(0xFFa89984),        // gruvbox bg4 - was bg2, which is the empty-cell
+                                             // colour itself, so the grid vanished between cells
         cEmptyBg = Color(0xFFd5c4a1),
         cError = Color(0xFF9d0006),          // gruvbox red dark
         cHBg = Color(0xFFfbf1c7),            // gruvbox bg
@@ -32,7 +33,7 @@ object DefaultRozvrhThemes {
         cPrimary = Color(0xFFaf3a03),        // gruvbox orange dark
         cSecondary = Color(0xFF076678),      // gruvbox blue dark
         cSurface = Color(0xFFfbf1c7),        // gruvbox bg
-        dpDividerWidth = 1.0f,
+        dpDividerWidth = 1.5f,
         dpHighlightWidth = 1.0f,
         dpHomework = 5.0f,
         dpPaddingBottom = 3.0f,
@@ -57,7 +58,8 @@ object DefaultRozvrhThemes {
         cChngPrimaryText = Color(0xFFebdbb2),
         cChngRoomText = Color(0xFFa89984),
         cChngSecondaryText = Color(0xFFd5c4a1),
-        cDivider = Color(0xFF1d2021),        // gruvbox bg hard
+        cDivider = Color(0xFF665c54),        // gruvbox bg3 - a light-on-dark grid reads
+                                             // where the old near-black one did not
         cEmptyBg = Color(0xFF1d2021),
         cError = Color(0xFFfb4934),          // gruvbox red bright
         cHBg = Color(0xFF3c3836),            // gruvbox bg1
@@ -74,7 +76,7 @@ object DefaultRozvrhThemes {
         cPrimary = Color(0xFFfe8019),        // gruvbox orange bright
         cSecondary = Color(0xFF83a598),      // gruvbox blue bright
         cSurface = Color(0xFF282828),        // gruvbox bg
-        dpDividerWidth = 1.0f,
+        dpDividerWidth = 1.5f,
         dpHighlightWidth = 1.0f,
         dpHomework = 5.0f,
         dpPaddingBottom = 3.0f,

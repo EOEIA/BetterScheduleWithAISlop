@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.toArgb
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.LessonChangeType
 import cz.vitskalicky.lepsirozvrh.model.rozvrh.RozvrhLesson
+import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.isLegible
 import cz.vitskalicky.lepsirozvrh.theme.ThemeGenerator.textColorFor
 import kotlin.math.max
@@ -51,6 +52,11 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
     private var cornerHighlighted = false
     private var entireHighlighted //the highlighting is thicker
             = false
+
+    companion object {
+        /** A border only has to be *visible*, not text-legible, so this is well below the 4.5 used for text. */
+        private const val HIGHLIGHT_MIN_CONTRAST = 2.0
+    }
 
     override fun getMinimumWidth(): Int {
         return if (hodina != null) {
@@ -110,6 +116,14 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
 
     private var transposed = false
     fun setTransposed(transposed: Boolean) { this.transposed = transposed }
+
+    /** Whether cells with no lesson in them still draw their grid lines. */
+    private var gridInEmptyCells = true
+    fun setGridInEmptyCells(enabled: Boolean) {
+        if (gridInEmptyCells == enabled) return
+        gridInEmptyCells = enabled
+        invalidate()
+    }
 
     /**
      * Updates the content to display a lesson
@@ -217,13 +231,38 @@ class HodinaView(context: Context?, attrs: AttributeSet?) : CellView(context, at
         hightlightEdges(highlight, highlight, highlight)
     }
 
+    /**
+     * The highlight is drawn on top of the cell, and [t].cHighlight can be the *same* colour as the
+     * cell's background - a room-changed lesson is literally painted cHighlight (see [kindBgColor]),
+     * and a changed lesson can land close to it - in which case the border and the moving time line
+     * disappear. Fall back to black or white, whichever the cell's own background contrasts with.
+     */
+    fun contrastingHighlightColor(): Int {
+        val background = Color(backgroundPaint.color)
+        if (ThemeGenerator.isLegible(t.cHighlight, background, HIGHLIGHT_MIN_CONTRAST)) {
+            return t.cHighlight.toArgb()
+        }
+        return ThemeGenerator.whichTextColor(background, listOf(Color.White, Color.Black)).toArgb()
+    }
+
     override fun onDraw(canvas: Canvas) {
         // In transposed mode, draw row separators through normal lesson cells. Event rows stay visually merged.
-        val drawTop = !topHighlighted && (!transposed || event == null)
-        setDrawDividers(drawTop, !cornerHighlighted, !leftHighlighted && (event == null || eventStart == 0))
+        // an empty cell's grid lines are the only thing that gives the free periods any structure,
+        // so they are drawn by default, but can be switched off for a cleaner look
+        val showGrid = gridInEmptyCells || hasLesson()
+        val drawTop = showGrid && !topHighlighted && (!transposed || event == null)
+        setDrawDividers(
+            drawTop,
+            showGrid && !cornerHighlighted,
+            showGrid && !leftHighlighted && (event == null || eventStart == 0)
+        )
         super.onDraw(canvas)
         val w = width
         val h = height
+
+        val highlightColor = contrastingHighlightColor()
+        highlightPaint.color = highlightColor
+        highlightedDividerPaint.color = highlightColor
 
         //# draw highlighted dividers
         //left

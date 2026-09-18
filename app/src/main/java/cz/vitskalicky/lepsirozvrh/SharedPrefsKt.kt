@@ -78,6 +78,8 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val HIGHLIGHT_CURRENT_DAY = "prefs-highlight-current-day"
     /** Draw a line through today's row at the current time. non-set is treated as false */
     const val CURRENT_TIME_LINE = "prefs-current-time-line"
+    /** Draw grid lines in cells with no lesson. non-set is treated as true */
+    const val GRID_IN_EMPTY_CELLS = "prefs-grid-in-empty-cells"
     const val CHANGED_LESSON_VISUALS = "prefs-color-changed-lessons"
     /** non-set is treated as false */
     const val COMPACT_TIMETABLE = "prefs-compact-timetable"
@@ -138,6 +140,7 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
             if (!contains(STICKY_DAY_COLUMN)) putBoolean(STICKY_DAY_COLUMN, true)
             if (!contains(HIGHLIGHT_CURRENT_DAY)) putBoolean(HIGHLIGHT_CURRENT_DAY, false)
             if (!contains(CURRENT_TIME_LINE)) putBoolean(CURRENT_TIME_LINE, false)
+            if (!contains(GRID_IN_EMPTY_CELLS)) putBoolean(GRID_IN_EMPTY_CELLS, true)
             if (!contains(CHANGED_LESSON_VISUALS)) putBoolean(CHANGED_LESSON_VISUALS, true)
             if (!contains(COMPACT_TIMETABLE)) putBoolean(COMPACT_TIMETABLE, false)
             if (!contains(TIMETABLE_TRANSPOSED)) putBoolean(TIMETABLE_TRANSPOSED, false)

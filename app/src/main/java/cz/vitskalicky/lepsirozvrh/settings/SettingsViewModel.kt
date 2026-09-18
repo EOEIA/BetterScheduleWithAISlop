@@ -55,6 +55,10 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         get() = sp.boolean(PrefsConsts.CURRENT_TIME_LINE) ?: false
         set(value) = sp.edit { putBoolean(PrefsConsts.CURRENT_TIME_LINE, value) }
     val currentTimeLineLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.CURRENT_TIME_LINE, false)
+    var gridInEmptyCells: Boolean
+        get() = sp.boolean(PrefsConsts.GRID_IN_EMPTY_CELLS) ?: true
+        set(value) = sp.edit { putBoolean(PrefsConsts.GRID_IN_EMPTY_CELLS, value) }
+    val gridInEmptyCellsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.GRID_IN_EMPTY_CELLS, true)
 
     var changedLessonVisuals: Boolean
         get() = sp.boolean(PrefsConsts.CHANGED_LESSON_VISUALS) ?: true

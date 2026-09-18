@@ -87,6 +87,10 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.CURRENT_TIME_LINE, false)
     }
     val currentTimeLine by currentTimeLineLD.observeAsState(false)
+    val gridInEmptyCellsLD = remember {
+        SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.GRID_IN_EMPTY_CELLS, true)
+    }
+    val gridInEmptyCells by gridInEmptyCellsLD.observeAsState(true)
     val colorChangedLessonsLD = remember {
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.CHANGED_LESSON_VISUALS, true)
     }
@@ -190,6 +194,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         stickyDayColumn = stickyDayColumn,
         highlightCurrentDay = highlightCurrentDay,
         currentTimeLine = currentTimeLine,
+        gridInEmptyCells = gridInEmptyCells,
         colorChangedLessons = colorChangedLessons,
         compactTimetable = compactTimetable,
         transposedTimetable = transposedTimetable,
@@ -263,6 +268,7 @@ fun RozvrhWithControlsStateless(
     stickyDayColumn: Boolean = true,
     highlightCurrentDay: Boolean = false,
     currentTimeLine: Boolean = false,
+    gridInEmptyCells: Boolean = true,
     colorChangedLessons: Boolean = true,
     compactTimetable: Boolean = false,
     transposedTimetable: Boolean = false,
@@ -341,6 +347,7 @@ fun RozvrhWithControlsStateless(
                         rozvrhScrollView.setStickyDayColumn(stickyDayColumn)
                         rozvrhScrollView.setHighlightCurrentDay(highlightCurrentDay)
                         rozvrhScrollView.setCurrentTimeLine(currentTimeLine)
+                        rozvrhScrollView.setGridInEmptyCells(gridInEmptyCells)
                         rozvrhScrollView.setChangeVisualMode(if (colorChangedLessons) 1 else 0)
                         rozvrhScrollView.setCompact(compactTimetable)
                         rozvrhScrollView.setTheme(if (compactTimetable) rozvrhTheme.compact() else rozvrhTheme)
@@ -1036,6 +1043,7 @@ fun Rozvrhpreview(){
         showSettingsBadge = true,
         stickyDayColumn = true,
         highlightCurrentDay = false,
-        currentTimeLine = false
+        currentTimeLine = false,
+        gridInEmptyCells = true
     )
 }

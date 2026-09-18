@@ -33,8 +33,8 @@
     <!-- must match ThemeSettingsActivity.SelectedTheme -->
     <string-array name="themes_entries">
         <item>Follow system theme</item>
-        <item>Light</item>
-        <item>Dark</item>
+        <item>Gruvbox Light</item>
+        <item>Gruvbox Dark</item>
         <item>Black</item>
         <item>Custom</item>
         <item>Nord</item>
