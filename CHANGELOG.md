@@ -1,5 +1,15 @@
 # Seznam změn / Changelog
 
+## 2.0.33
+
+- Orámování tabulky se nyní drží připnutého sloupce s hodinami i při posouvání a nezmizí mimo obrazovku.
+- Odpočet u další hodiny už neukazuje prázdné jednotky — místo „0d 0h 27m 38s“ je vidět „27 min 38 s“.
+
+---
+
+- The table's frame now stays pinned to the lesson-index column while you scroll instead of sliding off screen.
+- The next-lesson countdown no longer prints empty units — "27m 38s" instead of "0d 0h 27m 38s".
+
 ## 2.0.32
 
 - Mřížka nyní tabulku i orámuje — čáry jsou i nahoře, dole a po stranách, ne jen mezi buňkami.

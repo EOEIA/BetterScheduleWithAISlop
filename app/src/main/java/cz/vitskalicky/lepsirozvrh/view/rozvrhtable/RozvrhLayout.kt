@@ -688,7 +688,19 @@ class RozvrhLayout : ViewGroup {
         borderPaint.color = source.dividerColor
         borderPaint.strokeWidth = stroke
         val inset = stroke / 2f
-        canvas.drawRect(inset, inset, width - inset, height - inset, borderPaint)
+
+        // The day/period column is pinned while the rest scrolls under it, so the frame has to be
+        // pinned to it as well - anchored at the table's real left edge it just scrolled away and
+        // left that column with no line down either side of it.
+        val leftColumnSticky = stickyDayColumn || transposed
+        val left = if (leftColumnSticky) horizontalScrollOffset + inset else inset
+        canvas.drawRect(left, inset, width - inset, height - inset, borderPaint)
+
+        // and the seam between that pinned column and the cells scrolling past it
+        if (leftColumnSticky) {
+            val seam = horizontalScrollOffset + columnSizes[0] - inset
+            canvas.drawLine(seam, inset, seam, height - inset, borderPaint)
+        }
     }
 
     /**

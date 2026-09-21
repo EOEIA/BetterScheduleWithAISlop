@@ -1,0 +1,1 @@
+The table's frame now stays pinned to the lesson-index column while you scroll instead of sliding off screen. The next-lesson countdown no longer prints empty units — "27m 38s" instead of "0d 0h 27m 38s".
