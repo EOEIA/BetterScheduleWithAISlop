@@ -44,6 +44,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import cz.vitskalicky.lepsirozvrh.settings.SettingsActivity
 import cz.vitskalicky.lepsirozvrh.theme.compact
 import cz.vitskalicky.lepsirozvrh.ui.theme.LocalRozvrhTheme
+import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.rozvrhtable.RozvrhScrollView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -878,6 +879,26 @@ private fun LessonActionButtons(
     }
 }
 
+/**
+ * Renders the next-lesson bar on its own, so it can be iterated on in Android Studio's preview pane
+ * without building and installing. Whether it shows the "current" or "next" state depends on the
+ * time of day you happen to be previewing at; with no lesson around it falls back to "school over".
+ */
+@Composable
+@Preview(showBackground = true, widthDp = 400)
+fun NextLessonCardPreview(){
+    LepsirozvrhTheme(hasAppBar = false, isRozvrhScreen = true) {
+        Column {
+            NextLessonCard(
+                rozvrh = DebugUtils.getDemoRozvrh(Utils.getCurrentMonday(), LocalContext.current),
+                isTeacher = false,
+                showCountdown = true
+            )
+            NextLessonCard(rozvrh = null, isTeacher = false, showCountdown = true)
+        }
+    }
+}
+
 @Composable
 @Preview
 fun LessonPreview(){
@@ -1023,12 +1044,22 @@ fun NextLessonCard(
 }
 
 @Composable
+/**
+ * Drops leading zero units, so half an hour reads "27m 38s" rather than "0d 0h 27m 38s". Only ever
+ * shows the two largest units that matter - past an hour the seconds are noise, and they were also
+ * making the text change width every tick.
+ */
 private fun durationText(totalSeconds: Int): String {
     val days = totalSeconds / 86_400
     val hours = (totalSeconds % 86_400) / 3_600
     val minutes = (totalSeconds % 3_600) / 60
     val seconds = totalSeconds % 60
-    return stringResource(R.string.next_lesson_card_duration, days, hours, minutes, seconds)
+    return when {
+        days > 0 -> stringResource(R.string.duration_days_hours, days, hours)
+        hours > 0 -> stringResource(R.string.duration_hours_minutes, hours, minutes)
+        minutes > 0 -> stringResource(R.string.duration_minutes_seconds, minutes, seconds)
+        else -> stringResource(R.string.duration_seconds, seconds)
+    }
 }
 
 @Composable
