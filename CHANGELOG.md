@@ -1,5 +1,15 @@
 # Seznam změn / Changelog
 
+## 2.0.32
+
+- Mřížka nyní tabulku i orámuje — čáry jsou i nahoře, dole a po stranách, ne jen mezi buňkami.
+- V otočené tabulce je sloupec s čísly hodin užší a nezabírá zbytečně místo.
+
+---
+
+- The grid now frames the table as well — lines along the top, bottom and sides, not just between cells.
+- In the transposed table the period-number column is narrower and no longer wastes space.
+
 ## 2.0.31
 
 - Nové nastavení: Odstín mřížky — mřížku mezi hodinami lze ztmavit nebo zesvětlit oproti motivu (Nastavení → Rozvrh).

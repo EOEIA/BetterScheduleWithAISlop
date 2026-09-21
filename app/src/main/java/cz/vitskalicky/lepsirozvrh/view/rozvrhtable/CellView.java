@@ -82,6 +82,11 @@ public class CellView extends View {
         return ColorUtils.blendARGB(base, towards, ratio);
     }
 
+    /** The divider colour actually in use, with any grid shade already applied. */
+    public int getDividerColor(){
+        return dividerPaint.getColor();
+    }
+
     /** @param shade -2..+2, 0 being the theme's own divider colour. */
     public void setGridShade(int shade){
         int clamped = Math.max(-2, Math.min(2, shade));

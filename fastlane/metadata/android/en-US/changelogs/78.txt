@@ -1,0 +1,1 @@
+The grid now frames the table as well — lines along the top, bottom and sides, not just between cells. In the transposed table the period-number column is narrower and no longer wastes space.

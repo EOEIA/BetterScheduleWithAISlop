@@ -63,6 +63,7 @@ class RozvrhLayout : ViewGroup {
     private var gridInEmptyCells = true
     private var gridShade = 0
     private val timeLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.strokeCap = Paint.Cap.ROUND }
+    private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.style = Paint.Style.STROKE }
     private var changeVisualMode = 0
     private var compact = false
     private var transposed = false
@@ -158,7 +159,10 @@ class RozvrhLayout : ViewGroup {
                 columnSizes[0] = Math.max(columnSizes[0], denViews[i].minimumWidth)
             }
         } else {
-            columnSizes[0] = naturalCellWidth
+            // transposed: the left column is just period numbers and times. Starting from
+            // naturalCellWidth made it as wide as a full lesson cell and wasted a sixth of the
+            // screen, so let the times decide, with a floor so it never collapses.
+            columnSizes[0] = dp(36f).toInt()
             for (i in captionViews.indices) {
                 columnSizes[0] = Math.max(columnSizes[0], captionViews[i].minimumWidth)
             }
@@ -665,9 +669,26 @@ class RozvrhLayout : ViewGroup {
 
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
+        drawOuterBorder(canvas)
         if (showCurrentTimeLine) {
             drawCurrentTimeLine(canvas)
         }
+    }
+
+    /**
+     * Every cell draws only its own top and left edge, so the table was left open on the right and
+     * along the bottom - the outermost cells had grid lines on two sides and nothing on the others.
+     * Close the rectangle here rather than teaching cells about being last, which would have to be
+     * recomputed on every transpose, hide-empty-hours and relayout.
+     */
+    private fun drawOuterBorder(canvas: Canvas) {
+        if (rows <= 0 || columns <= 0) return
+        val source = cornerView ?: return
+        val stroke = Math.max(1f, dp(t.dpDividerWidth))
+        borderPaint.color = source.dividerColor
+        borderPaint.strokeWidth = stroke
+        val inset = stroke / 2f
+        canvas.drawRect(inset, inset, width - inset, height - inset, borderPaint)
     }
 
     /**

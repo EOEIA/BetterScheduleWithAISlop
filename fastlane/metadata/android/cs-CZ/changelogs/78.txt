@@ -1,0 +1,1 @@
+Mřížka nyní tabulku i orámuje — čáry jsou i nahoře, dole a po stranách, ne jen mezi buňkami. V otočené tabulce je sloupec s čísly hodin užší a nezabírá zbytečně místo.
