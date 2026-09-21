@@ -1,0 +1,1 @@
+The app now watches for new versions and can update itself — no more downloading APKs from GitHub by hand (Settings → Check for updates). Homework and tasks are ordered with the nearest due date at the top. Each date heading shows how far away it is on the right (+3 d / -2 d / today).

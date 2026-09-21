@@ -473,4 +473,5 @@
     <string name="update_check_failed">Nepodařilo se spojit s GitHubem.</string>
     <string name="auto_update_check">Automaticky kontrolovat aktualizace</string>
     <string name="auto_update_check_desc">Při spuštění aplikace zjistit, zda vyšla nová verze</string>
+    <string name="date_offset_today">dnes</string>
 </resources>

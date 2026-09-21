@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.database.PersonalTask
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
+import org.joda.time.Days
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
 import androidx.compose.material.rememberScaffoldState
@@ -49,7 +50,8 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
     val personalTasks by viewModel.personalTasks.observeAsState(emptyList())
 
     var selectedTab by remember { mutableStateOf(HomeworkTab.BOTH) }
-    var sortOrder by remember { mutableStateOf(HwSortOrder.DATE_NEWEST) }
+    // earliest first: what is due soonest is what matters, so it belongs at the top
+    var sortOrder by remember { mutableStateOf(HwSortOrder.DATE_OLDEST) }
     var showAddTaskDialog by remember { mutableStateOf(false) }
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
@@ -277,7 +279,7 @@ private fun HomeworkAndTasksList(
         groups.forEach { (groupKey, entries) ->
             stickyHeader {
                 when (groupKey) {
-                    is GroupKey.ByDate -> DateHeader(groupKey.date?.toString(dateFmt) ?: noDateLabel)
+                    is GroupKey.ByDate -> DateHeader(groupKey.date?.toString(dateFmt) ?: noDateLabel, groupKey.date)
                     is GroupKey.BySubject -> SubjectHeader(groupKey.subject, groupKey.subject)
                 }
             }
@@ -329,7 +331,7 @@ private fun LazyListScope.homeworkContent(
     } else {
         grouped.forEach { (date, dateItems) ->
             stickyHeader {
-                DateHeader(date?.toString(dateFmt) ?: stringResource(R.string.homework_no_date))
+                DateHeader(date?.toString(dateFmt) ?: stringResource(R.string.homework_no_date), date)
             }
             items(dateItems) { hw ->
                 HomeworkCard(hw, timeFmt = timeFmt, showSubjectChip = true, isDone = hw.doneWith(doneMap), onToggleDone = { onToggleHomework(hw, it) }, onCopied = onCopied)
@@ -361,20 +363,47 @@ private fun EmptyState() {
     }
 }
 
+/**
+ * How far the date is from today, as "+3 d" / "-2 d", or the word for today. Returns `null` for an
+ * undated group, which has nothing to count from.
+ */
 @Composable
-private fun DateHeader(label: String) {
+private fun relativeDayLabel(date: LocalDate?): String? {
+    if (date == null) return null
+    val days = Days.daysBetween(LocalDate.now(), date).days
+    return if (days == 0) stringResource(R.string.date_offset_today) else "%+d d".format(days)
+}
+
+@Composable
+private fun DateHeader(label: String, date: LocalDate? = null) {
+    val offset = relativeDayLabel(date)
     Surface(
         color = MaterialTheme.colors.surface,
         elevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.subtitle2,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colors.primary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                label,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.subtitle2,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colors.primary
+            )
+            if (offset != null) {
+                Text(
+                    offset,
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(
+                        // a date already gone by is dimmer than one still ahead
+                        alpha = if (offset.startsWith("-")) 0.45f else 0.7f
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -557,8 +586,17 @@ private fun TasksTab(
             )
         }
     } else {
+        // the DAO orders by creation time; on screen what matters is what is due soonest
+        val ordered = remember(tasks) {
+            tasks.sortedWith(
+                compareBy<PersonalTask> { it.dueDate == null }
+                    .thenBy { it.dueDate }
+                    .thenBy { it.dueTime == null }
+                    .thenBy { it.dueTime }
+            )
+        }
         LazyColumn(contentPadding = PaddingValues(bottom = 80.dp, top = 8.dp)) {
-            items(tasks, key = { it.id }) { task ->
+            items(ordered, key = { it.id }) { task ->
                 TaskCard(task = task, onToggle = onToggle, onDelete = onDelete)
             }
         }

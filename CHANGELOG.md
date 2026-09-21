@@ -1,5 +1,17 @@
 # Seznam změn / Changelog
 
+## 2.0.29
+
+- Aplikace si nyní sama hlídá nové verze a umí se aktualizovat — už není potřeba stahovat APK z GitHubu ručně (Nastavení → Zkontrolovat aktualizace).
+- Domácí úkoly i vlastní úkoly se řadí od nejbližšího termínu nahoře.
+- U každého data je vpravo vidět, za kolik dní to je (+3 d / -2 d / dnes).
+
+---
+
+- The app now watches for new versions and can update itself — no more downloading APKs from GitHub by hand (Settings → Check for updates).
+- Homework and tasks are ordered with the nearest due date at the top.
+- Each date heading shows how far away it is on the right (+3 d / -2 d / today).
+
 ## 2.0.28
 
 - Společná záložka nyní spojuje domácí úkoly a vlastní úkoly podle data — pod jedním datem uvidíte obojí.

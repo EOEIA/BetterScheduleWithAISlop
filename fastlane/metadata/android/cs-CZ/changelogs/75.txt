@@ -1,0 +1,1 @@
+Aplikace si nyní sama hlídá nové verze a umí se aktualizovat — už není potřeba stahovat APK z GitHubu ručně (Nastavení → Zkontrolovat aktualizace). Domácí úkoly i vlastní úkoly se řadí od nejbližšího termínu nahoře. U každého data je vpravo vidět, za kolik dní to je (+3 d / -2 d / dnes).
