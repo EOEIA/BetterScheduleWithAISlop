@@ -477,4 +477,20 @@
     <string name="transpose_timetable">Transpose timetable</string>
     <string name="grid_in_empty_cells">Grid in empty cells</string>
     <string name="grid_in_empty_cells_desc">Draw grid lines through free periods instead of leaving them blank</string>
+    <string name="update_available">Version %1$s is available</string>
+    <string name="update_current_version">You have %1$s</string>
+    <string name="update_download">Download</string>
+    <string name="update_install">Install</string>
+    <string name="update_retry">Try again</string>
+    <string name="update_skip">Skip</string>
+    <string name="later">Later</string>
+    <string name="update_failed">Update failed</string>
+    <string name="update_failed_desc">The download did not finish. Check your connection and try again.</string>
+    <string name="update_check">Check for updates</string>
+    <string name="update_check_desc">Current version: %1$s</string>
+    <string name="update_checking">Checking…</string>
+    <string name="update_up_to_date">You are on the latest version.</string>
+    <string name="update_check_failed">Could not reach GitHub.</string>
+    <string name="auto_update_check">Check for updates automatically</string>
+    <string name="auto_update_check_desc">Look for a new release when the app starts</string>
 </resources>

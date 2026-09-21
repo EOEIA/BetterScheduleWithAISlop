@@ -38,6 +38,10 @@ import cz.vitskalicky.lepsirozvrh.accountPicker.AccountPickerActivity
 import cz.vitskalicky.lepsirozvrh.LicencesActivity
 import cz.vitskalicky.lepsirozvrh.model.Account
 import cz.vitskalicky.lepsirozvrh.notification.PermanentNotification
+import cz.vitskalicky.lepsirozvrh.update.GithubRelease
+import cz.vitskalicky.lepsirozvrh.update.UpdateChecker
+import cz.vitskalicky.lepsirozvrh.update.UpdateDialog
+import androidx.compose.material.icons.filled.SystemUpdate
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
 import cz.vitskalicky.lepsirozvrh.view.preferences.Preference
 import cz.vitskalicky.lepsirozvrh.view.preferences.PreferenceGroupHeader
@@ -105,6 +109,8 @@ class SettingsActivity : ComponentActivity() {
 
             var showFeedbackDialog by rememberSaveable{ mutableStateOf(false) }
             var showWhatsNewDialog by rememberSaveable{ mutableStateOf(false) }
+            var checkingForUpdate by remember { mutableStateOf(false) }
+            var updateToOffer by remember { mutableStateOf<GithubRelease?>(null) }
             val showNotiPermissionDialog: Boolean by showNotiPermissionDialogLD.observeAsState(false)
             val areNotificationsEnabled: Boolean by app.areNotificationsEnabled.observeAsState(true)
             val dontShowNotiBanner: Boolean by viewModel.dontShowNotiBannerLD.observeAsState(true)
@@ -360,6 +366,38 @@ class SettingsActivity : ComponentActivity() {
                                 if (showWhatsNewDialog) WhatsNew.WhatsNewDialog(onDismissed = {showWhatsNewDialog = false; viewModel.userAcknowledgedNew()})
                             Preference(R.string.whats_new.str, null, Icons.Default.NewReleases.icon){
                                 showWhatsNewDialog = true;
+                            }
+                            if (UpdateChecker.isSupported) {
+                                if (updateToOffer != null) {
+                                    UpdateDialog(
+                                        release = updateToOffer!!,
+                                        onDismiss = { updateToOffer = null }
+                                    )
+                                }
+                                Preference(
+                                    R.string.update_check.str,
+                                    if (checkingForUpdate) R.string.update_checking.str
+                                    else stringResource(R.string.update_check_desc, BuildConfig.VERSION_NAME),
+                                    Icons.Default.SystemUpdate.icon
+                                ) {
+                                    if (!checkingForUpdate) {
+                                        checkingForUpdate = true
+                                        coroutinScope.launch {
+                                            val release = UpdateChecker.checkForUpdate(this@SettingsActivity)
+                                            checkingForUpdate = false
+                                            if (release != null) {
+                                                updateToOffer = release
+                                            } else {
+                                                scaffoldState.snackbarHostState.showSnackbar(
+                                                    getString(R.string.update_up_to_date)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                SwitchPreference(R.string.auto_update_check.str, R.string.auto_update_check_desc.str,
+                                    viewModel.autoUpdateCheckLD.observeAsState().value ?: true
+                                ) { newValue -> viewModel.autoUpdateCheck = newValue }
                             }
                             Preference(R.string.website.str, R.string.website_desc.str,Icons.Default.Language.icon){
                                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.website_link)))

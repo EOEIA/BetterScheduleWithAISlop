@@ -59,6 +59,10 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         get() = sp.boolean(PrefsConsts.GRID_IN_EMPTY_CELLS) ?: true
         set(value) = sp.edit { putBoolean(PrefsConsts.GRID_IN_EMPTY_CELLS, value) }
     val gridInEmptyCellsLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.GRID_IN_EMPTY_CELLS, true)
+    var autoUpdateCheck: Boolean
+        get() = sp.boolean(PrefsConsts.AUTO_UPDATE_CHECK) ?: true
+        set(value) = sp.edit { putBoolean(PrefsConsts.AUTO_UPDATE_CHECK, value) }
+    val autoUpdateCheckLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.AUTO_UPDATE_CHECK, true)
 
     var changedLessonVisuals: Boolean
         get() = sp.boolean(PrefsConsts.CHANGED_LESSON_VISUALS) ?: true

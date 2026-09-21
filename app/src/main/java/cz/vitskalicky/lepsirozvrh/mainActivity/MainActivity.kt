@@ -4,6 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import cz.vitskalicky.lepsirozvrh.update.GithubRelease
+import cz.vitskalicky.lepsirozvrh.update.UpdateChecker
+import cz.vitskalicky.lepsirozvrh.update.UpdateDialog
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +68,23 @@ class MainActivity : ComponentActivity() {
             setContent {
                 LepsirozvrhTheme(hasAppBar = false, isRozvrhScreen = true) {
                     RozvrhWithControls(viewModel)
+
+                    // offer a newer GitHub release, unless the user turned the check off or
+                    // already chose to skip this exact tag
+                    var pendingUpdate by remember { mutableStateOf<GithubRelease?>(null) }
+                    LaunchedEffect(Unit) {
+                        if (prefs.boolean(PrefsConsts.AUTO_UPDATE_CHECK) != false) {
+                            val release = UpdateChecker.checkForUpdate(this@MainActivity)
+                            if (release != null &&
+                                release.tagName != prefs.string(PrefsConsts.SKIPPED_UPDATE_TAG)
+                            ) {
+                                pendingUpdate = release
+                            }
+                        }
+                    }
+                    pendingUpdate?.let { release ->
+                        UpdateDialog(release = release, onDismiss = { pendingUpdate = null })
+                    }
 
                     //if notifications have been suddenly disabled
                     var showNotiPermissionDialog: Boolean by rememberSaveable{

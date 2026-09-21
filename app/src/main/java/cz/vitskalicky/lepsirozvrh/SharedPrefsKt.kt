@@ -80,6 +80,12 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val CURRENT_TIME_LINE = "prefs-current-time-line"
     /** Draw grid lines in cells with no lesson. non-set is treated as true */
     const val GRID_IN_EMPTY_CELLS = "prefs-grid-in-empty-cells"
+    /** Check GitHub releases for a newer build on launch. non-set is treated as true */
+    const val AUTO_UPDATE_CHECK = "prefs-auto-update-check"
+    /** Epoch millis of the last successful update check. */
+    const val LAST_UPDATE_CHECK = "prefs-last-update-check"
+    /** Release tag the user chose to skip, so we stop nagging about that one. */
+    const val SKIPPED_UPDATE_TAG = "prefs-skipped-update-tag"
     const val CHANGED_LESSON_VISUALS = "prefs-color-changed-lessons"
     /** non-set is treated as false */
     const val COMPACT_TIMETABLE = "prefs-compact-timetable"
@@ -141,6 +147,7 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
             if (!contains(HIGHLIGHT_CURRENT_DAY)) putBoolean(HIGHLIGHT_CURRENT_DAY, false)
             if (!contains(CURRENT_TIME_LINE)) putBoolean(CURRENT_TIME_LINE, false)
             if (!contains(GRID_IN_EMPTY_CELLS)) putBoolean(GRID_IN_EMPTY_CELLS, true)
+            if (!contains(AUTO_UPDATE_CHECK)) putBoolean(AUTO_UPDATE_CHECK, true)
             if (!contains(CHANGED_LESSON_VISUALS)) putBoolean(CHANGED_LESSON_VISUALS, true)
             if (!contains(COMPACT_TIMETABLE)) putBoolean(COMPACT_TIMETABLE, false)
             if (!contains(TIMETABLE_TRANSPOSED)) putBoolean(TIMETABLE_TRANSPOSED, false)

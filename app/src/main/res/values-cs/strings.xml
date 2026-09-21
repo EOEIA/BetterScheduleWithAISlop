@@ -457,4 +457,20 @@
     <string name="transpose_timetable">Otočit rozvrh</string>
     <string name="grid_in_empty_cells">Mřížka v prázdných místech</string>
     <string name="grid_in_empty_cells_desc">Vykreslí mřížku i tam, kde nejsou žádné hodiny</string>
+    <string name="update_available">K dispozici je verze %1$s</string>
+    <string name="update_current_version">Máte %1$s</string>
+    <string name="update_download">Stáhnout</string>
+    <string name="update_install">Nainstalovat</string>
+    <string name="update_retry">Zkusit znovu</string>
+    <string name="update_skip">Přeskočit</string>
+    <string name="later">Později</string>
+    <string name="update_failed">Aktualizace selhala</string>
+    <string name="update_failed_desc">Stahování se nedokončilo. Zkontrolujte připojení a zkuste to znovu.</string>
+    <string name="update_check">Zkontrolovat aktualizace</string>
+    <string name="update_check_desc">Aktuální verze: %1$s</string>
+    <string name="update_checking">Kontroluji…</string>
+    <string name="update_up_to_date">Máte nejnovější verzi.</string>
+    <string name="update_check_failed">Nepodařilo se spojit s GitHubem.</string>
+    <string name="auto_update_check">Automaticky kontrolovat aktualizace</string>
+    <string name="auto_update_check_desc">Při spuštění aplikace zjistit, zda vyšla nová verze</string>
 </resources>
