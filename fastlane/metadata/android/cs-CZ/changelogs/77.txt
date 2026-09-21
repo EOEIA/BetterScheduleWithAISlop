@@ -1,0 +1,1 @@
+Nové nastavení: Odstín mřížky — mřížku mezi hodinami lze ztmavit nebo zesvětlit oproti motivu (Nastavení → Rozvrh). Vedle tlačítka pro obnovení je nyní přepínač, který skryje nebo zobrazí hotové úkoly.

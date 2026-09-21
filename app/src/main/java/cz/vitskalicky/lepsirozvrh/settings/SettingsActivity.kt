@@ -248,6 +248,13 @@ class SettingsActivity : ComponentActivity() {
                             ) { newValue ->
                                 viewModel.gridInEmptyCells = newValue
                             }
+                                val gridShadeIndex by viewModel.gridShadeIndexLD.observeAsState(2)
+                                val gridShadeEntries = resources.getStringArray(R.array.grid_shade_entries).toList()
+                            RadioPreference(R.string.grid_shade.str,
+                                gridShadeEntries[gridShadeIndex.coerceIn(0, gridShadeEntries.lastIndex)],
+                                gridShadeEntries, gridShadeIndex,
+                                { Text(R.string.grid_shade.str) }
+                            ) { newIndex -> viewModel.gridShadeIndex = newIndex }
                             SwitchPreference(R.string.changed_lesson_visuals.str, R.string.changed_lesson_visuals_desc.str,
                                 viewModel.changedLessonVisualsLD.observeAsState().value ?: true
                             ) { newValue -> viewModel.changedLessonVisuals = newValue }

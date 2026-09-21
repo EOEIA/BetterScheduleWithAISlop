@@ -55,4 +55,18 @@
         <item>https://vitskalicky.github.io/lepsi-rozvrh/motiv-info</item>
         <item>https://vitskalicky.gitlab.io/lepsi-rozvrh/motiv-info</item>
     </string-array>
+    <string-array name="grid_shade_entries">
+        <item>Much lighter</item>
+        <item>Lighter</item>
+        <item>Theme default</item>
+        <item>Darker</item>
+        <item>Much darker</item>
+    </string-array>
+    <integer-array name="grid_shade_values">
+        <item>-2</item>
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </integer-array>
 </resources>

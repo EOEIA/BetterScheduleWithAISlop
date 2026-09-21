@@ -61,6 +61,7 @@ class RozvrhLayout : ViewGroup {
     private var highlightCurrentDay = false
     private var showCurrentTimeLine = false
     private var gridInEmptyCells = true
+    private var gridShade = 0
     private val timeLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).also { it.strokeCap = Paint.Cap.ROUND }
     private var changeVisualMode = 0
     private var compact = false
@@ -109,6 +110,19 @@ class RozvrhLayout : ViewGroup {
         }
         highlightCurrentDay = enabled
         updateCurrentDayHighlight()
+    }
+
+    fun setGridShade(shade: Int) {
+        if (gridShade == shade) return
+        gridShade = shade
+        applyGridShade()
+    }
+
+    private fun applyGridShade() {
+        cornerView?.setGridShade(gridShade)
+        denViews.forEach { it.setGridShade(gridShade) }
+        captionViews.forEach { it.setGridShade(gridShade) }
+        hodinasByCaptions.forEach { it.forEach { views -> views.forEach { v -> v.setGridShade(gridShade) } } }
     }
 
     fun setGridInEmptyCells(enabled: Boolean) {
@@ -510,6 +524,7 @@ class RozvrhLayout : ViewGroup {
         }
         applyLessonIndicatorKeys()
         hodinasByCaptions.forEach { it.forEach { views -> views.forEach { v -> v.setGridInEmptyCells(gridInEmptyCells) } } }
+        applyGridShade()
         updateCurrentDayHighlight()
         highlightCurrentLesson()
         invalidate()

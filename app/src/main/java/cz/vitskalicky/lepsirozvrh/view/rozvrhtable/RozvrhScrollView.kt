@@ -52,6 +52,10 @@ class RozvrhScrollView : HorizontalScrollView {
         rozvrhLayout.setGridInEmptyCells(enabled)
     }
 
+    fun setGridShade(shade: Int) {
+        rozvrhLayout.setGridShade(shade)
+    }
+
     fun setOnLessonPress(onLessonPress: (dayIndex: Int, captionIndex: Int, lessonInBlock: Int, lesson: RozvrhLesson) -> Unit) {
         rozvrhLayout.setOnLessonPress(onLessonPress)
     }

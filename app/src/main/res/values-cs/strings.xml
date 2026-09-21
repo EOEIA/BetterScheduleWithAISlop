@@ -475,4 +475,7 @@
     <string name="auto_update_check_desc">Při spuštění aplikace zjistit, zda vyšla nová verze</string>
     <string name="date_offset_today">dnes</string>
     <string name="homework_sort_past_due">Po termínu</string>
+    <string name="grid_shade">Odstín mřížky</string>
+    <string name="homework_hide_done">Skrýt hotové</string>
+    <string name="homework_show_done">Zobrazit hotové</string>
 </resources>

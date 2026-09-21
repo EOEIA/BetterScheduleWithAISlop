@@ -80,6 +80,10 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
     const val CURRENT_TIME_LINE = "prefs-current-time-line"
     /** Draw grid lines in cells with no lesson. non-set is treated as true */
     const val GRID_IN_EMPTY_CELLS = "prefs-grid-in-empty-cells"
+    /** Index into R.array.grid_shade_entries; the matching offset is in grid_shade_values. */
+    const val GRID_SHADE_INDEX = "prefs-grid-shade-index"
+    /** Hide homework and tasks that are ticked off. non-set is treated as false */
+    const val HOMEWORK_HIDE_DONE = "prefs-homework-hide-done"
     /** Check GitHub releases for a newer build on launch. non-set is treated as true */
     const val AUTO_UPDATE_CHECK = "prefs-auto-update-check"
     /** Epoch millis of the last successful update check. */
@@ -148,6 +152,7 @@ object PrefsConsts { //todo transform into some getters/setters (with livedata)
             if (!contains(CURRENT_TIME_LINE)) putBoolean(CURRENT_TIME_LINE, false)
             if (!contains(GRID_IN_EMPTY_CELLS)) putBoolean(GRID_IN_EMPTY_CELLS, true)
             if (!contains(AUTO_UPDATE_CHECK)) putBoolean(AUTO_UPDATE_CHECK, true)
+            if (!contains(GRID_SHADE_INDEX)) putInt(GRID_SHADE_INDEX, 2)
             if (!contains(CHANGED_LESSON_VISUALS)) putBoolean(CHANGED_LESSON_VISUALS, true)
             if (!contains(COMPACT_TIMETABLE)) putBoolean(COMPACT_TIMETABLE, false)
             if (!contains(TIMETABLE_TRANSPOSED)) putBoolean(TIMETABLE_TRANSPOSED, false)

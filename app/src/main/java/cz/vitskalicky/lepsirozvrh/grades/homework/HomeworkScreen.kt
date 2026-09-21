@@ -31,6 +31,11 @@ import androidx.compose.ui.unit.dp
 import cz.vitskalicky.lepsirozvrh.R
 import cz.vitskalicky.lepsirozvrh.database.PersonalTask
 import cz.vitskalicky.lepsirozvrh.ui.theme.LepsirozvrhTheme
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.platform.LocalContext
+import cz.vitskalicky.lepsirozvrh.PrefsConsts
+import cz.vitskalicky.lepsirozvrh.prefs
 import org.joda.time.Days
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
@@ -63,7 +68,9 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
     var showAddTaskDialog by remember { mutableStateOf(false) }
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val doneMap by viewModel.homeworkDone.observeAsState(emptyMap())
+    var hideDone by remember { mutableStateOf(context.prefs.boolean(PrefsConsts.HOMEWORK_HIDE_DONE) ?: false) }
     val onToggleHomework: (HomeworkItem, Boolean) -> Unit = { hw, done -> viewModel.setHomeworkDone(hw.id, done) }
     val onCopied: (String) -> Unit = { message ->
         coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message) }
@@ -76,7 +83,14 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
         )
     }
 
-    val sorted = remember(allItems, sortOrder, doneMap) {
+    val visibleItems = remember(allItems, hideDone, doneMap) {
+        if (hideDone) allItems.filterNot { it.doneWith(doneMap) } else allItems
+    }
+    val visibleTasks = remember(personalTasks, hideDone) {
+        if (hideDone) personalTasks.filterNot { it.isDone } else personalTasks
+    }
+    val sorted = remember(visibleItems, sortOrder, doneMap) {
+        val allItems = visibleItems
         when (sortOrder) {
             HwSortOrder.DATE_NEWEST -> allItems.sortedByDescending { it.date }
             HwSortOrder.DATE_OLDEST -> allItems.sortedBy { it.date }
@@ -114,6 +128,17 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                             }
                         },
                         actions = {
+                            IconButton(onClick = {
+                                hideDone = !hideDone
+                                context.prefs.putOne(PrefsConsts.HOMEWORK_HIDE_DONE, hideDone)
+                            }) {
+                                Icon(
+                                    if (hideDone) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = stringResource(
+                                        if (hideDone) R.string.homework_show_done else R.string.homework_hide_done
+                                    )
+                                )
+                            }
                             if (selectedTab != HomeworkTab.TASKS) {
                                 IconButton(onClick = { viewModel.loadHomework() }) {
                                     Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
@@ -156,7 +181,7 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                         else -> HomeworkList(sortOrder, grouped, dateFmt, timeFmt, { sortOrder = it }, doneMap, onToggleHomework, onCopied)
                     }
                     HomeworkTab.TASKS -> TasksTab(
-                        tasks = personalTasks,
+                        tasks = visibleTasks,
                         onToggle = { viewModel.toggleTaskDone(it) },
                         onDelete = { viewModel.deleteTask(it.id) }
                     )
@@ -168,7 +193,7 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                             items = sorted,
                             dateFmt = dateFmt,
                             timeFmt = timeFmt,
-                            tasks = personalTasks,
+                            tasks = visibleTasks,
                             onSortChange = { sortOrder = it },
                             onToggleTask = { viewModel.toggleTaskDone(it) },
                             onDeleteTask = { viewModel.deleteTask(it.id) },

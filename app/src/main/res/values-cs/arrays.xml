@@ -27,4 +27,11 @@
         <item>Solarized Light</item>
         <item>Dracula</item>
     </string-array>
+    <string-array name="grid_shade_entries">
+        <item>Výrazně světlejší</item>
+        <item>Světlejší</item>
+        <item>Podle motivu</item>
+        <item>Tmavší</item>
+        <item>Výrazně tmavší</item>
+    </string-array>
 </resources>

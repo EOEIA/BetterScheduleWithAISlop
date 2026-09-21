@@ -1,5 +1,15 @@
 # Seznam změn / Changelog
 
+## 2.0.31
+
+- Nové nastavení: Odstín mřížky — mřížku mezi hodinami lze ztmavit nebo zesvětlit oproti motivu (Nastavení → Rozvrh).
+- Vedle tlačítka pro obnovení je nyní přepínač, který skryje nebo zobrazí hotové úkoly.
+
+---
+
+- New setting: Grid shade — the grid between lessons can be made darker or lighter than the theme's own (Settings → Timetable).
+- A button next to refresh now hides or shows anything already ticked off.
+
 ## 2.0.30
 
 - Údaj o počtu dní u data je nyní barevný podle naléhavosti — po termínu červeně, dnes zvýrazněně, do dvou dnů oranžově, dál klidněji.

@@ -495,4 +495,7 @@
     <string name="auto_update_check_desc">Look for a new release when the app starts</string>
     <string name="date_offset_today">today</string>
     <string name="homework_sort_past_due">Past due</string>
+    <string name="grid_shade">Grid shade</string>
+    <string name="homework_hide_done">Hide completed</string>
+    <string name="homework_show_done">Show completed</string>
 </resources>

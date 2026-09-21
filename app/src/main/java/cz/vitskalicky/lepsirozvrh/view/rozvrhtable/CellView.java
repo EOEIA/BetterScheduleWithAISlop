@@ -2,6 +2,8 @@ package cz.vitskalicky.lepsirozvrh.view.rozvrhtable;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import androidx.core.graphics.ColorUtils;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
@@ -24,6 +26,8 @@ public class CellView extends View {
     protected final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);;
     protected final Paint rowHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected final Paint dividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    /** -2..+2: how far the grid colour is nudged from the theme's, negative lighter, positive darker. */
+    private int gridShade = 0;
     protected int dividerWidth;
 
     protected final Paint primaryTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -65,11 +69,33 @@ public class CellView extends View {
 
     /** This is called when the theme object has changed and the view should update all its paints and so on*/
     @CallSuper
+    /**
+     * Nudges the theme's divider colour toward white or black. Themes differ wildly in how visible
+     * their grid is (Gruvbox's used to be invisible, Black's is stark), so rather than a per-theme
+     * fix this shifts whatever the theme provides.
+     */
+    private int shadedDivider(){
+        int base = clr(t.cDivider());
+        if (gridShade == 0) return base;
+        int towards = gridShade < 0 ? Color.WHITE : Color.BLACK;
+        float ratio = Math.min(Math.abs(gridShade), 2) * 0.28f;
+        return ColorUtils.blendARGB(base, towards, ratio);
+    }
+
+    /** @param shade -2..+2, 0 being the theme's own divider colour. */
+    public void setGridShade(int shade){
+        int clamped = Math.max(-2, Math.min(2, shade));
+        if (gridShade == clamped) return;
+        gridShade = clamped;
+        dividerPaint.setColor(shadedDivider());
+        invalidate();
+    }
+
     protected void updateTheme(){
         backgroundPaint.setColor(clr(t.cEmptyBg()));
         rowHighlightPaint.setColor((clr(t.cHighlight()) & 0x00ffffff) | (0x22 << 24));
 
-        dividerPaint.setColor(clr(t.cDivider()));
+        dividerPaint.setColor(shadedDivider());
         dividerWidth = dp(t.dpDividerWidth());
         dividerPaint.setStrokeWidth(dividerWidth);
 

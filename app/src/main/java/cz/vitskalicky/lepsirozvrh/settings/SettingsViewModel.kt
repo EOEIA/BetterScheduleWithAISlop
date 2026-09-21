@@ -63,6 +63,10 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         get() = sp.boolean(PrefsConsts.AUTO_UPDATE_CHECK) ?: true
         set(value) = sp.edit { putBoolean(PrefsConsts.AUTO_UPDATE_CHECK, value) }
     val autoUpdateCheckLD: LiveData<Boolean> = SharedPrefsBooleanLiveData(sp.sharedPreferences, PrefsConsts.AUTO_UPDATE_CHECK, true)
+    var gridShadeIndex: Int
+        get() = sp.int(PrefsConsts.GRID_SHADE_INDEX) ?: 2
+        set(value) = sp.edit { putInt(PrefsConsts.GRID_SHADE_INDEX, value) }
+    val gridShadeIndexLD: LiveData<Int> = SharedPrefsIntLiveData(sp.sharedPreferences, PrefsConsts.GRID_SHADE_INDEX, 2)
 
     var changedLessonVisuals: Boolean
         get() = sp.boolean(PrefsConsts.CHANGED_LESSON_VISUALS) ?: true

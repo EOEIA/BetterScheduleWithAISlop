@@ -91,6 +91,11 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.GRID_IN_EMPTY_CELLS, true)
     }
     val gridInEmptyCells by gridInEmptyCellsLD.observeAsState(true)
+    val gridShadeIndexLD = remember {
+        SharedPrefsKt(context).sharedPreferences.intLiveData(PrefsConsts.GRID_SHADE_INDEX, 2)
+    }
+    val gridShadeIndex by gridShadeIndexLD.observeAsState(2)
+    val gridShade = remember(gridShadeIndex) { KotlinUtils.getGridShade(context) }
     val colorChangedLessonsLD = remember {
         SharedPrefsKt(context).sharedPreferences.booleanLiveData(PrefsConsts.CHANGED_LESSON_VISUALS, true)
     }
@@ -195,6 +200,7 @@ fun RozvrhWithControls(viewModel: RozvrhViewModel){
         highlightCurrentDay = highlightCurrentDay,
         currentTimeLine = currentTimeLine,
         gridInEmptyCells = gridInEmptyCells,
+        gridShade = gridShade,
         colorChangedLessons = colorChangedLessons,
         compactTimetable = compactTimetable,
         transposedTimetable = transposedTimetable,
@@ -269,6 +275,7 @@ fun RozvrhWithControlsStateless(
     highlightCurrentDay: Boolean = false,
     currentTimeLine: Boolean = false,
     gridInEmptyCells: Boolean = true,
+    gridShade: Int = 0,
     colorChangedLessons: Boolean = true,
     compactTimetable: Boolean = false,
     transposedTimetable: Boolean = false,
@@ -348,6 +355,7 @@ fun RozvrhWithControlsStateless(
                         rozvrhScrollView.setHighlightCurrentDay(highlightCurrentDay)
                         rozvrhScrollView.setCurrentTimeLine(currentTimeLine)
                         rozvrhScrollView.setGridInEmptyCells(gridInEmptyCells)
+                        rozvrhScrollView.setGridShade(gridShade)
                         rozvrhScrollView.setChangeVisualMode(if (colorChangedLessons) 1 else 0)
                         rozvrhScrollView.setCompact(compactTimetable)
                         rozvrhScrollView.setTheme(if (compactTimetable) rozvrhTheme.compact() else rozvrhTheme)
@@ -1044,6 +1052,7 @@ fun Rozvrhpreview(){
         stickyDayColumn = true,
         highlightCurrentDay = false,
         currentTimeLine = false,
-        gridInEmptyCells = true
+        gridInEmptyCells = true,
+        gridShade = 0
     )
 }

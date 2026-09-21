@@ -62,6 +62,13 @@ object KotlinUtils {
         return calculateWeekSwitchOffset(context, context.prefs.int(PrefsConsts.SWITCH_TO_NEXT_WEEK_OPTION_INDEX) ?: 0)
     }
 
+    /** How far the timetable grid colour is nudged from the theme's: -2 (lighter) .. +2 (darker). */
+    fun getGridShade(context: Context): Int {
+        val index = context.prefs.int(PrefsConsts.GRID_SHADE_INDEX) ?: 2
+        val values = context.resources.getIntArray(R.array.grid_shade_values)
+        return values.getOrElse(index) { 0 }
+    }
+
     /** How often the background check for grades/homework/schedule changes should run, in minutes. */
     fun getPeriodicCheckIntervalMinutes(context: Context): Int {
         val index = context.prefs.int(PrefsConsts.PERIODIC_CHECK_INTERVAL_INDEX) ?: 1

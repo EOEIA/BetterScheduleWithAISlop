@@ -1,0 +1,1 @@
+New setting: Grid shade — the grid between lessons can be made darker or lighter than the theme's own (Settings → Timetable). A button next to refresh now hides or shows anything already ticked off.
