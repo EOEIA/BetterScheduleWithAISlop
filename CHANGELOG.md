@@ -1,5 +1,21 @@
 # Seznam změn / Changelog
 
+## 2.0.28
+
+- Společná záložka nyní spojuje domácí úkoly a vlastní úkoly podle data — pod jedním datem uvidíte obojí.
+- Domácí úkoly lze odškrtnout jako hotové, stejně jako vlastní úkoly.
+- Zvýraznění aktuální hodiny i čára času jsou vidět i na barevných hodinách, kde dřív splývaly.
+- Gruvbox má konečně mřížku i v prázdných místech; lze ji vypnout v Nastavení → Rozvrh.
+- Motivy Světlý/Tmavý se nyní jmenují Gruvbox světlý/tmavý.
+
+---
+
+- The combined tab now merges homework and your own tasks by date — one date heading shows both.
+- Homework can be ticked off as done, the same way personal tasks can.
+- The current-lesson highlight and the time line stay visible on coloured lessons, where they used to disappear.
+- Gruvbox finally draws a grid through free periods; it can be turned off in Settings → Timetable.
+- The Light/Dark themes are now named Gruvbox Light/Gruvbox Dark.
+
 ## 2.0.27
 
 - Tlačítko pro otočení rozvrhu nyní mění ikonu podle toho, jak je tabulka otočená — šipky ⇄ když jsou dny ve sloupcích, ↕ když jsou v řádcích.
