@@ -39,7 +39,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import org.joda.time.format.DateTimeFormat
 
-private enum class HwSortOrder { DATE_NEWEST, DATE_OLDEST, SUBJECT }
+/** The last one is really a filter, but it belongs in the same row of chips. */
+private enum class HwSortOrder { DATE_NEWEST, DATE_OLDEST, SUBJECT, PAST_DUE }
+
+/** Overdue means dated strictly before today and not already ticked off. */
+private fun HomeworkItem.isPastDue(doneMap: Map<String, Boolean>): Boolean =
+    date != null && date.isBefore(LocalDate.now()) && !doneWith(doneMap)
+
+private fun PersonalTask.isPastDue(): Boolean =
+    dueDate != null && dueDate.isBefore(LocalDate.now()) && !isDone
 private enum class HomeworkTab { BOTH, HOMEWORK, TASKS }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -68,11 +76,13 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
         )
     }
 
-    val sorted = remember(allItems, sortOrder) {
+    val sorted = remember(allItems, sortOrder, doneMap) {
         when (sortOrder) {
             HwSortOrder.DATE_NEWEST -> allItems.sortedByDescending { it.date }
             HwSortOrder.DATE_OLDEST -> allItems.sortedBy { it.date }
             HwSortOrder.SUBJECT -> allItems.sortedWith(compareBy({ it.subjectName }, { it.date }))
+            // most overdue first - the thing that has been outstanding longest
+            HwSortOrder.PAST_DUE -> allItems.filter { it.isPastDue(doneMap) }.sortedBy { it.date }
         }
     }
 
@@ -140,6 +150,8 @@ fun HomeworkScreen(viewModel: HomeworkViewModel, onBack: () -> Unit) {
                 when (selectedTab) {
                     HomeworkTab.HOMEWORK -> when {
                         isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                        // deliberately allItems, not the filtered list: with nothing past due the
+                        // empty state would replace the chip row and there would be no way back
                         allItems.isEmpty() -> EmptyState()
                         else -> HomeworkList(sortOrder, grouped, dateFmt, timeFmt, { sortOrder = it }, doneMap, onToggleHomework, onCopied)
                     }
@@ -225,9 +237,15 @@ private sealed class GroupKey {
 private fun groupCombined(
     items: List<HomeworkItem>,
     tasks: List<PersonalTask>,
-    sortOrder: HwSortOrder
+    sortOrder: HwSortOrder,
+    doneMap: Map<String, Boolean>
 ): List<Pair<GroupKey, List<CombinedEntry>>> {
-    val all: List<CombinedEntry> = items.map { CombinedEntry.Hw(it) } + tasks.map { CombinedEntry.Task(it) }
+    val all: List<CombinedEntry> = if (sortOrder == HwSortOrder.PAST_DUE) {
+        items.filter { it.isPastDue(doneMap) }.map { CombinedEntry.Hw(it) } +
+            tasks.filter { it.isPastDue() }.map { CombinedEntry.Task(it) }
+    } else {
+        items.map { CombinedEntry.Hw(it) } + tasks.map { CombinedEntry.Task(it) }
+    }
     if (all.isEmpty()) return emptyList()
 
     // within a group, order by time of day; entries without a time sink to the bottom
@@ -272,7 +290,7 @@ private fun HomeworkAndTasksList(
     onToggleHomework: (HomeworkItem, Boolean) -> Unit,
     onCopied: (String) -> Unit
 ) {
-    val groups = remember(items, tasks, sortOrder) { groupCombined(items, tasks, sortOrder) }
+    val groups = remember(items, tasks, sortOrder, doneMap) { groupCombined(items, tasks, sortOrder, doneMap) }
     val noDateLabel = stringResource(R.string.homework_no_date)
     LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
         item { SortRow(sortOrder) { onSortChange(it) } }
@@ -364,19 +382,32 @@ private fun EmptyState() {
 }
 
 /**
- * How far the date is from today, as "+3 d" / "-2 d", or the word for today. Returns `null` for an
- * undated group, which has nothing to count from.
+ * How far a date is from today, and how loudly to say it. Colour carries the urgency: overdue reads
+ * as an error, today as the accent, the next couple of days as a warning, anything further out as
+ * ordinary muted text.
  */
+private data class DayOffset(val label: String, val color: Color, val emphasised: Boolean)
+
 @Composable
-private fun relativeDayLabel(date: LocalDate?): String? {
+private fun rememberDayOffset(date: LocalDate?): DayOffset? {
     if (date == null) return null
     val days = Days.daysBetween(LocalDate.now(), date).days
-    return if (days == 0) stringResource(R.string.date_offset_today) else "%+d d".format(days)
+    val label = if (days == 0) stringResource(R.string.date_offset_today) else "%+d d".format(days)
+    return when {
+        days < 0 -> DayOffset(label, MaterialTheme.colors.error, false)
+        days == 0 -> DayOffset(label, MaterialTheme.colors.primary, true)
+        days <= 2 -> DayOffset(label, DueSoonColor, true)
+        days <= 7 -> DayOffset(label, MaterialTheme.colors.secondary, false)
+        else -> DayOffset(label, MaterialTheme.colors.onSurface.copy(alpha = 0.55f), false)
+    }
 }
+
+/** Amber for "due in a day or two" - neither an error nor the calm end of the scale. */
+private val DueSoonColor = Color(0xFFF9A825)
 
 @Composable
 private fun DateHeader(label: String, date: LocalDate? = null) {
-    val offset = relativeDayLabel(date)
+    val offset = rememberDayOffset(date)
     Surface(
         color = MaterialTheme.colors.surface,
         elevation = 2.dp,
@@ -394,14 +425,18 @@ private fun DateHeader(label: String, date: LocalDate? = null) {
                 color = MaterialTheme.colors.primary
             )
             if (offset != null) {
-                Text(
-                    offset,
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.onSurface.copy(
-                        // a date already gone by is dimmer than one still ahead
-                        alpha = if (offset.startsWith("-")) 0.45f else 0.7f
+                Surface(
+                    color = offset.color.copy(alpha = 0.15f),
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text(
+                        offset.label,
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.caption,
+                        fontWeight = if (offset.emphasised) FontWeight.Bold else FontWeight.Medium,
+                        color = offset.color
                     )
-                )
+                }
             }
         }
     }
@@ -443,9 +478,10 @@ private fun SubjectHeader(subjectName: String, abbrev: String) {
 @Composable
 private fun SortRow(current: HwSortOrder, onSelect: (HwSortOrder) -> Unit) {
     val options = listOf(
-        HwSortOrder.DATE_NEWEST to R.string.homework_sort_newest,
         HwSortOrder.DATE_OLDEST to R.string.homework_sort_oldest,
-        HwSortOrder.SUBJECT to R.string.homework_sort_subject
+        HwSortOrder.DATE_NEWEST to R.string.homework_sort_newest,
+        HwSortOrder.SUBJECT to R.string.homework_sort_subject,
+        HwSortOrder.PAST_DUE to R.string.homework_sort_past_due
     )
     Row(
         modifier = Modifier

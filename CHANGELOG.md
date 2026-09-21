@@ -1,5 +1,15 @@
 # Seznam změn / Changelog
 
+## 2.0.30
+
+- Údaj o počtu dní u data je nyní barevný podle naléhavosti — po termínu červeně, dnes zvýrazněně, do dvou dnů oranžově, dál klidněji.
+- Nová volba „Po termínu“ v řazení domácích úkolů — ukáže jen to, co je po termínu a není hotové.
+
+---
+
+- The day count next to each date is now coloured by urgency — red once overdue, accented for today, amber within two days, calmer further out.
+- New "Past due" option in the homework sort row — shows only what is overdue and not yet done.
+
 ## 2.0.29
 
 - Aplikace si nyní sama hlídá nové verze a umí se aktualizovat — už není potřeba stahovat APK z GitHubu ručně (Nastavení → Zkontrolovat aktualizace).

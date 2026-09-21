@@ -1,0 +1,1 @@
+The day count next to each date is now coloured by urgency — red once overdue, accented for today, amber within two days, calmer further out. New "Past due" option in the homework sort row — shows only what is overdue and not yet done.

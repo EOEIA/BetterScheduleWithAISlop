@@ -1,0 +1,1 @@
+Údaj o počtu dní u data je nyní barevný podle naléhavosti — po termínu červeně, dnes zvýrazněně, do dvou dnů oranžově, dál klidněji. Nová volba „Po termínu“ v řazení domácích úkolů — ukáže jen to, co je po termínu a není hotové.
